@@ -44,11 +44,7 @@ ONDEWO_VTSI_VERSION=8.7.0
 
 # Submodule pins - `make checkout_defined_submodule_versions` checks these out
 ONDEWO_VTSI_API_GIT_BRANCH=tags/8.7.0
-# PROVISIONAL PIN. The six compiled-language targets this client depends on landed on the
-# branch below; ondewo-proto-compiler 5.15.0 is not tagged yet. Once that release is cut this
-# becomes tags/5.15.0 - `make release_update_proto_compiler_dependency_<lang>` in the compiler
-# repo rewrites it, so do not hand-edit it then.
-ONDEWO_PROTO_COMPILER_GIT_BRANCH=feature/rust-php-go-cpp-java-csharp
+ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.0
 
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
