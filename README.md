@@ -39,19 +39,20 @@ Go module is resolved straight from its version control tree — there is no bui
 ## Installation
 
 ```shell
-go get github.com/ondewo/ondewo-vtsi-client-go
+go get github.com/ondewo/ondewo-vtsi-client-go/v8
 ```
 
 Then import the package of the service you need:
 
 ```go
-import vtsipb "github.com/ondewo/ondewo-vtsi-client-go/api/ondewo/vtsi"
+import vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
 ```
 
 > **Major versions.** From major version 2 on, a Go module path carries its major version as a
-> `/vN` suffix (see [the module reference](https://go.dev/ref/mod#major-version-suffixes)), so the
-> import path of release `7.1.2` is `github.com/ondewo/ondewo-vtsi-client-go/v7/api/ondewo/vtsi`. The
-> `Makefile` derives the suffix from `ONDEWO_VTSI_VERSION`; run `make TEST` to print the
+> `/vN` suffix (see [the module reference](https://go.dev/ref/mod#major-version-suffixes)): a
+> `v8.y.z` tag on a module declared without `/v8` is invisible to `go get`. This release is
+> `8.7.0`, so the module declares — and every generated file imports — `github.com/ondewo/ondewo-vtsi-client-go/v8`.
+> The `Makefile` derives the suffix from `ONDEWO_VTSI_VERSION`; run `make TEST` to print the
 > exact module path of the current release.
 
 To work on the client itself:
@@ -76,36 +77,38 @@ import (
 
     "google.golang.org/grpc"
     "google.golang.org/grpc/credentials"
-    "google.golang.org/grpc/metadata"
 
-    vtsipb "github.com/ondewo/ondewo-vtsi-client-go/api/ondewo/vtsi"
+    vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
+    "github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
 )
 
 func main() {
+    // auth.WithBearerToken sends the Keycloak access token as `authorization: Bearer <token>` on
+    // every call of this connection, exactly as the other ONDEWO clients do. It refuses to attach
+    // itself to a plaintext connection, so it is paired with transport credentials here.
     conn, err := grpc.NewClient(
         "grpc-vtsi.ondewo.com:443",
         grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})),
+        auth.WithBearerToken(os.Getenv("ONDEWO_VTSI_ACCESS_TOKEN")),
     )
     if err != nil {
         log.Fatalf("could not connect: %v", err)
     }
     defer conn.Close()
 
-    // Credentials travel as request metadata, exactly as in the other ONDEWO clients.
-    bearerToken := os.Getenv("ONDEWO_VTSI_ACCESS_TOKEN")
     ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
     defer cancel()
-    ctx = metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+bearerToken)
 
     // Every service of the API has a generated New<Service>Client constructor. Browse
-    // api/ondewo/vtsi/ for the ones this product exposes.
-    client := vtsipb.NewExampleServiceClient(conn)
+    // api/ondewo/vtsi/ for this product's own three services, and
+    // api/ondewo/{nlu,qa,s2t,sip,t2s}/ for the 20 vendored ones this client also exposes.
+    client := vtsipb.NewProjectsClient(conn)
 
-    response, err := client.ExampleMethod(ctx, &vtsipb.ExampleRequest{})
+    response, err := client.ListVtsiProjects(ctx, &vtsipb.ListVtsiProjectsRequest{})
     if err != nil {
         log.Fatalf("rpc failed: %v", err)
     }
-    log.Printf("response: %v", response)
+    log.Printf("projects: %v", response.GetVtsiProjects())
 }
 ```
 
@@ -114,10 +117,15 @@ func main() {
 ```
 .
 ├── api                                    <----- GENERATED - do not edit, `make generate_ondewo_protos` rewrites it
-│   └── ondewo
-│       └── vtsi
-│           ├── *.pb.go                    <----- messages (protoc-gen-go)
-│           └── *_grpc.pb.go               <----- service stubs (protoc-gen-go-grpc)
+│   └── ondewo                             <----- each package below holds *.pb.go (messages,
+│       ├── vtsi                           <-----   protoc-gen-go) and *_grpc.pb.go (service
+│       ├── nlu                            <-----   stubs, protoc-gen-go-grpc)
+│       ├── qa                             <----- vtsi holds this product's own three services;
+│       ├── s2t                            <-----   nlu, qa, s2t, sip and t2s are vendored by
+│       ├── sip                            <-----   ondewo-vtsi-api and published from here too
+│       └── t2s
+├── auth                                   <----- HAND WRITTEN - the `authorization: Bearer` credential
+├── tests                                  <----- HAND WRITTEN - the go test suite (see Testing below)
 ├── ondewo-vtsi-api                             <----- submodule @ https://github.com/ondewo/ondewo-vtsi-api
 ├── ondewo-proto-compiler                  <----- submodule @ https://github.com/ondewo/ondewo-proto-compiler
 ├── .github
@@ -162,6 +170,56 @@ A few properties of the generation worth knowing:
   generated stubs at the end of every run so a drift is visible.
 * Generation needs no network: every module the stubs are compiled against was pre-downloaded when
   the image was built.
+
+## Testing
+
+```shell
+make check_stubs            ## assert the generated stubs are committed
+make test                   ## go test over every package
+make test_coverage          ## the same suite under -race, plus the hand-written coverage gate
+make test_coverage_generated ## report (never gate) how much of api/ the suite exercises
+```
+
+The suite lives in `tests/` — never below `api/`, which is wiped on every regeneration — and needs
+neither a network nor a running ONDEWO server. gRPC connections are made over an in-memory
+`bufconn` listener, so a client stub, a server stub and a real HTTP/2 connection are exercised
+in-process.
+
+What it asserts about the **generated** code:
+
+* `CallLogEntry` — a 64 bit scalar, a well-known `Timestamp`, a `bool`, two enums of the vtsi
+  package and one imported from the vendored NLU protos — survives `proto.Marshal` →
+  `proto.Unmarshal` unchanged, and a truncated payload is rejected;
+* a proto3 `optional` scalar keeps its explicit presence — `ListCallLogsRequest.oldest_first`
+  set to `false` is transmitted and arrives as a non-nil pointer, while an unset field stays
+  `nil`. Both are meaningful requests here, and this is the distinction the angular target of
+  the same compiler once lost, which made `false`/`0`/`""` unsendable;
+* the enum zero values are pinned with their generated name/value maps: `LogSource(0)` is
+  `LOG_SOURCE_UNSPECIFIED`, and `CallView(0)` is `MINIMUM` — a view callers really request, so
+  a client that cannot transmit the enum zero value cannot ask for it at all;
+* the `grpc.ServiceDesc` of every service (from `protoc-gen-go-grpc`) lists exactly the RPCs the
+  proto descriptor of that service (from `protoc-gen-go`) does — the two plugins run separately and
+  each half compiles on its own, so a disagreement is otherwise invisible;
+* every generated `New<Service>Client` binds to a connection, and every generated **unary** stub is
+  actually called over the wire and has to come back as `codes.Unimplemented` — 411 of them
+  across the 23 services of this product, which proves each one marshals its request and builds a
+  method name the transport accepts;
+* an RPC answered by a fake server round-trips its response, and one the server leaves to the
+  generated `Unimplemented*Server` base type reports `codes.Unimplemented`;
+* all 25 compiled `.proto` files are registered in the global descriptor registry as proto3.
+
+**Coverage.** The threshold (`COVERAGE_THRESHOLD` in the `Makefile`, currently **100%**) is
+enforced over the hand-written packages only — `auth/` — because everything below `api/` is machine
+output: gating on it would measure how much of protoc's output a test happens to walk. The stubs
+are still exercised for real, as listed above; `make test_coverage_generated` prints their figure
+(**15.8%** of generated statements at the time of writing) for the record. `make test_coverage`
+also fails if it ends up measuring no hand-written function at all, so a deleted package cannot
+turn the gate into a green no-op.
+
+`.github/workflows/ci.yml` runs exactly these targets on `ubuntu-latest` against the go directive of
+`go.mod` and the toolchain the compiler image generates with. It does **not** build the compiler
+image or check out the submodules: it builds and tests the committed stubs, which is what a
+consumer of the module gets.
 
 ## Release
 

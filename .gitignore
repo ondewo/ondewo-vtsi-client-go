@@ -22,6 +22,7 @@ dist/
 *.test
 *.prof
 coverage.out
+generated-coverage.out
 coverage.html
 
 # Go workspace files - a local multi-module setup is never part of a release

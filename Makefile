@@ -89,6 +89,21 @@ GO_RELEASE_TAG=v${ONDEWO_VTSI_VERSION}
 # command substitution (backticks would not).
 GO_PACKAGES=$$(go list ./... | grep -v "/${ONDEWO_PROTO_COMPILER_DIR}/")
 GO_SOURCES=$$(find . -name "*.go" ! -path "./${ONDEWO_PROTO_COMPILER_DIR}/*" ! -path "./${ONDEWO_API_DIR}/*")
+# `go build` on a package that holds only _test.go files is an error ("no non-test Go files"), and
+# tests/ is exactly such a package - it is compiled by `go test`, never by `go build`. .GoFiles is
+# empty for those, which is how they are dropped here. `go vet` and `go test` handle them fine, so
+# only the build target needs the narrower list.
+GO_BUILD_PACKAGES=$$(go list -f '{{if .GoFiles}}{{.ImportPath}}{{end}}' ./... | grep -v "/${ONDEWO_PROTO_COMPILER_DIR}/")
+
+# --- Coverage
+# The threshold is enforced over the HAND-WRITTEN packages only. Everything below ${STUBS_DIR}/ is
+# machine output: gating on it would measure how much of protoc's output a test happens to walk,
+# not how much of what somebody wrote is tested. The stubs are still exercised for real - the
+# suite round-trips messages on the wire and calls every generated unary stub - it is only the
+# NUMBER they are kept out of. `make test_coverage_generated` prints their figure for the record.
+COVERAGE_PACKAGES=./auth/...
+COVERAGE_THRESHOLD=100.0
+COVERAGE_PROFILE=coverage.out
 
 # Terminate on the ***** separator that delimits release entries, NOT on /\*\*/ - that matches
 # the first markdown **bold** span inside the entry and silently truncates the notes there,
@@ -198,11 +213,45 @@ fix_ownership: ## Give the root-owned output of the proto compiler back to the c
 		sudo chown -R $$(id -u):$$(id -g) "$$f" && echo "$(BLUE)[INFO]$(NC) chowned $$f"; \
 	done
 
-go_build: ## Compile every package of the module
-	go build $(GO_PACKAGES)
+go_build: ## Compile every package of the module that has non-test sources
+	go build $(GO_BUILD_PACKAGES)
 
 test: ## Run the go test suite
 	go test $(GO_PACKAGES)
+
+test_coverage: ## Run the suite under the race detector and fail if hand-written coverage < COVERAGE_THRESHOLD
+	@echo "$(BLUE)[INFO]$(NC) Running the test suite, measuring coverage of $(COVERAGE_PACKAGES) ..."
+	go test -count=1 -race -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=$(COVERAGE_PROFILE) $(GO_PACKAGES)
+	@go tool cover -func=$(COVERAGE_PROFILE)
+# An empty profile reports "total: 0.0%" and a threshold of 0 would wave it through, so the gate
+# first insists that at least one hand-written function was measured at all - that is what turns a
+# deleted or renamed COVERAGE_PACKAGES into a failure instead of a green run measuring nothing.
+	@measured=`go tool cover -func=$(COVERAGE_PROFILE) | grep -c "%$$"`; \
+	if [ "$$measured" -lt 2 ]; then \
+		echo "$(RED)[ERROR]$(NC) the profile measured no function of $(COVERAGE_PACKAGES) - is the package still there?"; \
+		exit 1; \
+	fi; \
+	total=`go tool cover -func=$(COVERAGE_PROFILE) | awk '/^total:/ {print $$3}' | tr -d '%'`; \
+	awk -v total="$$total" -v threshold="$(COVERAGE_THRESHOLD)" 'BEGIN { exit !(total + 0 >= threshold + 0) }' || { \
+		echo "$(RED)[ERROR]$(NC) hand-written coverage is $$total%, below the required $(COVERAGE_THRESHOLD)%"; \
+		exit 1; \
+	}; \
+	echo "$(GREEN)[SUCCESS]$(NC) hand-written coverage is $$total% (threshold $(COVERAGE_THRESHOLD)%)"
+
+test_coverage_generated: ## Print how much of the GENERATED stubs the suite exercises (reported, never gated)
+	go test -count=1 -coverpkg=./${STUBS_DIR}/... -coverprofile=generated-$(COVERAGE_PROFILE) $(GO_PACKAGES)
+	@go tool cover -func=generated-$(COVERAGE_PROFILE) | tail -1
+
+check_stubs: ## Assert the generated stubs are committed - the build has nothing to compile without them
+	@[ -d ${STUBS_DIR} ] || { echo "$(RED)[ERROR]$(NC) ${STUBS_DIR}/ is missing - the generated stubs are not committed"; exit 1; }
+	@messages=`find ${STUBS_DIR} -name "*.pb.go" ! -name "*_grpc.pb.go" | grep -c . || true`; \
+	services=`find ${STUBS_DIR} -name "*_grpc.pb.go" | grep -c . || true`; \
+	if [ "$$messages" -eq 0 ] || [ "$$services" -eq 0 ]; then \
+		echo "$(RED)[ERROR]$(NC) ${STUBS_DIR}/ holds $$messages message stubs and $$services service stubs - both must be non-zero"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) ${STUBS_DIR}/ holds $$messages message stubs and $$services service stubs"
+	@[ -f go.mod ] && [ -f go.sum ] || { echo "$(RED)[ERROR]$(NC) go.mod / go.sum are missing - the module is not installable"; exit 1; }
 
 vet: ## Run go vet over the hand-written packages and the generated stubs
 	go vet $(GO_PACKAGES)

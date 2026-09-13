@@ -23,20 +23,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The lower bound is the `go` directive of the generated go.mod; the upper bound is the
+        # The lower bound is the `go` directive of the committed go.mod; the upper bound is the
         # toolchain the proto compiler image generates with.
         go-version: ['1.25', '1.27']
     steps:
       # `submodules:` is deliberately NOT enabled: the generated api/ directory is committed to
-      # this repository, so the module compiles without either submodule, and both are codegen
-      # inputs only. Regenerating the stubs needs Docker and is not part of this workflow.
+      # this repository, so the module compiles from the checkout alone, and both submodules are
+      # codegen inputs only. Regenerating the stubs needs Docker and is a separate concern - this
+      # workflow builds and tests what is committed, which is what consumers of the module get.
       - uses: actions/checkout@v5
 
+      # @v6 rather than @v5: v5 still targets Node.js 20, which the runners deprecated and now
+      # force onto Node.js 24 with a warning annotation on every run.
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go-version }}
           cache-dependency-path: go.sum
+
+      # Nothing below this line is allowed to pass by finding no work to do. This is the guard
+      # that makes that true: it fails when api/ is absent or holds no stubs, so the whole job
+      # cannot go green on an empty checkout the way it did before the stubs were committed.
+      - name: Assert the generated stubs are committed
+        run: make check_stubs
 
       # A module whose manifest does not resolve is not installable, no matter what compiles
       # locally - so verify the committed go.mod/go.sum against the module proxy first.
@@ -54,8 +63,17 @@ jobs:
       - name: go build
         run: make go_build
 
-      - name: go test
-        run: make test
+      # Runs the suite under the race detector and fails when coverage of the hand-written
+      # packages drops below the threshold in the Makefile (currently 100%). The generated stubs
+      # are kept out of that number - they are machine output - but the same run exercises them
+      # for real: messages round-trip on the wire and every generated unary stub is called.
+      - name: go test with the coverage gate
+        run: make test_coverage
+
+      # Reported, never gated: how much of the generated code the suite touches. A drop here is
+      # worth a look, but pinning it would be pinning the size of protoc's output.
+      - name: Report coverage of the generated stubs
+        run: make test_coverage_generated
 
       # Publishing is what this repository exists for: assert the generated stubs can be
       # imported under the exact module path they declare, from a module outside this tree.
@@ -67,12 +85,20 @@ jobs:
           set -e
           module_path=$(go list -m)
           first_package=$(go list ./api/... | head -1)
+          # A module path that carries a /vN major suffix only accepts a vN.x.y version in
+          # `require`: `go mod edit -require=.../v5@v0.0.0` writes a go.mod that does not even
+          # parse ("version v0.0.0 invalid: should be v5, not v0"). The placeholder therefore has
+          # to be derived from the path rather than hard coded - `replace` makes its value
+          # irrelevant otherwise.
+          module_major=$(printf '%s' "${module_path}" | sed -n 's|.*/v\([0-9][0-9]*\)$|\1|p')
+          placeholder="v${module_major:-0}.0.0"
           echo "module path: ${module_path}"
           echo "importing:   ${first_package}"
+          echo "require:     ${module_path}@${placeholder}"
           work_dir=$(mktemp -d)
           cd "${work_dir}"
           go mod init ondewo.local/consumer
-          go mod edit -require="${module_path}@v0.0.0" -replace="${module_path}=${GITHUB_WORKSPACE}"
+          go mod edit -require="${module_path}@${placeholder}" -replace="${module_path}=${GITHUB_WORKSPACE}"
           printf 'package main\n\nimport _ "%s"\n\nfunc main() {}\n' "${first_package}" > main.go
           go mod tidy
           go build ./...
