@@ -1,0 +1,55 @@
+#############################################################################################
+# pre-commit - language-agnostic hooks only. Go's own toolchain owns go formatting, vetting   #
+# and testing (`make fmt` / `make vet` / `make test`, wired into .github/workflows/ci.yml);   #
+# nothing here shells out to it, so a contributor without a go toolchain can still commit     #
+# documentation. Ruff/mypy/uv are python-only and NOT included.                               #
+# see https://pre-commit.com/#intro for an introduction to pre-commit                         #
+#############################################################################################
+
+# Never touch generated or vendored code:
+#   api/                      rewritten from the protos on every generation - a hook that
+#                             reformatted it would produce a diff that the next
+#                             `make generate_ondewo_protos` silently reverts.
+#   ondewo-vtsi-api/               submodule, owned by its own repository.
+#   ondewo-proto-compiler/    submodule, owned by its own repository.
+#   vendor/                   third party sources.
+exclude: '^(api|ondewo-vtsi-api|ondewo-proto-compiler|vendor)/'
+
+fail_fast: false
+# "fail_fast: false" means pre-commit continues to run hooks after the first failure
+
+repos:
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.0
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [ --maxkb=1024 ]
+      - id: check-json
+      - id: check-yaml
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/milin/giticket
+    rev: '1.92'
+    hooks:
+      - id: giticket
+        args: [ '--regex=(?:(?:feature|bugfix|support|hotfix)/)?(OND[0-9]{3}-[0-9]{1,5})[_-][\w-]+',
+                '--format=[{ticket}] {commit_msg}',
+                '--mode=regex_match' ]
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]

@@ -1,0 +1,78 @@
+name: ci
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per branch/PR ref: a new push supersedes the in-flight run. Never on master, so every
+# commit on the release branch keeps its own result instead of being cancelled by the next push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  build-and-test:
+    name: go ${{ matrix.go-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # The lower bound is the `go` directive of the generated go.mod; the upper bound is the
+        # toolchain the proto compiler image generates with.
+        go-version: ['1.25', '1.27']
+    steps:
+      # `submodules:` is deliberately NOT enabled: the generated api/ directory is committed to
+      # this repository, so the module compiles without either submodule, and both are codegen
+      # inputs only. Regenerating the stubs needs Docker and is not part of this workflow.
+      - uses: actions/checkout@v5
+
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: go.sum
+
+      # A module whose manifest does not resolve is not installable, no matter what compiles
+      # locally - so verify the committed go.mod/go.sum against the module proxy first.
+      - name: Verify the module manifest
+        run: |
+          go mod download
+          go mod verify
+
+      - name: gofmt
+        run: make fmt_check
+
+      - name: go vet
+        run: make vet
+
+      - name: go build
+        run: make go_build
+
+      - name: go test
+        run: make test
+
+      # Publishing is what this repository exists for: assert the generated stubs can be
+      # imported under the exact module path they declare, from a module outside this tree.
+      # `replace` points at the checkout, so this proves the import paths baked into the stubs
+      # by protoc-gen-go agree with go.mod - the failure mode a local `go build` cannot see.
+      - name: Smoke test the module path
+        if: matrix.go-version == '1.27'
+        run: |
+          set -e
+          module_path=$(go list -m)
+          first_package=$(go list ./api/... | head -1)
+          echo "module path: ${module_path}"
+          echo "importing:   ${first_package}"
+          work_dir=$(mktemp -d)
+          cd "${work_dir}"
+          go mod init ondewo.local/consumer
+          go mod edit -require="${module_path}@v0.0.0" -replace="${module_path}=${GITHUB_WORKSPACE}"
+          printf 'package main\n\nimport _ "%s"\n\nfunc main() {}\n' "${first_package}" > main.go
+          go mod tidy
+          go build ./...
