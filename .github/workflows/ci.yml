@@ -31,12 +31,14 @@ jobs:
       # this repository, so the module compiles from the checkout alone, and both submodules are
       # codegen inputs only. Regenerating the stubs needs Docker and is a separate concern - this
       # workflow builds and tests what is committed, which is what consumers of the module get.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      # @v6 rather than @v5: v5 still targets Node.js 20, which the runners deprecated and now
-      # force onto Node.js 24 with a warning annotation on every run.
+      # Every actions/* reference in this repository is pinned to v7, the current major of all
+      # of them - the fleet ran checkout at v4, v5 AND v7 at once, and the older majors still
+      # target Node.js 20, which the runners deprecated and now force onto Node.js 24 with a
+      # warning annotation on every run.
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go-version }}
           cache-dependency-path: go.sum
@@ -95,3 +97,26 @@ jobs:
       # empty for every consumer. A published version is immutable, so it has to fail before the tag.
       - name: Rehearse the module publication
         run: make publish_dry_run
+
+  # The repository ships a .pre-commit-config.yaml, so the markdown and file hygiene it describes
+  # has to be enforced by something other than the goodwill of whoever remembered to install the
+  # hooks. Every other client language of the fleet gates on it; go was the one that did not, which
+  # meant a documentation change could only be caught by a human reading the diff.
+  lint:
+    name: pre-commit (markdownlint + hygiene)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      # `--all-files` runs the pre-commit-stage hooks only. The commit-msg-stage hooks
+      # (conventional-pre-commit, then giticket) are not reachable from here - they gate the
+      # message itself, on a developer machine, at commit time.
+      - name: Run pre-commit on all files
+        run: |
+          python -m pip install --upgrade pre-commit
+          pre-commit run --all-files --show-diff-on-failure

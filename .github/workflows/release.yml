@@ -3,14 +3,24 @@ name: release
 # A go module is published by TAGGING it - proxy.golang.org clones the tag and serves a zip of
 # exactly what git has under it, so there is no upload, no registry account and no registry
 # credential anywhere in this workflow. What it does instead is make the tag trustworthy: it
-# re-verifies the tagged tree, refuses the tag if it disagrees with the Makefile, publishes the
-# GitHub release from RELEASE.md, and then asks the public module proxy to fetch the new version so
-# the first `go get` is served from cache instead of waiting on a VCS clone.
+# re-verifies the tagged tree, refuses the tag if it disagrees with the Makefile, waits for the
+# GitHub release and checks it is not empty, and then asks the public module proxy to fetch the new
+# version so the first `go get` is served from cache instead of waiting on a VCS clone.
+#
+# THERE IS EXACTLY ONE CREATOR OF THE GITHUB RELEASE, AND IT IS NOT THIS WORKFLOW. `make release`
+# on the developer machine runs `push_to_gh` -> `build_gh_release`, which is where the release page
+# is made; `gh release create` is not idempotent (a second create for the same tag is HTTP 422
+# already_exists), so when both sides created it the local run won the race and this workflow went
+# red on every single release. It now WAITS for that release instead of racing it - the cpp clients
+# solve the same collision the same way - and fails loudly if a `v*` tag was ever pushed without a
+# release behind it.
 #
 # The one credential involved buys the GitHub release, not the module. It is read from the
-# ONDEWO_GITHUB_GH_TOKEN repository secret, never from a literal, and the first step of the job
-# refuses to run without it - a release that cannot be created must fail here, loudly, and not after
-# the immutable tag has already been announced to the module proxy.
+# ONDEWO_GH_TOKEN repository secret, never from a literal, and the first step of the job refuses to
+# run without it. That is the same value as GITHUB_GH_TOKEN in ondewo-devops-accounts; the secret
+# cannot carry that name because GitHub reserves every secret name starting with GITHUB_, and
+# ONDEWO_GH_TOKEN - not the longer ONDEWO_GITHUB_GH_TOKEN, which only invites confusion with the
+# reserved prefix - is the one spelling the whole client fleet uses.
 on:
   push:
     tags:
@@ -20,7 +30,9 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
-  # `gh release create` writes to this repository; nothing else here needs more.
+  # The release page is created by `make release` on the developer machine, not here, so nothing in
+  # this job writes to the repository with the built-in token. Left at write because a re-run that
+  # has to repair a release must not be blocked by the permission block; nothing needs more.
   contents: write
 
 # Releases are never cancelled halfway: a half-published release is worse than a slow one.
@@ -39,23 +51,24 @@ jobs:
       # command line and never written to a file.
       - name: Require the release credentials
         env:
-          ONDEWO_GITHUB_GH_TOKEN: ${{ secrets.ONDEWO_GITHUB_GH_TOKEN }}
+          ONDEWO_GH_TOKEN: ${{ secrets.ONDEWO_GH_TOKEN }}
         run: |
-          if [ -z "${ONDEWO_GITHUB_GH_TOKEN}" ]; then
-            echo "::error::The repository secret ONDEWO_GITHUB_GH_TOKEN is not set."
+          if [ -z "${ONDEWO_GH_TOKEN}" ]; then
+            echo "::error::The repository secret ONDEWO_GH_TOKEN is not set."
             echo "::error::Add it under Settings -> Secrets and variables -> Actions. Its value is the"
             echo "::error::GITHUB_GH_TOKEN of ondewo-devops-accounts/account_github.env - a GitHub"
-            echo "::error::personal access token with the 'repo' scope on ondewo/ondewo-vtsi-client-go."
-            echo "::error::Refusing to continue: without it the GitHub release cannot be created, and a"
+            echo "::error::personal access token with the 'repo' scope on ondewo/ondewo-vtsi-client-go. It cannot be"
+            echo "::error::named GITHUB_GH_TOKEN: GitHub reserves every secret name starting with GITHUB_."
+            echo "::error::Refusing to continue: without it the GitHub release cannot be read back, and a"
             echo "::error::tag announced to proxy.golang.org can never be taken back."
             exit 1
           fi
           echo "Release credentials are present."
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           # The toolchain the proto compiler image generates with; the module's own floor is the
           # `go` directive of go.mod, which the ci workflow covers on every push.
@@ -64,9 +77,9 @@ jobs:
 
       # The tag is the release, so it has to be the tag this working tree actually describes. Both
       # halves are checked: the `v`-prefixed tag that triggered this run has to be the one the
-      # Makefile derives from ONDEWO_VTSI_VERSION, and the bare ONDEWO tag naming the same release
-      # has to exist already - `gh release create` would otherwise happily CREATE it, pointing at
-      # the default branch instead of at this commit.
+      # Makefile derives from ONDEWO_VTSI_VERSION, and the bare ONDEWO tag naming the same release has
+      # to exist already - it is the tag the GitHub release hangs off, and the one the steps below
+      # read back. The bare version is exported for them, so nothing downstream re-derives it.
       - name: Assert the tag agrees with the Makefile
         run: |
           set -e
@@ -84,6 +97,7 @@ jobs:
             echo "::error::Both tags name the same commit (see 'make create_release_tag'); pushing only ${expected} is a half-release."
             exit 1
           fi
+          echo "ONDEWO_RELEASE_TAG=${version}" >> "${GITHUB_ENV}"
 
       # Everything below re-verifies the TAGGED tree. It duplicates the ci workflow on purpose: ci
       # ran on a branch head, and this is the artifact that becomes immutable.
@@ -93,8 +107,11 @@ jobs:
       - name: Assert the module path matches the version
         run: make check_go_module_path
 
-      # `gh release create -n ""` succeeds and publishes an EMPTY release. This is the step that
-      # turns a forgotten RELEASE.md entry into a failed release instead of a silent one.
+      # `gh release create -n ""` succeeds and publishes an EMPTY release, so the notes are checked
+      # twice over: here against the TAGGED TREE (does RELEASE.md carry an entry the Makefile's
+      # perl slice actually matches?) and, further down, against the release page that was really
+      # published. This half is what turns a forgotten RELEASE.md entry - or a heading whose
+      # wording drifted out of the slice - into a failed release instead of a silent one.
       - name: Assert the release notes exist
         run: make check_release_notes
 
@@ -120,13 +137,43 @@ jobs:
       - name: Rehearse the module publication
         run: make publish_dry_run
 
-      # From here on the release is public and irreversible.
-      - name: Publish the GitHub release
+      # This workflow does NOT create the GitHub release: `make release` already did, seconds after
+      # it pushed the tag that started this run. `gh release create` is not idempotent - a second
+      # create for the same tag is HTTP 422 already_exists - so creating it here too meant exactly
+      # one of the two always failed, and since the local run gets there first it was always this
+      # workflow. Poll rather than race. A `v*` tag pushed with no release ever created behind it
+      # fails here, loudly, which is the only case this step can still fail in.
+      - name: Wait for the GitHub release to exist
         env:
           # gh reads GH_TOKEN from the environment, so the token never appears on a command line
           # and never reaches a log.
-          GH_TOKEN: ${{ secrets.ONDEWO_GITHUB_GH_TOKEN }}
-        run: make build_gh_release
+          GH_TOKEN: ${{ secrets.ONDEWO_GH_TOKEN }}
+        run: |
+          for attempt in $(seq 1 30); do
+            if gh release view "${ONDEWO_RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+              echo "release ${ONDEWO_RELEASE_TAG} exists"
+              exit 0
+            fi
+            echo "attempt ${attempt}/30: release ${ONDEWO_RELEASE_TAG} does not exist yet, retrying in 10s"
+            sleep 10
+          done
+          echo "::error title=No GitHub release::Tag ${GITHUB_REF_NAME} has no GitHub release on ${ONDEWO_RELEASE_TAG} after 5 minutes. 'make release' creates it (push_to_gh -> build_gh_release); create it with 'make push_to_gh' and re-run this workflow."
+          exit 1
+
+      # The published page, not the working tree: `gh release create -n ""` publishes an empty
+      # release without complaining, and nothing downstream would ever notice. Reading the body
+      # back is what makes the release notes a checked property of the RELEASE rather than of the
+      # Makefile's ability to slice RELEASE.md.
+      - name: Verify the published release notes are not empty
+        env:
+          GH_TOKEN: ${{ secrets.ONDEWO_GH_TOKEN }}
+        run: |
+          body="$(gh release view "${ONDEWO_RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json body --jq '.body')"
+          printf 'published release notes (%s bytes):\n%s\n' "$(printf '%s' "${body}" | wc -c | tr -d ' ')" "${body}"
+          if [ -z "$(printf '%s' "${body}" | tr -d '[:space:]')" ]; then
+            echo "::error title=Empty release notes::Release ${ONDEWO_RELEASE_TAG} was published with an empty body. Fix the RELEASE.md entry, then 'gh release edit ${ONDEWO_RELEASE_TAG} --notes-file -' to repair the page."
+            exit 1
+          fi
 
       # The actual "publish" for a go module: the proxy fetches the tag on first request. Doing it
       # here means the first consumer gets a cached module instead of a cold VCS clone - and that a

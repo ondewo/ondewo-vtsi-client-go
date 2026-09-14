@@ -49,7 +49,7 @@ ONDEWO_VTSI_VERSION=8.7.0
 
 # Submodule pins - `make checkout_defined_submodule_versions` checks these out
 ONDEWO_VTSI_API_GIT_BRANCH=tags/8.7.0
-ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.0
+ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.1
 
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
@@ -347,7 +347,13 @@ checkout_defined_submodule_versions: ## Check out the submodule versions pinned 
 
 release: ## Automate the entire release process
 	@echo "$(BLUE)[INFO]$(NC) Start Release"
-# Everything that can be refuted without touching origin is refuted first: a missing RELEASE.md
+# FIRST, before anything is built, branched or tagged: the credential that buys the GitHub release
+# has to be there. It used to be exercised for the first time by `login_to_gh` inside `push_to_gh`,
+# which runs AFTER the release branch and BOTH tags have been pushed - so a missing token left an
+# immovable tag on origin, and `spc` then refused every retry, because that branch and that tag now
+# exist. The java clients check their publishing credentials first for exactly this reason.
+	make check_gh_credentials
+# Everything else that can be refuted without touching origin is refuted next: a missing RELEASE.md
 # entry or a module path that disagrees with the version must not be discovered after the tags
 # have been pushed, because a published go module version is immutable.
 	make check_release_notes
@@ -392,8 +398,26 @@ create_release_tag: ## Create Release Tag and push it to origin
 	git tag -a ${GO_RELEASE_TAG} -m "release/${GO_RELEASE_TAG}"
 	git push origin ${GO_RELEASE_TAG}
 
-login_to_gh: ## Login to Github CLI with Access Token
-	@echo $(GITHUB_GH_TOKEN) | gh auth login -p ssh --with-token
+# The one guard the release path has against a token that was never supplied. `release:` runs it
+# before anything is built, branched or tagged; `login_to_gh` depends on it too, so a bare
+# `make push_to_gh` cannot hand `gh auth login` the literal string ENTER_YOUR_TOKEN_HERE and then
+# fail one target later, in `build_gh_release`, far away from the actual cause.
+#
+# The value is read from the ENVIRONMENT (`export` at the top of this file puts every variable
+# there), never interpolated into the recipe text, so make's own command echo cannot leak it and a
+# space or a glob character in the token cannot break the command apart. Only its emptiness and the
+# placeholder are ever tested; the token itself is never printed, not even partially.
+check_gh_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the placeholder
+	@if [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN" = "ENTER_YOUR_TOKEN_HERE" ]; then \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - the GitHub release cannot be created"; \
+		echo "        Use 'make ondewo_release', which reads it from ondewo-devops-accounts/account_github.env,"; \
+		echo "        or create a token with the 'repo' scope at https://github.com/settings/tokens"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)[SUCCESS]$(NC) GITHUB_GH_TOKEN is set"
+
+login_to_gh: check_gh_credentials ## Login to Github CLI with Access Token
+	@printf '%s\n' "$$GITHUB_GH_TOKEN" | gh auth login -p ssh --with-token
 
 check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_VTSI_VERSION
 # `gh release create -n ""` succeeds and publishes an empty release, so an entry that was forgotten

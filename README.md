@@ -146,7 +146,8 @@ func main() {
 ├── ondewo-proto-compiler                  <----- submodule @ https://github.com/ondewo/ondewo-proto-compiler
 ├── .github
 │   └── workflows
-│       └── ci.yml
+│       ├── ci.yml                          <----- build, test, lint and the credential-free publish rehearsal
+│       └── release.yml                     <----- tagged-tree verification + module proxy warm-up, on a v* tag push
 ├── CONTRIBUTING.md
 ├── go.mod                                 <----- module manifest, written by the compiler on the first run
 ├── go.sum
@@ -291,11 +292,17 @@ The only credential in this repository buys the **GitHub release**, not the modu
 token into `make release` (`clone_devops_accounts` + `run_release_with_devops`); the working default
 in the `Makefile` is the placeholder `ENTER_YOUR_TOKEN_HERE`, and a real token is never committed.
 
-`.github/workflows/release.yml` does the same thing from CI on a `v*` tag push, reading the token
-from the repository secret **`ONDEWO_GITHUB_GH_TOKEN`** (same value as `GITHUB_GH_TOKEN` above). Its
-first step fails the run with an explicit message when that secret is missing, before anything is
-built — a release that cannot be created has to stop there, because the tag it would describe is
-already immutable.
+`.github/workflows/release.yml` re-verifies the tagged tree from CI on a `v*` tag push, reading the
+token from the repository secret **`ONDEWO_GH_TOKEN`** — the same value as `GITHUB_GH_TOKEN` above.
+The secret cannot carry that name: GitHub reserves every secret name beginning with `GITHUB_`, and
+`ONDEWO_GH_TOKEN` is the one spelling the whole client fleet uses. Its first step fails the run with
+an explicit message when that secret is missing, before anything is built — a release that cannot be
+verified has to stop there, because the tag it describes is already immutable.
+
+The workflow does **not** create the GitHub release. `make release` does, and `gh release create` is
+not idempotent — a second create for the same tag is HTTP 422 `already_exists` — so when both sides
+created it, the local run won the race and the workflow went red on every single release. It now
+waits for that release to appear and then reads its body back, failing if the notes are empty.
 
 ## Contributing
 
