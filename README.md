@@ -38,8 +38,12 @@ Go module is resolved straight from its version control tree — there is no bui
 
 ## Installation
 
+The client is a plain Go module, published to the public module proxy
+([`proxy.golang.org`](https://proxy.golang.org)) straight from this repository's release tags — there
+is no registry account, no token and no `go install` step in between. Add it to your module with:
+
 ```shell
-go get github.com/ondewo/ondewo-vtsi-client-go/v8
+go get github.com/ondewo/ondewo-vtsi-client-go/v8@latest   ## or @v8.7.0 to pin an exact release
 ```
 
 Then import the package of the service you need:
@@ -48,12 +52,24 @@ Then import the package of the service you need:
 import vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
 ```
 
-> **Major versions.** From major version 2 on, a Go module path carries its major version as a
-> `/vN` suffix (see [the module reference](https://go.dev/ref/mod#major-version-suffixes)): a
-> `v8.y.z` tag on a module declared without `/v8` is invisible to `go get`. This release is
-> `8.7.0`, so the module declares — and every generated file imports — `github.com/ondewo/ondewo-vtsi-client-go/v8`.
-> The `Makefile` derives the suffix from `ONDEWO_VTSI_VERSION`; run `make TEST` to print the
-> exact module path of the current release.
+> **The `/v8` is part of the name, not a version selector.** From major version 2 on, a Go module
+> path carries its major version as a `/vN` suffix (see
+> [the module reference](https://go.dev/ref/mod#major-version-suffixes)). Dropping it is not a
+> shorter spelling of the same module — `go get github.com/ondewo/ondewo-vtsi-client-go` names a
+> *different*, unpublished module and fails with `invalid version: module contains a go.mod file, so
+> major version must be compatible`. The suffix moves with the major version of the ONDEWO VTSI API,
+> so a `9.x` release will be imported as `/v9`, and a program can depend on both at once.
+
+Releases are tagged twice on the same commit: with the ONDEWO release number (`8.7.0`), which is
+what the [GitHub releases page](https://github.com/ondewo/ondewo-vtsi-client-go/releases) lists and
+what the rest of the ONDEWO client fleet uses, and with the `v`-prefixed spelling (`v8.7.0`), which
+is the only tag shape Go tooling recognises as a module version. Use the `v`-prefixed one in
+`go get`, `go.mod` and anywhere else a version is written.
+
+Nothing needs to be configured for a private proxy or a credential: the module is public, so the
+default `GOPROXY=https://proxy.golang.org,direct` and `GOSUMDB=sum.golang.org` resolve and verify it
+as they do any other dependency. `make TEST` prints the exact module path and release tag of the
+checked-out version.
 
 To work on the client itself:
 
@@ -230,9 +246,56 @@ make ondewo_release                         ## credentials from the devops-accou
 ```
 
 `make release` builds, commits, creates the release branch, pushes **two** tags for the same commit
-— the ONDEWO release tag (`7.1.2`) and the `v`-prefixed tag Go tooling requires (`v7.1.2`) — creates
+— the ONDEWO release tag (`8.7.0`) and the `v`-prefixed tag Go tooling requires (`v8.7.0`) — creates
 the GitHub release from the matching `RELEASE.md` entry, and asks the public module proxy to fetch
 the new version.
+
+### How publishing works, and what it costs
+
+Nothing is uploaded. `proxy.golang.org` clones the tag on the first request for it and serves a zip
+of exactly what git has under that tag, so **the tag *is* the published artifact** and there is no
+registry account to own, no namespace to claim and no publishing credential to rotate. The whole
+correctness question is therefore about the tag:
+
+* it must be spelled `v<semver>` — `8.7.0` alone is not a Go module version;
+* the module path in `go.mod` must end in `/vN` matching the tag's major version, and that path is
+  baked by `protoc-gen-go` into every generated import, so it cannot be patched after generation —
+  `make generate_ondewo_protos` passes it to the compiler image as the third positional argument;
+* everything a consumer compiles has to be *committed*, because the proxy never sees a working tree.
+
+Each of those is a gate rather than a convention:
+
+```shell
+make check_go_module_path   ## go.mod and every self-import carry the /vN that ONDEWO_VTSI_VERSION implies
+make check_release_notes    ## RELEASE.md has an entry for this version (`gh release create -n ""` would not complain)
+make publish_dry_run        ## rehearse the whole publication, offline and without credentials
+```
+
+`make publish_dry_run` is the interesting one. It packs `git archive HEAD` into the module zip the
+proxy would serve, publishes it through a throwaway `file://` module proxy, and then resolves and
+compiles it from a consumer module outside this tree under the real release version — so a module
+path that disagrees with the tag, a self-import missing its suffix, or generated code that never
+reached the commit all fail here instead of at a stranger's `go get`. It needs no network beyond the
+module cache and no secret of any kind, which is why `.github/workflows/ci.yml` runs it on every
+push, and `make release` runs it once more immediately before the tags are created.
+
+### Credentials
+
+The only credential in this repository buys the **GitHub release**, not the module:
+
+| Variable | Where it comes from | What it is for |
+| --- | --- | --- |
+| `GITHUB_GH_TOKEN` | `ondewo-devops-accounts/account_github.env` | `gh release create` — the GitHub release page and its notes |
+
+`make ondewo_release` clones `ondewo-devops-accounts`, reads `account_github.env` and passes the
+token into `make release` (`clone_devops_accounts` + `run_release_with_devops`); the working default
+in the `Makefile` is the placeholder `ENTER_YOUR_TOKEN_HERE`, and a real token is never committed.
+
+`.github/workflows/release.yml` does the same thing from CI on a `v*` tag push, reading the token
+from the repository secret **`ONDEWO_GITHUB_GH_TOKEN`** (same value as `GITHUB_GH_TOKEN` above). Its
+first step fails the run with an explicit message when that secret is missing, before anything is
+built — a release that cannot be created has to stop there, because the tag it would describe is
+already immutable.
 
 ## Contributing
 

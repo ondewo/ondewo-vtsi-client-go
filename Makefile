@@ -33,6 +33,11 @@ export
 # 3 - Create Release Tag and push (BOTH the ONDEWO tag and the go `vX.Y.Z` tag)
 # 4 - GitHub Release
 # 5 - Go module release (warm the public module proxy - a go module has no registry upload)
+#
+# Publishing a go module needs NO registry credential: proxy.golang.org serves whatever the public
+# VCS tag carries, so `make publish_dry_run` rehearses the entire publication offline and without a
+# single secret. The only credential in this repository is GITHUB_GH_TOKEN, and it buys the GitHub
+# release, not the module.
 
 ########################################################
 # 		Variables
@@ -68,13 +73,14 @@ PROTO_COMPILER_IMAGE=ondewo-go-proto-compiler:latest
 
 # --- Go module identity
 # Go resolves a module straight from its VCS path, and from major version 2 on that path has to
-# carry the major as a `/vN` suffix (https://go.dev/ref/mod#major-version-suffixes): a v7.1.2
-# tag on a module declared without `/v7` is invisible to `go get`. Derived from the version
+# carry the major as a `/vN` suffix (https://go.dev/ref/mod#major-version-suffixes): a v8.1.2
+# tag on a module declared without `/v8` is invisible to `go get`. Derived from the version
 # above so the module path, the go.mod the compiler renders and the import path baked by
 # protoc-gen-go into every generated file all move together.
+GO_MODULE_BASE_PATH=github.com/ondewo/ondewo-vtsi-client-go
 GO_MODULE_MAJOR=$(firstword $(subst ., ,$(ONDEWO_VTSI_VERSION)))
 GO_MODULE_MAJOR_SUFFIX=$(if $(filter 0 1,$(GO_MODULE_MAJOR)),,/v$(GO_MODULE_MAJOR))
-GO_MODULE_PATH=github.com/ondewo/ondewo-vtsi-client-go$(GO_MODULE_MAJOR_SUFFIX)
+GO_MODULE_PATH=$(GO_MODULE_BASE_PATH)$(GO_MODULE_MAJOR_SUFFIX)
 # The `v`-prefixed spelling of the release, which is the only tag shape go tooling accepts
 GO_RELEASE_TAG=v${ONDEWO_VTSI_VERSION}
 
@@ -147,6 +153,18 @@ TEST: ## Prints some important variables
 	@echo "Go Module Path: \t $(GO_MODULE_PATH)"
 	@echo "Go Release Tag: \t $(GO_RELEASE_TAG)"
 	@echo "Compiler Image: \t $(PROTO_COMPILER_IMAGE)"
+
+# Single-value printers for scripts and CI - `make -s <target>` yields the bare value, so the
+# release workflow reads the version, the tag and the module path from this Makefile instead of
+# keeping a second copy of them in yaml that can drift.
+print_version: ## Print ONDEWO_VTSI_VERSION and nothing else
+	@echo "${ONDEWO_VTSI_VERSION}"
+
+print_go_release_tag: ## Print the `v`-prefixed release tag and nothing else
+	@echo "${GO_RELEASE_TAG}"
+
+print_go_module_path: ## Print the go module path (including its /vN suffix) and nothing else
+	@echo "${GO_MODULE_PATH}"
 
 check_build: ## Checks if all built proto-code is there
 	@rm -f build_check.txt
@@ -249,6 +267,34 @@ check_stubs: ## Assert the generated stubs are committed - the build has nothing
 	echo "$(GREEN)[SUCCESS]$(NC) ${STUBS_DIR}/ holds $$messages message stubs and $$services service stubs"
 	@[ -f go.mod ] && [ -f go.sum ] || { echo "$(RED)[ERROR]$(NC) go.mod / go.sum are missing - the module is not installable"; exit 1; }
 
+# A go module carries its own major version in its path from v2 on, and nothing at build time
+# notices when the two disagree: everything compiles, `go build` is green, and the module simply
+# stays invisible to `go get` once the release is tagged ("module .../ondewo-vtsi-client-go@v8.7.0:
+# invalid version: module contains a go.mod file, so major version must be compatible"). This is
+# the gate that turns that silent mismatch into a failed build, in CI and before every release.
+check_go_module_path: ## Assert go.mod and every import agree with the /vN suffix ONDEWO_VTSI_VERSION requires
+	@declared=`sed -n 's|^module[[:space:]][[:space:]]*\([^[:space:]]*\).*|\1|p' go.mod | head -1`; \
+	if [ "$$declared" != "${GO_MODULE_PATH}" ]; then \
+		echo "$(RED)[ERROR]$(NC) go.mod declares module '$$declared', but ONDEWO_VTSI_VERSION=${ONDEWO_VTSI_VERSION} requires '${GO_MODULE_PATH}'"; \
+		echo "        From major version 2 on the module path must end in /vN (https://go.dev/ref/mod#major-version-suffixes)."; \
+		echo "        The path is baked into every generated import, so a go.mod-only edit is not enough - regenerate:"; \
+		echo "            make generate_ondewo_protos"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) go.mod declares $$declared, matching ONDEWO_VTSI_VERSION=${ONDEWO_VTSI_VERSION}"
+# Second half of the same question, asked of the sources instead of the manifest: a self-import
+# spelled without the suffix (the shape `protoc-gen-go` bakes in when it is handed the wrong module
+# path) resolves to a DIFFERENT, unpublished module rather than to this one.
+	@offenders=`grep -rn "\"${GO_MODULE_BASE_PATH}" --include="*.go" ${STUBS_DIR} auth tests \
+		| grep -v "\"${GO_MODULE_PATH}/" | grep -v "\"${GO_MODULE_PATH}\"" || true`; \
+	if [ -n "$$offenders" ]; then \
+		echo "$(RED)[ERROR]$(NC) these self-imports are not spelled ${GO_MODULE_PATH}/...:"; \
+		echo "$$offenders"; \
+		echo "        Regenerate the stubs and repoint the hand-written imports at ${GO_MODULE_PATH}"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) every self-import is spelled ${GO_MODULE_PATH}/..."
+
 vet: ## Run go vet over the hand-written packages and the generated stubs
 	go vet $(GO_PACKAGES)
 
@@ -301,8 +347,13 @@ checkout_defined_submodule_versions: ## Check out the submodule versions pinned 
 
 release: ## Automate the entire release process
 	@echo "$(BLUE)[INFO]$(NC) Start Release"
+# Everything that can be refuted without touching origin is refuted first: a missing RELEASE.md
+# entry or a module path that disagrees with the version must not be discovered after the tags
+# have been pushed, because a published go module version is immutable.
+	make check_release_notes
 	make build
 	make check_build
+	make check_go_module_path
 	-make precommit_hooks_run_all_files
 	git status
 	git add ${STUBS_DIR}
@@ -320,6 +371,9 @@ release: ## Automate the entire release process
 	-git commit --no-verify -m "PREPARING FOR RELEASE ${ONDEWO_VTSI_VERSION}"
 	git push
 	make create_release_branch
+# The last chance to refuse: the stubs are committed now, so this rehearses the exact tree the two
+# tags below are about to name, and a tag is the release - it cannot be corrected afterwards.
+	make publish_dry_run
 	make create_release_tag
 	make push_to_gh
 	make publish_go_module
@@ -341,11 +395,67 @@ create_release_tag: ## Create Release Tag and push it to origin
 login_to_gh: ## Login to Github CLI with Access Token
 	@echo $(GITHUB_GH_TOKEN) | gh auth login -p ssh --with-token
 
-build_gh_release: ## Generate Github Release with CLI
+check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_VTSI_VERSION
+# `gh release create -n ""` succeeds and publishes an empty release, so an entry that was forgotten
+# (or a heading whose wording drifted away from what CURRENT_RELEASE_NOTES greps for) is otherwise
+# only noticed by whoever reads the release page afterwards.
+	@notes="$(CURRENT_RELEASE_NOTES)"; \
+	if [ -z "$$notes" ]; then \
+		echo "$(RED)[ERROR]$(NC) RELEASE.md has no '## Release ONDEWO VTSI Go Client ${ONDEWO_VTSI_VERSION}' entry"; \
+		echo "        The GitHub release would be created with empty notes - add the entry first."; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) RELEASE.md has release notes for ${ONDEWO_VTSI_VERSION}"
+
+build_gh_release: check_release_notes ## Generate Github Release with CLI
 	gh release create --repo $(GH_REPO) "$(ONDEWO_VTSI_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_VTSI_VERSION}"
 
 push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
 	@echo "$(GREEN)[SUCCESS]$(NC) Released to Github"
+
+# The credential-free rehearsal of the publication, and the reason this repository needs no registry
+# account: a go module is never uploaded. proxy.golang.org clones the tag and serves a zip of exactly
+# what git has under it, so the whole publishing surface can be reproduced locally - and must be,
+# because every way of getting it wrong (a gitignored ${STUBS_DIR}/, a module path whose /vN
+# disagrees with the tag, a self-import spelled without the suffix) is invisible until a consumer's
+# `go get` fails, long after the tag has been pushed and can no longer be moved.
+#
+# It packs `git archive HEAD` rather than the working tree ON PURPOSE - the proxy only ever sees
+# committed files - and then resolves the result under its real version through a file:// GOPROXY,
+# which is what makes this a rehearsal of `go get` instead of another local build.
+publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exactly as the module proxy would and install it as an outside consumer (no credentials)
+	@git diff --quiet HEAD -- ${STUBS_DIR} go.mod go.sum || \
+		echo "$(YELLOW)[WARN]$(NC) ${STUBS_DIR}/, go.mod or go.sum differ from HEAD - the rehearsal packs HEAD, not your working tree"
+	@echo "$(BLUE)[INFO]$(NC) Packing ${GO_MODULE_PATH}@${GO_RELEASE_TAG} out of the committed tree ..."
+	@set -e; \
+	work=`mktemp -d`; \
+	trap 'rm -rf "$$work"' EXIT INT TERM; \
+	versions="$$work/proxy/${GO_MODULE_PATH}/@v"; \
+	mkdir -p "$$versions"; \
+	git archive --format=zip --prefix="${GO_MODULE_PATH}@${GO_RELEASE_TAG}/" HEAD > "$$versions/${GO_RELEASE_TAG}.zip"; \
+	git show HEAD:go.mod > "$$versions/${GO_RELEASE_TAG}.mod"; \
+	printf '{"Version":"%s","Time":"%s"}\n' "${GO_RELEASE_TAG}" "`git show -s --format=%cI HEAD`" > "$$versions/${GO_RELEASE_TAG}.info"; \
+	printf '%s\n' "${GO_RELEASE_TAG}" > "$$versions/list"; \
+	first_package=`go list ./${STUBS_DIR}/... | head -1`; \
+	echo "$(BLUE)[INFO]$(NC) Installing it into a throwaway consumer module, importing $$first_package ..."; \
+	mkdir -p "$$work/consumer"; \
+	cd "$$work/consumer"; \
+	go mod init ondewo.local/publish-dry-run >/dev/null; \
+	printf 'package main\n\nimport (\n\t_ "%s"\n\t_ "%s/auth"\n)\n\nfunc main() {}\n' \
+		"$$first_package" "${GO_MODULE_PATH}" > main.go; \
+	go mod edit -require="${GO_MODULE_PATH}@${GO_RELEASE_TAG}"; \
+	export GOFLAGS=-mod=mod; \
+	export GONOSUMDB="${GO_MODULE_BASE_PATH}"; \
+	export GOPROXY="file://$$work/proxy,$${GOPROXY:-https://proxy.golang.org,direct}"; \
+	go mod tidy; \
+	go build ./...; \
+	resolved=`go list -m ${GO_MODULE_PATH}`; \
+	echo "$(GREEN)[SUCCESS]$(NC) an outside consumer resolved and compiled against $$resolved"
+# The three settings are exported rather than prefixed onto `go mod tidy` alone, because every go
+# command after it resolves the module too. The checksum database is switched off for THIS module
+# only (GONOSUMDB) - the version being rehearsed is by definition not in sum.golang.org yet - and
+# the rehearsal proxy is the FIRST element of the GOPROXY list, so everything else (the module's own
+# dependencies) still comes from wherever the caller's GOPROXY points.
 
 publish_go_module: ## Ask the public go module proxy to fetch the pushed tag (a go module has no registry upload - the tag IS the release)
 	@echo "$(BLUE)[INFO]$(NC) Requesting ${GO_MODULE_PATH}@${GO_RELEASE_TAG} from proxy.golang.org ..."

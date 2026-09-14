@@ -47,6 +47,13 @@ jobs:
       - name: Assert the generated stubs are committed
         run: make check_stubs
 
+      # From major version 2 on, a go module path has to end in /vN, and NOTHING at build time
+      # notices when it stops agreeing with the released version: the module compiles, the suite is
+      # green, and `go get` simply cannot resolve the tag once it is pushed. This is the gate that
+      # keeps that mismatch from ever reaching a tag again.
+      - name: Assert the module path matches the version
+        run: make check_go_module_path
+
       # A module whose manifest does not resolve is not installable, no matter what compiles
       # locally - so verify the committed go.mod/go.sum against the module proxy first.
       - name: Verify the module manifest
@@ -75,30 +82,16 @@ jobs:
       - name: Report coverage of the generated stubs
         run: make test_coverage_generated
 
-      # Publishing is what this repository exists for: assert the generated stubs can be
-      # imported under the exact module path they declare, from a module outside this tree.
-      # `replace` points at the checkout, so this proves the import paths baked into the stubs
-      # by protoc-gen-go agree with go.mod - the failure mode a local `go build` cannot see.
-      - name: Smoke test the module path
-        if: matrix.go-version == '1.27'
-        run: |
-          set -e
-          module_path=$(go list -m)
-          first_package=$(go list ./api/... | head -1)
-          # A module path that carries a /vN major suffix only accepts a vN.x.y version in
-          # `require`: `go mod edit -require=.../v5@v0.0.0` writes a go.mod that does not even
-          # parse ("version v0.0.0 invalid: should be v5, not v0"). The placeholder therefore has
-          # to be derived from the path rather than hard coded - `replace` makes its value
-          # irrelevant otherwise.
-          module_major=$(printf '%s' "${module_path}" | sed -n 's|.*/v\([0-9][0-9]*\)$|\1|p')
-          placeholder="v${module_major:-0}.0.0"
-          echo "module path: ${module_path}"
-          echo "importing:   ${first_package}"
-          echo "require:     ${module_path}@${placeholder}"
-          work_dir=$(mktemp -d)
-          cd "${work_dir}"
-          go mod init ondewo.local/consumer
-          go mod edit -require="${module_path}@${placeholder}" -replace="${module_path}=${GITHUB_WORKSPACE}"
-          printf 'package main\n\nimport _ "%s"\n\nfunc main() {}\n' "${first_package}" > main.go
-          go mod tidy
-          go build ./...
+      # Publishing is what this repository exists for, and a go module is published by TAGGING it:
+      # proxy.golang.org clones the tag and serves a zip of exactly what git has under it, with no
+      # upload and no credential in between. So the packaging path is rehearsed here on every push,
+      # in full - `make publish_dry_run` packs `git archive HEAD` into that very zip, serves it
+      # through a throwaway file:// module proxy and resolves it from a consumer module outside this
+      # tree, under the real release version.
+      #
+      # It replaces the older `replace`-based smoke test, which pointed at the WORKING TREE and so
+      # could not see the most expensive mistake this repository can make: generated code that never
+      # reached the tag (a stray .gitignore entry) publishes a module that compiles here and is
+      # empty for every consumer. A published version is immutable, so it has to fail before the tag.
+      - name: Rehearse the module publication
+        run: make publish_dry_run
