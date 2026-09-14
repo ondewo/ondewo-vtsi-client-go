@@ -8,7 +8,7 @@
 
 * Initial release of the ONDEWO VTSI (Virtual Telephony Server Interface) gRPC client for Go. The module
   ships the stubs generated from the [ONDEWO VTSI API](https://github.com/ondewo/ondewo-vtsi-api)
-  by version 5.15.0 of the
+  by version 5.15.1 of the
   [ONDEWO Proto Compiler](https://github.com/ondewo/ondewo-proto-compiler): one `*.pb.go` of
   messages and one `*_grpc.pb.go` of service stubs per `.proto` — 48 files from 25 protos, below
   `api/ondewo/{vtsi,nlu,qa,s2t,sip,t2s}/` — compiled against the `google.golang.org/protobuf` and
