@@ -14,10 +14,10 @@
 
 // Package auth carries the ONDEWO credential on every gRPC call of this client.
 //
-// It is hand written - nothing below api/ is, and api/ is wiped on every regeneration - and it is
-// deliberately the whole of the hand-written surface: the ONDEWO servers authenticate a client by
-// the Keycloak access token in the `authorization` request header, exactly as the python, angular
-// and typescript clients of the same API do.
+// It is hand written - nothing below api/ is, and api/ is wiped on every regeneration - and, with
+// the client package that opens the connection, deliberately the whole of the hand-written surface:
+// the ONDEWO servers authenticate a client by the Keycloak access token in the `authorization`
+// request header, exactly as the python, angular and typescript clients of the same API do.
 package auth
 
 import (
