@@ -86,25 +86,22 @@ package main
 
 import (
     "context"
-    "crypto/tls"
     "log"
     "os"
     "time"
 
-    "google.golang.org/grpc"
-    "google.golang.org/grpc/credentials"
-
     vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
     "github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
+    "github.com/ondewo/ondewo-vtsi-client-go/v8/client"
 )
 
 func main() {
-    // auth.WithBearerToken sends the Keycloak access token as `authorization: Bearer <token>` on
-    // every call of this connection, exactly as the other ONDEWO clients do. It refuses to attach
-    // itself to a plaintext connection, so it is paired with transport credentials here.
-    conn, err := grpc.NewClient(
-        "grpc-vtsi.ondewo.com:443",
-        grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{})),
+    // client.NewChannel opens a TLS connection, verified against the system trust store, with the
+    // ONDEWO connection defaults; see "TLS, mutual TLS and certificates" for a private CA and
+    // mutual TLS. auth.WithBearerToken sends the Keycloak access token as
+    // `authorization: Bearer <token>` on every call, exactly as the other ONDEWO clients do.
+    conn, err := client.NewChannel(
+        client.Config{Host: "grpc-vtsi.ondewo.com", Port: "443"},
         auth.WithBearerToken(os.Getenv("ONDEWO_VTSI_ACCESS_TOKEN")),
     )
     if err != nil {
@@ -118,15 +115,168 @@ func main() {
     // Every service of the API has a generated New<Service>Client constructor. Browse
     // api/ondewo/vtsi/ for this product's own three services, and
     // api/ondewo/{nlu,qa,s2t,sip,t2s}/ for the 20 vendored ones this client also exposes.
-    client := vtsipb.NewProjectsClient(conn)
+    stub := vtsipb.NewProjectsClient(conn)
 
-    response, err := client.ListVtsiProjects(ctx, &vtsipb.ListVtsiProjectsRequest{})
+    response, err := stub.ListVtsiProjects(ctx, &vtsipb.ListVtsiProjectsRequest{})
     if err != nil {
         log.Fatalf("rpc failed: %v", err)
     }
     log.Printf("projects: %v", response.GetVtsiProjects())
 }
 ```
+
+## TLS, mutual TLS and certificates
+
+gRPC encrypts with **TLS**. `client.NewChannel` opens the connection from a `client.Config`; it
+behaves like the `ondewo-client-utils` channel helpers of the python SDKs, so one set of certificates
+works with every ONDEWO client.
+
+| Mode                                     | `client.Config` fields                                                   |
+|------------------------------------------|--------------------------------------------------------------------------|
+| Plaintext (not for production)           | `Insecure: true`                                                         |
+| TLS, server verified by the system roots | `GrpcCert` empty                                                         |
+| TLS, server verified by your CA          | `GrpcCert` = PEM of the CA that signed the server certificate            |
+| Mutual TLS                               | `GrpcCert` (or the system roots) plus `GrpcClientCert` and `GrpcClientKey` |
+
+Rules the code enforces:
+
+* `GrpcCert`, `GrpcClientCert` and `GrpcClientKey` hold **PEM content**, **not file paths**. Read the
+  files yourself (`os.ReadFile`). A `GrpcCert` that holds no PEM certificate, typically a path, is
+  refused with an error.
+* `GrpcClientCert` and `GrpcClientKey` go together: setting only one of them is refused by
+  `NewChannel` with an error, before gRPC sees either. Both empty means plain server-authenticated
+  TLS. A certificate and key that do not form a pair are refused the same way.
+* `Insecure: true` with a client certificate is an error instead of silently dropping the identity.
+  A plaintext connection otherwise works, and logs a warning naming `host:port` through `log/slog`
+  (`Config.Logger`, or `slog.Default()` when it is nil; the package never configures logging).
+* No error message contains a PEM, a key or the whole `Config`: they name the field and `host:port`.
+* The server certificate is verified against the trust anchors above, and the host you connect to
+  must be one of its subject alternative names (SAN). When you connect by IP and the certificate has
+  no IP SAN, pass the name to check with `grpc.WithAuthority("<name in the SAN>")` (python:
+  `grpc.ssl_target_name_override`).
+* A bare IPv6 literal host is bracketed (`::1` connects to `[::1]:50051`); a bracketed host or one
+  with a scheme (`dns:///...`, `unix:...`) is used as it is. PEMs with CRLF line endings work.
+
+```go
+package main
+
+import (
+    "log"
+    "os"
+
+    "google.golang.org/grpc"
+
+    "github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
+    "github.com/ondewo/ondewo-vtsi-client-go/v8/client"
+)
+
+func mustRead(path string) string {
+    content, err := os.ReadFile(path)
+    if err != nil {
+        log.Fatalf("could not read %s: %v", path, err)
+    }
+    return string(content)
+}
+
+func main() {
+    conn, err := client.NewChannel(
+        client.Config{
+            Host:           "10.0.0.5",
+            Port:           "50051",
+            GrpcCert:       mustRead("certs/ca.pem"),
+            GrpcClientCert: mustRead("certs/client.pem"), // leave both out for server-authenticated TLS
+            GrpcClientKey:  mustRead("certs/client.key"),
+        },
+        grpc.WithAuthority("vtsi.example.internal"), // only when connecting by IP
+        auth.WithBearerToken(os.Getenv("ONDEWO_VTSI_ACCESS_TOKEN")),
+    )
+    if err != nil {
+        log.Fatalf("could not connect: %v", err)
+    }
+    defer conn.Close()
+    // Every generated New<Service>Client takes this one connection: one TCP connection and one
+    // TLS handshake for all services.
+}
+```
+
+Like `grpc.NewClient`, `NewChannel` does not connect: the first RPC does, and a failed handshake
+surfaces there as `codes.Unavailable`.
+
+### Connection defaults
+
+`NewChannel` applies the channel defaults of the python SDKs that grpc-go exposes; every
+`grpc.DialOption` you pass is applied after them and wins.
+
+| Setting                    | Value                                     | python / grpc-core option                                   |
+|----------------------------|-------------------------------------------|-------------------------------------------------------------|
+| keepalive ping interval    | 30 s (`client.KeepaliveTime`)             | `grpc.keepalive_time_ms`                                    |
+| keepalive ping timeout     | 20 s (`client.KeepaliveTimeout`)          | `grpc.keepalive_timeout_ms` and `grpc.http2.ping_timeout_ms` |
+| pings without an RPC       | no (`PermitWithoutStream: false`)         | `grpc.keepalive_permit_without_calls`                       |
+| maximum reconnect backoff  | 5 s (`client.MaxReconnectBackoff`)        | `grpc.max_reconnect_backoff_ms`                             |
+| maximum message size       | 2³¹−1 bytes, both directions (`client.MaxMessageLength`) | `grpc.max_send_message_length` / `grpc.max_receive_message_length` |
+
+Gaps, documented rather than faked: grpc-go has no `http2.max_pings_without_data` (its client only
+pings while an RPC is active, which is what that limit protects), and one keepalive timeout instead
+of grpc-core's two. The per-method retry policy of the python SDKs is not configured here: only
+gRPC's transparent retries apply, so a non-idempotent call is never sent twice. Pass
+`grpc.WithDefaultServiceConfig(...)` to add one.
+
+### A test PKI with openssl
+
+A CA, a server certificate with SANs, and a client certificate with the `clientAuth` extended key
+usage. For tests only: the keys are unencrypted.
+
+```bash
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes -days 365 \
+  -subj "/CN=Test CA" -keyout ca.key -out ca.pem
+
+printf 'subjectAltName=DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth\n' > server.ext
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+  -subj "/CN=localhost" -keyout server.key -out server.csr
+openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 365 \
+  -extfile server.ext -out server.pem
+
+printf 'extendedKeyUsage=clientAuth\n' > client.ext
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+  -subj "/CN=my-client" -keyout client.key -out client.csr
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 365 \
+  -extfile client.ext -out client.pem
+
+chmod 600 *.key
+openssl verify -CAfile ca.pem server.pem client.pem
+```
+
+The client then uses `ca.pem` / `client.pem` / `client.key`; a server that requires client
+certificates uses `server.pem` / `server.key` and trusts `ca.pem` for its clients. The test suite
+builds the same PKI in memory with `crypto/x509` on every run (`tests/tls_test.go`).
+
+### TLS security notes
+
+* Every `fmt` verb (`%v`, `%+v`, `%#v`, `%s`, ...) and `log/slog`, with any handler, render a
+  `client.Config` with `GrpcClientKey` as `***REDACTED***` and the certificates by their size only.
+  An empty key renders empty.
+* `encoding/json` writes **every** field of a `client.Config`, `GrpcClientKey` included, **in clear
+  text**. Treat a serialized config as a secret (file mode `0600`, never commit it), or better keep
+  the key out of it and read it from a file or secret store at startup.
+* Keep `client.key` readable by the service user only, and never log the `tls.Config` or the PEMs
+  you read.
+
+### TLS troubleshooting
+
+A failed handshake is `codes.Unavailable`; the cause is in the error text:
+
+* **`x509: certificate signed by unknown authority`**: `GrpcCert` is not the CA that issued the
+  server certificate, the server does not send its intermediate certificates, or `GrpcCert` is
+  empty and the server's CA is not in the system trust store.
+* **`x509: cannot validate certificate for <ip> because it doesn't contain any IP SANs`** or
+  **`x509: certificate is valid for <names>, not <host>`**: the host you connect to is not in the
+  server certificate's SAN. Connect by a name in the SAN, add the SAN, or pass `grpc.WithAuthority`.
+* **`remote error: tls: certificate required`**, **`tls: unknown certificate authority`**, or a bare
+  `broken pipe` / `connection reset by peer` against a server that requires client certificates: no
+  client certificate was presented, or one the server's CA did not issue. The server log names the
+  reason. Set `GrpcClientCert` / `GrpcClientKey`.
+* **`GrpcCert holds no PEM certificate`** from `NewChannel`: `GrpcCert` holds something that is not
+  PEM, typically a file path. Pass the file's content instead.
 
 ## Repository structure
 
@@ -141,6 +291,7 @@ func main() {
 │       ├── sip                            <-----   ondewo-vtsi-api and published from here too
 │       └── t2s
 ├── auth                                   <----- HAND WRITTEN - the `authorization: Bearer` credential
+├── client                                 <----- HAND WRITTEN - client.NewChannel: plaintext, TLS and mutual TLS
 ├── tests                                  <----- HAND WRITTEN - the go test suite (see Testing below)
 ├── ondewo-vtsi-api                             <----- submodule @ https://github.com/ondewo/ondewo-vtsi-api
 ├── ondewo-proto-compiler                  <----- submodule @ https://github.com/ondewo/ondewo-proto-compiler
@@ -225,8 +376,19 @@ What it asserts about the **generated** code:
   generated `Unimplemented*Server` base type reports `codes.Unimplemented`;
 * all 25 compiled `.proto` files are registered in the global descriptor registry as proto3.
 
+What it asserts about the **hand-written** `client` package (`tests/tls_test.go`), with real
+handshakes against an in-process gRPC server on a loopback port and a PKI generated per run:
+plain TLS, mutual TLS, a server requiring a client certificate refusing a client without one or
+with one from an unrelated CA, a wrong CA and an empty `GrpcCert` (system roots) failing the
+handshake as `codes.Unavailable`, CRLF PEMs, IPv6 `[::1]` (skipped without an IPv6 loopback),
+`grpc.WithAuthority`, the bearer token over TLS and a message above gRPC's 4 MiB default; and,
+before gRPC is reached, half a client identity, a plaintext channel with an identity, a path in
+`GrpcCert` and a mismatched key refused with messages that carry no PEM, the insecure warning
+naming `host:port`, and every `fmt` / `slog` rendering of a `Config` redacting the key.
+`tests/release_notes_test.go` pins the `RELEASE.md` slice `make build_gh_release` publishes.
+
 **Coverage.** The threshold (`COVERAGE_THRESHOLD` in the `Makefile`, currently **100%**) is
-enforced over the hand-written packages only — `auth/` — because everything below `api/` is machine
+enforced over the hand-written packages only — `auth/` and `client/` — because everything below `api/` is machine
 output: gating on it would measure how much of protoc's output a test happens to walk. The stubs
 are still exercised for real, as listed above; `make test_coverage_generated` prints their figure
 (**15.8%** of generated statements at the time of writing) for the record. `make test_coverage`

@@ -103,7 +103,7 @@ GO_BUILD_PACKAGES=$$(go list -f '{{if .GoFiles}}{{.ImportPath}}{{end}}' ./... | 
 # not how much of what somebody wrote is tested. The stubs are still exercised for real - the
 # suite round-trips messages on the wire and calls every generated unary stub - it is only the
 # NUMBER they are kept out of. `make test_coverage_generated` prints their figure for the record.
-COVERAGE_PACKAGES=./auth/...
+COVERAGE_PACKAGES=./auth/...,./client/...
 COVERAGE_THRESHOLD=100.0
 COVERAGE_PROFILE=coverage.out
 
