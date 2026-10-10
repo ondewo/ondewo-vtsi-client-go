@@ -47,8 +47,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	"github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
-	"github.com/ondewo/ondewo-vtsi-client-go/v8/client"
+	"github.com/ondewo/ondewo-vtsi-client-go/v9/auth"
+	"github.com/ondewo/ondewo-vtsi-client-go/v9/client"
 )
 
 // region test PKI

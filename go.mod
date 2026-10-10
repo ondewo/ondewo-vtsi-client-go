@@ -1,4 +1,4 @@
-module github.com/ondewo/ondewo-vtsi-client-go/v8
+module github.com/ondewo/ondewo-vtsi-client-go/v9
 
 go 1.25.0
 
