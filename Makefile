@@ -447,13 +447,23 @@ push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
 # It packs `git archive HEAD` rather than the working tree ON PURPOSE - the proxy only ever sees
 # committed files - and then resolves the result under its real version through a file:// GOPROXY,
 # which is what makes this a rehearsal of `go get` instead of another local build.
+#
+# Every go command of the rehearsal runs on a THROWAWAY module cache (GOMODCACHE inside the mktemp
+# work dir), never the caller's. Go caches a downloaded module version once and for all, and the
+# rehearsed zip does not hash like the one proxy.golang.org builds from the tag, so with the shared
+# cache a later real `go get ${GO_MODULE_PATH}@${GO_RELEASE_TAG}` on the same machine reads the
+# rehearsed copy and fails with a checksum SECURITY ERROR against sum.golang.org. Go writes its
+# cache read-only, hence -modcacherw and the `chmod -R u+w` before the cleanup. The build cache
+# (GOCACHE) stays shared: it is keyed by content hashes, so nothing in it can stand in for a
+# published module version.
 publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exactly as the module proxy would and install it as an outside consumer (no credentials)
 	@git diff --quiet HEAD -- ${STUBS_DIR} go.mod go.sum || \
 		echo "$(YELLOW)[WARN]$(NC) ${STUBS_DIR}/, go.mod or go.sum differ from HEAD - the rehearsal packs HEAD, not your working tree"
 	@echo "$(BLUE)[INFO]$(NC) Packing ${GO_MODULE_PATH}@${GO_RELEASE_TAG} out of the committed tree ..."
 	@set -e; \
 	work=`mktemp -d`; \
-	trap 'rm -rf "$$work"' EXIT INT TERM; \
+	trap 'chmod -R u+w "$$work" 2>/dev/null; rm -rf "$$work"' EXIT INT TERM; \
+	export GOMODCACHE="$$work/modcache"; \
 	versions="$$work/proxy/${GO_MODULE_PATH}/@v"; \
 	mkdir -p "$$versions"; \
 	git archive --format=zip --prefix="${GO_MODULE_PATH}@${GO_RELEASE_TAG}/" HEAD > "$$versions/${GO_RELEASE_TAG}.zip"; \
@@ -468,7 +478,7 @@ publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exa
 	printf 'package main\n\nimport (\n\t_ "%s"\n\t_ "%s/auth"\n)\n\nfunc main() {}\n' \
 		"$$first_package" "${GO_MODULE_PATH}" > main.go; \
 	go mod edit -require="${GO_MODULE_PATH}@${GO_RELEASE_TAG}"; \
-	export GOFLAGS=-mod=mod; \
+	export GOFLAGS="-mod=mod -modcacherw"; \
 	export GONOSUMDB="${GO_MODULE_BASE_PATH}"; \
 	export GOPROXY="file://$$work/proxy,$${GOPROXY:-https://proxy.golang.org,direct}"; \
 	go mod tidy; \
