@@ -497,8 +497,13 @@ clone_devops_accounts: ## Clones devops-accounts repo
 	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
 
 run_release_with_devops: ## Gets Credentials from devops-repo and run release command with them
-	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH))
-	@make release $(info)
+# The token is loaded into the environment of the sub-make (anchored ^NAME=, so a comment line naming
+# the variable cannot break the value) and never passed as `make release NAME=<value>`: make's argv,
+# like every /proc/<pid>/cmdline, is world-readable.
+	@set -a \
+		&& eval "$$(grep -h -E '^(GITHUB_GH_TOKEN)=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
+		&& set +a \
+		&& $(MAKE) release
 
 spc: ## Checks if the Release Branch and the two Release Tags already exist
 	$(eval filtered_branches:= $(shell git branch --all | grep "release/${ONDEWO_VTSI_VERSION}"))
