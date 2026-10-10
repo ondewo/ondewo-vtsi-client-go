@@ -43,26 +43,26 @@ The client is a plain Go module, published to the public module proxy
 is no registry account, no token and no `go install` step in between. Add it to your module with:
 
 ```shell
-go get github.com/ondewo/ondewo-vtsi-client-go/v8@latest   ## or @v8.7.1 to pin an exact release
+go get github.com/ondewo/ondewo-vtsi-client-go/v9@latest   ## or @v9.0.0 to pin an exact release
 ```
 
 Then import the package of the service you need:
 
 ```go
-import vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
+import vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/vtsi"
 ```
 
-> **The `/v8` is part of the name, not a version selector.** From major version 2 on, a Go module
+> **The `/v9` is part of the name, not a version selector.** From major version 2 on, a Go module
 > path carries its major version as a `/vN` suffix (see
 > [the module reference](https://go.dev/ref/mod#major-version-suffixes)). Dropping it is not a
 > shorter spelling of the same module — `go get github.com/ondewo/ondewo-vtsi-client-go` names a
 > *different*, unpublished module and fails with `invalid version: module contains a go.mod file, so
 > major version must be compatible`. The suffix moves with the major version of the ONDEWO VTSI API,
-> so a `9.x` release will be imported as `/v9`, and a program can depend on both at once.
+> so a `10.x` release will be imported as `/v10`, and a program can depend on both at once.
 
-Releases are tagged twice on the same commit: with the ONDEWO release number (`8.7.1`), which is
+Releases are tagged twice on the same commit: with the ONDEWO release number (`9.0.0`), which is
 what the [GitHub releases page](https://github.com/ondewo/ondewo-vtsi-client-go/releases) lists and
-what the rest of the ONDEWO client fleet uses, and with the `v`-prefixed spelling (`v8.7.1`), which
+what the rest of the ONDEWO client fleet uses, and with the `v`-prefixed spelling (`v9.0.0`), which
 is the only tag shape Go tooling recognises as a module version. Use the `v`-prefixed one in
 `go get`, `go.mod` and anywhere else a version is written.
 
@@ -90,9 +90,9 @@ import (
     "os"
     "time"
 
-    vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
-    "github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
-    "github.com/ondewo/ondewo-vtsi-client-go/v8/client"
+    vtsipb "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/vtsi"
+    "github.com/ondewo/ondewo-vtsi-client-go/v9/auth"
+    "github.com/ondewo/ondewo-vtsi-client-go/v9/client"
 )
 
 func main() {
@@ -113,7 +113,7 @@ func main() {
     defer cancel()
 
     // Every service of the API has a generated New<Service>Client constructor. Browse
-    // api/ondewo/vtsi/ for this product's own three services, and
+    // api/ondewo/vtsi/ for this product's own six services, and
     // api/ondewo/{nlu,qa,s2t,sip,t2s}/ for the 20 vendored ones this client also exposes.
     stub := vtsipb.NewProjectsClient(conn)
 
@@ -166,8 +166,8 @@ import (
 
     "google.golang.org/grpc"
 
-    "github.com/ondewo/ondewo-vtsi-client-go/v8/auth"
-    "github.com/ondewo/ondewo-vtsi-client-go/v8/client"
+    "github.com/ondewo/ondewo-vtsi-client-go/v9/auth"
+    "github.com/ondewo/ondewo-vtsi-client-go/v9/client"
 )
 
 func mustRead(path string) string {
@@ -286,7 +286,7 @@ A failed handshake is `codes.Unavailable`; the cause is in the error text:
 │   └── ondewo                             <----- each package below holds *.pb.go (messages,
 │       ├── vtsi                           <-----   protoc-gen-go) and *_grpc.pb.go (service
 │       ├── nlu                            <-----   stubs, protoc-gen-go-grpc)
-│       ├── qa                             <----- vtsi holds this product's own three services;
+│       ├── qa                             <----- vtsi holds this product's own six services;
 │       ├── s2t                            <-----   nlu, qa, s2t, sip and t2s are vendored by
 │       ├── sip                            <-----   ondewo-vtsi-api and published from here too
 │       └── t2s
@@ -369,12 +369,12 @@ What it asserts about the **generated** code:
   proto descriptor of that service (from `protoc-gen-go`) does — the two plugins run separately and
   each half compiles on its own, so a disagreement is otherwise invisible;
 * every generated `New<Service>Client` binds to a connection, and every generated **unary** stub is
-  actually called over the wire and has to come back as `codes.Unimplemented` — 411 of them
-  across the 23 services of this product, which proves each one marshals its request and builds a
+  actually called over the wire and has to come back as `codes.Unimplemented` — 450 of them
+  across the 26 services of this product, which proves each one marshals its request and builds a
   method name the transport accepts;
 * an RPC answered by a fake server round-trips its response, and one the server leaves to the
   generated `Unimplemented*Server` base type reports `codes.Unimplemented`;
-* all 25 compiled `.proto` files are registered in the global descriptor registry as proto3.
+* all 28 compiled `.proto` files are registered in the global descriptor registry as proto3.
 
 What it asserts about the **hand-written** `client` package (`tests/tls_test.go`), with real
 handshakes against an in-process gRPC server on a loopback port and a PKI generated per run:
@@ -409,7 +409,7 @@ make ondewo_release                         ## credentials from the devops-accou
 ```
 
 `make release` builds, commits, creates the release branch, pushes **two** tags for the same commit
-— the ONDEWO release tag (`8.7.1`) and the `v`-prefixed tag Go tooling requires (`v8.7.1`) — creates
+— the ONDEWO release tag (`9.0.0`) and the `v`-prefixed tag Go tooling requires (`v9.0.0`) — creates
 the GitHub release from the matching `RELEASE.md` entry, and asks the public module proxy to fetch
 the new version.
 
@@ -420,7 +420,7 @@ of exactly what git has under that tag, so **the tag *is* the published artifact
 registry account to own, no namespace to claim and no publishing credential to rotate. The whole
 correctness question is therefore about the tag:
 
-* it must be spelled `v<semver>` — `8.7.1` alone is not a Go module version;
+* it must be spelled `v<semver>` — `9.0.0` alone is not a Go module version;
 * the module path in `go.mod` must end in `/vN` matching the tag's major version, and that path is
   baked by `protoc-gen-go` into every generated import, so it cannot be patched after generation —
   `make generate_ondewo_protos` passes it to the compiler image as the third positional argument;

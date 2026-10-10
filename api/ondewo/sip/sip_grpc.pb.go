@@ -34,17 +34,20 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Sip_SipStartSession_FullMethodName        = "/ondewo.sip.Sip/SipStartSession"
-	Sip_SipEndSession_FullMethodName          = "/ondewo.sip.Sip/SipEndSession"
-	Sip_SipStartCall_FullMethodName           = "/ondewo.sip.Sip/SipStartCall"
-	Sip_SipEndCall_FullMethodName             = "/ondewo.sip.Sip/SipEndCall"
-	Sip_SipTransferCall_FullMethodName        = "/ondewo.sip.Sip/SipTransferCall"
-	Sip_SipRegisterAccount_FullMethodName     = "/ondewo.sip.Sip/SipRegisterAccount"
-	Sip_SipGetSipStatus_FullMethodName        = "/ondewo.sip.Sip/SipGetSipStatus"
-	Sip_SipGetSipStatusHistory_FullMethodName = "/ondewo.sip.Sip/SipGetSipStatusHistory"
-	Sip_SipPlayWavFiles_FullMethodName        = "/ondewo.sip.Sip/SipPlayWavFiles"
-	Sip_SipMute_FullMethodName                = "/ondewo.sip.Sip/SipMute"
-	Sip_SipUnMute_FullMethodName              = "/ondewo.sip.Sip/SipUnMute"
+	Sip_SipStartSession_FullMethodName                   = "/ondewo.sip.Sip/SipStartSession"
+	Sip_SipEndSession_FullMethodName                     = "/ondewo.sip.Sip/SipEndSession"
+	Sip_SipStartCall_FullMethodName                      = "/ondewo.sip.Sip/SipStartCall"
+	Sip_SipEndCall_FullMethodName                        = "/ondewo.sip.Sip/SipEndCall"
+	Sip_SipTransferCall_FullMethodName                   = "/ondewo.sip.Sip/SipTransferCall"
+	Sip_SipRegisterAccount_FullMethodName                = "/ondewo.sip.Sip/SipRegisterAccount"
+	Sip_SipGetSipStatus_FullMethodName                   = "/ondewo.sip.Sip/SipGetSipStatus"
+	Sip_SipGetSipStatusHistory_FullMethodName            = "/ondewo.sip.Sip/SipGetSipStatusHistory"
+	Sip_SipPlayWavFiles_FullMethodName                   = "/ondewo.sip.Sip/SipPlayWavFiles"
+	Sip_SipMute_FullMethodName                           = "/ondewo.sip.Sip/SipMute"
+	Sip_SipUnMute_FullMethodName                         = "/ondewo.sip.Sip/SipUnMute"
+	Sip_SipReportAnsweringMachineDetected_FullMethodName = "/ondewo.sip.Sip/SipReportAnsweringMachineDetected"
+	Sip_SipSetCallMediaControl_FullMethodName            = "/ondewo.sip.Sip/SipSetCallMediaControl"
+	Sip_SipStreamCallAudio_FullMethodName                = "/ondewo.sip.Sip/SipStreamCallAudio"
 )
 
 // SipClient is the client API for Sip service.
@@ -62,6 +65,17 @@ type SipClient interface {
 	// <p>Ends a call in an active SIP session for an account registered at a SIP server</p>
 	SipEndCall(ctx context.Context, in *SipEndCallRequest, opts ...grpc.CallOption) (*SipStatus, error)
 	// <p>Transfers a call in an active SIP session for an account registered at a SIP server to another SIP account or phone number specified by <code>transfer_id</code></p>
+	// <p>Call scoping: when the gRPC metadatum <code>x-ondewo-expected-call-id</code> is present it must equal
+	// <code>SipStatus.call_id</code> of the ongoing call, otherwise the request is refused with
+	// <code>exception_name=CallScopeMismatch</code> and nothing is assigned to the status. When it is absent the request is
+	// accepted for backward compatibility (unless the server requires call scoping).</p>
+	// <p>With <code>outcome_timeout_ms = 0</code> the call is transferred as before (REFER, then an immediate hangup).
+	// With <code>outcome_timeout_ms &gt; 0</code> see <code>SipTransferCallRequest.outcome_timeout_ms</code>.</p>
+	// <p>Refused while invited participants are present (see
+	// <code>SipSetCallMediaControlRequest.participants_present</code>): a REFER into a conference bridge transfers every
+	// party in it, the invited participant included. The refusal is RETURNED as <code>TRANSFER_CALL_FAILED</code> with
+	// <code>exception_name=ParticipantsPresent</code> and <code>description = reason=participants-present</code>; nothing
+	// is sent and the call is kept.</p>
 	SipTransferCall(ctx context.Context, in *SipTransferCallRequest, opts ...grpc.CallOption) (*SipStatus, error)
 	// <p>Registers s SIP account at a SIP server</p>
 	SipRegisterAccount(ctx context.Context, in *SipRegisterAccountRequest, opts ...grpc.CallOption) (*SipStatus, error)
@@ -70,11 +84,47 @@ type SipClient interface {
 	// <p>Gets the history of SIP status</p>
 	SipGetSipStatusHistory(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SipStatusHistoryResponse, error)
 	// <p>Plays wav files during an ongoing call of an active SIP session</p>
+	// <p>Call scoping as for <code>SipTransferCall</code>: a present <code>x-ondewo-expected-call-id</code> metadatum must
+	// match <code>SipStatus.call_id</code>.</p>
 	SipPlayWavFiles(ctx context.Context, in *SipPlayWavFilesRequest, opts ...grpc.CallOption) (*SipStatus, error)
 	// <p>Mutes the microphone in an ongoing call of an active SIP session</p>
+	// <p>Call scoping as for <code>SipTransferCall</code>. Sent by the in-container speech-to-speech pipeline it mutes only
+	// the bot's own mixer slot; sent by a remote client it sets the operator mute of
+	// <code>SipSetCallMediaControl</code>, which the pipeline cannot undo.</p>
 	SipMute(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SipStatus, error)
 	// <p>Un-mutes the microphone in an ongoing call of an active SIP session</p>
+	// <p>Call scoping and the split between the pipeline's own mute and the operator mute as for <code>SipMute</code>.</p>
 	SipUnMute(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SipStatus, error)
+	// <p>Reports that answering machine detection reached a verdict on the ongoing outgoing call. Sets the status
+	// <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> carrying <code>amd_result</code>; the call stays up.</p>
+	// <p>Called by the speech-to-speech pipeline (ONDEWO-CSI) inside the same container, i.e. over loopback only.
+	// Refused, and the current status left untouched, when no outgoing call is connected: the returned
+	// <code>SipStatus</code> then carries the refusal in <code>exception_name</code> and <code>description</code></p>
+	SipReportAnsweringMachineDetected(ctx context.Context, in *SipReportAnsweringMachineDetectedRequest, opts ...grpc.CallOption) (*SipStatus, error)
+	// <p>Call-scoped operator media control of the ongoing call: mute the bot and/or pause its listening.</p>
+	// <p>Metadata REQUIRED: <code>x-ondewo-expected-call-id</code> (must equal <code>SipStatus.call_id</code> of the ongoing
+	// call) and <code>x-ondewo-sip-call-control-token</code> (the per-container call-control token).</p>
+	// <p>Every request sets a desired level per owner and never toggles; a repeat leaves the level unchanged. The bot is
+	// muted while ANY owner holds a mute, and its listening is paused while ANY owner holds a pause.</p>
+	// <p>Returns the live status with <code>call_id</code>, <code>bot_muted</code>, <code>listening_paused</code> and
+	// <code>call_audio_streams</code> filled. Refusals are RETURNED in <code>exception_name</code> /
+	// <code>description</code> (<code>CallScopeMismatch</code>, <code>CallControlUnauthenticated</code>,
+	// <code>NoOngoingCall</code>, <code>AmdInProgress</code>, <code>CsiMediaControlFailed</code>) and never assigned to
+	// the shared status. When the pipeline refuses or fails, a requested pause is rolled back and a requested mute is
+	// kept (the safe direction); the returned fields carry the actual level.</p>
+	SipSetCallMediaControl(ctx context.Context, in *SipSetCallMediaControlRequest, opts ...grpc.CallOption) (*SipStatus, error)
+	// <p>Bidirectional live audio of the ongoing call.</p>
+	// <p>The first request MUST be <code>config</code> and must arrive within 2 seconds. Metadata as for
+	// <code>SipSetCallMediaControl</code>.</p>
+	// <p>LISTEN receives the caller (plus any conference participants) mixed with the bot. TALK sends the agent's audio to
+	// the caller; it REQUIRES <code>take_over</code>, i.e. the bot is muted and does not listen while the stream is
+	// connected, and in TALK the agent hears the caller only. Audio is LINEAR16 little-endian mono in 20 ms frames.</p>
+	// <p>gRPC status codes: <code>UNAUTHENTICATED</code> (token), <code>FAILED_PRECONDITION</code> (call id mismatch, no
+	// connected call, answering machine detection in progress, bot still speaking at TALK start),
+	// <code>INVALID_ARGUMENT</code> (missing or invalid <code>config</code>, wrong frame size),
+	// <code>RESOURCE_EXHAUSTED</code> (stream cap reached, a second TALK). A normal end sends one <code>ended</code>
+	// message and then OK.</p>
+	SipStreamCallAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[SipCallAudioRequest, SipCallAudioResponse], error)
 }
 
 type sipClient struct {
@@ -195,6 +245,39 @@ func (c *sipClient) SipUnMute(ctx context.Context, in *emptypb.Empty, opts ...gr
 	return out, nil
 }
 
+func (c *sipClient) SipReportAnsweringMachineDetected(ctx context.Context, in *SipReportAnsweringMachineDetectedRequest, opts ...grpc.CallOption) (*SipStatus, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SipStatus)
+	err := c.cc.Invoke(ctx, Sip_SipReportAnsweringMachineDetected_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sipClient) SipSetCallMediaControl(ctx context.Context, in *SipSetCallMediaControlRequest, opts ...grpc.CallOption) (*SipStatus, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SipStatus)
+	err := c.cc.Invoke(ctx, Sip_SipSetCallMediaControl_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sipClient) SipStreamCallAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[SipCallAudioRequest, SipCallAudioResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Sip_ServiceDesc.Streams[0], Sip_SipStreamCallAudio_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[SipCallAudioRequest, SipCallAudioResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Sip_SipStreamCallAudioClient = grpc.BidiStreamingClient[SipCallAudioRequest, SipCallAudioResponse]
+
 // SipServer is the server API for Sip service.
 // All implementations must embed UnimplementedSipServer
 // for forward compatibility.
@@ -210,6 +293,17 @@ type SipServer interface {
 	// <p>Ends a call in an active SIP session for an account registered at a SIP server</p>
 	SipEndCall(context.Context, *SipEndCallRequest) (*SipStatus, error)
 	// <p>Transfers a call in an active SIP session for an account registered at a SIP server to another SIP account or phone number specified by <code>transfer_id</code></p>
+	// <p>Call scoping: when the gRPC metadatum <code>x-ondewo-expected-call-id</code> is present it must equal
+	// <code>SipStatus.call_id</code> of the ongoing call, otherwise the request is refused with
+	// <code>exception_name=CallScopeMismatch</code> and nothing is assigned to the status. When it is absent the request is
+	// accepted for backward compatibility (unless the server requires call scoping).</p>
+	// <p>With <code>outcome_timeout_ms = 0</code> the call is transferred as before (REFER, then an immediate hangup).
+	// With <code>outcome_timeout_ms &gt; 0</code> see <code>SipTransferCallRequest.outcome_timeout_ms</code>.</p>
+	// <p>Refused while invited participants are present (see
+	// <code>SipSetCallMediaControlRequest.participants_present</code>): a REFER into a conference bridge transfers every
+	// party in it, the invited participant included. The refusal is RETURNED as <code>TRANSFER_CALL_FAILED</code> with
+	// <code>exception_name=ParticipantsPresent</code> and <code>description = reason=participants-present</code>; nothing
+	// is sent and the call is kept.</p>
 	SipTransferCall(context.Context, *SipTransferCallRequest) (*SipStatus, error)
 	// <p>Registers s SIP account at a SIP server</p>
 	SipRegisterAccount(context.Context, *SipRegisterAccountRequest) (*SipStatus, error)
@@ -218,11 +312,47 @@ type SipServer interface {
 	// <p>Gets the history of SIP status</p>
 	SipGetSipStatusHistory(context.Context, *emptypb.Empty) (*SipStatusHistoryResponse, error)
 	// <p>Plays wav files during an ongoing call of an active SIP session</p>
+	// <p>Call scoping as for <code>SipTransferCall</code>: a present <code>x-ondewo-expected-call-id</code> metadatum must
+	// match <code>SipStatus.call_id</code>.</p>
 	SipPlayWavFiles(context.Context, *SipPlayWavFilesRequest) (*SipStatus, error)
 	// <p>Mutes the microphone in an ongoing call of an active SIP session</p>
+	// <p>Call scoping as for <code>SipTransferCall</code>. Sent by the in-container speech-to-speech pipeline it mutes only
+	// the bot's own mixer slot; sent by a remote client it sets the operator mute of
+	// <code>SipSetCallMediaControl</code>, which the pipeline cannot undo.</p>
 	SipMute(context.Context, *emptypb.Empty) (*SipStatus, error)
 	// <p>Un-mutes the microphone in an ongoing call of an active SIP session</p>
+	// <p>Call scoping and the split between the pipeline's own mute and the operator mute as for <code>SipMute</code>.</p>
 	SipUnMute(context.Context, *emptypb.Empty) (*SipStatus, error)
+	// <p>Reports that answering machine detection reached a verdict on the ongoing outgoing call. Sets the status
+	// <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> carrying <code>amd_result</code>; the call stays up.</p>
+	// <p>Called by the speech-to-speech pipeline (ONDEWO-CSI) inside the same container, i.e. over loopback only.
+	// Refused, and the current status left untouched, when no outgoing call is connected: the returned
+	// <code>SipStatus</code> then carries the refusal in <code>exception_name</code> and <code>description</code></p>
+	SipReportAnsweringMachineDetected(context.Context, *SipReportAnsweringMachineDetectedRequest) (*SipStatus, error)
+	// <p>Call-scoped operator media control of the ongoing call: mute the bot and/or pause its listening.</p>
+	// <p>Metadata REQUIRED: <code>x-ondewo-expected-call-id</code> (must equal <code>SipStatus.call_id</code> of the ongoing
+	// call) and <code>x-ondewo-sip-call-control-token</code> (the per-container call-control token).</p>
+	// <p>Every request sets a desired level per owner and never toggles; a repeat leaves the level unchanged. The bot is
+	// muted while ANY owner holds a mute, and its listening is paused while ANY owner holds a pause.</p>
+	// <p>Returns the live status with <code>call_id</code>, <code>bot_muted</code>, <code>listening_paused</code> and
+	// <code>call_audio_streams</code> filled. Refusals are RETURNED in <code>exception_name</code> /
+	// <code>description</code> (<code>CallScopeMismatch</code>, <code>CallControlUnauthenticated</code>,
+	// <code>NoOngoingCall</code>, <code>AmdInProgress</code>, <code>CsiMediaControlFailed</code>) and never assigned to
+	// the shared status. When the pipeline refuses or fails, a requested pause is rolled back and a requested mute is
+	// kept (the safe direction); the returned fields carry the actual level.</p>
+	SipSetCallMediaControl(context.Context, *SipSetCallMediaControlRequest) (*SipStatus, error)
+	// <p>Bidirectional live audio of the ongoing call.</p>
+	// <p>The first request MUST be <code>config</code> and must arrive within 2 seconds. Metadata as for
+	// <code>SipSetCallMediaControl</code>.</p>
+	// <p>LISTEN receives the caller (plus any conference participants) mixed with the bot. TALK sends the agent's audio to
+	// the caller; it REQUIRES <code>take_over</code>, i.e. the bot is muted and does not listen while the stream is
+	// connected, and in TALK the agent hears the caller only. Audio is LINEAR16 little-endian mono in 20 ms frames.</p>
+	// <p>gRPC status codes: <code>UNAUTHENTICATED</code> (token), <code>FAILED_PRECONDITION</code> (call id mismatch, no
+	// connected call, answering machine detection in progress, bot still speaking at TALK start),
+	// <code>INVALID_ARGUMENT</code> (missing or invalid <code>config</code>, wrong frame size),
+	// <code>RESOURCE_EXHAUSTED</code> (stream cap reached, a second TALK). A normal end sends one <code>ended</code>
+	// message and then OK.</p>
+	SipStreamCallAudio(grpc.BidiStreamingServer[SipCallAudioRequest, SipCallAudioResponse]) error
 	mustEmbedUnimplementedSipServer()
 }
 
@@ -265,6 +395,15 @@ func (UnimplementedSipServer) SipMute(context.Context, *emptypb.Empty) (*SipStat
 }
 func (UnimplementedSipServer) SipUnMute(context.Context, *emptypb.Empty) (*SipStatus, error) {
 	return nil, status.Error(codes.Unimplemented, "method SipUnMute not implemented")
+}
+func (UnimplementedSipServer) SipReportAnsweringMachineDetected(context.Context, *SipReportAnsweringMachineDetectedRequest) (*SipStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "method SipReportAnsweringMachineDetected not implemented")
+}
+func (UnimplementedSipServer) SipSetCallMediaControl(context.Context, *SipSetCallMediaControlRequest) (*SipStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "method SipSetCallMediaControl not implemented")
+}
+func (UnimplementedSipServer) SipStreamCallAudio(grpc.BidiStreamingServer[SipCallAudioRequest, SipCallAudioResponse]) error {
+	return status.Error(codes.Unimplemented, "method SipStreamCallAudio not implemented")
 }
 func (UnimplementedSipServer) mustEmbedUnimplementedSipServer() {}
 func (UnimplementedSipServer) testEmbeddedByValue()             {}
@@ -485,6 +624,49 @@ func _Sip_SipUnMute_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Sip_SipReportAnsweringMachineDetected_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SipReportAnsweringMachineDetectedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SipServer).SipReportAnsweringMachineDetected(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Sip_SipReportAnsweringMachineDetected_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SipServer).SipReportAnsweringMachineDetected(ctx, req.(*SipReportAnsweringMachineDetectedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Sip_SipSetCallMediaControl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SipSetCallMediaControlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SipServer).SipSetCallMediaControl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Sip_SipSetCallMediaControl_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SipServer).SipSetCallMediaControl(ctx, req.(*SipSetCallMediaControlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Sip_SipStreamCallAudio_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SipServer).SipStreamCallAudio(&grpc.GenericServerStream[SipCallAudioRequest, SipCallAudioResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Sip_SipStreamCallAudioServer = grpc.BidiStreamingServer[SipCallAudioRequest, SipCallAudioResponse]
+
 // Sip_ServiceDesc is the grpc.ServiceDesc for Sip service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -536,7 +718,22 @@ var Sip_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "SipUnMute",
 			Handler:    _Sip_SipUnMute_Handler,
 		},
+		{
+			MethodName: "SipReportAnsweringMachineDetected",
+			Handler:    _Sip_SipReportAnsweringMachineDetected_Handler,
+		},
+		{
+			MethodName: "SipSetCallMediaControl",
+			Handler:    _Sip_SipSetCallMediaControl_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "SipStreamCallAudio",
+			Handler:       _Sip_SipStreamCallAudio_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "ondewo/sip/sip.proto",
 }

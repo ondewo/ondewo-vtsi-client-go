@@ -33,34 +33,44 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Calls_StartCaller_FullMethodName           = "/ondewo.vtsi.Calls/StartCaller"
-	Calls_StartCallers_FullMethodName          = "/ondewo.vtsi.Calls/StartCallers"
-	Calls_ListCallers_FullMethodName           = "/ondewo.vtsi.Calls/ListCallers"
-	Calls_GetCaller_FullMethodName             = "/ondewo.vtsi.Calls/GetCaller"
-	Calls_DeleteCaller_FullMethodName          = "/ondewo.vtsi.Calls/DeleteCaller"
-	Calls_DeleteCallers_FullMethodName         = "/ondewo.vtsi.Calls/DeleteCallers"
-	Calls_StopCaller_FullMethodName            = "/ondewo.vtsi.Calls/StopCaller"
-	Calls_StopCallers_FullMethodName           = "/ondewo.vtsi.Calls/StopCallers"
-	Calls_StartListener_FullMethodName         = "/ondewo.vtsi.Calls/StartListener"
-	Calls_StartListeners_FullMethodName        = "/ondewo.vtsi.Calls/StartListeners"
-	Calls_StopListener_FullMethodName          = "/ondewo.vtsi.Calls/StopListener"
-	Calls_StopListeners_FullMethodName         = "/ondewo.vtsi.Calls/StopListeners"
-	Calls_ListListeners_FullMethodName         = "/ondewo.vtsi.Calls/ListListeners"
-	Calls_GetListener_FullMethodName           = "/ondewo.vtsi.Calls/GetListener"
-	Calls_DeleteListener_FullMethodName        = "/ondewo.vtsi.Calls/DeleteListener"
-	Calls_DeleteListeners_FullMethodName       = "/ondewo.vtsi.Calls/DeleteListeners"
-	Calls_StartScheduledCaller_FullMethodName  = "/ondewo.vtsi.Calls/StartScheduledCaller"
-	Calls_StartScheduledCallers_FullMethodName = "/ondewo.vtsi.Calls/StartScheduledCallers"
-	Calls_GetScheduledCaller_FullMethodName    = "/ondewo.vtsi.Calls/GetScheduledCaller"
-	Calls_ListScheduledCallers_FullMethodName  = "/ondewo.vtsi.Calls/ListScheduledCallers"
-	Calls_CancelScheduledCaller_FullMethodName = "/ondewo.vtsi.Calls/CancelScheduledCaller"
-	Calls_StopCall_FullMethodName              = "/ondewo.vtsi.Calls/StopCall"
-	Calls_StopCalls_FullMethodName             = "/ondewo.vtsi.Calls/StopCalls"
-	Calls_StopAllCalls_FullMethodName          = "/ondewo.vtsi.Calls/StopAllCalls"
-	Calls_TransferCall_FullMethodName          = "/ondewo.vtsi.Calls/TransferCall"
-	Calls_TransferCalls_FullMethodName         = "/ondewo.vtsi.Calls/TransferCalls"
-	Calls_GetCall_FullMethodName               = "/ondewo.vtsi.Calls/GetCall"
-	Calls_ListCalls_FullMethodName             = "/ondewo.vtsi.Calls/ListCalls"
+	Calls_StartCaller_FullMethodName                   = "/ondewo.vtsi.Calls/StartCaller"
+	Calls_StartCallers_FullMethodName                  = "/ondewo.vtsi.Calls/StartCallers"
+	Calls_ListCallers_FullMethodName                   = "/ondewo.vtsi.Calls/ListCallers"
+	Calls_GetCaller_FullMethodName                     = "/ondewo.vtsi.Calls/GetCaller"
+	Calls_DeleteCaller_FullMethodName                  = "/ondewo.vtsi.Calls/DeleteCaller"
+	Calls_DeleteCallers_FullMethodName                 = "/ondewo.vtsi.Calls/DeleteCallers"
+	Calls_StopCaller_FullMethodName                    = "/ondewo.vtsi.Calls/StopCaller"
+	Calls_StopCallers_FullMethodName                   = "/ondewo.vtsi.Calls/StopCallers"
+	Calls_StartListener_FullMethodName                 = "/ondewo.vtsi.Calls/StartListener"
+	Calls_StartListeners_FullMethodName                = "/ondewo.vtsi.Calls/StartListeners"
+	Calls_StopListener_FullMethodName                  = "/ondewo.vtsi.Calls/StopListener"
+	Calls_StopListeners_FullMethodName                 = "/ondewo.vtsi.Calls/StopListeners"
+	Calls_ListListeners_FullMethodName                 = "/ondewo.vtsi.Calls/ListListeners"
+	Calls_GetListener_FullMethodName                   = "/ondewo.vtsi.Calls/GetListener"
+	Calls_DeleteListener_FullMethodName                = "/ondewo.vtsi.Calls/DeleteListener"
+	Calls_DeleteListeners_FullMethodName               = "/ondewo.vtsi.Calls/DeleteListeners"
+	Calls_StartScheduledCaller_FullMethodName          = "/ondewo.vtsi.Calls/StartScheduledCaller"
+	Calls_StartScheduledCallers_FullMethodName         = "/ondewo.vtsi.Calls/StartScheduledCallers"
+	Calls_AddCallersToCampaign_FullMethodName          = "/ondewo.vtsi.Calls/AddCallersToCampaign"
+	Calls_AddScheduledCallersToCampaign_FullMethodName = "/ondewo.vtsi.Calls/AddScheduledCallersToCampaign"
+	Calls_GetScheduledCaller_FullMethodName            = "/ondewo.vtsi.Calls/GetScheduledCaller"
+	Calls_ListScheduledCallers_FullMethodName          = "/ondewo.vtsi.Calls/ListScheduledCallers"
+	Calls_CancelScheduledCaller_FullMethodName         = "/ondewo.vtsi.Calls/CancelScheduledCaller"
+	Calls_StopCall_FullMethodName                      = "/ondewo.vtsi.Calls/StopCall"
+	Calls_StopCalls_FullMethodName                     = "/ondewo.vtsi.Calls/StopCalls"
+	Calls_StopAllCalls_FullMethodName                  = "/ondewo.vtsi.Calls/StopAllCalls"
+	Calls_TransferCall_FullMethodName                  = "/ondewo.vtsi.Calls/TransferCall"
+	Calls_TransferCalls_FullMethodName                 = "/ondewo.vtsi.Calls/TransferCalls"
+	Calls_GetCall_FullMethodName                       = "/ondewo.vtsi.Calls/GetCall"
+	Calls_ListCalls_FullMethodName                     = "/ondewo.vtsi.Calls/ListCalls"
+	Calls_StreamCallerStatus_FullMethodName            = "/ondewo.vtsi.Calls/StreamCallerStatus"
+	Calls_StreamListenerStatus_FullMethodName          = "/ondewo.vtsi.Calls/StreamListenerStatus"
+	Calls_StreamScheduledCallerStatus_FullMethodName   = "/ondewo.vtsi.Calls/StreamScheduledCallerStatus"
+	Calls_InviteToCall_FullMethodName                  = "/ondewo.vtsi.Calls/InviteToCall"
+	Calls_RemoveCallParticipant_FullMethodName         = "/ondewo.vtsi.Calls/RemoveCallParticipant"
+	Calls_SetCallMediaControl_FullMethodName           = "/ondewo.vtsi.Calls/SetCallMediaControl"
+	Calls_StreamCallAudio_FullMethodName               = "/ondewo.vtsi.Calls/StreamCallAudio"
+	Calls_ListenCallAudio_FullMethodName               = "/ondewo.vtsi.Calls/ListenCallAudio"
 )
 
 // CallsClient is the client API for Calls service.
@@ -105,11 +115,26 @@ type CallsClient interface {
 	StartScheduledCaller(ctx context.Context, in *StartScheduledCallerRequest, opts ...grpc.CallOption) (*StartScheduledCallerResponse, error)
 	// <p>Start multiple ondewo-sip caller instances, each at its own scheduled time</p>
 	StartScheduledCallers(ctx context.Context, in *StartScheduledCallersRequest, opts ...grpc.CallOption) (*StartScheduledCallersResponse, error)
+	// <p>Adds callers to a campaign instead of starting them. The campaign then starts them, at most
+	// <code>max_parallel_calls</code> at a time. The request is atomic: either the campaign (when new), every
+	// campaign call is stored, or nothing is. Errors are gRPC status codes (see <code>CampaignAssignment</code>).</p>
+	// <p>Rolling updates: a VTSI server that predates this RPC answers <code>UNIMPLEMENTED</code> and starts
+	// nothing. Do not fall back to <code>StartCallers</code> on <code>UNIMPLEMENTED</code>; retry later.</p>
+	AddCallersToCampaign(ctx context.Context, in *AddCallersToCampaignRequest, opts ...grpc.CallOption) (*AddCallersToCampaignResponse, error)
+	// <p>Adds scheduled callers to a campaign: each fires at or after its scheduled time AND when the campaign has a
+	// free slot, and follows the campaign&apos;s retries, stop and hard stop. Same atomicity, errors and rolling-update
+	// behaviour as <code>AddCallersToCampaign</code>.</p>
+	AddScheduledCallersToCampaign(ctx context.Context, in *AddScheduledCallersToCampaignRequest, opts ...grpc.CallOption) (*AddScheduledCallersToCampaignResponse, error)
 	// <p>Gets a scheduled caller</p>
 	GetScheduledCaller(ctx context.Context, in *GetScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error)
 	// <p>Lists the scheduled callers of a vtsi-project</p>
 	ListScheduledCallers(ctx context.Context, in *ListScheduledCallersRequest, opts ...grpc.CallOption) (*ListScheduledCallersResponse, error)
 	// <p>Cancels a scheduled caller that has not fired yet</p>
+	// <p>A scheduled caller of a campaign can be cancelled while its campaign call is
+	// <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> or <code>CAMPAIGN_CALL_STATE_RETRY_PENDING</code>;
+	// the campaign call then becomes <code>CAMPAIGN_CALL_STATE_CANCELLED</code>. While an attempt is
+	// <code>DISPATCHING</code> or <code>IN_PROGRESS</code> the request is refused:
+	// <code>cancelled = false</code> and the scheduled caller keeps its status.</p>
 	CancelScheduledCaller(ctx context.Context, in *CancelScheduledCallerRequest, opts ...grpc.CallOption) (*CancelScheduledCallerResponse, error)
 	// <p>Stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.</p>
 	StopCall(ctx context.Context, in *StopCallRequest, opts ...grpc.CallOption) (*StopCallResponse, error)
@@ -119,14 +144,111 @@ type CallsClient interface {
 	// <p>Stop/kill all ondewo-sip listener or caller instance for a specific nlu-project.</p>
 	// <p>Stops all Listener and Caller calls</p>
 	StopAllCalls(ctx context.Context, in *StopAllCallsRequest, opts ...grpc.CallOption) (*StopCallsResponse, error)
-	// <p>Transfer a call from a listener to another</p>
+	// <p>Transfer a call to a phone number, a softphone account, another listener or the listener queue.</p>
+	// <p>The target is either the typed <code>target</code> or the legacy raw <code>transfer_id</code>, never both. It is
+	// resolved and validated before anything is sent; an invalid target is answered with
+	// <code>TRANSFER_OUTCOME_TARGET_INVALID</code> and an <code>error_reason</code>, and the call is untouched.</p>
+	// <p><code>TRANSFER_MODE_BLIND</code> (default) sends a SIP REFER and reports its outcome: a refused REFER keeps the
+	// call with the bot. <code>TRANSFER_MODE_WARM</code> rings the target into the call first, and the bot leaves only
+	// after the target joined (Asterisk 22 only).</p>
+	// <p>Telephony outcomes (busy, no answer, REFER rejected) are successful RPCs carrying an <code>outcome</code>.
+	// Refusals before any side effect also return a gRPC status with <code>reason=&lt;token&gt;</code> in its details:
+	// <code>INVALID_ARGUMENT</code> (both targets set, malformed target), <code>NOT_FOUND</code> (call or target not
+	// found, including another project&apos;s), <code>FAILED_PRECONDITION</code> (<code>call-not-connected</code>,
+	// <code>amd-in-progress</code>, <code>call-not-yet-identified</code>, <code>participants-present</code>,
+	// <code>asterisk-version-unsupported</code>, <code>sip-image-too-old</code>), <code>ABORTED</code>
+	// (<code>transfer-in-progress</code>), <code>UNAVAILABLE</code> (<code>sip-unreachable</code>).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCall(ctx context.Context, in *TransferCallRequest, opts ...grpc.CallOption) (*TransferCallResponse, error)
-	// <p>Transfer a call from a listener to another</p>
+	// <p>Transfer several calls, each like <code>TransferCall</code>.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCalls(ctx context.Context, in *TransferCallsRequest, opts ...grpc.CallOption) (*TransferCallsResponse, error)
 	// <p>Get call log for single call instance</p>
 	GetCall(ctx context.Context, in *GetCallRequest, opts ...grpc.CallOption) (*Call, error)
 	// <p>Get call log for all call instances</p>
 	ListCalls(ctx context.Context, in *ListCallsRequest, opts ...grpc.CallOption) (*ListCallsResponse, error)
+	// <p>Streams the status of the callers of a project: a snapshot first
+	// (<code>snapshot = true</code>), then every caller whose call or SIP status changed, plus
+	// keep-alive messages. Ends when the client disconnects or at the server-side maximum stream
+	// duration.</p>
+	// <p>Errors: <code>NOT_FOUND</code> for an unknown project; <code>RESOURCE_EXHAUSTED</code> when
+	// the server has no free stream slot.</p>
+	StreamCallerStatus(ctx context.Context, in *StreamCallerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error)
+	// <p>Streams the status of the listeners of a project, like <code>StreamCallerStatus</code>.</p>
+	StreamListenerStatus(ctx context.Context, in *StreamListenerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error)
+	// <p>Streams the status of the scheduled callers of a project, like
+	// <code>StreamCallerStatus</code>. The snapshot holds every PENDING and FIRING scheduled caller
+	// and those that finished in the last hour.</p>
+	StreamScheduledCallerStatus(ctx context.Context, in *StreamScheduledCallerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error)
+	// <p>Invite a registered softphone account of the project into a connected call. Returns the participant in
+	// <code>PARTICIPANT_STATE_RINGING</code>; follow <code>Call.participants</code> or the events
+	// <code>VTSI_EVENT_CALL_PARTICIPANT_*</code> for JOINED, FAILED and LEFT.</p>
+	// <p><code>PARTICIPANT_MODE_CONFERENCE</code> (default) joins the softphone into the call: Asterisk mixes the caller,
+	// the bot and the participant, and by default the bot keeps talking and listening
+	// (<code>BOT_POLICY_ON_JOIN_KEEP</code>). <code>PARTICIPANT_MODE_MONITOR</code> lets the participant listen only.
+	// When the bot&apos;s leg ends, every participant is hung up; the caller is handed over only by a WARM
+	// <code>TransferCall</code>. Idempotent per <code>request_id</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code>, <code>NOT_FOUND</code> (call or softphone account, including another
+	// project&apos;s), <code>FAILED_PRECONDITION</code> (<code>call-not-connected</code>, <code>amd-in-progress</code>,
+	// <code>softphone-not-registered</code>, <code>softphone-disabled</code>, <code>softphone-unrouted</code>,
+	// <code>call-not-yet-identified</code>, <code>bot-channel-ambiguous</code>, <code>asterisk-not-local</code>,
+	// <code>asterisk-version-unsupported</code>), <code>ALREADY_EXISTS</code> (the softphone is already ringing or joined),
+	// <code>ABORTED</code> (<code>transfer-in-progress</code>), <code>RESOURCE_EXHAUSTED</code> (participant cap),
+	// <code>UNAVAILABLE</code> (<code>asterisk-unreachable</code>).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	InviteToCall(ctx context.Context, in *InviteToCallRequest, opts ...grpc.CallOption) (*InviteToCallResponse, error)
+	// <p>Hang up a participant of a call (ringing or joined). The participant ends as
+	// <code>PARTICIPANT_STATE_LEFT</code> with <code>end_reason = REMOVED</code>; the call and the bot are not
+	// affected.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher. Audited like <code>InviteToCall</code>.</p>
+	RemoveCallParticipant(ctx context.Context, in *RemoveCallParticipantRequest, opts ...grpc.CallOption) (*RemoveCallParticipantResponse, error)
+	// <p>Mute the bot of a connected call and/or stop it listening to the caller, or undo either. Every request sets a
+	// desired level and never toggles: a repeat answers <code>changed = false</code>. The bot stays muted while
+	// anything else (a TALK take-over of <code>StreamCallAudio</code>, a participant bot policy) also holds it muted.</p>
+	// <p>Errors as for <code>InviteToCall</code>, plus <code>FAILED_PRECONDITION</code> <code>reason=sip-image-too-old</code>,
+	// <code>ABORTED</code> <code>reason=call-control-busy</code> (another call-control request for the call is running)
+	// and <code>UNAVAILABLE</code> <code>reason=sip-unreachable</code> or <code>reason=csi-media-control-failed</code> (the
+	// bot did not apply the level: a requested pause is rolled back, a requested mute is kept).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	SetCallMediaControl(ctx context.Context, in *SetCallMediaControlRequest, opts ...grpc.CallOption) (*SetCallMediaControlResponse, error)
+	// <p>Live audio of a connected call, both ways. The first request MUST be <code>config</code> (within 2 seconds).
+	// LISTEN receives the caller mixed with the bot. TALK sends the agent&apos;s audio to the caller and REQUIRES
+	// <code>take_over</code>: the bot is muted and does not listen while the stream is connected, and resumes when it
+	// ends; in TALK the agent hears the caller only. Audio is LINEAR16 little-endian mono in 20 ms frames.</p>
+	// <p>Bidirectional streaming: available to native gRPC clients (python, nodejs) only. Browser (grpc-web) clients
+	// use <code>ListenCallAudio</code>, plus a softphone (<code>InviteToCall</code>) to talk.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> (no or invalid <code>config</code>, TALK without
+	// <code>take_over</code>, wrong frame size), <code>NOT_FOUND</code>, <code>FAILED_PRECONDITION</code>
+	// (<code>call-not-connected</code>, <code>amd-in-progress</code>, <code>call-not-yet-identified</code>,
+	// <code>bot-still-speaking</code>, <code>sip-image-too-old</code>), <code>RESOURCE_EXHAUSTED</code> (stream cap, a
+	// second TALK). A normal end sends one <code>ended</code> message, then OK. A second <code>config</code> or audio
+	// sent in LISTEN mode ends the stream with <code>INVALID_ARGUMENT</code>. A client half-close ends the stream
+	// (<code>CALL_AUDIO_END_REASON_CLIENT_CLOSED</code>), so a listening client keeps its request stream open.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	StreamCallAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamCallAudioRequest, StreamCallAudioResponse], error)
+	// <p>Listen-only live audio of a connected call, like <code>StreamCallAudio</code> in LISTEN mode, as a server
+	// stream that grpc-web (browser) clients can consume. <code>config.mode</code> must be LISTEN or unspecified and
+	// <code>config.take_over</code> must be false, otherwise <code>INVALID_ARGUMENT</code> <code>reason=listen-only</code>.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	ListenCallAudio(ctx context.Context, in *ListenCallAudioRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallAudioResponse], error)
 }
 
 type callsClient struct {
@@ -317,6 +439,26 @@ func (c *callsClient) StartScheduledCallers(ctx context.Context, in *StartSchedu
 	return out, nil
 }
 
+func (c *callsClient) AddCallersToCampaign(ctx context.Context, in *AddCallersToCampaignRequest, opts ...grpc.CallOption) (*AddCallersToCampaignResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddCallersToCampaignResponse)
+	err := c.cc.Invoke(ctx, Calls_AddCallersToCampaign_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) AddScheduledCallersToCampaign(ctx context.Context, in *AddScheduledCallersToCampaignRequest, opts ...grpc.CallOption) (*AddScheduledCallersToCampaignResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddScheduledCallersToCampaignResponse)
+	err := c.cc.Invoke(ctx, Calls_AddScheduledCallersToCampaign_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *callsClient) GetScheduledCaller(ctx context.Context, in *GetScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ScheduledCaller)
@@ -417,6 +559,125 @@ func (c *callsClient) ListCalls(ctx context.Context, in *ListCallsRequest, opts 
 	return out, nil
 }
 
+func (c *callsClient) StreamCallerStatus(ctx context.Context, in *StreamCallerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Calls_ServiceDesc.Streams[0], Calls_StreamCallerStatus_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamCallerStatusRequest, StreamCallResourceStatusResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamCallerStatusClient = grpc.ServerStreamingClient[StreamCallResourceStatusResponse]
+
+func (c *callsClient) StreamListenerStatus(ctx context.Context, in *StreamListenerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Calls_ServiceDesc.Streams[1], Calls_StreamListenerStatus_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamListenerStatusRequest, StreamCallResourceStatusResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamListenerStatusClient = grpc.ServerStreamingClient[StreamCallResourceStatusResponse]
+
+func (c *callsClient) StreamScheduledCallerStatus(ctx context.Context, in *StreamScheduledCallerStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallResourceStatusResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Calls_ServiceDesc.Streams[2], Calls_StreamScheduledCallerStatus_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamScheduledCallerStatusRequest, StreamCallResourceStatusResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamScheduledCallerStatusClient = grpc.ServerStreamingClient[StreamCallResourceStatusResponse]
+
+func (c *callsClient) InviteToCall(ctx context.Context, in *InviteToCallRequest, opts ...grpc.CallOption) (*InviteToCallResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(InviteToCallResponse)
+	err := c.cc.Invoke(ctx, Calls_InviteToCall_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) RemoveCallParticipant(ctx context.Context, in *RemoveCallParticipantRequest, opts ...grpc.CallOption) (*RemoveCallParticipantResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveCallParticipantResponse)
+	err := c.cc.Invoke(ctx, Calls_RemoveCallParticipant_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) SetCallMediaControl(ctx context.Context, in *SetCallMediaControlRequest, opts ...grpc.CallOption) (*SetCallMediaControlResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetCallMediaControlResponse)
+	err := c.cc.Invoke(ctx, Calls_SetCallMediaControl_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) StreamCallAudio(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[StreamCallAudioRequest, StreamCallAudioResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Calls_ServiceDesc.Streams[3], Calls_StreamCallAudio_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[StreamCallAudioRequest, StreamCallAudioResponse]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamCallAudioClient = grpc.BidiStreamingClient[StreamCallAudioRequest, StreamCallAudioResponse]
+
+func (c *callsClient) ListenCallAudio(ctx context.Context, in *ListenCallAudioRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[StreamCallAudioResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Calls_ServiceDesc.Streams[4], Calls_ListenCallAudio_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ListenCallAudioRequest, StreamCallAudioResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_ListenCallAudioClient = grpc.ServerStreamingClient[StreamCallAudioResponse]
+
 // CallsServer is the server API for Calls service.
 // All implementations must embed UnimplementedCallsServer
 // for forward compatibility.
@@ -459,11 +720,26 @@ type CallsServer interface {
 	StartScheduledCaller(context.Context, *StartScheduledCallerRequest) (*StartScheduledCallerResponse, error)
 	// <p>Start multiple ondewo-sip caller instances, each at its own scheduled time</p>
 	StartScheduledCallers(context.Context, *StartScheduledCallersRequest) (*StartScheduledCallersResponse, error)
+	// <p>Adds callers to a campaign instead of starting them. The campaign then starts them, at most
+	// <code>max_parallel_calls</code> at a time. The request is atomic: either the campaign (when new), every
+	// campaign call is stored, or nothing is. Errors are gRPC status codes (see <code>CampaignAssignment</code>).</p>
+	// <p>Rolling updates: a VTSI server that predates this RPC answers <code>UNIMPLEMENTED</code> and starts
+	// nothing. Do not fall back to <code>StartCallers</code> on <code>UNIMPLEMENTED</code>; retry later.</p>
+	AddCallersToCampaign(context.Context, *AddCallersToCampaignRequest) (*AddCallersToCampaignResponse, error)
+	// <p>Adds scheduled callers to a campaign: each fires at or after its scheduled time AND when the campaign has a
+	// free slot, and follows the campaign&apos;s retries, stop and hard stop. Same atomicity, errors and rolling-update
+	// behaviour as <code>AddCallersToCampaign</code>.</p>
+	AddScheduledCallersToCampaign(context.Context, *AddScheduledCallersToCampaignRequest) (*AddScheduledCallersToCampaignResponse, error)
 	// <p>Gets a scheduled caller</p>
 	GetScheduledCaller(context.Context, *GetScheduledCallerRequest) (*ScheduledCaller, error)
 	// <p>Lists the scheduled callers of a vtsi-project</p>
 	ListScheduledCallers(context.Context, *ListScheduledCallersRequest) (*ListScheduledCallersResponse, error)
 	// <p>Cancels a scheduled caller that has not fired yet</p>
+	// <p>A scheduled caller of a campaign can be cancelled while its campaign call is
+	// <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> or <code>CAMPAIGN_CALL_STATE_RETRY_PENDING</code>;
+	// the campaign call then becomes <code>CAMPAIGN_CALL_STATE_CANCELLED</code>. While an attempt is
+	// <code>DISPATCHING</code> or <code>IN_PROGRESS</code> the request is refused:
+	// <code>cancelled = false</code> and the scheduled caller keeps its status.</p>
 	CancelScheduledCaller(context.Context, *CancelScheduledCallerRequest) (*CancelScheduledCallerResponse, error)
 	// <p>Stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.</p>
 	StopCall(context.Context, *StopCallRequest) (*StopCallResponse, error)
@@ -473,14 +749,111 @@ type CallsServer interface {
 	// <p>Stop/kill all ondewo-sip listener or caller instance for a specific nlu-project.</p>
 	// <p>Stops all Listener and Caller calls</p>
 	StopAllCalls(context.Context, *StopAllCallsRequest) (*StopCallsResponse, error)
-	// <p>Transfer a call from a listener to another</p>
+	// <p>Transfer a call to a phone number, a softphone account, another listener or the listener queue.</p>
+	// <p>The target is either the typed <code>target</code> or the legacy raw <code>transfer_id</code>, never both. It is
+	// resolved and validated before anything is sent; an invalid target is answered with
+	// <code>TRANSFER_OUTCOME_TARGET_INVALID</code> and an <code>error_reason</code>, and the call is untouched.</p>
+	// <p><code>TRANSFER_MODE_BLIND</code> (default) sends a SIP REFER and reports its outcome: a refused REFER keeps the
+	// call with the bot. <code>TRANSFER_MODE_WARM</code> rings the target into the call first, and the bot leaves only
+	// after the target joined (Asterisk 22 only).</p>
+	// <p>Telephony outcomes (busy, no answer, REFER rejected) are successful RPCs carrying an <code>outcome</code>.
+	// Refusals before any side effect also return a gRPC status with <code>reason=&lt;token&gt;</code> in its details:
+	// <code>INVALID_ARGUMENT</code> (both targets set, malformed target), <code>NOT_FOUND</code> (call or target not
+	// found, including another project&apos;s), <code>FAILED_PRECONDITION</code> (<code>call-not-connected</code>,
+	// <code>amd-in-progress</code>, <code>call-not-yet-identified</code>, <code>participants-present</code>,
+	// <code>asterisk-version-unsupported</code>, <code>sip-image-too-old</code>), <code>ABORTED</code>
+	// (<code>transfer-in-progress</code>), <code>UNAVAILABLE</code> (<code>sip-unreachable</code>).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCall(context.Context, *TransferCallRequest) (*TransferCallResponse, error)
-	// <p>Transfer a call from a listener to another</p>
+	// <p>Transfer several calls, each like <code>TransferCall</code>.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCalls(context.Context, *TransferCallsRequest) (*TransferCallsResponse, error)
 	// <p>Get call log for single call instance</p>
 	GetCall(context.Context, *GetCallRequest) (*Call, error)
 	// <p>Get call log for all call instances</p>
 	ListCalls(context.Context, *ListCallsRequest) (*ListCallsResponse, error)
+	// <p>Streams the status of the callers of a project: a snapshot first
+	// (<code>snapshot = true</code>), then every caller whose call or SIP status changed, plus
+	// keep-alive messages. Ends when the client disconnects or at the server-side maximum stream
+	// duration.</p>
+	// <p>Errors: <code>NOT_FOUND</code> for an unknown project; <code>RESOURCE_EXHAUSTED</code> when
+	// the server has no free stream slot.</p>
+	StreamCallerStatus(*StreamCallerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error
+	// <p>Streams the status of the listeners of a project, like <code>StreamCallerStatus</code>.</p>
+	StreamListenerStatus(*StreamListenerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error
+	// <p>Streams the status of the scheduled callers of a project, like
+	// <code>StreamCallerStatus</code>. The snapshot holds every PENDING and FIRING scheduled caller
+	// and those that finished in the last hour.</p>
+	StreamScheduledCallerStatus(*StreamScheduledCallerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error
+	// <p>Invite a registered softphone account of the project into a connected call. Returns the participant in
+	// <code>PARTICIPANT_STATE_RINGING</code>; follow <code>Call.participants</code> or the events
+	// <code>VTSI_EVENT_CALL_PARTICIPANT_*</code> for JOINED, FAILED and LEFT.</p>
+	// <p><code>PARTICIPANT_MODE_CONFERENCE</code> (default) joins the softphone into the call: Asterisk mixes the caller,
+	// the bot and the participant, and by default the bot keeps talking and listening
+	// (<code>BOT_POLICY_ON_JOIN_KEEP</code>). <code>PARTICIPANT_MODE_MONITOR</code> lets the participant listen only.
+	// When the bot&apos;s leg ends, every participant is hung up; the caller is handed over only by a WARM
+	// <code>TransferCall</code>. Idempotent per <code>request_id</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code>, <code>NOT_FOUND</code> (call or softphone account, including another
+	// project&apos;s), <code>FAILED_PRECONDITION</code> (<code>call-not-connected</code>, <code>amd-in-progress</code>,
+	// <code>softphone-not-registered</code>, <code>softphone-disabled</code>, <code>softphone-unrouted</code>,
+	// <code>call-not-yet-identified</code>, <code>bot-channel-ambiguous</code>, <code>asterisk-not-local</code>,
+	// <code>asterisk-version-unsupported</code>), <code>ALREADY_EXISTS</code> (the softphone is already ringing or joined),
+	// <code>ABORTED</code> (<code>transfer-in-progress</code>), <code>RESOURCE_EXHAUSTED</code> (participant cap),
+	// <code>UNAVAILABLE</code> (<code>asterisk-unreachable</code>).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	InviteToCall(context.Context, *InviteToCallRequest) (*InviteToCallResponse, error)
+	// <p>Hang up a participant of a call (ringing or joined). The participant ends as
+	// <code>PARTICIPANT_STATE_LEFT</code> with <code>end_reason = REMOVED</code>; the call and the bot are not
+	// affected.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher. Audited like <code>InviteToCall</code>.</p>
+	RemoveCallParticipant(context.Context, *RemoveCallParticipantRequest) (*RemoveCallParticipantResponse, error)
+	// <p>Mute the bot of a connected call and/or stop it listening to the caller, or undo either. Every request sets a
+	// desired level and never toggles: a repeat answers <code>changed = false</code>. The bot stays muted while
+	// anything else (a TALK take-over of <code>StreamCallAudio</code>, a participant bot policy) also holds it muted.</p>
+	// <p>Errors as for <code>InviteToCall</code>, plus <code>FAILED_PRECONDITION</code> <code>reason=sip-image-too-old</code>,
+	// <code>ABORTED</code> <code>reason=call-control-busy</code> (another call-control request for the call is running)
+	// and <code>UNAVAILABLE</code> <code>reason=sip-unreachable</code> or <code>reason=csi-media-control-failed</code> (the
+	// bot did not apply the level: a requested pause is rolled back, a requested mute is kept).</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	SetCallMediaControl(context.Context, *SetCallMediaControlRequest) (*SetCallMediaControlResponse, error)
+	// <p>Live audio of a connected call, both ways. The first request MUST be <code>config</code> (within 2 seconds).
+	// LISTEN receives the caller mixed with the bot. TALK sends the agent&apos;s audio to the caller and REQUIRES
+	// <code>take_over</code>: the bot is muted and does not listen while the stream is connected, and resumes when it
+	// ends; in TALK the agent hears the caller only. Audio is LINEAR16 little-endian mono in 20 ms frames.</p>
+	// <p>Bidirectional streaming: available to native gRPC clients (python, nodejs) only. Browser (grpc-web) clients
+	// use <code>ListenCallAudio</code>, plus a softphone (<code>InviteToCall</code>) to talk.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> (no or invalid <code>config</code>, TALK without
+	// <code>take_over</code>, wrong frame size), <code>NOT_FOUND</code>, <code>FAILED_PRECONDITION</code>
+	// (<code>call-not-connected</code>, <code>amd-in-progress</code>, <code>call-not-yet-identified</code>,
+	// <code>bot-still-speaking</code>, <code>sip-image-too-old</code>), <code>RESOURCE_EXHAUSTED</code> (stream cap, a
+	// second TALK). A normal end sends one <code>ended</code> message, then OK. A second <code>config</code> or audio
+	// sent in LISTEN mode ends the stream with <code>INVALID_ARGUMENT</code>. A client half-close ends the stream
+	// (<code>CALL_AUDIO_END_REASON_CLIENT_CLOSED</code>), so a listening client keeps its request stream open.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	StreamCallAudio(grpc.BidiStreamingServer[StreamCallAudioRequest, StreamCallAudioResponse]) error
+	// <p>Listen-only live audio of a connected call, like <code>StreamCallAudio</code> in LISTEN mode, as a server
+	// stream that grpc-web (browser) clients can consume. <code>config.mode</code> must be LISTEN or unspecified and
+	// <code>config.take_over</code> must be false, otherwise <code>INVALID_ARGUMENT</code> <code>reason=listen-only</code>.</p>
+	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
+	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
+	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
+	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
+	ListenCallAudio(*ListenCallAudioRequest, grpc.ServerStreamingServer[StreamCallAudioResponse]) error
 	mustEmbedUnimplementedCallsServer()
 }
 
@@ -545,6 +918,12 @@ func (UnimplementedCallsServer) StartScheduledCaller(context.Context, *StartSche
 func (UnimplementedCallsServer) StartScheduledCallers(context.Context, *StartScheduledCallersRequest) (*StartScheduledCallersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method StartScheduledCallers not implemented")
 }
+func (UnimplementedCallsServer) AddCallersToCampaign(context.Context, *AddCallersToCampaignRequest) (*AddCallersToCampaignResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddCallersToCampaign not implemented")
+}
+func (UnimplementedCallsServer) AddScheduledCallersToCampaign(context.Context, *AddScheduledCallersToCampaignRequest) (*AddScheduledCallersToCampaignResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddScheduledCallersToCampaign not implemented")
+}
 func (UnimplementedCallsServer) GetScheduledCaller(context.Context, *GetScheduledCallerRequest) (*ScheduledCaller, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetScheduledCaller not implemented")
 }
@@ -574,6 +953,30 @@ func (UnimplementedCallsServer) GetCall(context.Context, *GetCallRequest) (*Call
 }
 func (UnimplementedCallsServer) ListCalls(context.Context, *ListCallsRequest) (*ListCallsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListCalls not implemented")
+}
+func (UnimplementedCallsServer) StreamCallerStatus(*StreamCallerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error {
+	return status.Error(codes.Unimplemented, "method StreamCallerStatus not implemented")
+}
+func (UnimplementedCallsServer) StreamListenerStatus(*StreamListenerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error {
+	return status.Error(codes.Unimplemented, "method StreamListenerStatus not implemented")
+}
+func (UnimplementedCallsServer) StreamScheduledCallerStatus(*StreamScheduledCallerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error {
+	return status.Error(codes.Unimplemented, "method StreamScheduledCallerStatus not implemented")
+}
+func (UnimplementedCallsServer) InviteToCall(context.Context, *InviteToCallRequest) (*InviteToCallResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method InviteToCall not implemented")
+}
+func (UnimplementedCallsServer) RemoveCallParticipant(context.Context, *RemoveCallParticipantRequest) (*RemoveCallParticipantResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RemoveCallParticipant not implemented")
+}
+func (UnimplementedCallsServer) SetCallMediaControl(context.Context, *SetCallMediaControlRequest) (*SetCallMediaControlResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetCallMediaControl not implemented")
+}
+func (UnimplementedCallsServer) StreamCallAudio(grpc.BidiStreamingServer[StreamCallAudioRequest, StreamCallAudioResponse]) error {
+	return status.Error(codes.Unimplemented, "method StreamCallAudio not implemented")
+}
+func (UnimplementedCallsServer) ListenCallAudio(*ListenCallAudioRequest, grpc.ServerStreamingServer[StreamCallAudioResponse]) error {
+	return status.Error(codes.Unimplemented, "method ListenCallAudio not implemented")
 }
 func (UnimplementedCallsServer) mustEmbedUnimplementedCallsServer() {}
 func (UnimplementedCallsServer) testEmbeddedByValue()               {}
@@ -920,6 +1323,42 @@ func _Calls_StartScheduledCallers_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calls_AddCallersToCampaign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddCallersToCampaignRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).AddCallersToCampaign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_AddCallersToCampaign_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).AddCallersToCampaign(ctx, req.(*AddCallersToCampaignRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_AddScheduledCallersToCampaign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddScheduledCallersToCampaignRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).AddScheduledCallersToCampaign(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_AddScheduledCallersToCampaign_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).AddScheduledCallersToCampaign(ctx, req.(*AddScheduledCallersToCampaignRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Calls_GetScheduledCaller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetScheduledCallerRequest)
 	if err := dec(in); err != nil {
@@ -1100,6 +1539,111 @@ func _Calls_ListCalls_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calls_StreamCallerStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamCallerStatusRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CallsServer).StreamCallerStatus(m, &grpc.GenericServerStream[StreamCallerStatusRequest, StreamCallResourceStatusResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamCallerStatusServer = grpc.ServerStreamingServer[StreamCallResourceStatusResponse]
+
+func _Calls_StreamListenerStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamListenerStatusRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CallsServer).StreamListenerStatus(m, &grpc.GenericServerStream[StreamListenerStatusRequest, StreamCallResourceStatusResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamListenerStatusServer = grpc.ServerStreamingServer[StreamCallResourceStatusResponse]
+
+func _Calls_StreamScheduledCallerStatus_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StreamScheduledCallerStatusRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CallsServer).StreamScheduledCallerStatus(m, &grpc.GenericServerStream[StreamScheduledCallerStatusRequest, StreamCallResourceStatusResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamScheduledCallerStatusServer = grpc.ServerStreamingServer[StreamCallResourceStatusResponse]
+
+func _Calls_InviteToCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InviteToCallRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).InviteToCall(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_InviteToCall_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).InviteToCall(ctx, req.(*InviteToCallRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_RemoveCallParticipant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveCallParticipantRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).RemoveCallParticipant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_RemoveCallParticipant_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).RemoveCallParticipant(ctx, req.(*RemoveCallParticipantRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_SetCallMediaControl_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetCallMediaControlRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).SetCallMediaControl(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_SetCallMediaControl_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).SetCallMediaControl(ctx, req.(*SetCallMediaControlRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_StreamCallAudio_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(CallsServer).StreamCallAudio(&grpc.GenericServerStream[StreamCallAudioRequest, StreamCallAudioResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_StreamCallAudioServer = grpc.BidiStreamingServer[StreamCallAudioRequest, StreamCallAudioResponse]
+
+func _Calls_ListenCallAudio_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListenCallAudioRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(CallsServer).ListenCallAudio(m, &grpc.GenericServerStream[ListenCallAudioRequest, StreamCallAudioResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Calls_ListenCallAudioServer = grpc.ServerStreamingServer[StreamCallAudioResponse]
+
 // Calls_ServiceDesc is the grpc.ServiceDesc for Calls service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1180,6 +1724,14 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Calls_StartScheduledCallers_Handler,
 		},
 		{
+			MethodName: "AddCallersToCampaign",
+			Handler:    _Calls_AddCallersToCampaign_Handler,
+		},
+		{
+			MethodName: "AddScheduledCallersToCampaign",
+			Handler:    _Calls_AddScheduledCallersToCampaign_Handler,
+		},
+		{
 			MethodName: "GetScheduledCaller",
 			Handler:    _Calls_GetScheduledCaller_Handler,
 		},
@@ -1219,7 +1771,46 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "ListCalls",
 			Handler:    _Calls_ListCalls_Handler,
 		},
+		{
+			MethodName: "InviteToCall",
+			Handler:    _Calls_InviteToCall_Handler,
+		},
+		{
+			MethodName: "RemoveCallParticipant",
+			Handler:    _Calls_RemoveCallParticipant_Handler,
+		},
+		{
+			MethodName: "SetCallMediaControl",
+			Handler:    _Calls_SetCallMediaControl_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StreamCallerStatus",
+			Handler:       _Calls_StreamCallerStatus_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "StreamListenerStatus",
+			Handler:       _Calls_StreamListenerStatus_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "StreamScheduledCallerStatus",
+			Handler:       _Calls_StreamScheduledCallerStatus_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "StreamCallAudio",
+			Handler:       _Calls_StreamCallAudio_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "ListenCallAudio",
+			Handler:       _Calls_ListenCallAudio_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "ondewo/vtsi/calls.proto",
 }

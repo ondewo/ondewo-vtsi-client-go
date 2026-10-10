@@ -37,6 +37,517 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// <p>Desired setting of one media control flag</p>
+type MediaControlSetting int32
+
+const (
+	// Leave the flag as it is for this owner
+	MediaControlSetting_MEDIA_CONTROL_SETTING_UNCHANGED MediaControlSetting = 0
+	// The flag is on: the bot speaks (<code>bot_voice</code>) or the bot listens (<code>bot_listening</code>)
+	MediaControlSetting_MEDIA_CONTROL_SETTING_ON MediaControlSetting = 1
+	// The flag is off: the bot is muted (<code>bot_voice</code>) or the bot's listening is paused (<code>bot_listening</code>)
+	MediaControlSetting_MEDIA_CONTROL_SETTING_OFF MediaControlSetting = 2
+)
+
+// Enum value maps for MediaControlSetting.
+var (
+	MediaControlSetting_name = map[int32]string{
+		0: "MEDIA_CONTROL_SETTING_UNCHANGED",
+		1: "MEDIA_CONTROL_SETTING_ON",
+		2: "MEDIA_CONTROL_SETTING_OFF",
+	}
+	MediaControlSetting_value = map[string]int32{
+		"MEDIA_CONTROL_SETTING_UNCHANGED": 0,
+		"MEDIA_CONTROL_SETTING_ON":        1,
+		"MEDIA_CONTROL_SETTING_OFF":       2,
+	}
+)
+
+func (x MediaControlSetting) Enum() *MediaControlSetting {
+	p := new(MediaControlSetting)
+	*p = x
+	return p
+}
+
+func (x MediaControlSetting) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MediaControlSetting) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[0].Descriptor()
+}
+
+func (MediaControlSetting) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[0]
+}
+
+func (x MediaControlSetting) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MediaControlSetting.Descriptor instead.
+func (MediaControlSetting) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{0}
+}
+
+// <p>Owner of a media control hold. Each owner holds its own mute and pause; releasing one owner's hold never releases
+// another owner's</p>
+type MediaControlOwner int32
+
+const (
+	// Same as <code>MEDIA_CONTROL_OWNER_OPERATOR</code>
+	MediaControlOwner_MEDIA_CONTROL_OWNER_UNSPECIFIED MediaControlOwner = 0
+	// An operator, e.g. a supervisor muting the bot
+	MediaControlOwner_MEDIA_CONTROL_OWNER_OPERATOR MediaControlOwner = 1
+	// The bot policy of invited conference participants, set while at least one participant is ringing or joined. Its
+	// hold mutes or pauses the bot only when a participant's bot policy asks for it; it also carries
+	// <code>SipSetCallMediaControlRequest.participants_present</code>
+	MediaControlOwner_MEDIA_CONTROL_OWNER_PARTICIPANT MediaControlOwner = 2
+)
+
+// Enum value maps for MediaControlOwner.
+var (
+	MediaControlOwner_name = map[int32]string{
+		0: "MEDIA_CONTROL_OWNER_UNSPECIFIED",
+		1: "MEDIA_CONTROL_OWNER_OPERATOR",
+		2: "MEDIA_CONTROL_OWNER_PARTICIPANT",
+	}
+	MediaControlOwner_value = map[string]int32{
+		"MEDIA_CONTROL_OWNER_UNSPECIFIED": 0,
+		"MEDIA_CONTROL_OWNER_OPERATOR":    1,
+		"MEDIA_CONTROL_OWNER_PARTICIPANT": 2,
+	}
+)
+
+func (x MediaControlOwner) Enum() *MediaControlOwner {
+	p := new(MediaControlOwner)
+	*p = x
+	return p
+}
+
+func (x MediaControlOwner) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (MediaControlOwner) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[1].Descriptor()
+}
+
+func (MediaControlOwner) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[1]
+}
+
+func (x MediaControlOwner) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use MediaControlOwner.Descriptor instead.
+func (MediaControlOwner) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{1}
+}
+
+// <p>Mode of a <code>SipStreamCallAudio</code> stream</p>
+type SipCallAudioMode int32
+
+const (
+	// Same as <code>SIP_CALL_AUDIO_MODE_LISTEN</code>
+	SipCallAudioMode_SIP_CALL_AUDIO_MODE_UNSPECIFIED SipCallAudioMode = 0
+	// Receive the call audio only
+	SipCallAudioMode_SIP_CALL_AUDIO_MODE_LISTEN SipCallAudioMode = 1
+	// Receive the caller's audio and send audio to the caller. Requires <code>take_over</code>
+	SipCallAudioMode_SIP_CALL_AUDIO_MODE_TALK SipCallAudioMode = 2
+)
+
+// Enum value maps for SipCallAudioMode.
+var (
+	SipCallAudioMode_name = map[int32]string{
+		0: "SIP_CALL_AUDIO_MODE_UNSPECIFIED",
+		1: "SIP_CALL_AUDIO_MODE_LISTEN",
+		2: "SIP_CALL_AUDIO_MODE_TALK",
+	}
+	SipCallAudioMode_value = map[string]int32{
+		"SIP_CALL_AUDIO_MODE_UNSPECIFIED": 0,
+		"SIP_CALL_AUDIO_MODE_LISTEN":      1,
+		"SIP_CALL_AUDIO_MODE_TALK":        2,
+	}
+)
+
+func (x SipCallAudioMode) Enum() *SipCallAudioMode {
+	p := new(SipCallAudioMode)
+	*p = x
+	return p
+}
+
+func (x SipCallAudioMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SipCallAudioMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[2].Descriptor()
+}
+
+func (SipCallAudioMode) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[2]
+}
+
+func (x SipCallAudioMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SipCallAudioMode.Descriptor instead.
+func (SipCallAudioMode) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2}
+}
+
+// <p>Why a <code>SipStreamCallAudio</code> stream ended</p>
+type SipCallAudioEndReason int32
+
+const (
+	// No reason recorded
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_UNSPECIFIED SipCallAudioEndReason = 0
+	// The client cancelled or half-closed the stream
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_CLIENT_CLOSED SipCallAudioEndReason = 1
+	// The call ended
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_CALL_ENDED SipCallAudioEndReason = 2
+	// The call was transferred
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_CALL_TRANSFERRED SipCallAudioEndReason = 3
+	// <code>max_duration_s</code> was reached
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_MAX_DURATION SipCallAudioEndReason = 4
+	// The client did not read the audio in time
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_STALLED SipCallAudioEndReason = 5
+	// An internal error ended the stream
+	SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_INTERNAL SipCallAudioEndReason = 6
+)
+
+// Enum value maps for SipCallAudioEndReason.
+var (
+	SipCallAudioEndReason_name = map[int32]string{
+		0: "SIP_CALL_AUDIO_END_REASON_UNSPECIFIED",
+		1: "SIP_CALL_AUDIO_END_REASON_CLIENT_CLOSED",
+		2: "SIP_CALL_AUDIO_END_REASON_CALL_ENDED",
+		3: "SIP_CALL_AUDIO_END_REASON_CALL_TRANSFERRED",
+		4: "SIP_CALL_AUDIO_END_REASON_MAX_DURATION",
+		5: "SIP_CALL_AUDIO_END_REASON_STALLED",
+		6: "SIP_CALL_AUDIO_END_REASON_INTERNAL",
+	}
+	SipCallAudioEndReason_value = map[string]int32{
+		"SIP_CALL_AUDIO_END_REASON_UNSPECIFIED":      0,
+		"SIP_CALL_AUDIO_END_REASON_CLIENT_CLOSED":    1,
+		"SIP_CALL_AUDIO_END_REASON_CALL_ENDED":       2,
+		"SIP_CALL_AUDIO_END_REASON_CALL_TRANSFERRED": 3,
+		"SIP_CALL_AUDIO_END_REASON_MAX_DURATION":     4,
+		"SIP_CALL_AUDIO_END_REASON_STALLED":          5,
+		"SIP_CALL_AUDIO_END_REASON_INTERNAL":         6,
+	}
+)
+
+func (x SipCallAudioEndReason) Enum() *SipCallAudioEndReason {
+	p := new(SipCallAudioEndReason)
+	*p = x
+	return p
+}
+
+func (x SipCallAudioEndReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SipCallAudioEndReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[3].Descriptor()
+}
+
+func (SipCallAudioEndReason) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[3]
+}
+
+func (x SipCallAudioEndReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SipCallAudioEndReason.Descriptor instead.
+func (SipCallAudioEndReason) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{3}
+}
+
+// <p>Why the call is being ended</p>
+type SipEndCallRequest_EndCallReason int32
+
+const (
+	// No specific reason given. The call ends as an ordinary hangup, exactly as before this field existed
+	SipEndCallRequest_END_CALL_REASON_UNSPECIFIED SipEndCallRequest_EndCallReason = 0
+	// Answering machine detection decided the callee is not a person to talk to (answering machine, fax,
+	// network announcement, ...) and the call is hung up WITHOUT leaving a voice message. The terminal status
+	// of the call is <code>OUTGOING_CALL_FINISHED</code> with the description
+	// <code>Answering machine detected with hang up</code>
+	SipEndCallRequest_ANSWERING_MACHINE SipEndCallRequest_EndCallReason = 1
+	// Answering machine detection decided the callee is an answering machine, a voice message was left on it,
+	// and the call is hung up afterwards (or when the voice message timeout expired). The terminal status of
+	// the call is <code>OUTGOING_CALL_FINISHED</code> with the description
+	// <code>Answering machine detected with left voice message and hang up</code>
+	SipEndCallRequest_ANSWERING_MACHINE_VOICE_MESSAGE_LEFT SipEndCallRequest_EndCallReason = 2
+	// A WARM transfer completed: the transfer target joined the call and the bot leaves it. The terminal status of
+	// the call is <code>*_CALL_FINISHED</code> with the description <code>Call transferred</code> and
+	// <code>transfer_call_id</code> set to the transfer target
+	SipEndCallRequest_END_CALL_REASON_TRANSFERRED SipEndCallRequest_EndCallReason = 3
+)
+
+// Enum value maps for SipEndCallRequest_EndCallReason.
+var (
+	SipEndCallRequest_EndCallReason_name = map[int32]string{
+		0: "END_CALL_REASON_UNSPECIFIED",
+		1: "ANSWERING_MACHINE",
+		2: "ANSWERING_MACHINE_VOICE_MESSAGE_LEFT",
+		3: "END_CALL_REASON_TRANSFERRED",
+	}
+	SipEndCallRequest_EndCallReason_value = map[string]int32{
+		"END_CALL_REASON_UNSPECIFIED":          0,
+		"ANSWERING_MACHINE":                    1,
+		"ANSWERING_MACHINE_VOICE_MESSAGE_LEFT": 2,
+		"END_CALL_REASON_TRANSFERRED":          3,
+	}
+)
+
+func (x SipEndCallRequest_EndCallReason) Enum() *SipEndCallRequest_EndCallReason {
+	p := new(SipEndCallRequest_EndCallReason)
+	*p = x
+	return p
+}
+
+func (x SipEndCallRequest_EndCallReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SipEndCallRequest_EndCallReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[4].Descriptor()
+}
+
+func (SipEndCallRequest_EndCallReason) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[4]
+}
+
+func (x SipEndCallRequest_EndCallReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SipEndCallRequest_EndCallReason.Descriptor instead.
+func (SipEndCallRequest_EndCallReason) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{0, 0}
+}
+
+// <p>Who or what answered the call</p>
+type AnsweringMachineDetectionResult_Verdict int32
+
+const (
+	// No verdict available
+	AnsweringMachineDetectionResult_VERDICT_UNSPECIFIED AnsweringMachineDetectionResult_Verdict = 0
+	// A person answered the call
+	AnsweringMachineDetectionResult_HUMAN AnsweringMachineDetectionResult_Verdict = 1
+	// An answering machine or voicemail answered the call
+	AnsweringMachineDetectionResult_MACHINE AnsweringMachineDetectionResult_Verdict = 2
+	// An interactive voice response system (IVR) answered the call
+	AnsweringMachineDetectionResult_IVR AnsweringMachineDetectionResult_Verdict = 3
+	// A fax machine answered the call
+	AnsweringMachineDetectionResult_FAX AnsweringMachineDetectionResult_Verdict = 4
+	// A network announcement answered the call, e.g. "the number you have dialed is not available"
+	AnsweringMachineDetectionResult_NETWORK_ANNOUNCEMENT AnsweringMachineDetectionResult_Verdict = 5
+	// A call screening service answered the call, e.g. asking the caller to state their name
+	AnsweringMachineDetectionResult_CALL_SCREENING AnsweringMachineDetectionResult_Verdict = 6
+	// Nothing was said within the detection window
+	AnsweringMachineDetectionResult_NO_SPEECH AnsweringMachineDetectionResult_Verdict = 7
+	// The detection could not decide
+	AnsweringMachineDetectionResult_UNKNOWN AnsweringMachineDetectionResult_Verdict = 8
+)
+
+// Enum value maps for AnsweringMachineDetectionResult_Verdict.
+var (
+	AnsweringMachineDetectionResult_Verdict_name = map[int32]string{
+		0: "VERDICT_UNSPECIFIED",
+		1: "HUMAN",
+		2: "MACHINE",
+		3: "IVR",
+		4: "FAX",
+		5: "NETWORK_ANNOUNCEMENT",
+		6: "CALL_SCREENING",
+		7: "NO_SPEECH",
+		8: "UNKNOWN",
+	}
+	AnsweringMachineDetectionResult_Verdict_value = map[string]int32{
+		"VERDICT_UNSPECIFIED":  0,
+		"HUMAN":                1,
+		"MACHINE":              2,
+		"IVR":                  3,
+		"FAX":                  4,
+		"NETWORK_ANNOUNCEMENT": 5,
+		"CALL_SCREENING":       6,
+		"NO_SPEECH":            7,
+		"UNKNOWN":              8,
+	}
+)
+
+func (x AnsweringMachineDetectionResult_Verdict) Enum() *AnsweringMachineDetectionResult_Verdict {
+	p := new(AnsweringMachineDetectionResult_Verdict)
+	*p = x
+	return p
+}
+
+func (x AnsweringMachineDetectionResult_Verdict) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AnsweringMachineDetectionResult_Verdict) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[5].Descriptor()
+}
+
+func (AnsweringMachineDetectionResult_Verdict) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[5]
+}
+
+func (x AnsweringMachineDetectionResult_Verdict) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AnsweringMachineDetectionResult_Verdict.Descriptor instead.
+func (AnsweringMachineDetectionResult_Verdict) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2, 0}
+}
+
+// <p>Evidence that led to the verdict</p>
+type AnsweringMachineDetectionResult_Cause int32
+
+const (
+	// No cause available
+	AnsweringMachineDetectionResult_CAUSE_UNSPECIFIED AnsweringMachineDetectionResult_Cause = 0
+	// The speech cadence, e.g. a long uninterrupted greeting
+	AnsweringMachineDetectionResult_CADENCE AnsweringMachineDetectionResult_Cause = 1
+	// A keyword or phrase typical of the verdict
+	AnsweringMachineDetectionResult_KEYWORD AnsweringMachineDetectionResult_Cause = 2
+	// A voicemail beep
+	AnsweringMachineDetectionResult_BEEP AnsweringMachineDetectionResult_Cause = 3
+	// A tone, e.g. a fax or special information tone
+	AnsweringMachineDetectionResult_TONE AnsweringMachineDetectionResult_Cause = 4
+	// Both the speech cadence and a keyword
+	AnsweringMachineDetectionResult_CADENCE_AND_KEYWORD AnsweringMachineDetectionResult_Cause = 5
+	// Both the speech cadence and a voicemail beep
+	AnsweringMachineDetectionResult_CADENCE_AND_BEEP AnsweringMachineDetectionResult_Cause = 6
+	// The detection window ended before any other evidence decided
+	AnsweringMachineDetectionResult_TIMEOUT AnsweringMachineDetectionResult_Cause = 7
+	// Silence throughout the detection window
+	AnsweringMachineDetectionResult_SILENCE AnsweringMachineDetectionResult_Cause = 8
+)
+
+// Enum value maps for AnsweringMachineDetectionResult_Cause.
+var (
+	AnsweringMachineDetectionResult_Cause_name = map[int32]string{
+		0: "CAUSE_UNSPECIFIED",
+		1: "CADENCE",
+		2: "KEYWORD",
+		3: "BEEP",
+		4: "TONE",
+		5: "CADENCE_AND_KEYWORD",
+		6: "CADENCE_AND_BEEP",
+		7: "TIMEOUT",
+		8: "SILENCE",
+	}
+	AnsweringMachineDetectionResult_Cause_value = map[string]int32{
+		"CAUSE_UNSPECIFIED":   0,
+		"CADENCE":             1,
+		"KEYWORD":             2,
+		"BEEP":                3,
+		"TONE":                4,
+		"CADENCE_AND_KEYWORD": 5,
+		"CADENCE_AND_BEEP":    6,
+		"TIMEOUT":             7,
+		"SILENCE":             8,
+	}
+)
+
+func (x AnsweringMachineDetectionResult_Cause) Enum() *AnsweringMachineDetectionResult_Cause {
+	p := new(AnsweringMachineDetectionResult_Cause)
+	*p = x
+	return p
+}
+
+func (x AnsweringMachineDetectionResult_Cause) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AnsweringMachineDetectionResult_Cause) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[6].Descriptor()
+}
+
+func (AnsweringMachineDetectionResult_Cause) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[6]
+}
+
+func (x AnsweringMachineDetectionResult_Cause) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AnsweringMachineDetectionResult_Cause.Descriptor instead.
+func (AnsweringMachineDetectionResult_Cause) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2, 1}
+}
+
+// <p>What was done because of the verdict</p>
+type AnsweringMachineDetectionResult_ActionTaken int32
+
+const (
+	// No action recorded
+	AnsweringMachineDetectionResult_ACTION_TAKEN_UNSPECIFIED AnsweringMachineDetectionResult_ActionTaken = 0
+	// The call was hung up
+	AnsweringMachineDetectionResult_HUNG_UP AnsweringMachineDetectionResult_ActionTaken = 1
+	// The call continued as normal
+	AnsweringMachineDetectionResult_CONTINUED AnsweringMachineDetectionResult_ActionTaken = 2
+	// Detection only: the verdict was recorded, but the call was not influenced by it
+	AnsweringMachineDetectionResult_DETECT_ONLY AnsweringMachineDetectionResult_ActionTaken = 3
+	// A voice message was left on the answering machine, and the call was hung up afterwards
+	AnsweringMachineDetectionResult_LEFT_VOICE_MESSAGE AnsweringMachineDetectionResult_ActionTaken = 4
+)
+
+// Enum value maps for AnsweringMachineDetectionResult_ActionTaken.
+var (
+	AnsweringMachineDetectionResult_ActionTaken_name = map[int32]string{
+		0: "ACTION_TAKEN_UNSPECIFIED",
+		1: "HUNG_UP",
+		2: "CONTINUED",
+		3: "DETECT_ONLY",
+		4: "LEFT_VOICE_MESSAGE",
+	}
+	AnsweringMachineDetectionResult_ActionTaken_value = map[string]int32{
+		"ACTION_TAKEN_UNSPECIFIED": 0,
+		"HUNG_UP":                  1,
+		"CONTINUED":                2,
+		"DETECT_ONLY":              3,
+		"LEFT_VOICE_MESSAGE":       4,
+	}
+)
+
+func (x AnsweringMachineDetectionResult_ActionTaken) Enum() *AnsweringMachineDetectionResult_ActionTaken {
+	p := new(AnsweringMachineDetectionResult_ActionTaken)
+	*p = x
+	return p
+}
+
+func (x AnsweringMachineDetectionResult_ActionTaken) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AnsweringMachineDetectionResult_ActionTaken) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_sip_sip_proto_enumTypes[7].Descriptor()
+}
+
+func (AnsweringMachineDetectionResult_ActionTaken) Type() protoreflect.EnumType {
+	return &file_ondewo_sip_sip_proto_enumTypes[7]
+}
+
+func (x AnsweringMachineDetectionResult_ActionTaken) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AnsweringMachineDetectionResult_ActionTaken.Descriptor instead.
+func (AnsweringMachineDetectionResult_ActionTaken) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2, 2}
+}
+
 // Types of status
 type SipStatus_StatusType int32
 
@@ -85,6 +596,15 @@ const (
 	SipStatus_MICROPHONE_WAV_FILES_PLAYED SipStatus_StatusType = 20
 	// No ongoing call
 	SipStatus_NO_ONGOING_CALL SipStatus_StatusType = 21
+	// Answering machine detection decided the callee of the ongoing outgoing call is not a person to talk to.
+	// NOT terminal: the call is still up when this status is set. <code>amd_result.verdict</code> tells an
+	// answering machine, a fax, a network announcement, ... apart. The call then ends as
+	// <code>OUTGOING_CALL_FINISHED</code> carrying <code>amd_result</code> and exactly one of the descriptions
+	// <code>Answering machine detected with hang up</code>,
+	// <code>Answering machine detected with left voice message and hang up</code>,
+	// <code>Answering machine detected, call ended by the answering machine</code> or
+	// <code>Answering machine detected, call ended by the answering machine after leaving a voice message</code>
+	SipStatus_OUTGOING_CALL_ANSWERING_MACHINE_DETECTED SipStatus_StatusType = 22
 )
 
 // Enum value maps for SipStatus_StatusType.
@@ -112,30 +632,32 @@ var (
 		19: "MICROPHONE_UNMUTED",
 		20: "MICROPHONE_WAV_FILES_PLAYED",
 		21: "NO_ONGOING_CALL",
+		22: "OUTGOING_CALL_ANSWERING_MACHINE_DETECTED",
 	}
 	SipStatus_StatusType_value = map[string]int32{
-		"NO_SESSION":                  0,
-		"REGISTERED":                  1,
-		"READY":                       2,
-		"INCOMING_CALL_INITIATED":     3,
-		"OUTGOING_CALL_INITIATED":     4,
-		"OUTGOING_CALL_CONNECTED":     5,
-		"INCOMING_CALL_CONNECTED":     6,
-		"TRANSFER_CALL_INITIATED":     7,
-		"SOFT_HANGUP_INITIATED":       8,
-		"HARD_HANGUP_INITIATED":       9,
-		"INCOMING_CALL_FAILED":        10,
-		"OUTGOING_CALL_FAILED":        11,
-		"INCOMING_CALL_FINISHED":      12,
-		"OUTGOING_CALL_FINISHED":      13,
-		"SESSION_REGISTRATION_FAILED": 14,
-		"SESSION_STARTED":             15,
-		"SESSION_ENDED":               16,
-		"TRANSFER_CALL_FAILED":        17,
-		"MICROPHONE_MUTED":            18,
-		"MICROPHONE_UNMUTED":          19,
-		"MICROPHONE_WAV_FILES_PLAYED": 20,
-		"NO_ONGOING_CALL":             21,
+		"NO_SESSION":                               0,
+		"REGISTERED":                               1,
+		"READY":                                    2,
+		"INCOMING_CALL_INITIATED":                  3,
+		"OUTGOING_CALL_INITIATED":                  4,
+		"OUTGOING_CALL_CONNECTED":                  5,
+		"INCOMING_CALL_CONNECTED":                  6,
+		"TRANSFER_CALL_INITIATED":                  7,
+		"SOFT_HANGUP_INITIATED":                    8,
+		"HARD_HANGUP_INITIATED":                    9,
+		"INCOMING_CALL_FAILED":                     10,
+		"OUTGOING_CALL_FAILED":                     11,
+		"INCOMING_CALL_FINISHED":                   12,
+		"OUTGOING_CALL_FINISHED":                   13,
+		"SESSION_REGISTRATION_FAILED":              14,
+		"SESSION_STARTED":                          15,
+		"SESSION_ENDED":                            16,
+		"TRANSFER_CALL_FAILED":                     17,
+		"MICROPHONE_MUTED":                         18,
+		"MICROPHONE_UNMUTED":                       19,
+		"MICROPHONE_WAV_FILES_PLAYED":              20,
+		"NO_ONGOING_CALL":                          21,
+		"OUTGOING_CALL_ANSWERING_MACHINE_DETECTED": 22,
 	}
 )
 
@@ -150,11 +672,11 @@ func (x SipStatus_StatusType) String() string {
 }
 
 func (SipStatus_StatusType) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_sip_sip_proto_enumTypes[0].Descriptor()
+	return file_ondewo_sip_sip_proto_enumTypes[8].Descriptor()
 }
 
 func (SipStatus_StatusType) Type() protoreflect.EnumType {
-	return &file_ondewo_sip_sip_proto_enumTypes[0]
+	return &file_ondewo_sip_sip_proto_enumTypes[8]
 }
 
 func (x SipStatus_StatusType) Number() protoreflect.EnumNumber {
@@ -163,14 +685,20 @@ func (x SipStatus_StatusType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SipStatus_StatusType.Descriptor instead.
 func (SipStatus_StatusType) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{5, 0}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{7, 0}
 }
 
 // <p>Ends an ongoing call of the active SIP session of the active SIP account</p>
 type SipEndCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Set to <code>True</code> to forcefully hang up the call
-	HardHangup    bool `protobuf:"varint,1,opt,name=hard_hangup,json=hardHangup,proto3" json:"hard_hangup,omitempty"`
+	HardHangup bool `protobuf:"varint,1,opt,name=hard_hangup,json=hardHangup,proto3" json:"hard_hangup,omitempty"`
+	// Optional: reason for ending the call. Leave unset for an ordinary hangup
+	EndReason SipEndCallRequest_EndCallReason `protobuf:"varint,2,opt,name=end_reason,json=endReason,proto3,enum=ondewo.sip.SipEndCallRequest_EndCallReason" json:"end_reason,omitempty"`
+	// Optional: result of the answering machine detection that decided to end the call. Only meaningful together with
+	// <code>end_reason = ANSWERING_MACHINE</code> or <code>end_reason = ANSWERING_MACHINE_VOICE_MESSAGE_LEFT</code>;
+	// it is carried into <code>SipStatus.amd_result</code> of the terminal status of the call
+	AmdResult     *AnsweringMachineDetectionResult `protobuf:"bytes,3,opt,name=amd_result,json=amdResult,proto3" json:"amd_result,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -212,6 +740,178 @@ func (x *SipEndCallRequest) GetHardHangup() bool {
 	return false
 }
 
+func (x *SipEndCallRequest) GetEndReason() SipEndCallRequest_EndCallReason {
+	if x != nil {
+		return x.EndReason
+	}
+	return SipEndCallRequest_END_CALL_REASON_UNSPECIFIED
+}
+
+func (x *SipEndCallRequest) GetAmdResult() *AnsweringMachineDetectionResult {
+	if x != nil {
+		return x.AmdResult
+	}
+	return nil
+}
+
+// <p>Reports the verdict of the answering machine detection of the ongoing outgoing call</p>
+type SipReportAnsweringMachineDetectedRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Result of the answering machine detection. Written to <code>SipStatus.amd_result</code> of the
+	// <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> status of the call
+	AmdResult     *AnsweringMachineDetectionResult `protobuf:"bytes,1,opt,name=amd_result,json=amdResult,proto3" json:"amd_result,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipReportAnsweringMachineDetectedRequest) Reset() {
+	*x = SipReportAnsweringMachineDetectedRequest{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipReportAnsweringMachineDetectedRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipReportAnsweringMachineDetectedRequest) ProtoMessage() {}
+
+func (x *SipReportAnsweringMachineDetectedRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipReportAnsweringMachineDetectedRequest.ProtoReflect.Descriptor instead.
+func (*SipReportAnsweringMachineDetectedRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SipReportAnsweringMachineDetectedRequest) GetAmdResult() *AnsweringMachineDetectionResult {
+	if x != nil {
+		return x.AmdResult
+	}
+	return nil
+}
+
+// <p>Result of the answering machine detection (AMD) of an outbound call</p>
+// <p>Carries identifiers from closed vocabularies only: never audio, transcript text or a phone number</p>
+type AnsweringMachineDetectionResult struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Who or what answered the call
+	Verdict AnsweringMachineDetectionResult_Verdict `protobuf:"varint,1,opt,name=verdict,proto3,enum=ondewo.sip.AnsweringMachineDetectionResult_Verdict" json:"verdict,omitempty"`
+	// Evidence that led to the verdict
+	Cause AnsweringMachineDetectionResult_Cause `protobuf:"varint,2,opt,name=cause,proto3,enum=ondewo.sip.AnsweringMachineDetectionResult_Cause" json:"cause,omitempty"`
+	// Confidence of the verdict, between <code>0.0</code> and <code>1.0</code>
+	Confidence float32 `protobuf:"fixed32,3,opt,name=confidence,proto3" json:"confidence,omitempty"`
+	// Time in milliseconds from the call being connected until the verdict was reached
+	DecisionMs int32 `protobuf:"varint,4,opt,name=decision_ms,json=decisionMs,proto3" json:"decision_ms,omitempty"`
+	// Identifier of the detection rule that produced the verdict
+	RuleId string `protobuf:"bytes,5,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`
+	// Identifiers of the cues that matched, e.g. keyword or tone identifiers. Identifiers only, never transcript text
+	MatchedCueIds []string `protobuf:"bytes,6,rep,name=matched_cue_ids,json=matchedCueIds,proto3" json:"matched_cue_ids,omitempty"`
+	// What was done because of the verdict
+	ActionTaken AnsweringMachineDetectionResult_ActionTaken `protobuf:"varint,7,opt,name=action_taken,json=actionTaken,proto3,enum=ondewo.sip.AnsweringMachineDetectionResult_ActionTaken" json:"action_taken,omitempty"`
+	// Identifier of the call the result belongs to, i.e. the value of the <code>X-ondewo-vtsi-caller-call-id</code>
+	// header of the call. Used to match a result to its call by identity rather than by recency
+	CallId        string `protobuf:"bytes,8,opt,name=call_id,json=callId,proto3" json:"call_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AnsweringMachineDetectionResult) Reset() {
+	*x = AnsweringMachineDetectionResult{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AnsweringMachineDetectionResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AnsweringMachineDetectionResult) ProtoMessage() {}
+
+func (x *AnsweringMachineDetectionResult) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AnsweringMachineDetectionResult.ProtoReflect.Descriptor instead.
+func (*AnsweringMachineDetectionResult) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AnsweringMachineDetectionResult) GetVerdict() AnsweringMachineDetectionResult_Verdict {
+	if x != nil {
+		return x.Verdict
+	}
+	return AnsweringMachineDetectionResult_VERDICT_UNSPECIFIED
+}
+
+func (x *AnsweringMachineDetectionResult) GetCause() AnsweringMachineDetectionResult_Cause {
+	if x != nil {
+		return x.Cause
+	}
+	return AnsweringMachineDetectionResult_CAUSE_UNSPECIFIED
+}
+
+func (x *AnsweringMachineDetectionResult) GetConfidence() float32 {
+	if x != nil {
+		return x.Confidence
+	}
+	return 0
+}
+
+func (x *AnsweringMachineDetectionResult) GetDecisionMs() int32 {
+	if x != nil {
+		return x.DecisionMs
+	}
+	return 0
+}
+
+func (x *AnsweringMachineDetectionResult) GetRuleId() string {
+	if x != nil {
+		return x.RuleId
+	}
+	return ""
+}
+
+func (x *AnsweringMachineDetectionResult) GetMatchedCueIds() []string {
+	if x != nil {
+		return x.MatchedCueIds
+	}
+	return nil
+}
+
+func (x *AnsweringMachineDetectionResult) GetActionTaken() AnsweringMachineDetectionResult_ActionTaken {
+	if x != nil {
+		return x.ActionTaken
+	}
+	return AnsweringMachineDetectionResult_ACTION_TAKEN_UNSPECIFIED
+}
+
+func (x *AnsweringMachineDetectionResult) GetCallId() string {
+	if x != nil {
+		return x.CallId
+	}
+	return ""
+}
+
 // <p>Request to start the call with the active SIP session of the active SIP account</p>
 type SipStartCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -225,7 +925,7 @@ type SipStartCallRequest struct {
 
 func (x *SipStartCallRequest) Reset() {
 	*x = SipStartCallRequest{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[1]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -237,7 +937,7 @@ func (x *SipStartCallRequest) String() string {
 func (*SipStartCallRequest) ProtoMessage() {}
 
 func (x *SipStartCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[1]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -250,7 +950,7 @@ func (x *SipStartCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipStartCallRequest.ProtoReflect.Descriptor instead.
 func (*SipStartCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{1}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SipStartCallRequest) GetCalleeId() string {
@@ -285,7 +985,7 @@ type SipRegisterAccountRequest struct {
 
 func (x *SipRegisterAccountRequest) Reset() {
 	*x = SipRegisterAccountRequest{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[2]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -297,7 +997,7 @@ func (x *SipRegisterAccountRequest) String() string {
 func (*SipRegisterAccountRequest) ProtoMessage() {}
 
 func (x *SipRegisterAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[2]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -310,7 +1010,7 @@ func (x *SipRegisterAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipRegisterAccountRequest.ProtoReflect.Descriptor instead.
 func (*SipRegisterAccountRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SipRegisterAccountRequest) GetAccountName() string {
@@ -355,7 +1055,7 @@ type SipStartSessionRequest struct {
 
 func (x *SipStartSessionRequest) Reset() {
 	*x = SipStartSessionRequest{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[3]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -367,7 +1067,7 @@ func (x *SipStartSessionRequest) String() string {
 func (*SipStartSessionRequest) ProtoMessage() {}
 
 func (x *SipStartSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[3]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -380,7 +1080,7 @@ func (x *SipStartSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipStartSessionRequest.ProtoReflect.Descriptor instead.
 func (*SipStartSessionRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{3}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SipStartSessionRequest) GetAccountName() string {
@@ -402,15 +1102,38 @@ type SipTransferCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The account name or phone number to transfer the call to
 	TransferId string `protobuf:"bytes,1,opt,name=transfer_id,json=transferId,proto3" json:"transfer_id,omitempty"`
-	// The headers to include when transferring the call
-	Headers       map[string]string `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The headers to include when transferring the call. They are sent on the REFER. Note that Asterisk (res_pjsip,
+	// measured on 18.6 and 22) does NOT forward headers of a REFER to the transfer target: the target receives the
+	// headers of the transferred caller's original INVITE. Hand headers to the target through the dialplan instead
+	Headers map[string]string `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// <p>Optional. How long to wait, in milliseconds, for the SIP server's answer to the REFER before reporting the outcome.
+	// Clamped to 10000.</p>
+	// <p><code>0</code> (default): legacy behaviour, unchanged: REFER, then an immediate hangup.</p>
+	// <p><code>&gt; 0</code>: the call is kept until the outcome is known:</p>
+	// <ul>
+	//   <li>REFER accepted (<code>202</code>): the hangup is held for a short grace in which a terminal NOTIFY with a
+	//   <code>404</code> sipfrag (unknown target) still counts as a refusal; any other sipfrag, or none, means accepted.
+	//   The bot then hangs up and <code>TRANSFER_CALL_INITIATED</code> is returned with
+	//   <code>sip_response_code = 202</code>. The call ends as <code>*_CALL_FINISHED</code> with the description
+	//   <code>Call transferred</code>.</li>
+	//   <li>REFER refused (a final response <code>&gt;= 400</code>, or the <code>404</code> sipfrag above): the call is KEPT
+	//   with the bot, nothing is assigned to the shared status, and <code>TRANSFER_CALL_FAILED</code> is returned with
+	//   <code>description = reason=refer-rejected</code> and <code>sip_response_code</code> (<code>0</code> when the SIP
+	//   stack did not report the code, e.g. a declined REFER).</li>
+	//   <li>No answer within the timeout: the call is KEPT and <code>TRANSFER_CALL_FAILED</code> is returned with
+	//   <code>description = reason=refer-timeout</code>. A late acceptance still ends the bot's leg.</li>
+	//   <li>The call ended while waiting: <code>NO_ONGOING_CALL</code> is returned.</li>
+	// </ul>
+	// <p>A <code>202</code> does not mean the target answered: when the dialplan's dial to the target then fails (busy, no
+	// answer, unreachable) the caller is lost. Validate targets up front, or use a WARM transfer.</p>
+	OutcomeTimeoutMs uint32 `protobuf:"varint,3,opt,name=outcome_timeout_ms,json=outcomeTimeoutMs,proto3" json:"outcome_timeout_ms,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *SipTransferCallRequest) Reset() {
 	*x = SipTransferCallRequest{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[4]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -422,7 +1145,7 @@ func (x *SipTransferCallRequest) String() string {
 func (*SipTransferCallRequest) ProtoMessage() {}
 
 func (x *SipTransferCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[4]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -435,7 +1158,7 @@ func (x *SipTransferCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipTransferCallRequest.ProtoReflect.Descriptor instead.
 func (*SipTransferCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{4}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SipTransferCallRequest) GetTransferId() string {
@@ -450,6 +1173,13 @@ func (x *SipTransferCallRequest) GetHeaders() map[string]string {
 		return x.Headers
 	}
 	return nil
+}
+
+func (x *SipTransferCallRequest) GetOutcomeTimeoutMs() uint32 {
+	if x != nil {
+		return x.OutcomeTimeoutMs
+	}
+	return 0
 }
 
 // <p>Status information for a SIP account, session, or call</p>
@@ -476,13 +1206,34 @@ type SipStatus struct {
 	ExceptionTraceback string `protobuf:"bytes,9,opt,name=exception_traceback,json=exceptionTraceback,proto3" json:"exception_traceback,omitempty"`
 	// session name of the NLU session
 	NluSessionName string `protobuf:"bytes,10,opt,name=nlu_session_name,json=nluSessionName,proto3" json:"nlu_session_name,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Result of the answering machine detection of the call. Set on
+	// <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> and on the terminal status of every call on which answering machine detection ran, including a
+	// <code>HUMAN</code> verdict; unset otherwise
+	AmdResult *AnsweringMachineDetectionResult `protobuf:"bytes,11,opt,name=amd_result,json=amdResult,proto3" json:"amd_result,omitempty"`
+	// Identifier of the ongoing call, minted per call: the value of the <code>X-ondewo-vtsi-caller-call-id</code> header of
+	// an outgoing call when present, otherwise a random UUID. Empty when no call is ongoing. Set on every status of the
+	// call, including the entries of <code>SipGetSipStatusHistory</code>. Clients send it back as the
+	// <code>x-ondewo-expected-call-id</code> metadatum to scope a request to this call
+	CallId string `protobuf:"bytes,12,opt,name=call_id,json=callId,proto3" json:"call_id,omitempty"`
+	// <code>true</code> while the bot is muted by an operator, a conference participant policy or a TALK take-over of
+	// <code>SipSetCallMediaControl</code> / <code>SipStreamCallAudio</code>. Not the bot's own pipeline mute
+	// (<code>MICROPHONE_MUTED</code>). Cleared when the call ends
+	BotMuted bool `protobuf:"varint,13,opt,name=bot_muted,json=botMuted,proto3" json:"bot_muted,omitempty"`
+	// <code>true</code> while the bot does not listen to the caller (see <code>bot_muted</code> for who sets it). Cleared
+	// when the call ends
+	ListeningPaused bool `protobuf:"varint,14,opt,name=listening_paused,json=listeningPaused,proto3" json:"listening_paused,omitempty"`
+	// Number of connected <code>SipStreamCallAudio</code> streams of the ongoing call
+	CallAudioStreams int32 `protobuf:"varint,15,opt,name=call_audio_streams,json=callAudioStreams,proto3" json:"call_audio_streams,omitempty"`
+	// SIP response code of the last transfer attempt of the ongoing call (<code>202</code> when accepted, the refusal code
+	// otherwise, <code>0</code> when unknown). Call-scoped
+	SipResponseCode int32 `protobuf:"varint,16,opt,name=sip_response_code,json=sipResponseCode,proto3" json:"sip_response_code,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SipStatus) Reset() {
 	*x = SipStatus{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[5]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -494,7 +1245,7 @@ func (x *SipStatus) String() string {
 func (*SipStatus) ProtoMessage() {}
 
 func (x *SipStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[5]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -507,7 +1258,7 @@ func (x *SipStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipStatus.ProtoReflect.Descriptor instead.
 func (*SipStatus) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{5}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SipStatus) GetAccountName() string {
@@ -580,6 +1331,48 @@ func (x *SipStatus) GetNluSessionName() string {
 	return ""
 }
 
+func (x *SipStatus) GetAmdResult() *AnsweringMachineDetectionResult {
+	if x != nil {
+		return x.AmdResult
+	}
+	return nil
+}
+
+func (x *SipStatus) GetCallId() string {
+	if x != nil {
+		return x.CallId
+	}
+	return ""
+}
+
+func (x *SipStatus) GetBotMuted() bool {
+	if x != nil {
+		return x.BotMuted
+	}
+	return false
+}
+
+func (x *SipStatus) GetListeningPaused() bool {
+	if x != nil {
+		return x.ListeningPaused
+	}
+	return false
+}
+
+func (x *SipStatus) GetCallAudioStreams() int32 {
+	if x != nil {
+		return x.CallAudioStreams
+	}
+	return 0
+}
+
+func (x *SipStatus) GetSipResponseCode() int32 {
+	if x != nil {
+		return x.SipResponseCode
+	}
+	return 0
+}
+
 // <p>History of SIP status</p>
 type SipStatusHistoryResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -591,7 +1384,7 @@ type SipStatusHistoryResponse struct {
 
 func (x *SipStatusHistoryResponse) Reset() {
 	*x = SipStatusHistoryResponse{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[6]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -603,7 +1396,7 @@ func (x *SipStatusHistoryResponse) String() string {
 func (*SipStatusHistoryResponse) ProtoMessage() {}
 
 func (x *SipStatusHistoryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[6]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -616,7 +1409,7 @@ func (x *SipStatusHistoryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipStatusHistoryResponse.ProtoReflect.Descriptor instead.
 func (*SipStatusHistoryResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{6}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SipStatusHistoryResponse) GetStatusHistory() []*SipStatus {
@@ -625,6 +1418,670 @@ func (x *SipStatusHistoryResponse) GetStatusHistory() []*SipStatus {
 	}
 	return nil
 }
+
+// <p>Request of <code>SipSetCallMediaControl</code></p>
+type SipSetCallMediaControlRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// <code>MEDIA_CONTROL_SETTING_ON</code>: the bot speaks. <code>MEDIA_CONTROL_SETTING_OFF</code>: the bot is muted
+	BotVoice MediaControlSetting `protobuf:"varint,1,opt,name=bot_voice,json=botVoice,proto3,enum=ondewo.sip.MediaControlSetting" json:"bot_voice,omitempty"`
+	// <code>MEDIA_CONTROL_SETTING_ON</code>: caller audio reaches speech-to-text. <code>MEDIA_CONTROL_SETTING_OFF</code>:
+	// listening is paused
+	BotListening MediaControlSetting `protobuf:"varint,2,opt,name=bot_listening,json=botListening,proto3,enum=ondewo.sip.MediaControlSetting" json:"bot_listening,omitempty"`
+	// Owner whose hold is set
+	Owner MediaControlOwner `protobuf:"varint,3,opt,name=owner,proto3,enum=ondewo.sip.MediaControlOwner" json:"owner,omitempty"`
+	// <p>Only for <code>MEDIA_CONTROL_OWNER_PARTICIPANT</code>, ignored for every other owner: whether at least one
+	// invited participant is ringing or joined. Every participant request carries the full value, so the request that
+	// reports the last participant gone sends <code>false</code>.</p>
+	// <p>While participants are present (this flag, or a mute or pause held by the participant owner)
+	// <code>SipTransferCall</code> is refused with <code>exception_name=ParticipantsPresent</code>, because a REFER
+	// into a conference bridge transfers every party in it. A request that would mark participants present while a
+	// transfer of the call is in flight is refused with <code>exception_name=TransferInProgress</code> and changes
+	// nothing. Cleared when the call ends</p>
+	ParticipantsPresent bool `protobuf:"varint,4,opt,name=participants_present,json=participantsPresent,proto3" json:"participants_present,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *SipSetCallMediaControlRequest) Reset() {
+	*x = SipSetCallMediaControlRequest{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipSetCallMediaControlRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipSetCallMediaControlRequest) ProtoMessage() {}
+
+func (x *SipSetCallMediaControlRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipSetCallMediaControlRequest.ProtoReflect.Descriptor instead.
+func (*SipSetCallMediaControlRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SipSetCallMediaControlRequest) GetBotVoice() MediaControlSetting {
+	if x != nil {
+		return x.BotVoice
+	}
+	return MediaControlSetting_MEDIA_CONTROL_SETTING_UNCHANGED
+}
+
+func (x *SipSetCallMediaControlRequest) GetBotListening() MediaControlSetting {
+	if x != nil {
+		return x.BotListening
+	}
+	return MediaControlSetting_MEDIA_CONTROL_SETTING_UNCHANGED
+}
+
+func (x *SipSetCallMediaControlRequest) GetOwner() MediaControlOwner {
+	if x != nil {
+		return x.Owner
+	}
+	return MediaControlOwner_MEDIA_CONTROL_OWNER_UNSPECIFIED
+}
+
+func (x *SipSetCallMediaControlRequest) GetParticipantsPresent() bool {
+	if x != nil {
+		return x.ParticipantsPresent
+	}
+	return false
+}
+
+// <p>Configuration of a <code>SipStreamCallAudio</code> stream. Must be the first request of the stream</p>
+type SipCallAudioConfig struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Mode of the stream. Unspecified means LISTEN
+	Mode SipCallAudioMode `protobuf:"varint,1,opt,name=mode,proto3,enum=ondewo.sip.SipCallAudioMode" json:"mode,omitempty"`
+	// Sample rate in Hz of the audio in both directions: <code>8000</code> or <code>16000</code>. <code>0</code> means
+	// <code>16000</code>
+	SampleRateHz int32 `protobuf:"varint,2,opt,name=sample_rate_hz,json=sampleRateHz,proto3" json:"sample_rate_hz,omitempty"`
+	// Frame length in milliseconds. Only <code>20</code> is supported; <code>0</code> means <code>20</code>
+	FrameMs int32 `protobuf:"varint,3,opt,name=frame_ms,json=frameMs,proto3" json:"frame_ms,omitempty"`
+	// REQUIRED for TALK: the bot is muted and does not listen while the stream is connected. Released when the stream
+	// ends
+	TakeOver bool `protobuf:"varint,4,opt,name=take_over,json=takeOver,proto3" json:"take_over,omitempty"`
+	// Identifier of the stream for logs and audit correlation, minted by the client (a UUID)
+	StreamId string `protobuf:"bytes,5,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
+	// Maximum duration of the stream in seconds. <code>0</code> means the server default (3600)
+	MaxDurationS  int32 `protobuf:"varint,6,opt,name=max_duration_s,json=maxDurationS,proto3" json:"max_duration_s,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioConfig) Reset() {
+	*x = SipCallAudioConfig{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioConfig) ProtoMessage() {}
+
+func (x *SipCallAudioConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioConfig.ProtoReflect.Descriptor instead.
+func (*SipCallAudioConfig) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SipCallAudioConfig) GetMode() SipCallAudioMode {
+	if x != nil {
+		return x.Mode
+	}
+	return SipCallAudioMode_SIP_CALL_AUDIO_MODE_UNSPECIFIED
+}
+
+func (x *SipCallAudioConfig) GetSampleRateHz() int32 {
+	if x != nil {
+		return x.SampleRateHz
+	}
+	return 0
+}
+
+func (x *SipCallAudioConfig) GetFrameMs() int32 {
+	if x != nil {
+		return x.FrameMs
+	}
+	return 0
+}
+
+func (x *SipCallAudioConfig) GetTakeOver() bool {
+	if x != nil {
+		return x.TakeOver
+	}
+	return false
+}
+
+func (x *SipCallAudioConfig) GetStreamId() string {
+	if x != nil {
+		return x.StreamId
+	}
+	return ""
+}
+
+func (x *SipCallAudioConfig) GetMaxDurationS() int32 {
+	if x != nil {
+		return x.MaxDurationS
+	}
+	return 0
+}
+
+// <p>One frame of call audio</p>
+type SipCallAudioFrame struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// LINEAR16 little-endian mono samples of one frame, i.e. <code>sample_rate_hz * frame_ms / 1000 * 2</code> bytes
+	PcmS16Le []byte `protobuf:"bytes,1,opt,name=pcm_s16le,json=pcmS16le,proto3" json:"pcm_s16le,omitempty"`
+	// Monotonic sequence number of the frame within its direction of the stream
+	Sequence      uint64 `protobuf:"varint,2,opt,name=sequence,proto3" json:"sequence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioFrame) Reset() {
+	*x = SipCallAudioFrame{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioFrame) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioFrame) ProtoMessage() {}
+
+func (x *SipCallAudioFrame) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioFrame.ProtoReflect.Descriptor instead.
+func (*SipCallAudioFrame) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SipCallAudioFrame) GetPcmS16Le() []byte {
+	if x != nil {
+		return x.PcmS16Le
+	}
+	return nil
+}
+
+func (x *SipCallAudioFrame) GetSequence() uint64 {
+	if x != nil {
+		return x.Sequence
+	}
+	return 0
+}
+
+// <p>Request of <code>SipStreamCallAudio</code></p>
+type SipCallAudioRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// One of the following
+	//
+	// Types that are valid to be assigned to Request:
+	//
+	//	*SipCallAudioRequest_Config
+	//	*SipCallAudioRequest_Audio
+	//	*SipCallAudioRequest_AgentMuted
+	Request       isSipCallAudioRequest_Request `protobuf_oneof:"request"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioRequest) Reset() {
+	*x = SipCallAudioRequest{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioRequest) ProtoMessage() {}
+
+func (x *SipCallAudioRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioRequest.ProtoReflect.Descriptor instead.
+func (*SipCallAudioRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *SipCallAudioRequest) GetRequest() isSipCallAudioRequest_Request {
+	if x != nil {
+		return x.Request
+	}
+	return nil
+}
+
+func (x *SipCallAudioRequest) GetConfig() *SipCallAudioConfig {
+	if x != nil {
+		if x, ok := x.Request.(*SipCallAudioRequest_Config); ok {
+			return x.Config
+		}
+	}
+	return nil
+}
+
+func (x *SipCallAudioRequest) GetAudio() *SipCallAudioFrame {
+	if x != nil {
+		if x, ok := x.Request.(*SipCallAudioRequest_Audio); ok {
+			return x.Audio
+		}
+	}
+	return nil
+}
+
+func (x *SipCallAudioRequest) GetAgentMuted() bool {
+	if x != nil {
+		if x, ok := x.Request.(*SipCallAudioRequest_AgentMuted); ok {
+			return x.AgentMuted
+		}
+	}
+	return false
+}
+
+type isSipCallAudioRequest_Request interface {
+	isSipCallAudioRequest_Request()
+}
+
+type SipCallAudioRequest_Config struct {
+	// Configuration; must be the first request and is accepted only once
+	Config *SipCallAudioConfig `protobuf:"bytes,1,opt,name=config,proto3,oneof"`
+}
+
+type SipCallAudioRequest_Audio struct {
+	// Agent audio to send to the caller (TALK only)
+	Audio *SipCallAudioFrame `protobuf:"bytes,2,opt,name=audio,proto3,oneof"`
+}
+
+type SipCallAudioRequest_AgentMuted struct {
+	// <code>true</code>: the agent's audio is not sent to the caller (silence instead) until set to <code>false</code>
+	AgentMuted bool `protobuf:"varint,3,opt,name=agent_muted,json=agentMuted,proto3,oneof"`
+}
+
+func (*SipCallAudioRequest_Config) isSipCallAudioRequest_Request() {}
+
+func (*SipCallAudioRequest_Audio) isSipCallAudioRequest_Request() {}
+
+func (*SipCallAudioRequest_AgentMuted) isSipCallAudioRequest_Request() {}
+
+// <p>Sent once when a <code>SipStreamCallAudio</code> stream is connected</p>
+type SipCallAudioStarted struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Identifier of the stream
+	StreamId string `protobuf:"bytes,1,opt,name=stream_id,json=streamId,proto3" json:"stream_id,omitempty"`
+	// Sample rate in Hz of the audio in both directions
+	SampleRateHz int32 `protobuf:"varint,2,opt,name=sample_rate_hz,json=sampleRateHz,proto3" json:"sample_rate_hz,omitempty"`
+	// Frame length in milliseconds
+	FrameMs int32 `protobuf:"varint,3,opt,name=frame_ms,json=frameMs,proto3" json:"frame_ms,omitempty"`
+	// Mode of the stream
+	Mode          SipCallAudioMode `protobuf:"varint,4,opt,name=mode,proto3,enum=ondewo.sip.SipCallAudioMode" json:"mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioStarted) Reset() {
+	*x = SipCallAudioStarted{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioStarted) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioStarted) ProtoMessage() {}
+
+func (x *SipCallAudioStarted) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioStarted.ProtoReflect.Descriptor instead.
+func (*SipCallAudioStarted) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SipCallAudioStarted) GetStreamId() string {
+	if x != nil {
+		return x.StreamId
+	}
+	return ""
+}
+
+func (x *SipCallAudioStarted) GetSampleRateHz() int32 {
+	if x != nil {
+		return x.SampleRateHz
+	}
+	return 0
+}
+
+func (x *SipCallAudioStarted) GetFrameMs() int32 {
+	if x != nil {
+		return x.FrameMs
+	}
+	return 0
+}
+
+func (x *SipCallAudioStarted) GetMode() SipCallAudioMode {
+	if x != nil {
+		return x.Mode
+	}
+	return SipCallAudioMode_SIP_CALL_AUDIO_MODE_UNSPECIFIED
+}
+
+// <p>Counters of a <code>SipStreamCallAudio</code> stream, sent periodically</p>
+type SipCallAudioStats struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Frames sent to the client
+	FramesSent uint64 `protobuf:"varint,1,opt,name=frames_sent,json=framesSent,proto3" json:"frames_sent,omitempty"`
+	// Frames to the client dropped because the client read too slowly
+	FramesDropped uint64 `protobuf:"varint,2,opt,name=frames_dropped,json=framesDropped,proto3" json:"frames_dropped,omitempty"`
+	// Frames received from the client
+	FramesReceived uint64 `protobuf:"varint,3,opt,name=frames_received,json=framesReceived,proto3" json:"frames_received,omitempty"`
+	// Playback underruns of the agent audio (silence was played)
+	Underruns uint64 `protobuf:"varint,4,opt,name=underruns,proto3" json:"underruns,omitempty"`
+	// Frames from the client discarded because the playback buffer was full
+	FramesDiscarded uint64 `protobuf:"varint,5,opt,name=frames_discarded,json=framesDiscarded,proto3" json:"frames_discarded,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *SipCallAudioStats) Reset() {
+	*x = SipCallAudioStats{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioStats) ProtoMessage() {}
+
+func (x *SipCallAudioStats) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioStats.ProtoReflect.Descriptor instead.
+func (*SipCallAudioStats) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *SipCallAudioStats) GetFramesSent() uint64 {
+	if x != nil {
+		return x.FramesSent
+	}
+	return 0
+}
+
+func (x *SipCallAudioStats) GetFramesDropped() uint64 {
+	if x != nil {
+		return x.FramesDropped
+	}
+	return 0
+}
+
+func (x *SipCallAudioStats) GetFramesReceived() uint64 {
+	if x != nil {
+		return x.FramesReceived
+	}
+	return 0
+}
+
+func (x *SipCallAudioStats) GetUnderruns() uint64 {
+	if x != nil {
+		return x.Underruns
+	}
+	return 0
+}
+
+func (x *SipCallAudioStats) GetFramesDiscarded() uint64 {
+	if x != nil {
+		return x.FramesDiscarded
+	}
+	return 0
+}
+
+// <p>Sent once when a <code>SipStreamCallAudio</code> stream ends normally</p>
+type SipCallAudioEnded struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Why the stream ended
+	Reason SipCallAudioEndReason `protobuf:"varint,1,opt,name=reason,proto3,enum=ondewo.sip.SipCallAudioEndReason" json:"reason,omitempty"`
+	// Optional detail, a stable token
+	Detail        string `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioEnded) Reset() {
+	*x = SipCallAudioEnded{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioEnded) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioEnded) ProtoMessage() {}
+
+func (x *SipCallAudioEnded) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioEnded.ProtoReflect.Descriptor instead.
+func (*SipCallAudioEnded) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SipCallAudioEnded) GetReason() SipCallAudioEndReason {
+	if x != nil {
+		return x.Reason
+	}
+	return SipCallAudioEndReason_SIP_CALL_AUDIO_END_REASON_UNSPECIFIED
+}
+
+func (x *SipCallAudioEnded) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+// <p>Response of <code>SipStreamCallAudio</code></p>
+type SipCallAudioResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// One of the following
+	//
+	// Types that are valid to be assigned to Response:
+	//
+	//	*SipCallAudioResponse_Started
+	//	*SipCallAudioResponse_Audio
+	//	*SipCallAudioResponse_Stats
+	//	*SipCallAudioResponse_Ended
+	Response      isSipCallAudioResponse_Response `protobuf_oneof:"response"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipCallAudioResponse) Reset() {
+	*x = SipCallAudioResponse{}
+	mi := &file_ondewo_sip_sip_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipCallAudioResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipCallAudioResponse) ProtoMessage() {}
+
+func (x *SipCallAudioResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_sip_sip_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipCallAudioResponse.ProtoReflect.Descriptor instead.
+func (*SipCallAudioResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SipCallAudioResponse) GetResponse() isSipCallAudioResponse_Response {
+	if x != nil {
+		return x.Response
+	}
+	return nil
+}
+
+func (x *SipCallAudioResponse) GetStarted() *SipCallAudioStarted {
+	if x != nil {
+		if x, ok := x.Response.(*SipCallAudioResponse_Started); ok {
+			return x.Started
+		}
+	}
+	return nil
+}
+
+func (x *SipCallAudioResponse) GetAudio() *SipCallAudioFrame {
+	if x != nil {
+		if x, ok := x.Response.(*SipCallAudioResponse_Audio); ok {
+			return x.Audio
+		}
+	}
+	return nil
+}
+
+func (x *SipCallAudioResponse) GetStats() *SipCallAudioStats {
+	if x != nil {
+		if x, ok := x.Response.(*SipCallAudioResponse_Stats); ok {
+			return x.Stats
+		}
+	}
+	return nil
+}
+
+func (x *SipCallAudioResponse) GetEnded() *SipCallAudioEnded {
+	if x != nil {
+		if x, ok := x.Response.(*SipCallAudioResponse_Ended); ok {
+			return x.Ended
+		}
+	}
+	return nil
+}
+
+type isSipCallAudioResponse_Response interface {
+	isSipCallAudioResponse_Response()
+}
+
+type SipCallAudioResponse_Started struct {
+	// The stream is connected
+	Started *SipCallAudioStarted `protobuf:"bytes,1,opt,name=started,proto3,oneof"`
+}
+
+type SipCallAudioResponse_Audio struct {
+	// Call audio
+	Audio *SipCallAudioFrame `protobuf:"bytes,2,opt,name=audio,proto3,oneof"`
+}
+
+type SipCallAudioResponse_Stats struct {
+	// Stream counters
+	Stats *SipCallAudioStats `protobuf:"bytes,3,opt,name=stats,proto3,oneof"`
+}
+
+type SipCallAudioResponse_Ended struct {
+	// The stream ended
+	Ended *SipCallAudioEnded `protobuf:"bytes,4,opt,name=ended,proto3,oneof"`
+}
+
+func (*SipCallAudioResponse_Started) isSipCallAudioResponse_Response() {}
+
+func (*SipCallAudioResponse_Audio) isSipCallAudioResponse_Response() {}
+
+func (*SipCallAudioResponse_Stats) isSipCallAudioResponse_Response() {}
+
+func (*SipCallAudioResponse_Ended) isSipCallAudioResponse_Response() {}
 
 // <p>Plays a list of wav files</p>
 type SipPlayWavFilesRequest struct {
@@ -637,7 +2094,7 @@ type SipPlayWavFilesRequest struct {
 
 func (x *SipPlayWavFilesRequest) Reset() {
 	*x = SipPlayWavFilesRequest{}
-	mi := &file_ondewo_sip_sip_proto_msgTypes[7]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -649,7 +2106,7 @@ func (x *SipPlayWavFilesRequest) String() string {
 func (*SipPlayWavFilesRequest) ProtoMessage() {}
 
 func (x *SipPlayWavFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_sip_sip_proto_msgTypes[7]
+	mi := &file_ondewo_sip_sip_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -662,7 +2119,7 @@ func (x *SipPlayWavFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipPlayWavFilesRequest.ProtoReflect.Descriptor instead.
 func (*SipPlayWavFilesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{7}
+	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *SipPlayWavFilesRequest) GetWavFiles() [][]byte {
@@ -677,10 +2134,60 @@ var File_ondewo_sip_sip_proto protoreflect.FileDescriptor
 const file_ondewo_sip_sip_proto_rawDesc = "" +
 	"\n" +
 	"\x14ondewo/sip/sip.proto\x12\n" +
-	"ondewo.sip\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"4\n" +
+	"ondewo.sip\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe1\x02\n" +
 	"\x11SipEndCallRequest\x12\x1f\n" +
 	"\vhard_hangup\x18\x01 \x01(\bR\n" +
-	"hardHangup\"\xb6\x01\n" +
+	"hardHangup\x12J\n" +
+	"\n" +
+	"end_reason\x18\x02 \x01(\x0e2+.ondewo.sip.SipEndCallRequest.EndCallReasonR\tendReason\x12J\n" +
+	"\n" +
+	"amd_result\x18\x03 \x01(\v2+.ondewo.sip.AnsweringMachineDetectionResultR\tamdResult\"\x92\x01\n" +
+	"\rEndCallReason\x12\x1f\n" +
+	"\x1bEND_CALL_REASON_UNSPECIFIED\x10\x00\x12\x15\n" +
+	"\x11ANSWERING_MACHINE\x10\x01\x12(\n" +
+	"$ANSWERING_MACHINE_VOICE_MESSAGE_LEFT\x10\x02\x12\x1f\n" +
+	"\x1bEND_CALL_REASON_TRANSFERRED\x10\x03\"v\n" +
+	"(SipReportAnsweringMachineDetectedRequest\x12J\n" +
+	"\n" +
+	"amd_result\x18\x01 \x01(\v2+.ondewo.sip.AnsweringMachineDetectionResultR\tamdResult\"\xd3\x06\n" +
+	"\x1fAnsweringMachineDetectionResult\x12M\n" +
+	"\averdict\x18\x01 \x01(\x0e23.ondewo.sip.AnsweringMachineDetectionResult.VerdictR\averdict\x12G\n" +
+	"\x05cause\x18\x02 \x01(\x0e21.ondewo.sip.AnsweringMachineDetectionResult.CauseR\x05cause\x12\x1e\n" +
+	"\n" +
+	"confidence\x18\x03 \x01(\x02R\n" +
+	"confidence\x12\x1f\n" +
+	"\vdecision_ms\x18\x04 \x01(\x05R\n" +
+	"decisionMs\x12\x17\n" +
+	"\arule_id\x18\x05 \x01(\tR\x06ruleId\x12&\n" +
+	"\x0fmatched_cue_ids\x18\x06 \x03(\tR\rmatchedCueIds\x12Z\n" +
+	"\faction_taken\x18\a \x01(\x0e27.ondewo.sip.AnsweringMachineDetectionResult.ActionTakenR\vactionTaken\x12\x17\n" +
+	"\acall_id\x18\b \x01(\tR\x06callId\"\x96\x01\n" +
+	"\aVerdict\x12\x17\n" +
+	"\x13VERDICT_UNSPECIFIED\x10\x00\x12\t\n" +
+	"\x05HUMAN\x10\x01\x12\v\n" +
+	"\aMACHINE\x10\x02\x12\a\n" +
+	"\x03IVR\x10\x03\x12\a\n" +
+	"\x03FAX\x10\x04\x12\x18\n" +
+	"\x14NETWORK_ANNOUNCEMENT\x10\x05\x12\x12\n" +
+	"\x0eCALL_SCREENING\x10\x06\x12\r\n" +
+	"\tNO_SPEECH\x10\a\x12\v\n" +
+	"\aUNKNOWN\x10\b\"\x95\x01\n" +
+	"\x05Cause\x12\x15\n" +
+	"\x11CAUSE_UNSPECIFIED\x10\x00\x12\v\n" +
+	"\aCADENCE\x10\x01\x12\v\n" +
+	"\aKEYWORD\x10\x02\x12\b\n" +
+	"\x04BEEP\x10\x03\x12\b\n" +
+	"\x04TONE\x10\x04\x12\x17\n" +
+	"\x13CADENCE_AND_KEYWORD\x10\x05\x12\x14\n" +
+	"\x10CADENCE_AND_BEEP\x10\x06\x12\v\n" +
+	"\aTIMEOUT\x10\a\x12\v\n" +
+	"\aSILENCE\x10\b\"p\n" +
+	"\vActionTaken\x12\x1c\n" +
+	"\x18ACTION_TAKEN_UNSPECIFIED\x10\x00\x12\v\n" +
+	"\aHUNG_UP\x10\x01\x12\r\n" +
+	"\tCONTINUED\x10\x02\x12\x0f\n" +
+	"\vDETECT_ONLY\x10\x03\x12\x16\n" +
+	"\x12LEFT_VOICE_MESSAGE\x10\x04\"\xb6\x01\n" +
 	"\x13SipStartCallRequest\x12\x1b\n" +
 	"\tcallee_id\x18\x01 \x01(\tR\bcalleeId\x12F\n" +
 	"\aheaders\x18\x02 \x03(\v2,.ondewo.sip.SipStartCallRequest.HeadersEntryR\aheaders\x1a:\n" +
@@ -694,14 +2201,16 @@ const file_ondewo_sip_sip_proto_rawDesc = "" +
 	"\x0eoutbound_proxy\x18\x04 \x01(\tR\routboundProxy\"m\n" +
 	"\x16SipStartSessionRequest\x12!\n" +
 	"\faccount_name\x18\x01 \x01(\tR\vaccountName\x120\n" +
-	"\x14auto_answer_interval\x18\x02 \x01(\x05R\x12autoAnswerInterval\"\xc0\x01\n" +
+	"\x14auto_answer_interval\x18\x02 \x01(\x05R\x12autoAnswerInterval\"\xee\x01\n" +
 	"\x16SipTransferCallRequest\x12\x1f\n" +
 	"\vtransfer_id\x18\x01 \x01(\tR\n" +
 	"transferId\x12I\n" +
-	"\aheaders\x18\x02 \x03(\v2/.ondewo.sip.SipTransferCallRequest.HeadersEntryR\aheaders\x1a:\n" +
+	"\aheaders\x18\x02 \x03(\v2/.ondewo.sip.SipTransferCallRequest.HeadersEntryR\aheaders\x12,\n" +
+	"\x12outcome_timeout_ms\x18\x03 \x01(\rR\x10outcomeTimeoutMs\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc4\b\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xf9\n" +
+	"\n" +
 	"\tSipStatus\x12!\n" +
 	"\faccount_name\x18\x01 \x01(\tR\vaccountName\x128\n" +
 	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12A\n" +
@@ -714,10 +2223,17 @@ const file_ondewo_sip_sip_proto_rawDesc = "" +
 	"\x0eexception_name\x18\b \x01(\tR\rexceptionName\x12/\n" +
 	"\x13exception_traceback\x18\t \x01(\tR\x12exceptionTraceback\x12(\n" +
 	"\x10nlu_session_name\x18\n" +
-	" \x01(\tR\x0enluSessionName\x1a:\n" +
+	" \x01(\tR\x0enluSessionName\x12J\n" +
+	"\n" +
+	"amd_result\x18\v \x01(\v2+.ondewo.sip.AnsweringMachineDetectionResultR\tamdResult\x12\x17\n" +
+	"\acall_id\x18\f \x01(\tR\x06callId\x12\x1b\n" +
+	"\tbot_muted\x18\r \x01(\bR\bbotMuted\x12)\n" +
+	"\x10listening_paused\x18\x0e \x01(\bR\x0flisteningPaused\x12,\n" +
+	"\x12call_audio_streams\x18\x0f \x01(\x05R\x10callAudioStreams\x12*\n" +
+	"\x11sip_response_code\x18\x10 \x01(\x05R\x0fsipResponseCode\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xb1\x04\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xdf\x04\n" +
 	"\n" +
 	"StatusType\x12\x0e\n" +
 	"\n" +
@@ -744,11 +2260,75 @@ const file_ondewo_sip_sip_proto_rawDesc = "" +
 	"\x10MICROPHONE_MUTED\x10\x12\x12\x16\n" +
 	"\x12MICROPHONE_UNMUTED\x10\x13\x12\x1f\n" +
 	"\x1bMICROPHONE_WAV_FILES_PLAYED\x10\x14\x12\x13\n" +
-	"\x0fNO_ONGOING_CALL\x10\x15\"X\n" +
+	"\x0fNO_ONGOING_CALL\x10\x15\x12,\n" +
+	"(OUTGOING_CALL_ANSWERING_MACHINE_DETECTED\x10\x16\"X\n" +
 	"\x18SipStatusHistoryResponse\x12<\n" +
-	"\x0estatus_history\x18\x01 \x03(\v2\x15.ondewo.sip.SipStatusR\rstatusHistory\"5\n" +
+	"\x0estatus_history\x18\x01 \x03(\v2\x15.ondewo.sip.SipStatusR\rstatusHistory\"\x8b\x02\n" +
+	"\x1dSipSetCallMediaControlRequest\x12<\n" +
+	"\tbot_voice\x18\x01 \x01(\x0e2\x1f.ondewo.sip.MediaControlSettingR\bbotVoice\x12D\n" +
+	"\rbot_listening\x18\x02 \x01(\x0e2\x1f.ondewo.sip.MediaControlSettingR\fbotListening\x123\n" +
+	"\x05owner\x18\x03 \x01(\x0e2\x1d.ondewo.sip.MediaControlOwnerR\x05owner\x121\n" +
+	"\x14participants_present\x18\x04 \x01(\bR\x13participantsPresent\"\xe7\x01\n" +
+	"\x12SipCallAudioConfig\x120\n" +
+	"\x04mode\x18\x01 \x01(\x0e2\x1c.ondewo.sip.SipCallAudioModeR\x04mode\x12$\n" +
+	"\x0esample_rate_hz\x18\x02 \x01(\x05R\fsampleRateHz\x12\x19\n" +
+	"\bframe_ms\x18\x03 \x01(\x05R\aframeMs\x12\x1b\n" +
+	"\ttake_over\x18\x04 \x01(\bR\btakeOver\x12\x1b\n" +
+	"\tstream_id\x18\x05 \x01(\tR\bstreamId\x12$\n" +
+	"\x0emax_duration_s\x18\x06 \x01(\x05R\fmaxDurationS\"L\n" +
+	"\x11SipCallAudioFrame\x12\x1b\n" +
+	"\tpcm_s16le\x18\x01 \x01(\fR\bpcmS16le\x12\x1a\n" +
+	"\bsequence\x18\x02 \x01(\x04R\bsequence\"\xb4\x01\n" +
+	"\x13SipCallAudioRequest\x128\n" +
+	"\x06config\x18\x01 \x01(\v2\x1e.ondewo.sip.SipCallAudioConfigH\x00R\x06config\x125\n" +
+	"\x05audio\x18\x02 \x01(\v2\x1d.ondewo.sip.SipCallAudioFrameH\x00R\x05audio\x12!\n" +
+	"\vagent_muted\x18\x03 \x01(\bH\x00R\n" +
+	"agentMutedB\t\n" +
+	"\arequest\"\xa5\x01\n" +
+	"\x13SipCallAudioStarted\x12\x1b\n" +
+	"\tstream_id\x18\x01 \x01(\tR\bstreamId\x12$\n" +
+	"\x0esample_rate_hz\x18\x02 \x01(\x05R\fsampleRateHz\x12\x19\n" +
+	"\bframe_ms\x18\x03 \x01(\x05R\aframeMs\x120\n" +
+	"\x04mode\x18\x04 \x01(\x0e2\x1c.ondewo.sip.SipCallAudioModeR\x04mode\"\xcd\x01\n" +
+	"\x11SipCallAudioStats\x12\x1f\n" +
+	"\vframes_sent\x18\x01 \x01(\x04R\n" +
+	"framesSent\x12%\n" +
+	"\x0eframes_dropped\x18\x02 \x01(\x04R\rframesDropped\x12'\n" +
+	"\x0fframes_received\x18\x03 \x01(\x04R\x0eframesReceived\x12\x1c\n" +
+	"\tunderruns\x18\x04 \x01(\x04R\tunderruns\x12)\n" +
+	"\x10frames_discarded\x18\x05 \x01(\x04R\x0fframesDiscarded\"f\n" +
+	"\x11SipCallAudioEnded\x129\n" +
+	"\x06reason\x18\x01 \x01(\x0e2!.ondewo.sip.SipCallAudioEndReasonR\x06reason\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\x84\x02\n" +
+	"\x14SipCallAudioResponse\x12;\n" +
+	"\astarted\x18\x01 \x01(\v2\x1f.ondewo.sip.SipCallAudioStartedH\x00R\astarted\x125\n" +
+	"\x05audio\x18\x02 \x01(\v2\x1d.ondewo.sip.SipCallAudioFrameH\x00R\x05audio\x125\n" +
+	"\x05stats\x18\x03 \x01(\v2\x1d.ondewo.sip.SipCallAudioStatsH\x00R\x05stats\x125\n" +
+	"\x05ended\x18\x04 \x01(\v2\x1d.ondewo.sip.SipCallAudioEndedH\x00R\x05endedB\n" +
+	"\n" +
+	"\bresponse\"5\n" +
 	"\x16SipPlayWavFilesRequest\x12\x1b\n" +
-	"\twav_files\x18\x01 \x03(\fR\bwavFiles2\xb5\x06\n" +
+	"\twav_files\x18\x01 \x03(\fR\bwavFiles*w\n" +
+	"\x13MediaControlSetting\x12#\n" +
+	"\x1fMEDIA_CONTROL_SETTING_UNCHANGED\x10\x00\x12\x1c\n" +
+	"\x18MEDIA_CONTROL_SETTING_ON\x10\x01\x12\x1d\n" +
+	"\x19MEDIA_CONTROL_SETTING_OFF\x10\x02*\x7f\n" +
+	"\x11MediaControlOwner\x12#\n" +
+	"\x1fMEDIA_CONTROL_OWNER_UNSPECIFIED\x10\x00\x12 \n" +
+	"\x1cMEDIA_CONTROL_OWNER_OPERATOR\x10\x01\x12#\n" +
+	"\x1fMEDIA_CONTROL_OWNER_PARTICIPANT\x10\x02*u\n" +
+	"\x10SipCallAudioMode\x12#\n" +
+	"\x1fSIP_CALL_AUDIO_MODE_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aSIP_CALL_AUDIO_MODE_LISTEN\x10\x01\x12\x1c\n" +
+	"\x18SIP_CALL_AUDIO_MODE_TALK\x10\x02*\xc4\x02\n" +
+	"\x15SipCallAudioEndReason\x12)\n" +
+	"%SIP_CALL_AUDIO_END_REASON_UNSPECIFIED\x10\x00\x12+\n" +
+	"'SIP_CALL_AUDIO_END_REASON_CLIENT_CLOSED\x10\x01\x12(\n" +
+	"$SIP_CALL_AUDIO_END_REASON_CALL_ENDED\x10\x02\x12.\n" +
+	"*SIP_CALL_AUDIO_END_REASON_CALL_TRANSFERRED\x10\x03\x12*\n" +
+	"&SIP_CALL_AUDIO_END_REASON_MAX_DURATION\x10\x04\x12%\n" +
+	"!SIP_CALL_AUDIO_END_REASON_STALLED\x10\x05\x12&\n" +
+	"\"SIP_CALL_AUDIO_END_REASON_INTERNAL\x10\x062\xec\b\n" +
 	"\x03Sip\x12N\n" +
 	"\x0fSipStartSession\x12\".ondewo.sip.SipStartSessionRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12@\n" +
 	"\rSipEndSession\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x00\x12H\n" +
@@ -756,12 +2336,15 @@ const file_ondewo_sip_sip_proto_rawDesc = "" +
 	"\n" +
 	"SipEndCall\x12\x1d.ondewo.sip.SipEndCallRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12N\n" +
 	"\x0fSipTransferCall\x12\".ondewo.sip.SipTransferCallRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12T\n" +
-	"\x12SipRegisterAccount\x12%.ondewo.sip.SipRegisterAccountRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12B\n" +
-	"\x0fSipGetSipStatus\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x00\x12X\n" +
-	"\x16SipGetSipStatusHistory\x12\x16.google.protobuf.Empty\x1a$.ondewo.sip.SipStatusHistoryResponse\"\x00\x12N\n" +
+	"\x12SipRegisterAccount\x12%.ondewo.sip.SipRegisterAccountRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12E\n" +
+	"\x0fSipGetSipStatus\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x03\x90\x02\x01\x12[\n" +
+	"\x16SipGetSipStatusHistory\x12\x16.google.protobuf.Empty\x1a$.ondewo.sip.SipStatusHistoryResponse\"\x03\x90\x02\x01\x12N\n" +
 	"\x0fSipPlayWavFiles\x12\".ondewo.sip.SipPlayWavFilesRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12:\n" +
 	"\aSipMute\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x00\x12<\n" +
-	"\tSipUnMute\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x00b\x06proto3"
+	"\tSipUnMute\x12\x16.google.protobuf.Empty\x1a\x15.ondewo.sip.SipStatus\"\x00\x12r\n" +
+	"!SipReportAnsweringMachineDetected\x124.ondewo.sip.SipReportAnsweringMachineDetectedRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12\\\n" +
+	"\x16SipSetCallMediaControl\x12).ondewo.sip.SipSetCallMediaControlRequest\x1a\x15.ondewo.sip.SipStatus\"\x00\x12]\n" +
+	"\x12SipStreamCallAudio\x12\x1f.ondewo.sip.SipCallAudioRequest\x1a .ondewo.sip.SipCallAudioResponse\"\x00(\x010\x01b\x06proto3"
 
 var (
 	file_ondewo_sip_sip_proto_rawDescOnce sync.Once
@@ -775,58 +2358,101 @@ func file_ondewo_sip_sip_proto_rawDescGZIP() []byte {
 	return file_ondewo_sip_sip_proto_rawDescData
 }
 
-var file_ondewo_sip_sip_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_ondewo_sip_sip_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_ondewo_sip_sip_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
+var file_ondewo_sip_sip_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_ondewo_sip_sip_proto_goTypes = []any{
-	(SipStatus_StatusType)(0),         // 0: ondewo.sip.SipStatus.StatusType
-	(*SipEndCallRequest)(nil),         // 1: ondewo.sip.SipEndCallRequest
-	(*SipStartCallRequest)(nil),       // 2: ondewo.sip.SipStartCallRequest
-	(*SipRegisterAccountRequest)(nil), // 3: ondewo.sip.SipRegisterAccountRequest
-	(*SipStartSessionRequest)(nil),    // 4: ondewo.sip.SipStartSessionRequest
-	(*SipTransferCallRequest)(nil),    // 5: ondewo.sip.SipTransferCallRequest
-	(*SipStatus)(nil),                 // 6: ondewo.sip.SipStatus
-	(*SipStatusHistoryResponse)(nil),  // 7: ondewo.sip.SipStatusHistoryResponse
-	(*SipPlayWavFilesRequest)(nil),    // 8: ondewo.sip.SipPlayWavFilesRequest
-	nil,                               // 9: ondewo.sip.SipStartCallRequest.HeadersEntry
-	nil,                               // 10: ondewo.sip.SipTransferCallRequest.HeadersEntry
-	nil,                               // 11: ondewo.sip.SipStatus.HeadersEntry
-	(*timestamppb.Timestamp)(nil),     // 12: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),             // 13: google.protobuf.Empty
+	(MediaControlSetting)(0),                         // 0: ondewo.sip.MediaControlSetting
+	(MediaControlOwner)(0),                           // 1: ondewo.sip.MediaControlOwner
+	(SipCallAudioMode)(0),                            // 2: ondewo.sip.SipCallAudioMode
+	(SipCallAudioEndReason)(0),                       // 3: ondewo.sip.SipCallAudioEndReason
+	(SipEndCallRequest_EndCallReason)(0),             // 4: ondewo.sip.SipEndCallRequest.EndCallReason
+	(AnsweringMachineDetectionResult_Verdict)(0),     // 5: ondewo.sip.AnsweringMachineDetectionResult.Verdict
+	(AnsweringMachineDetectionResult_Cause)(0),       // 6: ondewo.sip.AnsweringMachineDetectionResult.Cause
+	(AnsweringMachineDetectionResult_ActionTaken)(0), // 7: ondewo.sip.AnsweringMachineDetectionResult.ActionTaken
+	(SipStatus_StatusType)(0),                        // 8: ondewo.sip.SipStatus.StatusType
+	(*SipEndCallRequest)(nil),                        // 9: ondewo.sip.SipEndCallRequest
+	(*SipReportAnsweringMachineDetectedRequest)(nil), // 10: ondewo.sip.SipReportAnsweringMachineDetectedRequest
+	(*AnsweringMachineDetectionResult)(nil),          // 11: ondewo.sip.AnsweringMachineDetectionResult
+	(*SipStartCallRequest)(nil),                      // 12: ondewo.sip.SipStartCallRequest
+	(*SipRegisterAccountRequest)(nil),                // 13: ondewo.sip.SipRegisterAccountRequest
+	(*SipStartSessionRequest)(nil),                   // 14: ondewo.sip.SipStartSessionRequest
+	(*SipTransferCallRequest)(nil),                   // 15: ondewo.sip.SipTransferCallRequest
+	(*SipStatus)(nil),                                // 16: ondewo.sip.SipStatus
+	(*SipStatusHistoryResponse)(nil),                 // 17: ondewo.sip.SipStatusHistoryResponse
+	(*SipSetCallMediaControlRequest)(nil),            // 18: ondewo.sip.SipSetCallMediaControlRequest
+	(*SipCallAudioConfig)(nil),                       // 19: ondewo.sip.SipCallAudioConfig
+	(*SipCallAudioFrame)(nil),                        // 20: ondewo.sip.SipCallAudioFrame
+	(*SipCallAudioRequest)(nil),                      // 21: ondewo.sip.SipCallAudioRequest
+	(*SipCallAudioStarted)(nil),                      // 22: ondewo.sip.SipCallAudioStarted
+	(*SipCallAudioStats)(nil),                        // 23: ondewo.sip.SipCallAudioStats
+	(*SipCallAudioEnded)(nil),                        // 24: ondewo.sip.SipCallAudioEnded
+	(*SipCallAudioResponse)(nil),                     // 25: ondewo.sip.SipCallAudioResponse
+	(*SipPlayWavFilesRequest)(nil),                   // 26: ondewo.sip.SipPlayWavFilesRequest
+	nil,                                              // 27: ondewo.sip.SipStartCallRequest.HeadersEntry
+	nil,                                              // 28: ondewo.sip.SipTransferCallRequest.HeadersEntry
+	nil,                                              // 29: ondewo.sip.SipStatus.HeadersEntry
+	(*timestamppb.Timestamp)(nil),                    // 30: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),                            // 31: google.protobuf.Empty
 }
 var file_ondewo_sip_sip_proto_depIdxs = []int32{
-	9,  // 0: ondewo.sip.SipStartCallRequest.headers:type_name -> ondewo.sip.SipStartCallRequest.HeadersEntry
-	10, // 1: ondewo.sip.SipTransferCallRequest.headers:type_name -> ondewo.sip.SipTransferCallRequest.HeadersEntry
-	12, // 2: ondewo.sip.SipStatus.timestamp:type_name -> google.protobuf.Timestamp
-	0,  // 3: ondewo.sip.SipStatus.status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	11, // 4: ondewo.sip.SipStatus.headers:type_name -> ondewo.sip.SipStatus.HeadersEntry
-	6,  // 5: ondewo.sip.SipStatusHistoryResponse.status_history:type_name -> ondewo.sip.SipStatus
-	4,  // 6: ondewo.sip.Sip.SipStartSession:input_type -> ondewo.sip.SipStartSessionRequest
-	13, // 7: ondewo.sip.Sip.SipEndSession:input_type -> google.protobuf.Empty
-	2,  // 8: ondewo.sip.Sip.SipStartCall:input_type -> ondewo.sip.SipStartCallRequest
-	1,  // 9: ondewo.sip.Sip.SipEndCall:input_type -> ondewo.sip.SipEndCallRequest
-	5,  // 10: ondewo.sip.Sip.SipTransferCall:input_type -> ondewo.sip.SipTransferCallRequest
-	3,  // 11: ondewo.sip.Sip.SipRegisterAccount:input_type -> ondewo.sip.SipRegisterAccountRequest
-	13, // 12: ondewo.sip.Sip.SipGetSipStatus:input_type -> google.protobuf.Empty
-	13, // 13: ondewo.sip.Sip.SipGetSipStatusHistory:input_type -> google.protobuf.Empty
-	8,  // 14: ondewo.sip.Sip.SipPlayWavFiles:input_type -> ondewo.sip.SipPlayWavFilesRequest
-	13, // 15: ondewo.sip.Sip.SipMute:input_type -> google.protobuf.Empty
-	13, // 16: ondewo.sip.Sip.SipUnMute:input_type -> google.protobuf.Empty
-	6,  // 17: ondewo.sip.Sip.SipStartSession:output_type -> ondewo.sip.SipStatus
-	6,  // 18: ondewo.sip.Sip.SipEndSession:output_type -> ondewo.sip.SipStatus
-	6,  // 19: ondewo.sip.Sip.SipStartCall:output_type -> ondewo.sip.SipStatus
-	6,  // 20: ondewo.sip.Sip.SipEndCall:output_type -> ondewo.sip.SipStatus
-	6,  // 21: ondewo.sip.Sip.SipTransferCall:output_type -> ondewo.sip.SipStatus
-	6,  // 22: ondewo.sip.Sip.SipRegisterAccount:output_type -> ondewo.sip.SipStatus
-	6,  // 23: ondewo.sip.Sip.SipGetSipStatus:output_type -> ondewo.sip.SipStatus
-	7,  // 24: ondewo.sip.Sip.SipGetSipStatusHistory:output_type -> ondewo.sip.SipStatusHistoryResponse
-	6,  // 25: ondewo.sip.Sip.SipPlayWavFiles:output_type -> ondewo.sip.SipStatus
-	6,  // 26: ondewo.sip.Sip.SipMute:output_type -> ondewo.sip.SipStatus
-	6,  // 27: ondewo.sip.Sip.SipUnMute:output_type -> ondewo.sip.SipStatus
-	17, // [17:28] is the sub-list for method output_type
-	6,  // [6:17] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	4,  // 0: ondewo.sip.SipEndCallRequest.end_reason:type_name -> ondewo.sip.SipEndCallRequest.EndCallReason
+	11, // 1: ondewo.sip.SipEndCallRequest.amd_result:type_name -> ondewo.sip.AnsweringMachineDetectionResult
+	11, // 2: ondewo.sip.SipReportAnsweringMachineDetectedRequest.amd_result:type_name -> ondewo.sip.AnsweringMachineDetectionResult
+	5,  // 3: ondewo.sip.AnsweringMachineDetectionResult.verdict:type_name -> ondewo.sip.AnsweringMachineDetectionResult.Verdict
+	6,  // 4: ondewo.sip.AnsweringMachineDetectionResult.cause:type_name -> ondewo.sip.AnsweringMachineDetectionResult.Cause
+	7,  // 5: ondewo.sip.AnsweringMachineDetectionResult.action_taken:type_name -> ondewo.sip.AnsweringMachineDetectionResult.ActionTaken
+	27, // 6: ondewo.sip.SipStartCallRequest.headers:type_name -> ondewo.sip.SipStartCallRequest.HeadersEntry
+	28, // 7: ondewo.sip.SipTransferCallRequest.headers:type_name -> ondewo.sip.SipTransferCallRequest.HeadersEntry
+	30, // 8: ondewo.sip.SipStatus.timestamp:type_name -> google.protobuf.Timestamp
+	8,  // 9: ondewo.sip.SipStatus.status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	29, // 10: ondewo.sip.SipStatus.headers:type_name -> ondewo.sip.SipStatus.HeadersEntry
+	11, // 11: ondewo.sip.SipStatus.amd_result:type_name -> ondewo.sip.AnsweringMachineDetectionResult
+	16, // 12: ondewo.sip.SipStatusHistoryResponse.status_history:type_name -> ondewo.sip.SipStatus
+	0,  // 13: ondewo.sip.SipSetCallMediaControlRequest.bot_voice:type_name -> ondewo.sip.MediaControlSetting
+	0,  // 14: ondewo.sip.SipSetCallMediaControlRequest.bot_listening:type_name -> ondewo.sip.MediaControlSetting
+	1,  // 15: ondewo.sip.SipSetCallMediaControlRequest.owner:type_name -> ondewo.sip.MediaControlOwner
+	2,  // 16: ondewo.sip.SipCallAudioConfig.mode:type_name -> ondewo.sip.SipCallAudioMode
+	19, // 17: ondewo.sip.SipCallAudioRequest.config:type_name -> ondewo.sip.SipCallAudioConfig
+	20, // 18: ondewo.sip.SipCallAudioRequest.audio:type_name -> ondewo.sip.SipCallAudioFrame
+	2,  // 19: ondewo.sip.SipCallAudioStarted.mode:type_name -> ondewo.sip.SipCallAudioMode
+	3,  // 20: ondewo.sip.SipCallAudioEnded.reason:type_name -> ondewo.sip.SipCallAudioEndReason
+	22, // 21: ondewo.sip.SipCallAudioResponse.started:type_name -> ondewo.sip.SipCallAudioStarted
+	20, // 22: ondewo.sip.SipCallAudioResponse.audio:type_name -> ondewo.sip.SipCallAudioFrame
+	23, // 23: ondewo.sip.SipCallAudioResponse.stats:type_name -> ondewo.sip.SipCallAudioStats
+	24, // 24: ondewo.sip.SipCallAudioResponse.ended:type_name -> ondewo.sip.SipCallAudioEnded
+	14, // 25: ondewo.sip.Sip.SipStartSession:input_type -> ondewo.sip.SipStartSessionRequest
+	31, // 26: ondewo.sip.Sip.SipEndSession:input_type -> google.protobuf.Empty
+	12, // 27: ondewo.sip.Sip.SipStartCall:input_type -> ondewo.sip.SipStartCallRequest
+	9,  // 28: ondewo.sip.Sip.SipEndCall:input_type -> ondewo.sip.SipEndCallRequest
+	15, // 29: ondewo.sip.Sip.SipTransferCall:input_type -> ondewo.sip.SipTransferCallRequest
+	13, // 30: ondewo.sip.Sip.SipRegisterAccount:input_type -> ondewo.sip.SipRegisterAccountRequest
+	31, // 31: ondewo.sip.Sip.SipGetSipStatus:input_type -> google.protobuf.Empty
+	31, // 32: ondewo.sip.Sip.SipGetSipStatusHistory:input_type -> google.protobuf.Empty
+	26, // 33: ondewo.sip.Sip.SipPlayWavFiles:input_type -> ondewo.sip.SipPlayWavFilesRequest
+	31, // 34: ondewo.sip.Sip.SipMute:input_type -> google.protobuf.Empty
+	31, // 35: ondewo.sip.Sip.SipUnMute:input_type -> google.protobuf.Empty
+	10, // 36: ondewo.sip.Sip.SipReportAnsweringMachineDetected:input_type -> ondewo.sip.SipReportAnsweringMachineDetectedRequest
+	18, // 37: ondewo.sip.Sip.SipSetCallMediaControl:input_type -> ondewo.sip.SipSetCallMediaControlRequest
+	21, // 38: ondewo.sip.Sip.SipStreamCallAudio:input_type -> ondewo.sip.SipCallAudioRequest
+	16, // 39: ondewo.sip.Sip.SipStartSession:output_type -> ondewo.sip.SipStatus
+	16, // 40: ondewo.sip.Sip.SipEndSession:output_type -> ondewo.sip.SipStatus
+	16, // 41: ondewo.sip.Sip.SipStartCall:output_type -> ondewo.sip.SipStatus
+	16, // 42: ondewo.sip.Sip.SipEndCall:output_type -> ondewo.sip.SipStatus
+	16, // 43: ondewo.sip.Sip.SipTransferCall:output_type -> ondewo.sip.SipStatus
+	16, // 44: ondewo.sip.Sip.SipRegisterAccount:output_type -> ondewo.sip.SipStatus
+	16, // 45: ondewo.sip.Sip.SipGetSipStatus:output_type -> ondewo.sip.SipStatus
+	17, // 46: ondewo.sip.Sip.SipGetSipStatusHistory:output_type -> ondewo.sip.SipStatusHistoryResponse
+	16, // 47: ondewo.sip.Sip.SipPlayWavFiles:output_type -> ondewo.sip.SipStatus
+	16, // 48: ondewo.sip.Sip.SipMute:output_type -> ondewo.sip.SipStatus
+	16, // 49: ondewo.sip.Sip.SipUnMute:output_type -> ondewo.sip.SipStatus
+	16, // 50: ondewo.sip.Sip.SipReportAnsweringMachineDetected:output_type -> ondewo.sip.SipStatus
+	16, // 51: ondewo.sip.Sip.SipSetCallMediaControl:output_type -> ondewo.sip.SipStatus
+	25, // 52: ondewo.sip.Sip.SipStreamCallAudio:output_type -> ondewo.sip.SipCallAudioResponse
+	39, // [39:53] is the sub-list for method output_type
+	25, // [25:39] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	25, // [25:25] is the sub-list for extension extendee
+	0,  // [0:25] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_sip_sip_proto_init() }
@@ -834,13 +2460,24 @@ func file_ondewo_sip_sip_proto_init() {
 	if File_ondewo_sip_sip_proto != nil {
 		return
 	}
+	file_ondewo_sip_sip_proto_msgTypes[12].OneofWrappers = []any{
+		(*SipCallAudioRequest_Config)(nil),
+		(*SipCallAudioRequest_Audio)(nil),
+		(*SipCallAudioRequest_AgentMuted)(nil),
+	}
+	file_ondewo_sip_sip_proto_msgTypes[16].OneofWrappers = []any{
+		(*SipCallAudioResponse_Started)(nil),
+		(*SipCallAudioResponse_Audio)(nil),
+		(*SipCallAudioResponse_Stats)(nil),
+		(*SipCallAudioResponse_Ended)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_sip_sip_proto_rawDesc), len(file_ondewo_sip_sip_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   11,
+			NumEnums:      9,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

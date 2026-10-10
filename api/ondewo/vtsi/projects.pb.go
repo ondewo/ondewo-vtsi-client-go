@@ -111,6 +111,64 @@ func (VtsiProjectStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{0}
 }
 
+// Transport for the SIP trunk of an Asterisk server.
+type SipTrunkTransport int32
+
+const (
+	// Unspecified transport: identical to <pre><code>SIP_TRUNK_TRANSPORT_TLS</code></pre>. Encryption is
+	// the default, so the zero value is the secure one.
+	SipTrunkTransport_SIP_TRUNK_TRANSPORT_UNSPECIFIED SipTrunkTransport = 0
+	// TLS transport with SRTP media. The trunk is authenticated by certificate and needs no source CIDR.
+	SipTrunkTransport_SIP_TRUNK_TRANSPORT_TLS SipTrunkTransport = 1
+	// Plain UDP transport. Requires <pre><code>sip_trunk_source_cidr</code></pre>.
+	SipTrunkTransport_SIP_TRUNK_TRANSPORT_UDP SipTrunkTransport = 2
+	// Plain TCP transport. Requires <pre><code>sip_trunk_source_cidr</code></pre>.
+	SipTrunkTransport_SIP_TRUNK_TRANSPORT_TCP SipTrunkTransport = 3
+)
+
+// Enum value maps for SipTrunkTransport.
+var (
+	SipTrunkTransport_name = map[int32]string{
+		0: "SIP_TRUNK_TRANSPORT_UNSPECIFIED",
+		1: "SIP_TRUNK_TRANSPORT_TLS",
+		2: "SIP_TRUNK_TRANSPORT_UDP",
+		3: "SIP_TRUNK_TRANSPORT_TCP",
+	}
+	SipTrunkTransport_value = map[string]int32{
+		"SIP_TRUNK_TRANSPORT_UNSPECIFIED": 0,
+		"SIP_TRUNK_TRANSPORT_TLS":         1,
+		"SIP_TRUNK_TRANSPORT_UDP":         2,
+		"SIP_TRUNK_TRANSPORT_TCP":         3,
+	}
+)
+
+func (x SipTrunkTransport) Enum() *SipTrunkTransport {
+	p := new(SipTrunkTransport)
+	*p = x
+	return p
+}
+
+func (x SipTrunkTransport) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SipTrunkTransport) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_projects_proto_enumTypes[1].Descriptor()
+}
+
+func (SipTrunkTransport) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_projects_proto_enumTypes[1]
+}
+
+func (x SipTrunkTransport) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SipTrunkTransport.Descriptor instead.
+func (SipTrunkTransport) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{1}
+}
+
 // Sorting mode
 type VtsiProjectSortingMode int32
 
@@ -148,11 +206,11 @@ func (x VtsiProjectSortingMode) String() string {
 }
 
 func (VtsiProjectSortingMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[1].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[2].Descriptor()
 }
 
 func (VtsiProjectSortingMode) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[1]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[2]
 }
 
 func (x VtsiProjectSortingMode) Number() protoreflect.EnumNumber {
@@ -161,7 +219,7 @@ func (x VtsiProjectSortingMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VtsiProjectSortingMode.Descriptor instead.
 func (VtsiProjectSortingMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{1}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
 }
 
 // Structure of VTSI_PROJECT view
@@ -213,11 +271,11 @@ func (x VtsiProjectView) String() string {
 }
 
 func (VtsiProjectView) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[2].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[3].Descriptor()
 }
 
 func (VtsiProjectView) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[2]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[3]
 }
 
 func (x VtsiProjectView) Number() protoreflect.EnumNumber {
@@ -226,7 +284,7 @@ func (x VtsiProjectView) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VtsiProjectView.Descriptor instead.
 func (VtsiProjectView) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{3}
 }
 
 // Enum to specify the sorting field for VTSI projects.
@@ -275,11 +333,11 @@ func (x VtsiProjectSorting_VtsiProjectSortingField) String() string {
 }
 
 func (VtsiProjectSorting_VtsiProjectSortingField) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[3].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[4].Descriptor()
 }
 
 func (VtsiProjectSorting_VtsiProjectSortingField) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[3]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[4]
 }
 
 func (x VtsiProjectSorting_VtsiProjectSortingField) Number() protoreflect.EnumNumber {
@@ -329,8 +387,16 @@ type VtsiProject struct {
 	DeployedCallers int32 `protobuf:"varint,15,opt,name=deployed_callers,json=deployedCallers,proto3" json:"deployed_callers,omitempty"`
 	// The number of deployed listeners in this project.
 	DeployedListeners int32 `protobuf:"varint,16,opt,name=deployed_listeners,json=deployedListeners,proto3" json:"deployed_listeners,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// OPTIONAL: Restricts the phone numbers a call of this project may be transferred to with
+	// <pre><code>TransferCall</code></pre> and a <pre><code>CallTarget.phone_number</code></pre>. Each entry is an E.164
+	// number or number prefix (<pre><code>^\+[1-9][0-9]{0,14}$</code></pre>), e.g. <pre><code>+43</code></pre> or
+	// <pre><code>+4312345678</code></pre>; a number is allowed when it starts with any entry. Empty: any valid E.164
+	// number is allowed. A refused number answers <pre><code>TRANSFER_OUTCOME_TARGET_INVALID</code></pre> with
+	// <pre><code>error_reason = number-not-allowed</code></pre> and nothing is sent.
+	// Updatable with the update mask path <pre><code>transfer_phone_number_allowlist</code></pre>.
+	TransferPhoneNumberAllowlist []string `protobuf:"bytes,17,rep,name=transfer_phone_number_allowlist,json=transferPhoneNumberAllowlist,proto3" json:"transfer_phone_number_allowlist,omitempty"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *VtsiProject) Reset() {
@@ -475,6 +541,13 @@ func (x *VtsiProject) GetDeployedListeners() int32 {
 	return 0
 }
 
+func (x *VtsiProject) GetTransferPhoneNumberAllowlist() []string {
+	if x != nil {
+		return x.TransferPhoneNumberAllowlist
+	}
+	return nil
+}
+
 // Configuration variables for the Asterisk server
 type AsteriskConfigsVariables struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -490,8 +563,60 @@ type AsteriskConfigsVariables struct {
 	TransferNumberHost string `protobuf:"bytes,5,opt,name=transfer_number_host,json=transferNumberHost,proto3" json:"transfer_number_host,omitempty"`
 	// SIP trunk phone number / caller id.
 	SipTrunkPhoneNumber string `protobuf:"bytes,6,opt,name=sip_trunk_phone_number,json=sipTrunkPhoneNumber,proto3" json:"sip_trunk_phone_number,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// OPTIONAL: transport for the SIP trunk. Unset == <pre><code>SIP_TRUNK_TRANSPORT_UNSPECIFIED</code></pre>
+	// == <pre><code>SIP_TRUNK_TRANSPORT_TLS</code></pre>: encryption is the default, so a caller that says
+	// nothing gets an encrypted trunk.
+	SipTrunkTransport SipTrunkTransport `protobuf:"varint,7,opt,name=sip_trunk_transport,json=sipTrunkTransport,proto3,enum=ondewo.vtsi.SipTrunkTransport" json:"sip_trunk_transport,omitempty"`
+	// OPTIONAL: the source address or CIDR the carrier sends from, e.g. <pre><code>203.0.113.7/32</code></pre>.
+	// REQUIRED when <pre><code>sip_trunk_transport</code></pre> is
+	// <pre><code>SIP_TRUNK_TRANSPORT_UDP</code></pre> or <pre><code>SIP_TRUNK_TRANSPORT_TCP</code></pre>,
+	// where the trunk is matched by source address rather than authenticated by a TLS certificate; ignored
+	// otherwise. A hostname is REFUSED with <pre><code>INVALID_ARGUMENT</code></pre>: Asterisk drops a
+	// <pre><code>type=identify</code></pre> section whose <pre><code>match=</code></pre> does not resolve,
+	// and it does so silently, so an unresolvable name would read as a working trunk that never matches an
+	// inbound call.
+	SipTrunkSourceCidr *string `protobuf:"bytes,8,opt,name=sip_trunk_source_cidr,json=sipTrunkSourceCidr,proto3,oneof" json:"sip_trunk_source_cidr,omitempty"`
+	// OPTIONAL: the PEM bundle of the CA certificate(s) the carrier's TLS certificate chains to, i.e. one
+	// or more <pre><code>-----BEGIN CERTIFICATE-----</code></pre> blocks and nothing else.
+	// Storing a bundle does NOT by itself turn verification on: Asterisk verifies the carrier's
+	// certificate chain and host name only when <pre><code>sip_trunk_verify_server</code></pre> is also
+	// true. With verification off the bundle is validated and stored, so it can be staged before
+	// verification is switched on, and the trunk behaves exactly as without it.
+	// Applies only to the TLS trunk transport: setting it while <pre><code>sip_trunk_transport</code></pre>
+	// is <pre><code>SIP_TRUNK_TRANSPORT_UDP</code></pre> or <pre><code>SIP_TRUNK_TRANSPORT_TCP</code></pre>
+	// is REFUSED with <pre><code>INVALID_ARGUMENT</code></pre>, as is a bundle that is not PEM, contains a
+	// private key or any block other than a certificate, contains a certificate that is not a CA
+	// (basicConstraints CA=true) or has expired, or exceeds the server's count and size limits.
+	// This is PUBLIC data, not a secret: it is returned by Get and List like every other field here.
+	SipTrunkCaCertificatesPem *string `protobuf:"bytes,9,opt,name=sip_trunk_ca_certificates_pem,json=sipTrunkCaCertificatesPem,proto3,oneof" json:"sip_trunk_ca_certificates_pem,omitempty"`
+	// OPTIONAL: verify the carrier's TLS certificate. Default false (unset == false).
+	// When true, Asterisk verifies the carrier's certificate chain against
+	// <pre><code>sip_trunk_ca_certificates_pem</code></pre> and its host name against
+	// <pre><code>sip_trunk_host</code></pre> (<pre><code>verify_server=yes</code></pre>), and refuses a
+	// carrier that fails either check. true WITHOUT a CA bundle is REFUSED with
+	// <pre><code>INVALID_ARGUMENT</code></pre>, because the verification it asks for cannot happen.
+	// false or unset: the carrier's certificate is NOT verified, whether or not a bundle is stored.
+	// Applies only to the TLS trunk transport: true on a <pre><code>SIP_TRUNK_TRANSPORT_UDP</code></pre> or
+	// <pre><code>SIP_TRUNK_TRANSPORT_TCP</code></pre> trunk is REFUSED with
+	// <pre><code>INVALID_ARGUMENT</code></pre>; false there is accepted and changes nothing.
+	SipTrunkVerifyServer *bool `protobuf:"varint,10,opt,name=sip_trunk_verify_server,json=sipTrunkVerifyServer,proto3,oneof" json:"sip_trunk_verify_server,omitempty"`
+	// Optional: Source addresses that may reach this project&apos;s SOFTPHONE accounts, as IPv4/IPv6 CIDR networks
+	// written in full with an explicit prefix length (e.g. <code>203.0.113.0/24</code>). Every softphone account gets
+	// <code>deny</code> for every IPv4 and IPv6 source plus one <code>permit</code> per entry. This is the source
+	// allow-list of the project&apos;s EXTERNAL TLS port for softphones; it applies to every softphone account on
+	// BOTH TLS ports, because an account&apos;s ACL cannot tell ports apart and its transport restricts nothing
+	// inbound. Empty: the server&apos;s <code>ONDEWO_VTSI_ASTERISK_SOFTPHONE_PERMIT_CIDRS</code>, by default the
+	// private networks (<code>10.0.0.0/8</code>, <code>172.16.0.0/12</code>, <code>192.168.0.0/16</code>,
+	// <code>fc00::/7</code>). That server value is a CEILING: every entry here must lie inside it, so a project can
+	// only narrow the list; only the operator can open the port to every source. Entries outside the ceiling, a
+	// default route (<code>0.0.0.0/0</code>), entries that together cover a whole address family and shorthand
+	// spellings are refused with <code>INVALID_ARGUMENT</code>. The list is only effective when the port sees the real
+	// client addresses (no SNAT or proxy in front of it). The carrier trunk is not affected (it is matched by
+	// <code>sip_trunk_source_cidr</code> or authenticated by its registration); VTSI&apos;s own call containers are
+	// scoped separately by the server. Updatable with the rest of <code>asterisk_configs</code>.
+	SoftphonePermitCidrs []string `protobuf:"bytes,11,rep,name=softphone_permit_cidrs,json=softphonePermitCidrs,proto3" json:"softphone_permit_cidrs,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *AsteriskConfigsVariables) Reset() {
@@ -566,11 +691,51 @@ func (x *AsteriskConfigsVariables) GetSipTrunkPhoneNumber() string {
 	return ""
 }
 
+func (x *AsteriskConfigsVariables) GetSipTrunkTransport() SipTrunkTransport {
+	if x != nil {
+		return x.SipTrunkTransport
+	}
+	return SipTrunkTransport_SIP_TRUNK_TRANSPORT_UNSPECIFIED
+}
+
+func (x *AsteriskConfigsVariables) GetSipTrunkSourceCidr() string {
+	if x != nil && x.SipTrunkSourceCidr != nil {
+		return *x.SipTrunkSourceCidr
+	}
+	return ""
+}
+
+func (x *AsteriskConfigsVariables) GetSipTrunkCaCertificatesPem() string {
+	if x != nil && x.SipTrunkCaCertificatesPem != nil {
+		return *x.SipTrunkCaCertificatesPem
+	}
+	return ""
+}
+
+func (x *AsteriskConfigsVariables) GetSipTrunkVerifyServer() bool {
+	if x != nil && x.SipTrunkVerifyServer != nil {
+		return *x.SipTrunkVerifyServer
+	}
+	return false
+}
+
+func (x *AsteriskConfigsVariables) GetSoftphonePermitCidrs() []string {
+	if x != nil {
+		return x.SoftphonePermitCidrs
+	}
+	return nil
+}
+
 // Configuration files for the Asterisk server
 type AsteriskConfigsFiles struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// sip.conf file as string
-	SipConfFileString string `protobuf:"bytes,1,opt,name=sip_conf_file_string,json=sipConfFileString,proto3" json:"sip_conf_file_string,omitempty"`
+	// pjsip.conf file as string.
+	// Renamed from <pre><code>sip_conf_file_string</code></pre> in 9.0.0: the chan_sip driver this field
+	// was named after was removed in Asterisk 21, and the file an Asterisk 22 server reads is
+	// <pre><code>pjsip.conf</code></pre>. Field number 1 and type <pre><code>string</code></pre> are
+	// unchanged and no <pre><code>json_name</code></pre> override was added, so the change is binary
+	// wire-compatible in both directions and source-breaking only.
+	PjsipConfFileString string `protobuf:"bytes,1,opt,name=pjsip_conf_file_string,json=pjsipConfFileString,proto3" json:"pjsip_conf_file_string,omitempty"`
 	// extensions.conf file as string
 	ExtensionsConfFileString string `protobuf:"bytes,2,opt,name=extensions_conf_file_string,json=extensionsConfFileString,proto3" json:"extensions_conf_file_string,omitempty"`
 	// queues.conf file as string
@@ -611,9 +776,9 @@ func (*AsteriskConfigsFiles) Descriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *AsteriskConfigsFiles) GetSipConfFileString() string {
+func (x *AsteriskConfigsFiles) GetPjsipConfFileString() string {
 	if x != nil {
-		return x.SipConfFileString
+		return x.PjsipConfFileString
 	}
 	return ""
 }
@@ -1569,7 +1734,7 @@ var File_ondewo_vtsi_projects_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\n" +
-	"\x1aondewo/vtsi/projects.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd4\x05\n" +
+	"\x1aondewo/vtsi/projects.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\x06\n" +
 	"\vVtsiProject\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x1f\n" +
@@ -1592,16 +1757,26 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\rasterisk_port\x18\r \x01(\x05R\fasteriskPort\x12&\n" +
 	"\x0fnlu_agent_names\x18\x0e \x03(\tR\rnluAgentNames\x12)\n" +
 	"\x10deployed_callers\x18\x0f \x01(\x05R\x0fdeployedCallers\x12-\n" +
-	"\x12deployed_listeners\x18\x10 \x01(\x05R\x11deployedListeners\"\xac\x02\n" +
+	"\x12deployed_listeners\x18\x10 \x01(\x05R\x11deployedListeners\x12E\n" +
+	"\x1ftransfer_phone_number_allowlist\x18\x11 \x03(\tR\x1ctransferPhoneNumberAllowlist\"\xc5\x05\n" +
 	"\x18AsteriskConfigsVariables\x12,\n" +
 	"\x12sip_trunk_username\x18\x01 \x01(\tR\x10sipTrunkUsername\x12,\n" +
 	"\x12sip_trunk_password\x18\x02 \x01(\tR\x10sipTrunkPassword\x12$\n" +
 	"\x0esip_trunk_host\x18\x03 \x01(\tR\fsipTrunkHost\x12'\n" +
 	"\x0ftransfer_number\x18\x04 \x01(\tR\x0etransferNumber\x120\n" +
 	"\x14transfer_number_host\x18\x05 \x01(\tR\x12transferNumberHost\x123\n" +
-	"\x16sip_trunk_phone_number\x18\x06 \x01(\tR\x13sipTrunkPhoneNumber\"\xf6\x01\n" +
-	"\x14AsteriskConfigsFiles\x12/\n" +
-	"\x14sip_conf_file_string\x18\x01 \x01(\tR\x11sipConfFileString\x12=\n" +
+	"\x16sip_trunk_phone_number\x18\x06 \x01(\tR\x13sipTrunkPhoneNumber\x12N\n" +
+	"\x13sip_trunk_transport\x18\a \x01(\x0e2\x1e.ondewo.vtsi.SipTrunkTransportR\x11sipTrunkTransport\x126\n" +
+	"\x15sip_trunk_source_cidr\x18\b \x01(\tH\x00R\x12sipTrunkSourceCidr\x88\x01\x01\x12E\n" +
+	"\x1dsip_trunk_ca_certificates_pem\x18\t \x01(\tH\x01R\x19sipTrunkCaCertificatesPem\x88\x01\x01\x12:\n" +
+	"\x17sip_trunk_verify_server\x18\n" +
+	" \x01(\bH\x02R\x14sipTrunkVerifyServer\x88\x01\x01\x124\n" +
+	"\x16softphone_permit_cidrs\x18\v \x03(\tR\x14softphonePermitCidrsB\x18\n" +
+	"\x16_sip_trunk_source_cidrB \n" +
+	"\x1e_sip_trunk_ca_certificates_pemB\x1a\n" +
+	"\x18_sip_trunk_verify_server\"\xfa\x01\n" +
+	"\x14AsteriskConfigsFiles\x123\n" +
+	"\x16pjsip_conf_file_string\x18\x01 \x01(\tR\x13pjsipConfFileString\x12=\n" +
 	"\x1bextensions_conf_file_string\x18\x02 \x01(\tR\x18extensionsConfFileString\x125\n" +
 	"\x17queues_conf_file_string\x18\x03 \x01(\tR\x14queuesConfFileString\x127\n" +
 	"\x18modules_conf_file_string\x18\x04 \x01(\tR\x15modulesConfFileString\"\xad\x03\n" +
@@ -1675,7 +1850,12 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\bDEPLOYED\x10\x04\x12\x0f\n" +
 	"\vUNDEPLOYING\x10\x05\x12\f\n" +
 	"\bDELETING\x10\x06\x12\v\n" +
-	"\aDELETED\x10\a*7\n" +
+	"\aDELETED\x10\a*\x8f\x01\n" +
+	"\x11SipTrunkTransport\x12#\n" +
+	"\x1fSIP_TRUNK_TRANSPORT_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17SIP_TRUNK_TRANSPORT_TLS\x10\x01\x12\x1b\n" +
+	"\x17SIP_TRUNK_TRANSPORT_UDP\x10\x02\x12\x1b\n" +
+	"\x17SIP_TRUNK_TRANSPORT_TCP\x10\x03*7\n" +
 	"\x16VtsiProjectSortingMode\x12\r\n" +
 	"\tASCENDING\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -1706,70 +1886,72 @@ func file_ondewo_vtsi_projects_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_projects_proto_rawDescData
 }
 
-var file_ondewo_vtsi_projects_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_ondewo_vtsi_projects_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
 var file_ondewo_vtsi_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_ondewo_vtsi_projects_proto_goTypes = []any{
 	(VtsiProjectStatus)(0),                          // 0: ondewo.vtsi.VtsiProjectStatus
-	(VtsiProjectSortingMode)(0),                     // 1: ondewo.vtsi.VtsiProjectSortingMode
-	(VtsiProjectView)(0),                            // 2: ondewo.vtsi.VtsiProjectView
-	(VtsiProjectSorting_VtsiProjectSortingField)(0), // 3: ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
-	(*VtsiProject)(nil),                             // 4: ondewo.vtsi.VtsiProject
-	(*AsteriskConfigsVariables)(nil),                // 5: ondewo.vtsi.AsteriskConfigsVariables
-	(*AsteriskConfigsFiles)(nil),                    // 6: ondewo.vtsi.AsteriskConfigsFiles
-	(*AsteriskConfigs)(nil),                         // 7: ondewo.vtsi.AsteriskConfigs
-	(*CreateVtsiProjectRequest)(nil),                // 8: ondewo.vtsi.CreateVtsiProjectRequest
-	(*CreateVtsiProjectResponse)(nil),               // 9: ondewo.vtsi.CreateVtsiProjectResponse
-	(*GetVtsiProjectRequest)(nil),                   // 10: ondewo.vtsi.GetVtsiProjectRequest
-	(*ListVtsiProjectsRequest)(nil),                 // 11: ondewo.vtsi.ListVtsiProjectsRequest
-	(*ListVtsiProjectsResponse)(nil),                // 12: ondewo.vtsi.ListVtsiProjectsResponse
-	(*VtsiProjectSorting)(nil),                      // 13: ondewo.vtsi.VtsiProjectSorting
-	(*UpdateVtsiProjectRequest)(nil),                // 14: ondewo.vtsi.UpdateVtsiProjectRequest
-	(*UpdateVtsiProjectResponse)(nil),               // 15: ondewo.vtsi.UpdateVtsiProjectResponse
-	(*DeleteVtsiProjectRequest)(nil),                // 16: ondewo.vtsi.DeleteVtsiProjectRequest
-	(*DeleteVtsiProjectResponse)(nil),               // 17: ondewo.vtsi.DeleteVtsiProjectResponse
-	(*DeployVtsiProjectRequest)(nil),                // 18: ondewo.vtsi.DeployVtsiProjectRequest
-	(*DeployVtsiProjectResponse)(nil),               // 19: ondewo.vtsi.DeployVtsiProjectResponse
-	(*UndeployVtsiProjectRequest)(nil),              // 20: ondewo.vtsi.UndeployVtsiProjectRequest
-	(*UndeployVtsiProjectResponse)(nil),             // 21: ondewo.vtsi.UndeployVtsiProjectResponse
-	(*timestamppb.Timestamp)(nil),                   // 22: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil),                   // 23: google.protobuf.FieldMask
+	(SipTrunkTransport)(0),                          // 1: ondewo.vtsi.SipTrunkTransport
+	(VtsiProjectSortingMode)(0),                     // 2: ondewo.vtsi.VtsiProjectSortingMode
+	(VtsiProjectView)(0),                            // 3: ondewo.vtsi.VtsiProjectView
+	(VtsiProjectSorting_VtsiProjectSortingField)(0), // 4: ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
+	(*VtsiProject)(nil),                             // 5: ondewo.vtsi.VtsiProject
+	(*AsteriskConfigsVariables)(nil),                // 6: ondewo.vtsi.AsteriskConfigsVariables
+	(*AsteriskConfigsFiles)(nil),                    // 7: ondewo.vtsi.AsteriskConfigsFiles
+	(*AsteriskConfigs)(nil),                         // 8: ondewo.vtsi.AsteriskConfigs
+	(*CreateVtsiProjectRequest)(nil),                // 9: ondewo.vtsi.CreateVtsiProjectRequest
+	(*CreateVtsiProjectResponse)(nil),               // 10: ondewo.vtsi.CreateVtsiProjectResponse
+	(*GetVtsiProjectRequest)(nil),                   // 11: ondewo.vtsi.GetVtsiProjectRequest
+	(*ListVtsiProjectsRequest)(nil),                 // 12: ondewo.vtsi.ListVtsiProjectsRequest
+	(*ListVtsiProjectsResponse)(nil),                // 13: ondewo.vtsi.ListVtsiProjectsResponse
+	(*VtsiProjectSorting)(nil),                      // 14: ondewo.vtsi.VtsiProjectSorting
+	(*UpdateVtsiProjectRequest)(nil),                // 15: ondewo.vtsi.UpdateVtsiProjectRequest
+	(*UpdateVtsiProjectResponse)(nil),               // 16: ondewo.vtsi.UpdateVtsiProjectResponse
+	(*DeleteVtsiProjectRequest)(nil),                // 17: ondewo.vtsi.DeleteVtsiProjectRequest
+	(*DeleteVtsiProjectResponse)(nil),               // 18: ondewo.vtsi.DeleteVtsiProjectResponse
+	(*DeployVtsiProjectRequest)(nil),                // 19: ondewo.vtsi.DeployVtsiProjectRequest
+	(*DeployVtsiProjectResponse)(nil),               // 20: ondewo.vtsi.DeployVtsiProjectResponse
+	(*UndeployVtsiProjectRequest)(nil),              // 21: ondewo.vtsi.UndeployVtsiProjectRequest
+	(*UndeployVtsiProjectResponse)(nil),             // 22: ondewo.vtsi.UndeployVtsiProjectResponse
+	(*timestamppb.Timestamp)(nil),                   // 23: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),                   // 24: google.protobuf.FieldMask
 }
 var file_ondewo_vtsi_projects_proto_depIdxs = []int32{
-	7,  // 0: ondewo.vtsi.VtsiProject.asterisk_configs:type_name -> ondewo.vtsi.AsteriskConfigs
+	8,  // 0: ondewo.vtsi.VtsiProject.asterisk_configs:type_name -> ondewo.vtsi.AsteriskConfigs
 	0,  // 1: ondewo.vtsi.VtsiProject.vtsi_project_status:type_name -> ondewo.vtsi.VtsiProjectStatus
-	22, // 2: ondewo.vtsi.VtsiProject.created_at:type_name -> google.protobuf.Timestamp
-	22, // 3: ondewo.vtsi.VtsiProject.modified_at:type_name -> google.protobuf.Timestamp
-	5,  // 4: ondewo.vtsi.AsteriskConfigs.asterisk_configs_variables:type_name -> ondewo.vtsi.AsteriskConfigsVariables
-	6,  // 5: ondewo.vtsi.AsteriskConfigs.asterisk_configs_files:type_name -> ondewo.vtsi.AsteriskConfigsFiles
-	4,  // 6: ondewo.vtsi.CreateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	4,  // 7: ondewo.vtsi.CreateVtsiProjectResponse.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	2,  // 8: ondewo.vtsi.GetVtsiProjectRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
-	2,  // 9: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
-	13, // 10: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_sorting:type_name -> ondewo.vtsi.VtsiProjectSorting
-	4,  // 11: ondewo.vtsi.ListVtsiProjectsResponse.vtsi_projects:type_name -> ondewo.vtsi.VtsiProject
-	3,  // 12: ondewo.vtsi.VtsiProjectSorting.sorting_field:type_name -> ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
-	1,  // 13: ondewo.vtsi.VtsiProjectSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
-	4,  // 14: ondewo.vtsi.UpdateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	23, // 15: ondewo.vtsi.UpdateVtsiProjectRequest.update_mask:type_name -> google.protobuf.FieldMask
-	8,  // 16: ondewo.vtsi.Projects.CreateVtsiProject:input_type -> ondewo.vtsi.CreateVtsiProjectRequest
-	10, // 17: ondewo.vtsi.Projects.GetVtsiProject:input_type -> ondewo.vtsi.GetVtsiProjectRequest
-	14, // 18: ondewo.vtsi.Projects.UpdateVtsiProject:input_type -> ondewo.vtsi.UpdateVtsiProjectRequest
-	16, // 19: ondewo.vtsi.Projects.DeleteVtsiProject:input_type -> ondewo.vtsi.DeleteVtsiProjectRequest
-	18, // 20: ondewo.vtsi.Projects.DeployVtsiProject:input_type -> ondewo.vtsi.DeployVtsiProjectRequest
-	20, // 21: ondewo.vtsi.Projects.UndeployVtsiProject:input_type -> ondewo.vtsi.UndeployVtsiProjectRequest
-	11, // 22: ondewo.vtsi.Projects.ListVtsiProjects:input_type -> ondewo.vtsi.ListVtsiProjectsRequest
-	9,  // 23: ondewo.vtsi.Projects.CreateVtsiProject:output_type -> ondewo.vtsi.CreateVtsiProjectResponse
-	4,  // 24: ondewo.vtsi.Projects.GetVtsiProject:output_type -> ondewo.vtsi.VtsiProject
-	15, // 25: ondewo.vtsi.Projects.UpdateVtsiProject:output_type -> ondewo.vtsi.UpdateVtsiProjectResponse
-	17, // 26: ondewo.vtsi.Projects.DeleteVtsiProject:output_type -> ondewo.vtsi.DeleteVtsiProjectResponse
-	19, // 27: ondewo.vtsi.Projects.DeployVtsiProject:output_type -> ondewo.vtsi.DeployVtsiProjectResponse
-	21, // 28: ondewo.vtsi.Projects.UndeployVtsiProject:output_type -> ondewo.vtsi.UndeployVtsiProjectResponse
-	12, // 29: ondewo.vtsi.Projects.ListVtsiProjects:output_type -> ondewo.vtsi.ListVtsiProjectsResponse
-	23, // [23:30] is the sub-list for method output_type
-	16, // [16:23] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	23, // 2: ondewo.vtsi.VtsiProject.created_at:type_name -> google.protobuf.Timestamp
+	23, // 3: ondewo.vtsi.VtsiProject.modified_at:type_name -> google.protobuf.Timestamp
+	1,  // 4: ondewo.vtsi.AsteriskConfigsVariables.sip_trunk_transport:type_name -> ondewo.vtsi.SipTrunkTransport
+	6,  // 5: ondewo.vtsi.AsteriskConfigs.asterisk_configs_variables:type_name -> ondewo.vtsi.AsteriskConfigsVariables
+	7,  // 6: ondewo.vtsi.AsteriskConfigs.asterisk_configs_files:type_name -> ondewo.vtsi.AsteriskConfigsFiles
+	5,  // 7: ondewo.vtsi.CreateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	5,  // 8: ondewo.vtsi.CreateVtsiProjectResponse.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	3,  // 9: ondewo.vtsi.GetVtsiProjectRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
+	3,  // 10: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
+	14, // 11: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_sorting:type_name -> ondewo.vtsi.VtsiProjectSorting
+	5,  // 12: ondewo.vtsi.ListVtsiProjectsResponse.vtsi_projects:type_name -> ondewo.vtsi.VtsiProject
+	4,  // 13: ondewo.vtsi.VtsiProjectSorting.sorting_field:type_name -> ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
+	2,  // 14: ondewo.vtsi.VtsiProjectSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
+	5,  // 15: ondewo.vtsi.UpdateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	24, // 16: ondewo.vtsi.UpdateVtsiProjectRequest.update_mask:type_name -> google.protobuf.FieldMask
+	9,  // 17: ondewo.vtsi.Projects.CreateVtsiProject:input_type -> ondewo.vtsi.CreateVtsiProjectRequest
+	11, // 18: ondewo.vtsi.Projects.GetVtsiProject:input_type -> ondewo.vtsi.GetVtsiProjectRequest
+	15, // 19: ondewo.vtsi.Projects.UpdateVtsiProject:input_type -> ondewo.vtsi.UpdateVtsiProjectRequest
+	17, // 20: ondewo.vtsi.Projects.DeleteVtsiProject:input_type -> ondewo.vtsi.DeleteVtsiProjectRequest
+	19, // 21: ondewo.vtsi.Projects.DeployVtsiProject:input_type -> ondewo.vtsi.DeployVtsiProjectRequest
+	21, // 22: ondewo.vtsi.Projects.UndeployVtsiProject:input_type -> ondewo.vtsi.UndeployVtsiProjectRequest
+	12, // 23: ondewo.vtsi.Projects.ListVtsiProjects:input_type -> ondewo.vtsi.ListVtsiProjectsRequest
+	10, // 24: ondewo.vtsi.Projects.CreateVtsiProject:output_type -> ondewo.vtsi.CreateVtsiProjectResponse
+	5,  // 25: ondewo.vtsi.Projects.GetVtsiProject:output_type -> ondewo.vtsi.VtsiProject
+	16, // 26: ondewo.vtsi.Projects.UpdateVtsiProject:output_type -> ondewo.vtsi.UpdateVtsiProjectResponse
+	18, // 27: ondewo.vtsi.Projects.DeleteVtsiProject:output_type -> ondewo.vtsi.DeleteVtsiProjectResponse
+	20, // 28: ondewo.vtsi.Projects.DeployVtsiProject:output_type -> ondewo.vtsi.DeployVtsiProjectResponse
+	22, // 29: ondewo.vtsi.Projects.UndeployVtsiProject:output_type -> ondewo.vtsi.UndeployVtsiProjectResponse
+	13, // 30: ondewo.vtsi.Projects.ListVtsiProjects:output_type -> ondewo.vtsi.ListVtsiProjectsResponse
+	24, // [24:31] is the sub-list for method output_type
+	17, // [17:24] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_projects_proto_init() }
@@ -1777,6 +1959,7 @@ func file_ondewo_vtsi_projects_proto_init() {
 	if File_ondewo_vtsi_projects_proto != nil {
 		return
 	}
+	file_ondewo_vtsi_projects_proto_msgTypes[1].OneofWrappers = []any{}
 	file_ondewo_vtsi_projects_proto_msgTypes[3].OneofWrappers = []any{
 		(*AsteriskConfigs_AsteriskConfigsVariables)(nil),
 		(*AsteriskConfigs_AsteriskConfigsFiles)(nil),
@@ -1789,7 +1972,7 @@ func file_ondewo_vtsi_projects_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_projects_proto_rawDesc), len(file_ondewo_vtsi_projects_proto_rawDesc)),
-			NumEnums:      4,
+			NumEnums:      5,
 			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,

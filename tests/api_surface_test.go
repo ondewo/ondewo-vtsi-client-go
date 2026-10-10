@@ -17,8 +17,8 @@
 // auth_test.go are product agnostic.
 //
 // VTSI is the widest of the composite products: ondewo-vtsi-api vendors the NLU, QA, S2T, SIP and
-// T2S protos, so this module ships SIX go packages and exposes 23 services - its own
-// ondewo.vtsi.{Calls,Logs,Projects} plus the sixteen ondewo.nlu.*, ondewo.qa.QA,
+// T2S protos, so this module ships SIX go packages and exposes 26 services - its own
+// ondewo.vtsi.{Calls,Campaigns,Events,Logs,Projects,Softphones} plus the sixteen ondewo.nlu.*, ondewo.qa.QA,
 // ondewo.s2t.Speech2Text, ondewo.sip.Sip and ondewo.t2s.Text2Speech. A consumer that drives a
 // telephony call and then reads its NLU session over the same client is the normal case, so all
 // six packages are part of this client's surface and all six are pinned here.
@@ -34,26 +34,29 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	nlu "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/nlu"
-	qa "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/qa"
-	s2t "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/s2t"
-	sip "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/sip"
-	t2s "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/t2s"
-	vtsi "github.com/ondewo/ondewo-vtsi-client-go/v8/api/ondewo/vtsi"
+	nlu "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/nlu"
+	qa "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/qa"
+	s2t "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/s2t"
+	sip "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/sip"
+	t2s "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/t2s"
+	vtsi "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/vtsi"
 )
 
 // protoFileCount is the number of .proto files below ondewo-vtsi-api/ondewo that the compiler
 // consumed. Every one of them has to end up in the global descriptor registry when this package
 // is linked; a proto that silently stopped being compiled is otherwise invisible until a
 // consumer misses a type.
-const protoFileCount = 25
+const protoFileCount = 28
 
 // services is every gRPC service this product exposes, keyed by the fully qualified proto name
 // the ServiceDesc must declare.
 var services = map[string]*grpc.ServiceDesc{
 	"ondewo.vtsi.Calls":            &vtsi.Calls_ServiceDesc,
+	"ondewo.vtsi.Campaigns":        &vtsi.Campaigns_ServiceDesc,
+	"ondewo.vtsi.Events":           &vtsi.Events_ServiceDesc,
 	"ondewo.vtsi.Logs":             &vtsi.Logs_ServiceDesc,
 	"ondewo.vtsi.Projects":         &vtsi.Projects_ServiceDesc,
+	"ondewo.vtsi.Softphones":       &vtsi.Softphones_ServiceDesc,
 	"ondewo.nlu.Agents":            &nlu.Agents_ServiceDesc,
 	"ondewo.nlu.AiServices":        &nlu.AiServices_ServiceDesc,
 	"ondewo.nlu.CcaiProjects":      &nlu.CcaiProjects_ServiceDesc,
@@ -81,8 +84,11 @@ var services = map[string]*grpc.ServiceDesc{
 // produce them (protoc-gen-go, protoc-gen-go-grpc) can disagree - so both halves are listed.
 var clientConstructors = map[string]func(grpc.ClientConnInterface) any{
 	"ondewo.vtsi.Calls":            func(cc grpc.ClientConnInterface) any { return vtsi.NewCallsClient(cc) },
+	"ondewo.vtsi.Campaigns":        func(cc grpc.ClientConnInterface) any { return vtsi.NewCampaignsClient(cc) },
+	"ondewo.vtsi.Events":           func(cc grpc.ClientConnInterface) any { return vtsi.NewEventsClient(cc) },
 	"ondewo.vtsi.Logs":             func(cc grpc.ClientConnInterface) any { return vtsi.NewLogsClient(cc) },
 	"ondewo.vtsi.Projects":         func(cc grpc.ClientConnInterface) any { return vtsi.NewProjectsClient(cc) },
+	"ondewo.vtsi.Softphones":       func(cc grpc.ClientConnInterface) any { return vtsi.NewSoftphonesClient(cc) },
 	"ondewo.nlu.Agents":            func(cc grpc.ClientConnInterface) any { return nlu.NewAgentsClient(cc) },
 	"ondewo.nlu.AiServices":        func(cc grpc.ClientConnInterface) any { return nlu.NewAiServicesClient(cc) },
 	"ondewo.nlu.CcaiProjects":      func(cc grpc.ClientConnInterface) any { return nlu.NewCcaiProjectsClient(cc) },
@@ -115,6 +121,29 @@ var expectedMethods = map[string][]string{
 		"StartListener", "StopListener", "ListListeners", "GetListener",
 		"StartScheduledCaller", "CancelScheduledCaller",
 		"StopCall", "StopAllCalls", "TransferCall", "GetCall", "ListCalls",
+		"AddCallersToCampaign", "AddScheduledCallersToCampaign",
+		"InviteToCall", "RemoveCallParticipant", "SetCallMediaControl",
+		// Streaming RPCs live in ServiceDesc.Streams rather than .Methods.
+		"StreamCallerStatus", "StreamListenerStatus", "StreamScheduledCallerStatus",
+		"StreamCallAudio", "ListenCallAudio",
+	},
+	"ondewo.vtsi.Campaigns": {
+		"CreateCampaign", "GetCampaign", "UpdateCampaign", "DeleteCampaign", "ListCampaigns",
+		"GetCampaignStatistics", "ListCampaignCalls",
+		"StartCampaign", "StopCampaign", "HardStopCampaign", "ResumeCampaign",
+		"StreamCampaignStatus",
+	},
+	"ondewo.vtsi.Events": {
+		"CreateVtsiEventSubscription", "GetVtsiEventSubscription", "UpdateVtsiEventSubscription",
+		"DeleteVtsiEventSubscription", "ListVtsiEventSubscriptions",
+		"CreateWebhook", "GetWebhook", "UpdateWebhook", "DeleteWebhook", "ListWebhooks", "TestWebhook",
+		"SubscribeVtsiEvents",
+	},
+	"ondewo.vtsi.Softphones": {
+		"CreateSoftphoneAccount", "GetSoftphoneAccount", "UpdateSoftphoneAccount",
+		"DeleteSoftphoneAccount", "ListSoftphoneAccounts", "RotateSoftphoneCredentials",
+		"ListSoftphoneCertificates", "GetSoftphoneCertificate", "RevokeSoftphoneCertificate",
+		"GetSoftphoneProvisioning",
 	},
 	// StreamCallLogs is server streaming, so it lives in ServiceDesc.Streams rather than
 	// .Methods - the lookup has to consider both.
@@ -125,7 +154,10 @@ var expectedMethods = map[string][]string{
 		"CreateVtsiProject", "GetVtsiProject", "UpdateVtsiProject", "DeleteVtsiProject",
 		"DeployVtsiProject", "UndeployVtsiProject", "ListVtsiProjects",
 	},
-	"ondewo.sip.Sip":      {"SipStartCall", "SipEndCall", "SipTransferCall", "SipGetSipStatus"},
+	"ondewo.sip.Sip": {
+		"SipStartCall", "SipEndCall", "SipTransferCall", "SipGetSipStatus",
+		"SipReportAnsweringMachineDetected", "SipSetCallMediaControl", "SipStreamCallAudio",
+	},
 	"ondewo.qa.QA":        {"GetAnswer", "GetServerState", "ListProjectIds"},
 	"ondewo.nlu.Sessions": {"DetectIntent", "StreamingDetectIntent", "ListSessions", "GetSession"},
 }
@@ -233,6 +265,52 @@ func TestProto3ExplicitPresenceSurvivesTheWire(t *testing.T) {
 			t.Errorf("MaxLines = %v after a round trip that never set it, want nil", *parsed.MaxLines)
 		}
 	})
+}
+
+// TestVersion9PresenceOnFormerlyPlainScalars pins one of the eleven calls.proto scalars that
+// gained `optional` in ONDEWO VTSI API 9.0.0: the go field is a pointer now, so an explicit `false`
+// is transmitted and an unset field stays nil. Code written against 8.x that assigned a plain bool
+// no longer compiles - the migration is `proto.Bool(...)` - and this is the test that says so.
+func TestVersion9PresenceOnFormerlyPlainScalars(t *testing.T) {
+	t.Parallel()
+
+	wire, err := proto.Marshal(&vtsi.InterruptionHandlingConfig{TranscribeOnDisabledInterruptions: proto.Bool(false)})
+	if err != nil {
+		t.Fatalf("proto.Marshal failed: %v", err)
+	}
+	if len(wire) == 0 {
+		t.Fatal("an explicitly set false was dropped from the wire - proto3 presence is lost")
+	}
+
+	parsed := &vtsi.InterruptionHandlingConfig{}
+	if err := proto.Unmarshal(wire, parsed); err != nil {
+		t.Fatalf("proto.Unmarshal failed: %v", err)
+	}
+	if parsed.TranscribeOnDisabledInterruptions == nil || *parsed.TranscribeOnDisabledInterruptions {
+		t.Fatalf("TranscribeOnDisabledInterruptions = %v after the round trip, want a pointer to false",
+			parsed.TranscribeOnDisabledInterruptions)
+	}
+
+	if unset := (&vtsi.InterruptionHandlingConfig{}).TranscribeOnDisabledInterruptions; unset != nil {
+		t.Errorf("TranscribeOnDisabledInterruptions of an empty message = %v, want nil", *unset)
+	}
+}
+
+// TestPjsipConfFileStringKeepsFieldNumberOne pins the 9.0.0 rename of
+// AsteriskConfigsFiles.sip_conf_file_string to pjsip_conf_file_string: source breaking only, the
+// field number (1) and type (string) are unchanged, so bytes written by an 8.x client still parse
+// into the renamed field.
+func TestPjsipConfFileStringKeepsFieldNumberOne(t *testing.T) {
+	t.Parallel()
+
+	// field 1, wire type 2 (length delimited), 3 bytes: what 8.x wrote for SipConfFileString: "abc".
+	parsed := &vtsi.AsteriskConfigsFiles{}
+	if err := proto.Unmarshal([]byte{0x0a, 0x03, 'a', 'b', 'c'}, parsed); err != nil {
+		t.Fatalf("proto.Unmarshal failed: %v", err)
+	}
+	if got, want := parsed.GetPjsipConfFileString(), "abc"; got != want {
+		t.Errorf("PjsipConfFileString = %q, want %q", got, want)
+	}
 }
 
 // TestEnumZeroValueIsTheUnspecifiedMember checks the member every proto3 enum should have at 0 and
