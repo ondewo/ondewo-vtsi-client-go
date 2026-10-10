@@ -37,6 +37,7 @@
 * README: new section "TLS, mutual TLS and certificates" (modes, connection defaults, a test PKI with
   openssl, TLS security notes, troubleshooting).
 * The ONDEWO proto compiler submodule is pinned to 5.15.2 (was 5.15.1).
+
 *****************
 
 ## Release ONDEWO VTSI Go Client 8.7.0
