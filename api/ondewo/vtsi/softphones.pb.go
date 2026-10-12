@@ -169,6 +169,71 @@ func (SoftphoneCertificateStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{1}
 }
 
+// Reachability of one registered contact of a softphone account, as the project&apos;s Asterisk
+// qualifies it (SIP <code>OPTIONS</code>).
+type SoftphoneContactStatus int32
+
+const (
+	// Unspecified. Never returned.
+	SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_UNSPECIFIED SoftphoneContactStatus = 0
+	// The contact answered the last qualify (<code>Avail</code>); <code>round_trip_ms</code> is set.
+	SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_AVAILABLE SoftphoneContactStatus = 1
+	// The contact did not answer the last qualify (<code>Unavail</code>): the device is registered but
+	// currently unreachable, e.g. offline or behind a NAT that expired. Calls to it fail until it answers
+	// again or its registration expires.
+	SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_UNAVAILABLE SoftphoneContactStatus = 2
+	// The contact is not qualified (<code>NonQual</code>), so its reachability is not checked.
+	SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_NOT_QUALIFIED SoftphoneContactStatus = 3
+	// The Asterisk has not determined the reachability yet (<code>Unknown</code>, <code>Created</code>),
+	// e.g. right after the registration.
+	SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_UNKNOWN SoftphoneContactStatus = 4
+)
+
+// Enum value maps for SoftphoneContactStatus.
+var (
+	SoftphoneContactStatus_name = map[int32]string{
+		0: "SOFTPHONE_CONTACT_STATUS_UNSPECIFIED",
+		1: "SOFTPHONE_CONTACT_STATUS_AVAILABLE",
+		2: "SOFTPHONE_CONTACT_STATUS_UNAVAILABLE",
+		3: "SOFTPHONE_CONTACT_STATUS_NOT_QUALIFIED",
+		4: "SOFTPHONE_CONTACT_STATUS_UNKNOWN",
+	}
+	SoftphoneContactStatus_value = map[string]int32{
+		"SOFTPHONE_CONTACT_STATUS_UNSPECIFIED":   0,
+		"SOFTPHONE_CONTACT_STATUS_AVAILABLE":     1,
+		"SOFTPHONE_CONTACT_STATUS_UNAVAILABLE":   2,
+		"SOFTPHONE_CONTACT_STATUS_NOT_QUALIFIED": 3,
+		"SOFTPHONE_CONTACT_STATUS_UNKNOWN":       4,
+	}
+)
+
+func (x SoftphoneContactStatus) Enum() *SoftphoneContactStatus {
+	p := new(SoftphoneContactStatus)
+	*p = x
+	return p
+}
+
+func (x SoftphoneContactStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SoftphoneContactStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_softphones_proto_enumTypes[2].Descriptor()
+}
+
+func (SoftphoneContactStatus) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_softphones_proto_enumTypes[2]
+}
+
+func (x SoftphoneContactStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SoftphoneContactStatus.Descriptor instead.
+func (SoftphoneContactStatus) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{2}
+}
+
 // Media encryption a softphone must use.
 type SoftphoneSrtpMode int32
 
@@ -204,11 +269,11 @@ func (x SoftphoneSrtpMode) String() string {
 }
 
 func (SoftphoneSrtpMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_softphones_proto_enumTypes[2].Descriptor()
+	return file_ondewo_vtsi_softphones_proto_enumTypes[3].Descriptor()
 }
 
 func (SoftphoneSrtpMode) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_softphones_proto_enumTypes[2]
+	return &file_ondewo_vtsi_softphones_proto_enumTypes[3]
 }
 
 func (x SoftphoneSrtpMode) Number() protoreflect.EnumNumber {
@@ -217,7 +282,7 @@ func (x SoftphoneSrtpMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SoftphoneSrtpMode.Descriptor instead.
 func (SoftphoneSrtpMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{2}
+	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{3}
 }
 
 // The field by which softphone accounts are sorted.
@@ -270,11 +335,11 @@ func (x SoftphoneAccountSorting_SoftphoneAccountSortingField) String() string {
 }
 
 func (SoftphoneAccountSorting_SoftphoneAccountSortingField) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_softphones_proto_enumTypes[3].Descriptor()
+	return file_ondewo_vtsi_softphones_proto_enumTypes[4].Descriptor()
 }
 
 func (SoftphoneAccountSorting_SoftphoneAccountSortingField) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_softphones_proto_enumTypes[3]
+	return &file_ondewo_vtsi_softphones_proto_enumTypes[4]
 }
 
 func (x SoftphoneAccountSorting_SoftphoneAccountSortingField) Number() protoreflect.EnumNumber {
@@ -322,6 +387,10 @@ type SoftphoneAccount struct {
 	// Free-form labels for organising and filtering accounts, e.g. <code>team: support</code>. Keys: 1 to
 	// 63 characters of <pre><code>[a-z0-9_.-]</code></pre>, starting with a letter; values: at most 256
 	// characters; at most 64 entries. Updatable (the whole map is replaced).
+	// Control characters: a KEY cannot contain one (the key pattern refuses it with
+	// <code>INVALID_ARGUMENT</code>); a VALUE is checked for its length only, so control characters
+	// (including line breaks) are accepted and stored and returned verbatim. Clients that display or log
+	// label values must escape them.
 	Labels map[string]string `protobuf:"bytes,9,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Asterisk dialplan extensions or patterns this softphone may dial, e.g. <code>100</code> or
 	// <code>_1XX</code>. Empty means the project default: the project&apos;s own listener extensions,
@@ -346,7 +415,19 @@ type SoftphoneAccount struct {
 	// Output only. The user who last modified the account, including credential rotation.
 	ModifiedBy string `protobuf:"bytes,17,opt,name=modified_by,json=modifiedBy,proto3" json:"modified_by,omitempty"`
 	// Output only. Last modification time of the account, including credential rotation.
-	ModifiedAt    *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=modified_at,json=modifiedAt,proto3" json:"modified_at,omitempty"`
+	ModifiedAt *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=modified_at,json=modifiedAt,proto3" json:"modified_at,omitempty"`
+	// Output only. Whether the account is LOCKED: <code>RevokeSoftphoneCertificate</code> revoked its
+	// ACTIVE certificate, so the account is removed from the Asterisk and cannot register or call until
+	// <code>RotateSoftphoneCredentials</code> unlocks it. Independent of <code>enabled</code>: an account
+	// is usable only when it is enabled AND not locked.
+	Locked bool `protobuf:"varint,19,opt,name=locked,proto3" json:"locked,omitempty"`
+	// Output only. When the account was locked. Unset when it is not locked (also for an account locked
+	// by a server older than 9.1.0 whose lock time is not known).
+	LockedAt *timestamppb.Timestamp `protobuf:"bytes,20,opt,name=locked_at,json=lockedAt,proto3" json:"locked_at,omitempty"`
+	// Output only. Why the account was locked: the <code>reason</code> given to the
+	// <code>RevokeSoftphoneCertificate</code> that locked it (empty when none was given or the account is
+	// not locked).
+	LockedReason  string `protobuf:"bytes,21,opt,name=locked_reason,json=lockedReason,proto3" json:"locked_reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -505,6 +586,27 @@ func (x *SoftphoneAccount) GetModifiedAt() *timestamppb.Timestamp {
 		return x.ModifiedAt
 	}
 	return nil
+}
+
+func (x *SoftphoneAccount) GetLocked() bool {
+	if x != nil {
+		return x.Locked
+	}
+	return false
+}
+
+func (x *SoftphoneAccount) GetLockedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.LockedAt
+	}
+	return nil
+}
+
+func (x *SoftphoneAccount) GetLockedReason() string {
+	if x != nil {
+		return x.LockedReason
+	}
+	return ""
 }
 
 // A client certificate issued to a softphone account by the project&apos;s SOFTPHONE certificate
@@ -1053,8 +1155,11 @@ type SoftphoneAccountFilter struct {
 	// certificate never match. A window whose start is not before its end is rejected with
 	// <code>INVALID_ARGUMENT</code>.
 	CertificateExpiresAfter *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=certificate_expires_after,json=certificateExpiresAfter,proto3" json:"certificate_expires_after,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
+	// Only locked (<code>true</code>) or only unlocked (<code>false</code>) accounts, see
+	// <code>SoftphoneAccount.locked</code>. Unset matches both.
+	Locked        *bool `protobuf:"varint,8,opt,name=locked,proto3,oneof" json:"locked,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SoftphoneAccountFilter) Reset() {
@@ -1134,6 +1239,13 @@ func (x *SoftphoneAccountFilter) GetCertificateExpiresAfter() *timestamppb.Times
 		return x.CertificateExpiresAfter
 	}
 	return nil
+}
+
+func (x *SoftphoneAccountFilter) GetLocked() bool {
+	if x != nil && x.Locked != nil {
+		return *x.Locked
+	}
+	return false
 }
 
 // Narrows a softphone certificate listing. Combined like
@@ -1268,8 +1380,27 @@ type CreateSoftphoneAccountRequest struct {
 	// The account to create. <code>sip_username</code> is required. Output-only fields must be left
 	// unset and are otherwise rejected with <code>INVALID_ARGUMENT</code>.
 	SoftphoneAccount *SoftphoneAccount `protobuf:"bytes,2,opt,name=softphone_account,json=softphoneAccount,proto3" json:"softphone_account,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Optional client idempotency key: at most 255 printable ASCII characters, no whitespace; empty means
+	// no deduplication. The key is scoped to the VTSI project and to this RPC and retained for 24 hours by
+	// default (the server&apos;s <code>ONDEWO_VTSI_IDEMPOTENCY_KEY_RETENTION_S</code>), whichever server
+	// replica a retry reaches.
+	// <p>A retry carrying the same key and the same request does NOT create a second account. Because the
+	// server keeps no copy of the one-time secrets it handed out, it cannot replay the first response;
+	// instead the retry ROTATES the credentials of the account the first attempt created, exactly like
+	// <code>RotateSoftphoneCredentials</code> (the SIP password always, and a new certificate for a
+	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code> account), and returns the account with
+	// the NEW one-time secrets. The secrets of the first response, if anyone received them, stop working;
+	// a lost response is therefore always recoverable and never leaves two valid sets of secrets. This
+	// grants nothing a caller could not do anyway: both RPCs require the same role.</p>
+	// <p>Reusing a key with a different request is refused with <code>INVALID_ARGUMENT</code>. A retry that
+	// arrives while the first attempt is still running is answered <code>ABORTED</code> and may be retried
+	// later. A first attempt that fails stores nothing, so a retry after a failure runs the create again.
+	// A retry after the account was deleted is <code>NOT_FOUND</code>; a retry while the account is
+	// <code>locked</code> is refused with <code>FAILED_PRECONDITION</code> (unlock it deliberately with
+	// <code>RotateSoftphoneCredentials</code>: a replayed key must not undo a revocation).</p>
+	IdempotencyKey string `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateSoftphoneAccountRequest) Reset() {
@@ -1316,6 +1447,13 @@ func (x *CreateSoftphoneAccountRequest) GetSoftphoneAccount() *SoftphoneAccount 
 	return nil
 }
 
+func (x *CreateSoftphoneAccountRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Softphones.CreateSoftphoneAccount">Softphones.CreateSoftphoneAccount</a>.
 type CreateSoftphoneAccountResponse struct {
@@ -1324,6 +1462,7 @@ type CreateSoftphoneAccountResponse struct {
 	SoftphoneAccount *SoftphoneAccount `protobuf:"bytes,1,opt,name=softphone_account,json=softphoneAccount,proto3" json:"softphone_account,omitempty"`
 	// ONE-TIME secrets: the SIP password and, for
 	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code>, the PKCS#12 bundle and its password.
+	// For a replayed <code>idempotency_key</code>: the newly rotated secrets.
 	Credentials   *SoftphoneCredentials `protobuf:"bytes,2,opt,name=credentials,proto3" json:"credentials,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2238,11 +2377,233 @@ func (x *GetSoftphoneProvisioningRequest) GetName() string {
 	return ""
 }
 
+// The request message for
+// <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneRegistration">Softphones.GetSoftphoneRegistration</a>.
+type GetSoftphoneRegistrationRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource name of the account.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/softphoneAccounts/&lt;softphone_account_uuid&gt;</code></pre>
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>SoftphoneRegistration</code> field paths to populate, e.g.
+	// <code>contacts</code>, <code>observed_at</code>. <code>softphone_account_name</code> is always
+	// populated. Unset or empty returns every field. An unknown path, or a path below
+	// <code>contacts</code> (a repeated field), is rejected with <code>INVALID_ARGUMENT</code>.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSoftphoneRegistrationRequest) Reset() {
+	*x = GetSoftphoneRegistrationRequest{}
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSoftphoneRegistrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSoftphoneRegistrationRequest) ProtoMessage() {}
+
+func (x *GetSoftphoneRegistrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSoftphoneRegistrationRequest.ProtoReflect.Descriptor instead.
+func (*GetSoftphoneRegistrationRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetSoftphoneRegistrationRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetSoftphoneRegistrationRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// The live registrations of one softphone account on its project&apos;s Asterisk. Every field is output
+// only. Never carries a secret.
+type SoftphoneRegistration struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource name of the softphone account.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/softphoneAccounts/&lt;softphone_account_uuid&gt;</code></pre>
+	SoftphoneAccountName string `protobuf:"bytes,1,opt,name=softphone_account_name,json=softphoneAccountName,proto3" json:"softphone_account_name,omitempty"`
+	// The currently registered contacts (devices), at most the account&apos;s <code>max_contacts</code>,
+	// ordered by <code>expire_time</code>, latest first. Empty when no device is registered.
+	Contacts []*SoftphoneContact `protobuf:"bytes,2,rep,name=contacts,proto3" json:"contacts,omitempty"`
+	// When the server read the registrations from the Asterisk.
+	ObservedAt    *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SoftphoneRegistration) Reset() {
+	*x = SoftphoneRegistration{}
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SoftphoneRegistration) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SoftphoneRegistration) ProtoMessage() {}
+
+func (x *SoftphoneRegistration) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SoftphoneRegistration.ProtoReflect.Descriptor instead.
+func (*SoftphoneRegistration) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *SoftphoneRegistration) GetSoftphoneAccountName() string {
+	if x != nil {
+		return x.SoftphoneAccountName
+	}
+	return ""
+}
+
+func (x *SoftphoneRegistration) GetContacts() []*SoftphoneContact {
+	if x != nil {
+		return x.Contacts
+	}
+	return nil
+}
+
+func (x *SoftphoneRegistration) GetObservedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return nil
+}
+
+// One registered contact (device) of a softphone account.
+type SoftphoneContact struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The contact URI the device registered, e.g.
+	// <code>sip:alice@198.51.100.7:52114;transport=TLS</code>.
+	Uri string `protobuf:"bytes,1,opt,name=uri,proto3" json:"uri,omitempty"`
+	// The <code>User-Agent</code> header of the device&apos;s registration, e.g. <code>Z 5.6.1 v2.10.20.3</code>.
+	// Empty when the device sent none.
+	UserAgent string `protobuf:"bytes,2,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	// The source address the registration arrived from, as <code>host:port</code> (an IPv6 host in
+	// brackets). It can differ from the host of <code>uri</code> behind a NAT.
+	SourceAddress string `protobuf:"bytes,3,opt,name=source_address,json=sourceAddress,proto3" json:"source_address,omitempty"`
+	// When the registration expires unless the device refreshes it.
+	ExpireTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=expire_time,json=expireTime,proto3" json:"expire_time,omitempty"`
+	// Round-trip time of the last qualify (SIP <code>OPTIONS</code>) in milliseconds. <code>0</code> unless
+	// <code>status</code> is <code>SOFTPHONE_CONTACT_STATUS_AVAILABLE</code>.
+	RoundTripMs float64 `protobuf:"fixed64,5,opt,name=round_trip_ms,json=roundTripMs,proto3" json:"round_trip_ms,omitempty"`
+	// Reachability of the contact.
+	Status        SoftphoneContactStatus `protobuf:"varint,6,opt,name=status,proto3,enum=ondewo.vtsi.SoftphoneContactStatus" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SoftphoneContact) Reset() {
+	*x = SoftphoneContact{}
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SoftphoneContact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SoftphoneContact) ProtoMessage() {}
+
+func (x *SoftphoneContact) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_softphones_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SoftphoneContact.ProtoReflect.Descriptor instead.
+func (*SoftphoneContact) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *SoftphoneContact) GetUri() string {
+	if x != nil {
+		return x.Uri
+	}
+	return ""
+}
+
+func (x *SoftphoneContact) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
+	}
+	return ""
+}
+
+func (x *SoftphoneContact) GetSourceAddress() string {
+	if x != nil {
+		return x.SourceAddress
+	}
+	return ""
+}
+
+func (x *SoftphoneContact) GetExpireTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpireTime
+	}
+	return nil
+}
+
+func (x *SoftphoneContact) GetRoundTripMs() float64 {
+	if x != nil {
+		return x.RoundTripMs
+	}
+	return 0
+}
+
+func (x *SoftphoneContact) GetStatus() SoftphoneContactStatus {
+	if x != nil {
+		return x.Status
+	}
+	return SoftphoneContactStatus_SOFTPHONE_CONTACT_STATUS_UNSPECIFIED
+}
+
 var File_ondewo_vtsi_softphones_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"\n" +
-	"\x1condewo/vtsi/softphones.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1aondewo/vtsi/projects.proto\"\x96\b\n" +
+	"\x1condewo/vtsi/softphones.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1aondewo/vtsi/projects.proto\"\x8c\t\n" +
 	"\x10SoftphoneAccount\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x120\n" +
 	"\x14softphone_account_id\x18\x02 \x01(\tR\x12softphoneAccountId\x12*\n" +
@@ -2266,7 +2627,10 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"\vmodified_by\x18\x11 \x01(\tR\n" +
 	"modifiedBy\x12;\n" +
 	"\vmodified_at\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"modifiedAt\x1a9\n" +
+	"modifiedAt\x12\x16\n" +
+	"\x06locked\x18\x13 \x01(\bR\x06locked\x127\n" +
+	"\tlocked_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\blockedAt\x12#\n" +
+	"\rlocked_reason\x18\x15 \x01(\tR\flockedReason\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
@@ -2324,7 +2688,7 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"%client_certificate_sha256_fingerprint\x18\x11 \x01(\tR\"clientCertificateSha256Fingerprint\x12_\n" +
 	"\x1eclient_certificate_expire_time\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\x1bclientCertificateExpireTime\x12/\n" +
 	"\x13zoiper_instructions\x18\x13 \x01(\tR\x12zoiperInstructions\x12E\n" +
-	"\x1fclient_certificate_support_note\x18\x14 \x01(\tR\x1cclientCertificateSupportNote\"\xbd\x04\n" +
+	"\x1fclient_certificate_support_note\x18\x14 \x01(\tR\x1cclientCertificateSupportNote\"\xe5\x04\n" +
 	"\x16SoftphoneAccountFilter\x12Z\n" +
 	"\x14transport_securities\x18\x01 \x03(\x0e2'.ondewo.vtsi.SoftphoneTransportSecurityR\x13transportSecurities\x12\x1d\n" +
 	"\aenabled\x18\x02 \x01(\bH\x00R\aenabled\x88\x01\x01\x12G\n" +
@@ -2332,12 +2696,14 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"\x15display_name_contains\x18\x04 \x01(\tR\x13displayNameContains\x122\n" +
 	"\x15sip_username_contains\x18\x05 \x01(\tR\x13sipUsernameContains\x12X\n" +
 	"\x1acertificate_expires_before\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x18certificateExpiresBefore\x12V\n" +
-	"\x19certificate_expires_after\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x17certificateExpiresAfter\x1a9\n" +
+	"\x19certificate_expires_after\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\x17certificateExpiresAfter\x12\x1b\n" +
+	"\x06locked\x18\b \x01(\bH\x01R\x06locked\x88\x01\x01\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
 	"\n" +
-	"\b_enabled\"\xe5\x01\n" +
+	"\b_enabledB\t\n" +
+	"\a_locked\"\xe5\x01\n" +
 	"\x1aSoftphoneCertificateFilter\x12C\n" +
 	"\bstatuses\x18\x01 \x03(\x0e2'.ondewo.vtsi.SoftphoneCertificateStatusR\bstatuses\x12A\n" +
 	"\x0eexpires_before\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\rexpiresBefore\x12?\n" +
@@ -2353,10 +2719,11 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"'SORT_SOFTPHONE_ACCOUNT_BY_LAST_MODIFIED\x10\x04\x120\n" +
 	",SORT_SOFTPHONE_ACCOUNT_BY_CERTIFICATE_EXPIRY\x10\x05B\x10\n" +
 	"\x0e_sorting_fieldB\x0f\n" +
-	"\r_sorting_mode\"\x97\x01\n" +
+	"\r_sorting_mode\"\xc0\x01\n" +
 	"\x1dCreateSoftphoneAccountRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12J\n" +
-	"\x11softphone_account\x18\x02 \x01(\v2\x1d.ondewo.vtsi.SoftphoneAccountR\x10softphoneAccount\"\xb1\x01\n" +
+	"\x11softphone_account\x18\x02 \x01(\v2\x1d.ondewo.vtsi.SoftphoneAccountR\x10softphoneAccount\x12'\n" +
+	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xb1\x01\n" +
 	"\x1eCreateSoftphoneAccountResponse\x12J\n" +
 	"\x11softphone_account\x18\x01 \x01(\v2\x1d.ondewo.vtsi.SoftphoneAccountR\x10softphoneAccount\x12C\n" +
 	"\vcredentials\x18\x02 \x01(\v2!.ondewo.vtsi.SoftphoneCredentialsR\vcredentials\"k\n" +
@@ -2415,7 +2782,25 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x16\n" +
 	"\x06reason\x18\x02 \x01(\tR\x06reason\"5\n" +
 	"\x1fGetSoftphoneProvisioningRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name*\xb1\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"p\n" +
+	"\x1fGetSoftphoneRegistrationRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xc5\x01\n" +
+	"\x15SoftphoneRegistration\x124\n" +
+	"\x16softphone_account_name\x18\x01 \x01(\tR\x14softphoneAccountName\x129\n" +
+	"\bcontacts\x18\x02 \x03(\v2\x1d.ondewo.vtsi.SoftphoneContactR\bcontacts\x12;\n" +
+	"\vobserved_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"observedAt\"\x88\x02\n" +
+	"\x10SoftphoneContact\x12\x10\n" +
+	"\x03uri\x18\x01 \x01(\tR\x03uri\x12\x1d\n" +
+	"\n" +
+	"user_agent\x18\x02 \x01(\tR\tuserAgent\x12%\n" +
+	"\x0esource_address\x18\x03 \x01(\tR\rsourceAddress\x12;\n" +
+	"\vexpire_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"expireTime\x12\"\n" +
+	"\rround_trip_ms\x18\x05 \x01(\x01R\vroundTripMs\x12;\n" +
+	"\x06status\x18\x06 \x01(\x0e2#.ondewo.vtsi.SoftphoneContactStatusR\x06status*\xb1\x01\n" +
 	"\x1aSoftphoneTransportSecurity\x12,\n" +
 	"(SOFTPHONE_TRANSPORT_SECURITY_UNSPECIFIED\x10\x00\x123\n" +
 	"/SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE\x10\x01\x120\n" +
@@ -2424,10 +2809,16 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"(SOFTPHONE_CERTIFICATE_STATUS_UNSPECIFIED\x10\x00\x12'\n" +
 	"#SOFTPHONE_CERTIFICATE_STATUS_ACTIVE\x10\x01\x12+\n" +
 	"'SOFTPHONE_CERTIFICATE_STATUS_SUPERSEDED\x10\x02\x12(\n" +
-	"$SOFTPHONE_CERTIFICATE_STATUS_REVOKED\x10\x03*`\n" +
+	"$SOFTPHONE_CERTIFICATE_STATUS_REVOKED\x10\x03*\xe6\x01\n" +
+	"\x16SoftphoneContactStatus\x12(\n" +
+	"$SOFTPHONE_CONTACT_STATUS_UNSPECIFIED\x10\x00\x12&\n" +
+	"\"SOFTPHONE_CONTACT_STATUS_AVAILABLE\x10\x01\x12(\n" +
+	"$SOFTPHONE_CONTACT_STATUS_UNAVAILABLE\x10\x02\x12*\n" +
+	"&SOFTPHONE_CONTACT_STATUS_NOT_QUALIFIED\x10\x03\x12$\n" +
+	" SOFTPHONE_CONTACT_STATUS_UNKNOWN\x10\x04*`\n" +
 	"\x11SoftphoneSrtpMode\x12#\n" +
 	"\x1fSOFTPHONE_SRTP_MODE_UNSPECIFIED\x10\x00\x12&\n" +
-	"\"SOFTPHONE_SRTP_MODE_SDES_MANDATORY\x10\x012\xeb\b\n" +
+	"\"SOFTPHONE_SRTP_MODE_SDES_MANDATORY\x10\x012\xd9\t\n" +
 	"\n" +
 	"Softphones\x12q\n" +
 	"\x16CreateSoftphoneAccount\x12*.ondewo.vtsi.CreateSoftphoneAccountRequest\x1a+.ondewo.vtsi.CreateSoftphoneAccountResponse\x12]\n" +
@@ -2439,7 +2830,8 @@ const file_ondewo_vtsi_softphones_proto_rawDesc = "" +
 	"\x19ListSoftphoneCertificates\x12-.ondewo.vtsi.ListSoftphoneCertificatesRequest\x1a..ondewo.vtsi.ListSoftphoneCertificatesResponse\x12i\n" +
 	"\x17GetSoftphoneCertificate\x12+.ondewo.vtsi.GetSoftphoneCertificateRequest\x1a!.ondewo.vtsi.SoftphoneCertificate\x12o\n" +
 	"\x1aRevokeSoftphoneCertificate\x12..ondewo.vtsi.RevokeSoftphoneCertificateRequest\x1a!.ondewo.vtsi.SoftphoneCertificate\x12l\n" +
-	"\x18GetSoftphoneProvisioning\x12,.ondewo.vtsi.GetSoftphoneProvisioningRequest\x1a\".ondewo.vtsi.SoftphoneProvisioningb\x06proto3"
+	"\x18GetSoftphoneProvisioning\x12,.ondewo.vtsi.GetSoftphoneProvisioningRequest\x1a\".ondewo.vtsi.SoftphoneProvisioning\x12l\n" +
+	"\x18GetSoftphoneRegistration\x12,.ondewo.vtsi.GetSoftphoneRegistrationRequest\x1a\".ondewo.vtsi.SoftphoneRegistrationb\x06proto3"
 
 var (
 	file_ondewo_vtsi_softphones_proto_rawDescOnce sync.Once
@@ -2453,108 +2845,120 @@ func file_ondewo_vtsi_softphones_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_softphones_proto_rawDescData
 }
 
-var file_ondewo_vtsi_softphones_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_ondewo_vtsi_softphones_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_ondewo_vtsi_softphones_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_ondewo_vtsi_softphones_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_ondewo_vtsi_softphones_proto_goTypes = []any{
 	(SoftphoneTransportSecurity)(0),                           // 0: ondewo.vtsi.SoftphoneTransportSecurity
 	(SoftphoneCertificateStatus)(0),                           // 1: ondewo.vtsi.SoftphoneCertificateStatus
-	(SoftphoneSrtpMode)(0),                                    // 2: ondewo.vtsi.SoftphoneSrtpMode
-	(SoftphoneAccountSorting_SoftphoneAccountSortingField)(0), // 3: ondewo.vtsi.SoftphoneAccountSorting.SoftphoneAccountSortingField
-	(*SoftphoneAccount)(nil),                                  // 4: ondewo.vtsi.SoftphoneAccount
-	(*SoftphoneCertificate)(nil),                              // 5: ondewo.vtsi.SoftphoneCertificate
-	(*SoftphoneCredentials)(nil),                              // 6: ondewo.vtsi.SoftphoneCredentials
-	(*SoftphoneProvisioning)(nil),                             // 7: ondewo.vtsi.SoftphoneProvisioning
-	(*SoftphoneAccountFilter)(nil),                            // 8: ondewo.vtsi.SoftphoneAccountFilter
-	(*SoftphoneCertificateFilter)(nil),                        // 9: ondewo.vtsi.SoftphoneCertificateFilter
-	(*SoftphoneAccountSorting)(nil),                           // 10: ondewo.vtsi.SoftphoneAccountSorting
-	(*CreateSoftphoneAccountRequest)(nil),                     // 11: ondewo.vtsi.CreateSoftphoneAccountRequest
-	(*CreateSoftphoneAccountResponse)(nil),                    // 12: ondewo.vtsi.CreateSoftphoneAccountResponse
-	(*GetSoftphoneAccountRequest)(nil),                        // 13: ondewo.vtsi.GetSoftphoneAccountRequest
-	(*UpdateSoftphoneAccountRequest)(nil),                     // 14: ondewo.vtsi.UpdateSoftphoneAccountRequest
-	(*DeleteSoftphoneAccountRequest)(nil),                     // 15: ondewo.vtsi.DeleteSoftphoneAccountRequest
-	(*DeleteSoftphoneAccountResponse)(nil),                    // 16: ondewo.vtsi.DeleteSoftphoneAccountResponse
-	(*ListSoftphoneAccountsRequest)(nil),                      // 17: ondewo.vtsi.ListSoftphoneAccountsRequest
-	(*ListSoftphoneAccountsResponse)(nil),                     // 18: ondewo.vtsi.ListSoftphoneAccountsResponse
-	(*RotateSoftphoneCredentialsRequest)(nil),                 // 19: ondewo.vtsi.RotateSoftphoneCredentialsRequest
-	(*RotateSoftphoneCredentialsResponse)(nil),                // 20: ondewo.vtsi.RotateSoftphoneCredentialsResponse
-	(*ListSoftphoneCertificatesRequest)(nil),                  // 21: ondewo.vtsi.ListSoftphoneCertificatesRequest
-	(*ListSoftphoneCertificatesResponse)(nil),                 // 22: ondewo.vtsi.ListSoftphoneCertificatesResponse
-	(*GetSoftphoneCertificateRequest)(nil),                    // 23: ondewo.vtsi.GetSoftphoneCertificateRequest
-	(*RevokeSoftphoneCertificateRequest)(nil),                 // 24: ondewo.vtsi.RevokeSoftphoneCertificateRequest
-	(*GetSoftphoneProvisioningRequest)(nil),                   // 25: ondewo.vtsi.GetSoftphoneProvisioningRequest
-	nil,                                                       // 26: ondewo.vtsi.SoftphoneAccount.LabelsEntry
-	nil,                                                       // 27: ondewo.vtsi.SoftphoneAccountFilter.LabelsEntry
-	(*timestamppb.Timestamp)(nil),                             // 28: google.protobuf.Timestamp
-	(VtsiProjectSortingMode)(0),                               // 29: ondewo.vtsi.VtsiProjectSortingMode
-	(*fieldmaskpb.FieldMask)(nil),                             // 30: google.protobuf.FieldMask
+	(SoftphoneContactStatus)(0),                               // 2: ondewo.vtsi.SoftphoneContactStatus
+	(SoftphoneSrtpMode)(0),                                    // 3: ondewo.vtsi.SoftphoneSrtpMode
+	(SoftphoneAccountSorting_SoftphoneAccountSortingField)(0), // 4: ondewo.vtsi.SoftphoneAccountSorting.SoftphoneAccountSortingField
+	(*SoftphoneAccount)(nil),                                  // 5: ondewo.vtsi.SoftphoneAccount
+	(*SoftphoneCertificate)(nil),                              // 6: ondewo.vtsi.SoftphoneCertificate
+	(*SoftphoneCredentials)(nil),                              // 7: ondewo.vtsi.SoftphoneCredentials
+	(*SoftphoneProvisioning)(nil),                             // 8: ondewo.vtsi.SoftphoneProvisioning
+	(*SoftphoneAccountFilter)(nil),                            // 9: ondewo.vtsi.SoftphoneAccountFilter
+	(*SoftphoneCertificateFilter)(nil),                        // 10: ondewo.vtsi.SoftphoneCertificateFilter
+	(*SoftphoneAccountSorting)(nil),                           // 11: ondewo.vtsi.SoftphoneAccountSorting
+	(*CreateSoftphoneAccountRequest)(nil),                     // 12: ondewo.vtsi.CreateSoftphoneAccountRequest
+	(*CreateSoftphoneAccountResponse)(nil),                    // 13: ondewo.vtsi.CreateSoftphoneAccountResponse
+	(*GetSoftphoneAccountRequest)(nil),                        // 14: ondewo.vtsi.GetSoftphoneAccountRequest
+	(*UpdateSoftphoneAccountRequest)(nil),                     // 15: ondewo.vtsi.UpdateSoftphoneAccountRequest
+	(*DeleteSoftphoneAccountRequest)(nil),                     // 16: ondewo.vtsi.DeleteSoftphoneAccountRequest
+	(*DeleteSoftphoneAccountResponse)(nil),                    // 17: ondewo.vtsi.DeleteSoftphoneAccountResponse
+	(*ListSoftphoneAccountsRequest)(nil),                      // 18: ondewo.vtsi.ListSoftphoneAccountsRequest
+	(*ListSoftphoneAccountsResponse)(nil),                     // 19: ondewo.vtsi.ListSoftphoneAccountsResponse
+	(*RotateSoftphoneCredentialsRequest)(nil),                 // 20: ondewo.vtsi.RotateSoftphoneCredentialsRequest
+	(*RotateSoftphoneCredentialsResponse)(nil),                // 21: ondewo.vtsi.RotateSoftphoneCredentialsResponse
+	(*ListSoftphoneCertificatesRequest)(nil),                  // 22: ondewo.vtsi.ListSoftphoneCertificatesRequest
+	(*ListSoftphoneCertificatesResponse)(nil),                 // 23: ondewo.vtsi.ListSoftphoneCertificatesResponse
+	(*GetSoftphoneCertificateRequest)(nil),                    // 24: ondewo.vtsi.GetSoftphoneCertificateRequest
+	(*RevokeSoftphoneCertificateRequest)(nil),                 // 25: ondewo.vtsi.RevokeSoftphoneCertificateRequest
+	(*GetSoftphoneProvisioningRequest)(nil),                   // 26: ondewo.vtsi.GetSoftphoneProvisioningRequest
+	(*GetSoftphoneRegistrationRequest)(nil),                   // 27: ondewo.vtsi.GetSoftphoneRegistrationRequest
+	(*SoftphoneRegistration)(nil),                             // 28: ondewo.vtsi.SoftphoneRegistration
+	(*SoftphoneContact)(nil),                                  // 29: ondewo.vtsi.SoftphoneContact
+	nil,                                                       // 30: ondewo.vtsi.SoftphoneAccount.LabelsEntry
+	nil,                                                       // 31: ondewo.vtsi.SoftphoneAccountFilter.LabelsEntry
+	(*timestamppb.Timestamp)(nil),                             // 32: google.protobuf.Timestamp
+	(VtsiProjectSortingMode)(0),                               // 33: ondewo.vtsi.VtsiProjectSortingMode
+	(*fieldmaskpb.FieldMask)(nil),                             // 34: google.protobuf.FieldMask
 }
 var file_ondewo_vtsi_softphones_proto_depIdxs = []int32{
 	0,  // 0: ondewo.vtsi.SoftphoneAccount.transport_security:type_name -> ondewo.vtsi.SoftphoneTransportSecurity
-	26, // 1: ondewo.vtsi.SoftphoneAccount.labels:type_name -> ondewo.vtsi.SoftphoneAccount.LabelsEntry
-	28, // 2: ondewo.vtsi.SoftphoneAccount.current_certificate_expire_time:type_name -> google.protobuf.Timestamp
-	28, // 3: ondewo.vtsi.SoftphoneAccount.sip_password_set_at:type_name -> google.protobuf.Timestamp
-	28, // 4: ondewo.vtsi.SoftphoneAccount.created_at:type_name -> google.protobuf.Timestamp
-	28, // 5: ondewo.vtsi.SoftphoneAccount.modified_at:type_name -> google.protobuf.Timestamp
-	1,  // 6: ondewo.vtsi.SoftphoneCertificate.status:type_name -> ondewo.vtsi.SoftphoneCertificateStatus
-	28, // 7: ondewo.vtsi.SoftphoneCertificate.not_before:type_name -> google.protobuf.Timestamp
-	28, // 8: ondewo.vtsi.SoftphoneCertificate.not_after:type_name -> google.protobuf.Timestamp
-	28, // 9: ondewo.vtsi.SoftphoneCertificate.created_at:type_name -> google.protobuf.Timestamp
-	28, // 10: ondewo.vtsi.SoftphoneCertificate.superseded_at:type_name -> google.protobuf.Timestamp
-	28, // 11: ondewo.vtsi.SoftphoneCertificate.revoked_at:type_name -> google.protobuf.Timestamp
-	5,  // 12: ondewo.vtsi.SoftphoneCredentials.certificate:type_name -> ondewo.vtsi.SoftphoneCertificate
-	0,  // 13: ondewo.vtsi.SoftphoneProvisioning.transport_security:type_name -> ondewo.vtsi.SoftphoneTransportSecurity
-	2,  // 14: ondewo.vtsi.SoftphoneProvisioning.srtp_mode:type_name -> ondewo.vtsi.SoftphoneSrtpMode
-	28, // 15: ondewo.vtsi.SoftphoneProvisioning.client_certificate_expire_time:type_name -> google.protobuf.Timestamp
-	0,  // 16: ondewo.vtsi.SoftphoneAccountFilter.transport_securities:type_name -> ondewo.vtsi.SoftphoneTransportSecurity
-	27, // 17: ondewo.vtsi.SoftphoneAccountFilter.labels:type_name -> ondewo.vtsi.SoftphoneAccountFilter.LabelsEntry
-	28, // 18: ondewo.vtsi.SoftphoneAccountFilter.certificate_expires_before:type_name -> google.protobuf.Timestamp
-	28, // 19: ondewo.vtsi.SoftphoneAccountFilter.certificate_expires_after:type_name -> google.protobuf.Timestamp
-	1,  // 20: ondewo.vtsi.SoftphoneCertificateFilter.statuses:type_name -> ondewo.vtsi.SoftphoneCertificateStatus
-	28, // 21: ondewo.vtsi.SoftphoneCertificateFilter.expires_before:type_name -> google.protobuf.Timestamp
-	28, // 22: ondewo.vtsi.SoftphoneCertificateFilter.expires_after:type_name -> google.protobuf.Timestamp
-	3,  // 23: ondewo.vtsi.SoftphoneAccountSorting.sorting_field:type_name -> ondewo.vtsi.SoftphoneAccountSorting.SoftphoneAccountSortingField
-	29, // 24: ondewo.vtsi.SoftphoneAccountSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
-	4,  // 25: ondewo.vtsi.CreateSoftphoneAccountRequest.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
-	4,  // 26: ondewo.vtsi.CreateSoftphoneAccountResponse.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
-	6,  // 27: ondewo.vtsi.CreateSoftphoneAccountResponse.credentials:type_name -> ondewo.vtsi.SoftphoneCredentials
-	30, // 28: ondewo.vtsi.GetSoftphoneAccountRequest.field_mask:type_name -> google.protobuf.FieldMask
-	4,  // 29: ondewo.vtsi.UpdateSoftphoneAccountRequest.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
-	30, // 30: ondewo.vtsi.UpdateSoftphoneAccountRequest.update_mask:type_name -> google.protobuf.FieldMask
-	8,  // 31: ondewo.vtsi.ListSoftphoneAccountsRequest.filter:type_name -> ondewo.vtsi.SoftphoneAccountFilter
-	30, // 32: ondewo.vtsi.ListSoftphoneAccountsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	10, // 33: ondewo.vtsi.ListSoftphoneAccountsRequest.softphone_account_sorting:type_name -> ondewo.vtsi.SoftphoneAccountSorting
-	4,  // 34: ondewo.vtsi.ListSoftphoneAccountsResponse.softphone_accounts:type_name -> ondewo.vtsi.SoftphoneAccount
-	4,  // 35: ondewo.vtsi.RotateSoftphoneCredentialsResponse.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
-	6,  // 36: ondewo.vtsi.RotateSoftphoneCredentialsResponse.credentials:type_name -> ondewo.vtsi.SoftphoneCredentials
-	9,  // 37: ondewo.vtsi.ListSoftphoneCertificatesRequest.filter:type_name -> ondewo.vtsi.SoftphoneCertificateFilter
-	30, // 38: ondewo.vtsi.ListSoftphoneCertificatesRequest.field_mask:type_name -> google.protobuf.FieldMask
-	5,  // 39: ondewo.vtsi.ListSoftphoneCertificatesResponse.softphone_certificates:type_name -> ondewo.vtsi.SoftphoneCertificate
-	30, // 40: ondewo.vtsi.GetSoftphoneCertificateRequest.field_mask:type_name -> google.protobuf.FieldMask
-	11, // 41: ondewo.vtsi.Softphones.CreateSoftphoneAccount:input_type -> ondewo.vtsi.CreateSoftphoneAccountRequest
-	13, // 42: ondewo.vtsi.Softphones.GetSoftphoneAccount:input_type -> ondewo.vtsi.GetSoftphoneAccountRequest
-	14, // 43: ondewo.vtsi.Softphones.UpdateSoftphoneAccount:input_type -> ondewo.vtsi.UpdateSoftphoneAccountRequest
-	15, // 44: ondewo.vtsi.Softphones.DeleteSoftphoneAccount:input_type -> ondewo.vtsi.DeleteSoftphoneAccountRequest
-	17, // 45: ondewo.vtsi.Softphones.ListSoftphoneAccounts:input_type -> ondewo.vtsi.ListSoftphoneAccountsRequest
-	19, // 46: ondewo.vtsi.Softphones.RotateSoftphoneCredentials:input_type -> ondewo.vtsi.RotateSoftphoneCredentialsRequest
-	21, // 47: ondewo.vtsi.Softphones.ListSoftphoneCertificates:input_type -> ondewo.vtsi.ListSoftphoneCertificatesRequest
-	23, // 48: ondewo.vtsi.Softphones.GetSoftphoneCertificate:input_type -> ondewo.vtsi.GetSoftphoneCertificateRequest
-	24, // 49: ondewo.vtsi.Softphones.RevokeSoftphoneCertificate:input_type -> ondewo.vtsi.RevokeSoftphoneCertificateRequest
-	25, // 50: ondewo.vtsi.Softphones.GetSoftphoneProvisioning:input_type -> ondewo.vtsi.GetSoftphoneProvisioningRequest
-	12, // 51: ondewo.vtsi.Softphones.CreateSoftphoneAccount:output_type -> ondewo.vtsi.CreateSoftphoneAccountResponse
-	4,  // 52: ondewo.vtsi.Softphones.GetSoftphoneAccount:output_type -> ondewo.vtsi.SoftphoneAccount
-	4,  // 53: ondewo.vtsi.Softphones.UpdateSoftphoneAccount:output_type -> ondewo.vtsi.SoftphoneAccount
-	16, // 54: ondewo.vtsi.Softphones.DeleteSoftphoneAccount:output_type -> ondewo.vtsi.DeleteSoftphoneAccountResponse
-	18, // 55: ondewo.vtsi.Softphones.ListSoftphoneAccounts:output_type -> ondewo.vtsi.ListSoftphoneAccountsResponse
-	20, // 56: ondewo.vtsi.Softphones.RotateSoftphoneCredentials:output_type -> ondewo.vtsi.RotateSoftphoneCredentialsResponse
-	22, // 57: ondewo.vtsi.Softphones.ListSoftphoneCertificates:output_type -> ondewo.vtsi.ListSoftphoneCertificatesResponse
-	5,  // 58: ondewo.vtsi.Softphones.GetSoftphoneCertificate:output_type -> ondewo.vtsi.SoftphoneCertificate
-	5,  // 59: ondewo.vtsi.Softphones.RevokeSoftphoneCertificate:output_type -> ondewo.vtsi.SoftphoneCertificate
-	7,  // 60: ondewo.vtsi.Softphones.GetSoftphoneProvisioning:output_type -> ondewo.vtsi.SoftphoneProvisioning
-	51, // [51:61] is the sub-list for method output_type
-	41, // [41:51] is the sub-list for method input_type
-	41, // [41:41] is the sub-list for extension type_name
-	41, // [41:41] is the sub-list for extension extendee
-	0,  // [0:41] is the sub-list for field type_name
+	30, // 1: ondewo.vtsi.SoftphoneAccount.labels:type_name -> ondewo.vtsi.SoftphoneAccount.LabelsEntry
+	32, // 2: ondewo.vtsi.SoftphoneAccount.current_certificate_expire_time:type_name -> google.protobuf.Timestamp
+	32, // 3: ondewo.vtsi.SoftphoneAccount.sip_password_set_at:type_name -> google.protobuf.Timestamp
+	32, // 4: ondewo.vtsi.SoftphoneAccount.created_at:type_name -> google.protobuf.Timestamp
+	32, // 5: ondewo.vtsi.SoftphoneAccount.modified_at:type_name -> google.protobuf.Timestamp
+	32, // 6: ondewo.vtsi.SoftphoneAccount.locked_at:type_name -> google.protobuf.Timestamp
+	1,  // 7: ondewo.vtsi.SoftphoneCertificate.status:type_name -> ondewo.vtsi.SoftphoneCertificateStatus
+	32, // 8: ondewo.vtsi.SoftphoneCertificate.not_before:type_name -> google.protobuf.Timestamp
+	32, // 9: ondewo.vtsi.SoftphoneCertificate.not_after:type_name -> google.protobuf.Timestamp
+	32, // 10: ondewo.vtsi.SoftphoneCertificate.created_at:type_name -> google.protobuf.Timestamp
+	32, // 11: ondewo.vtsi.SoftphoneCertificate.superseded_at:type_name -> google.protobuf.Timestamp
+	32, // 12: ondewo.vtsi.SoftphoneCertificate.revoked_at:type_name -> google.protobuf.Timestamp
+	6,  // 13: ondewo.vtsi.SoftphoneCredentials.certificate:type_name -> ondewo.vtsi.SoftphoneCertificate
+	0,  // 14: ondewo.vtsi.SoftphoneProvisioning.transport_security:type_name -> ondewo.vtsi.SoftphoneTransportSecurity
+	3,  // 15: ondewo.vtsi.SoftphoneProvisioning.srtp_mode:type_name -> ondewo.vtsi.SoftphoneSrtpMode
+	32, // 16: ondewo.vtsi.SoftphoneProvisioning.client_certificate_expire_time:type_name -> google.protobuf.Timestamp
+	0,  // 17: ondewo.vtsi.SoftphoneAccountFilter.transport_securities:type_name -> ondewo.vtsi.SoftphoneTransportSecurity
+	31, // 18: ondewo.vtsi.SoftphoneAccountFilter.labels:type_name -> ondewo.vtsi.SoftphoneAccountFilter.LabelsEntry
+	32, // 19: ondewo.vtsi.SoftphoneAccountFilter.certificate_expires_before:type_name -> google.protobuf.Timestamp
+	32, // 20: ondewo.vtsi.SoftphoneAccountFilter.certificate_expires_after:type_name -> google.protobuf.Timestamp
+	1,  // 21: ondewo.vtsi.SoftphoneCertificateFilter.statuses:type_name -> ondewo.vtsi.SoftphoneCertificateStatus
+	32, // 22: ondewo.vtsi.SoftphoneCertificateFilter.expires_before:type_name -> google.protobuf.Timestamp
+	32, // 23: ondewo.vtsi.SoftphoneCertificateFilter.expires_after:type_name -> google.protobuf.Timestamp
+	4,  // 24: ondewo.vtsi.SoftphoneAccountSorting.sorting_field:type_name -> ondewo.vtsi.SoftphoneAccountSorting.SoftphoneAccountSortingField
+	33, // 25: ondewo.vtsi.SoftphoneAccountSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
+	5,  // 26: ondewo.vtsi.CreateSoftphoneAccountRequest.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
+	5,  // 27: ondewo.vtsi.CreateSoftphoneAccountResponse.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
+	7,  // 28: ondewo.vtsi.CreateSoftphoneAccountResponse.credentials:type_name -> ondewo.vtsi.SoftphoneCredentials
+	34, // 29: ondewo.vtsi.GetSoftphoneAccountRequest.field_mask:type_name -> google.protobuf.FieldMask
+	5,  // 30: ondewo.vtsi.UpdateSoftphoneAccountRequest.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
+	34, // 31: ondewo.vtsi.UpdateSoftphoneAccountRequest.update_mask:type_name -> google.protobuf.FieldMask
+	9,  // 32: ondewo.vtsi.ListSoftphoneAccountsRequest.filter:type_name -> ondewo.vtsi.SoftphoneAccountFilter
+	34, // 33: ondewo.vtsi.ListSoftphoneAccountsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	11, // 34: ondewo.vtsi.ListSoftphoneAccountsRequest.softphone_account_sorting:type_name -> ondewo.vtsi.SoftphoneAccountSorting
+	5,  // 35: ondewo.vtsi.ListSoftphoneAccountsResponse.softphone_accounts:type_name -> ondewo.vtsi.SoftphoneAccount
+	5,  // 36: ondewo.vtsi.RotateSoftphoneCredentialsResponse.softphone_account:type_name -> ondewo.vtsi.SoftphoneAccount
+	7,  // 37: ondewo.vtsi.RotateSoftphoneCredentialsResponse.credentials:type_name -> ondewo.vtsi.SoftphoneCredentials
+	10, // 38: ondewo.vtsi.ListSoftphoneCertificatesRequest.filter:type_name -> ondewo.vtsi.SoftphoneCertificateFilter
+	34, // 39: ondewo.vtsi.ListSoftphoneCertificatesRequest.field_mask:type_name -> google.protobuf.FieldMask
+	6,  // 40: ondewo.vtsi.ListSoftphoneCertificatesResponse.softphone_certificates:type_name -> ondewo.vtsi.SoftphoneCertificate
+	34, // 41: ondewo.vtsi.GetSoftphoneCertificateRequest.field_mask:type_name -> google.protobuf.FieldMask
+	34, // 42: ondewo.vtsi.GetSoftphoneRegistrationRequest.field_mask:type_name -> google.protobuf.FieldMask
+	29, // 43: ondewo.vtsi.SoftphoneRegistration.contacts:type_name -> ondewo.vtsi.SoftphoneContact
+	32, // 44: ondewo.vtsi.SoftphoneRegistration.observed_at:type_name -> google.protobuf.Timestamp
+	32, // 45: ondewo.vtsi.SoftphoneContact.expire_time:type_name -> google.protobuf.Timestamp
+	2,  // 46: ondewo.vtsi.SoftphoneContact.status:type_name -> ondewo.vtsi.SoftphoneContactStatus
+	12, // 47: ondewo.vtsi.Softphones.CreateSoftphoneAccount:input_type -> ondewo.vtsi.CreateSoftphoneAccountRequest
+	14, // 48: ondewo.vtsi.Softphones.GetSoftphoneAccount:input_type -> ondewo.vtsi.GetSoftphoneAccountRequest
+	15, // 49: ondewo.vtsi.Softphones.UpdateSoftphoneAccount:input_type -> ondewo.vtsi.UpdateSoftphoneAccountRequest
+	16, // 50: ondewo.vtsi.Softphones.DeleteSoftphoneAccount:input_type -> ondewo.vtsi.DeleteSoftphoneAccountRequest
+	18, // 51: ondewo.vtsi.Softphones.ListSoftphoneAccounts:input_type -> ondewo.vtsi.ListSoftphoneAccountsRequest
+	20, // 52: ondewo.vtsi.Softphones.RotateSoftphoneCredentials:input_type -> ondewo.vtsi.RotateSoftphoneCredentialsRequest
+	22, // 53: ondewo.vtsi.Softphones.ListSoftphoneCertificates:input_type -> ondewo.vtsi.ListSoftphoneCertificatesRequest
+	24, // 54: ondewo.vtsi.Softphones.GetSoftphoneCertificate:input_type -> ondewo.vtsi.GetSoftphoneCertificateRequest
+	25, // 55: ondewo.vtsi.Softphones.RevokeSoftphoneCertificate:input_type -> ondewo.vtsi.RevokeSoftphoneCertificateRequest
+	26, // 56: ondewo.vtsi.Softphones.GetSoftphoneProvisioning:input_type -> ondewo.vtsi.GetSoftphoneProvisioningRequest
+	27, // 57: ondewo.vtsi.Softphones.GetSoftphoneRegistration:input_type -> ondewo.vtsi.GetSoftphoneRegistrationRequest
+	13, // 58: ondewo.vtsi.Softphones.CreateSoftphoneAccount:output_type -> ondewo.vtsi.CreateSoftphoneAccountResponse
+	5,  // 59: ondewo.vtsi.Softphones.GetSoftphoneAccount:output_type -> ondewo.vtsi.SoftphoneAccount
+	5,  // 60: ondewo.vtsi.Softphones.UpdateSoftphoneAccount:output_type -> ondewo.vtsi.SoftphoneAccount
+	17, // 61: ondewo.vtsi.Softphones.DeleteSoftphoneAccount:output_type -> ondewo.vtsi.DeleteSoftphoneAccountResponse
+	19, // 62: ondewo.vtsi.Softphones.ListSoftphoneAccounts:output_type -> ondewo.vtsi.ListSoftphoneAccountsResponse
+	21, // 63: ondewo.vtsi.Softphones.RotateSoftphoneCredentials:output_type -> ondewo.vtsi.RotateSoftphoneCredentialsResponse
+	23, // 64: ondewo.vtsi.Softphones.ListSoftphoneCertificates:output_type -> ondewo.vtsi.ListSoftphoneCertificatesResponse
+	6,  // 65: ondewo.vtsi.Softphones.GetSoftphoneCertificate:output_type -> ondewo.vtsi.SoftphoneCertificate
+	6,  // 66: ondewo.vtsi.Softphones.RevokeSoftphoneCertificate:output_type -> ondewo.vtsi.SoftphoneCertificate
+	8,  // 67: ondewo.vtsi.Softphones.GetSoftphoneProvisioning:output_type -> ondewo.vtsi.SoftphoneProvisioning
+	28, // 68: ondewo.vtsi.Softphones.GetSoftphoneRegistration:output_type -> ondewo.vtsi.SoftphoneRegistration
+	58, // [58:69] is the sub-list for method output_type
+	47, // [47:58] is the sub-list for method input_type
+	47, // [47:47] is the sub-list for extension type_name
+	47, // [47:47] is the sub-list for extension extendee
+	0,  // [0:47] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_softphones_proto_init() }
@@ -2576,8 +2980,8 @@ func file_ondewo_vtsi_softphones_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_softphones_proto_rawDesc), len(file_ondewo_vtsi_softphones_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   24,
+			NumEnums:      5,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -37,6 +37,8 @@ const (
 	Calls_StartCallers_FullMethodName                  = "/ondewo.vtsi.Calls/StartCallers"
 	Calls_ListCallers_FullMethodName                   = "/ondewo.vtsi.Calls/ListCallers"
 	Calls_GetCaller_FullMethodName                     = "/ondewo.vtsi.Calls/GetCaller"
+	Calls_UpdateCaller_FullMethodName                  = "/ondewo.vtsi.Calls/UpdateCaller"
+	Calls_UpdateCallers_FullMethodName                 = "/ondewo.vtsi.Calls/UpdateCallers"
 	Calls_DeleteCaller_FullMethodName                  = "/ondewo.vtsi.Calls/DeleteCaller"
 	Calls_DeleteCallers_FullMethodName                 = "/ondewo.vtsi.Calls/DeleteCallers"
 	Calls_StopCaller_FullMethodName                    = "/ondewo.vtsi.Calls/StopCaller"
@@ -47,6 +49,8 @@ const (
 	Calls_StopListeners_FullMethodName                 = "/ondewo.vtsi.Calls/StopListeners"
 	Calls_ListListeners_FullMethodName                 = "/ondewo.vtsi.Calls/ListListeners"
 	Calls_GetListener_FullMethodName                   = "/ondewo.vtsi.Calls/GetListener"
+	Calls_UpdateListener_FullMethodName                = "/ondewo.vtsi.Calls/UpdateListener"
+	Calls_UpdateListeners_FullMethodName               = "/ondewo.vtsi.Calls/UpdateListeners"
 	Calls_DeleteListener_FullMethodName                = "/ondewo.vtsi.Calls/DeleteListener"
 	Calls_DeleteListeners_FullMethodName               = "/ondewo.vtsi.Calls/DeleteListeners"
 	Calls_StartScheduledCaller_FullMethodName          = "/ondewo.vtsi.Calls/StartScheduledCaller"
@@ -55,7 +59,10 @@ const (
 	Calls_AddScheduledCallersToCampaign_FullMethodName = "/ondewo.vtsi.Calls/AddScheduledCallersToCampaign"
 	Calls_GetScheduledCaller_FullMethodName            = "/ondewo.vtsi.Calls/GetScheduledCaller"
 	Calls_ListScheduledCallers_FullMethodName          = "/ondewo.vtsi.Calls/ListScheduledCallers"
+	Calls_UpdateScheduledCaller_FullMethodName         = "/ondewo.vtsi.Calls/UpdateScheduledCaller"
 	Calls_CancelScheduledCaller_FullMethodName         = "/ondewo.vtsi.Calls/CancelScheduledCaller"
+	Calls_CancelScheduledCallers_FullMethodName        = "/ondewo.vtsi.Calls/CancelScheduledCallers"
+	Calls_RetryScheduledCaller_FullMethodName          = "/ondewo.vtsi.Calls/RetryScheduledCaller"
 	Calls_StopCall_FullMethodName                      = "/ondewo.vtsi.Calls/StopCall"
 	Calls_StopCalls_FullMethodName                     = "/ondewo.vtsi.Calls/StopCalls"
 	Calls_StopAllCalls_FullMethodName                  = "/ondewo.vtsi.Calls/StopAllCalls"
@@ -63,6 +70,9 @@ const (
 	Calls_TransferCalls_FullMethodName                 = "/ondewo.vtsi.Calls/TransferCalls"
 	Calls_GetCall_FullMethodName                       = "/ondewo.vtsi.Calls/GetCall"
 	Calls_ListCalls_FullMethodName                     = "/ondewo.vtsi.Calls/ListCalls"
+	Calls_GetCallStatistics_FullMethodName             = "/ondewo.vtsi.Calls/GetCallStatistics"
+	Calls_UpdateCall_FullMethodName                    = "/ondewo.vtsi.Calls/UpdateCall"
+	Calls_UpdateCalls_FullMethodName                   = "/ondewo.vtsi.Calls/UpdateCalls"
 	Calls_StreamCallerStatus_FullMethodName            = "/ondewo.vtsi.Calls/StreamCallerStatus"
 	Calls_StreamListenerStatus_FullMethodName          = "/ondewo.vtsi.Calls/StreamListenerStatus"
 	Calls_StreamScheduledCallerStatus_FullMethodName   = "/ondewo.vtsi.Calls/StreamScheduledCallerStatus"
@@ -79,41 +89,224 @@ const (
 //
 // <p>ONDEWO VTSI API</p>
 type CallsClient interface {
-	// <p>Start single caller instance for a specific nlu-project.</p>
+	// <p>Starts one caller in a VTSI project: an ondewo-sip container that places one outbound call to
+	// <code>sip_caller_config.callee_id</code> (or a pooled caller of the server&apos;s caller pool that runs the same
+	// configuration). The configuration is validated first, including live checks against the upstream services;
+	// nothing is started when it fails. Not idempotent: every successful request places a new call (send it as a
+	// batch of one with an <code>idempotency_key</code> to make it idempotent). <code>validate_only</code> runs the
+	// validation alone.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed or invalid request or
+	// configuration (also when the NLU credentials are refused) or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project; <code>FAILED_PRECONDITION</code> when an upstream config lacks
+	// the required TLS certificate (<code>UPSTREAM_TLS_REQUIRED</code>) or the project is not deployed;
+	// <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; <code>UNAVAILABLE</code> when an
+	// upstream service could not be reached; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_STARTED</code> or <code>VTSI_EVENT_CALLER_START_FAILED</code>, then the
+	// events of the call (<code>VTSI_EVENT_CALL_*</code>). None with <code>validate_only</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartCaller(ctx context.Context, in *StartCallerRequest, opts ...grpc.CallOption) (*StartCallerResponse, error)
-	// <p>Start multiple ondewo-sip callers instances for a specific nlu-project.</p>
+	// <p>Starts several callers, each like <code>StartCaller</code>. Not atomic: every caller is started on its own;
+	// a caller that fails to start is rolled back and has no entry in the response, which accounts for it in
+	// <code>StartCallersResponse.error_message</code>. The project&apos;s caller limit is checked for the batch as a
+	// whole before anything is started (<code>RESOURCE_EXHAUSTED</code>, nothing started). Idempotent per
+	// <code>idempotency_key</code>.</p>
+	// <p>Authorization: as <code>StartCaller</code>.</p>
 	StartCallers(ctx context.Context, in *StartCallersRequest, opts ...grpc.CallOption) (*StartCallersResponse, error)
-	// <p>Lists all available callers</p>
+	// <p>Lists the callers of a VTSI project, ordered by the caller&apos;s uuid (the last segment of
+	// <code>name</code>), ascending: a stable order, not a chronological one. Paged with <code>page_size</code> /
+	// <code>page_token</code>; <code>total_size</code> counts every match.</p>
+	// <p>With <code>campaign_name</code> or <code>campaign_display_name</code> set, lists only the callers of that
+	// campaign: the callers that placed at least one attempt of one of its campaign calls (see
+	// <code>ListCallersRequest.campaign_name</code>). <code>active_only</code> and <code>sip_status_types</code>
+	// narrow the listing further.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid selector, a negative
+	// <code>page_size</code>, a <code>page_token</code> of another listing or an unknown <code>field_mask</code>
+	// path; <code>NOT_FOUND</code> for an unknown project or campaign; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListCallers(ctx context.Context, in *ListCallersRequest, opts ...grpc.CallOption) (*ListCallersResponse, error)
-	// <p>Gets a caller</p>
+	// <p>Gets a caller, populated according to <code>call_view</code> and <code>field_mask</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or caller, or a caller of another project; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetCaller(ctx context.Context, in *GetCallerRequest, opts ...grpc.CallOption) (*Caller, error)
-	// <p>Deletes a caller</p>
+	// <p>Updates the STORED configuration of a caller: the fields named in <code>update_mask</code>, i.e.
+	// <code>sip_caller_config</code> and <code>common_services_config</code> or any nested sub-path of them.
+	// Allowed whether or not the caller has a call running.</p>
+	// <p>A running call and its container are NEVER changed: nothing is restarted, redeployed or reconfigured,
+	// and the call goes on with the configuration its container was deployed with.</p>
+	// <p>When the stored configuration takes effect: a caller is ONE call (every <code>StartCaller</code> creates
+	// a new caller carrying its own configuration, and no RPC redeploys an existing one), so for a caller that
+	// is not pooled the update changes ONLY the stored and returned configuration and never any present or
+	// future call. The one case in which the server deploys a container from a caller&apos;s stored
+	// configuration is a POOLED (persistent) caller, which the server keeps warm between calls: when the server
+	// recycles the pooled callers of a project onto its Asterisk (an <code>UpdateVtsiProject</code> of a
+	// deployed project, the recovery after the project&apos;s Asterisk restarted, a change of the project&apos;s
+	// TLS trust anchor), the pooled caller it starts in place of this one is deployed from the stored, i.e.
+	// updated, configuration. An in-place restart of a pooled caller&apos;s container (the call monitor&apos;s
+	// health recovery) keeps the configuration the container was deployed with. Until it is recycled, an idle
+	// pooled caller is matched to later <code>StartCaller</code> requests by the configuration its container
+	// RUNS, never by an updated stored configuration it does not run.</p>
+	// <p>Updating a caller never changes a campaign: the attempts of a campaign call take their configuration
+	// from the campaign and the campaign call, never from a <code>Caller</code>.</p>
+	// <p>A STOPPED caller (its call ended and its configuration was released) has no stored configuration left:
+	// the update starts from an empty one, so it must state a complete configuration
+	// (<code>sip_caller_config</code> and <code>common_services_config</code>), and a partial one is refused as a
+	// configuration a <code>StartCallerRequest</code> would be refused for. Nothing is deployed.</p>
+	// <p>Credentials follow their endpoint: an update that MOVES an upstream (the <code>host</code>,
+	// <code>port</code> or <code>grpc_cert</code> of the NLU, S2T or T2S <code>*_base_config</code>, or the
+	// <code>host</code> / ports of <code>csi_vtsi_config.message_broker_config.rabbit_mq_config</code>) must
+	// also write every credential path of that upstream that holds a stored value -- the NLU
+	// <code>credentials</code>, <code>auth_token</code>, <code>http_basic_auth_token</code> and
+	// <code>contexts</code>, the S2T <code>s2t_transcribe_request_config</code>, the T2S
+	// <code>t2s_request_config</code>, the RabbitMQ <code>user</code> and <code>password</code> -- named itself
+	// or by a shorter path, with the values to use. A stored credential is never sent to an endpoint the request
+	// moved without restating it, also not for the live validation of the result.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed <code>caller.name</code>,
+	// an empty <code>update_mask</code>, an unknown, output-only or immutable <code>update_mask</code> path, an
+	// update that moves an upstream without restating its stored credentials (naming the paths to add), a
+	// resulting configuration that a <code>StartCallerRequest</code> carrying it would be refused for, or an
+	// unknown <code>field_mask</code> path (each naming the path or field); <code>NOT_FOUND</code> for an
+	// unknown caller or project; <code>ABORTED</code> when concurrent updates kept changing the caller, or while
+	// an update, deploy or undeploy of its project is still running (an update waits for it, for a bounded time,
+	// so that a recycle of the project cannot lose it), nothing being written (retry the request); with
+	// authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_UPDATED</code> (none with <code>validate_only</code>).</p>
+	// <p>Authorization: the role that may start and stop callers of the project (<code>PROJECT_EXECUTOR</code>
+	// or higher).</p>
+	UpdateCaller(ctx context.Context, in *UpdateCallerRequest, opts ...grpc.CallOption) (*UpdateCallerResponse, error)
+	// <p>Updates several callers, each like <code>UpdateCaller</code>. Not atomic: every entry is applied on its
+	// own and reported in <code>UpdateCallersResponse.update_caller_responses</code>, in request order; an entry
+	// that fails changes nothing and does not stop the others. Errors of the request as a whole (see
+	// <code>UpdateCallersRequest</code>) are gRPC status codes, and then no entry is applied.</p>
+	// <p>Authorization: as <code>UpdateCaller</code>.</p>
+	UpdateCallers(ctx context.Context, in *UpdateCallersRequest, opts ...grpc.CallOption) (*UpdateCallersResponse, error)
+	// <p>Deletes a caller: stops it if it still runs (hanging up its call) and removes it, so it is no longer
+	// listed or returned. Its call records (and their participants) are deleted with it and are no longer returned
+	// by <code>GetCall</code> / <code>ListCalls</code>; stop it instead to keep them.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown caller, a caller of another project, or a
+	// caller that was already deleted (so deleting is NOT idempotent: a repeat answers <code>NOT_FOUND</code>);
+	// with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_DELETED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	DeleteCaller(ctx context.Context, in *DeleteCallerRequest, opts ...grpc.CallOption) (*DeleteCallerResponse, error)
-	// <p>Deletes multiple callers</p>
+	// <p>Deletes several callers, each like <code>DeleteCaller</code>. Not atomic: every caller is deleted on its own
+	// and reported in its own entry, whose <code>error_message</code> carries the gRPC status code name
+	// <code>DeleteCaller</code> would have answered (e.g. <code>NOT_FOUND: ...</code>); an entry that fails does not
+	// stop the others. The request as a whole is refused, nothing being deleted, for no entry or more than 1000
+	// distinct names, and, when <code>vtsi_project_name</code> is set, as described there.</p>
+	// <p>Authorization: as <code>DeleteCaller</code>.</p>
 	DeleteCallers(ctx context.Context, in *DeleteCallersRequest, opts ...grpc.CallOption) (*DeleteCallersResponse, error)
-	// <p>Stops a caller</p>
+	// <p>Stops a caller: hangs up its call if one is up and releases its container and SIP account. The caller
+	// stays listed (with <code>active = false</code>) until it is deleted, and its stored configuration stays
+	// updatable (see <code>UpdateCaller</code>). A pooled caller is taken out of the pool.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown caller, a caller of another project, or a
+	// caller that is already stopped (so stopping is NOT idempotent: a repeat answers <code>NOT_FOUND</code>); with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_STOPPED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopCaller(ctx context.Context, in *StopCallerRequest, opts ...grpc.CallOption) (*StopCallerResponse, error)
-	// <p>Stops multiple callers</p>
+	// <p>Stops several callers, each like <code>StopCaller</code>, with the per-entry results and the request-level
+	// errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>StopCaller</code>.</p>
 	StopCallers(ctx context.Context, in *StopCallersRequest, opts ...grpc.CallOption) (*StopCallersResponse, error)
-	// <p>Start single listener instance for a specific nlu-project.</p>
+	// <p>Starts one listener in a VTSI project: an ondewo-sip container registered on the project&apos;s Asterisk
+	// that answers inbound calls, one after the other (persistent). Validation, <code>validate_only</code>, errors
+	// (<code>RESOURCE_EXHAUSTED</code> for the project&apos;s listener limit) and idempotency as for
+	// <code>StartCaller</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_STARTED</code> or <code>VTSI_EVENT_LISTENER_START_FAILED</code>. None with
+	// <code>validate_only</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartListener(ctx context.Context, in *StartListenerRequest, opts ...grpc.CallOption) (*StartListenerResponse, error)
-	// <p>Start multiple ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Starts several listeners, each like <code>StartListener</code>, with the batch semantics of
+	// <code>StartCallers</code> (a listener that fails to start has no entry and is accounted for in
+	// <code>StartListenersResponse.error_message</code>).</p>
+	// <p>Authorization: as <code>StartListener</code>.</p>
 	StartListeners(ctx context.Context, in *StartListenersRequest, opts ...grpc.CallOption) (*StartListenersResponse, error)
-	// <p>Stop a ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Stops a listener: hangs up its call if one is up and releases its container and SIP account. A stopped
+	// listener has no stored configuration left (see <code>UpdateListener</code>). Errors and idempotency as for
+	// <code>StopCaller</code> (a listener that is already stopped is <code>NOT_FOUND</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_STOPPED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopListener(ctx context.Context, in *StopListenerRequest, opts ...grpc.CallOption) (*StopListenerResponse, error)
-	// <p>Stop multiple ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Stops several listeners, each like <code>StopListener</code>, with the per-entry results and the
+	// request-level errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>StopListener</code>.</p>
 	StopListeners(ctx context.Context, in *StopListenersRequest, opts ...grpc.CallOption) (*StopListenersResponse, error)
-	// <p>Lists all available listeners</p>
+	// <p>Lists the listeners of a VTSI project, ordered by the listener&apos;s uuid (the last segment of
+	// <code>name</code>), ascending. Paging, <code>total_size</code>, filters and errors as for
+	// <code>ListCallers</code> (without a campaign selector).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListListeners(ctx context.Context, in *ListListenersRequest, opts ...grpc.CallOption) (*ListListenersResponse, error)
-	// <p>Gets a listener</p>
+	// <p>Gets a listener, populated according to <code>call_view</code> and <code>field_mask</code>. Errors as for
+	// <code>GetCaller</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetListener(ctx context.Context, in *GetListenerRequest, opts ...grpc.CallOption) (*Listener, error)
-	// <p>Deletes a listener</p>
+	// <p>Updates the STORED configuration of a listener: the fields named in <code>update_mask</code>, i.e.
+	// <code>sip_base_config</code> and <code>common_services_config</code> or any nested sub-path of them.
+	// Allowed whether or not the listener&apos;s container is running or has a call, as long as the listener is
+	// DEPLOYED: a stopped listener has no stored configuration (it is deployed again only by a
+	// <code>StartListener</code> carrying a complete one) and is <code>NOT_FOUND</code>, unlike a stopped caller,
+	// which <code>UpdateCaller</code> accepts with a complete configuration.</p>
+	// <p>A running container and every call it takes are NEVER changed: nothing is restarted, redeployed or
+	// reconfigured, and the running container answers its calls with the configuration it was deployed with
+	// until it is replaced.</p>
+	// <p>When the stored configuration takes effect: only when the server RECREATES the listener from it, i.e.
+	// when it recycles the listeners of the project onto its Asterisk: an <code>UpdateVtsiProject</code> of a
+	// deployed project, the recovery after the project&apos;s Asterisk restarted, or a change of the
+	// project&apos;s TLS trust anchor. The listener the server starts in place of this one is deployed from the
+	// stored, i.e. updated, configuration. An in-place restart of the listener&apos;s container (the
+	// server&apos;s restore of listener containers when it starts, the call monitor&apos;s restart of an
+	// unhealthy container, a <code>docker restart</code>) keeps the configuration the container was deployed
+	// with. A listener that is never recycled keeps the update only as its stored (and returned)
+	// configuration.</p>
+	// <p>Errors as for <code>UpdateCaller</code> (the credential rule included), with
+	// <code>StartListenerRequest</code> as the validation of the resulting configuration, and
+	// <code>NOT_FOUND</code> also for a stopped listener.</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_UPDATED</code> (none with <code>validate_only</code>).</p>
+	// <p>Authorization: the role that may start and stop listeners of the project (<code>PROJECT_EXECUTOR</code>
+	// or higher).</p>
+	UpdateListener(ctx context.Context, in *UpdateListenerRequest, opts ...grpc.CallOption) (*UpdateListenerResponse, error)
+	// <p>Updates several listeners, each like <code>UpdateListener</code>, with the per-entry results and the
+	// request-level errors of <code>UpdateCallers</code>.</p>
+	// <p>Authorization: as <code>UpdateListener</code>.</p>
+	UpdateListeners(ctx context.Context, in *UpdateListenersRequest, opts ...grpc.CallOption) (*UpdateListenersResponse, error)
+	// <p>Deletes a listener: stops it if it still runs (hanging up its call) and removes it, with its call
+	// records, like <code>DeleteCaller</code>. Errors and idempotency as for <code>DeleteCaller</code> (a repeat
+	// answers <code>NOT_FOUND</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_DELETED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	DeleteListener(ctx context.Context, in *DeleteListenerRequest, opts ...grpc.CallOption) (*DeleteListenerResponse, error)
-	// <p>Deletes multiple listeners</p>
+	// <p>Deletes several listeners, each like <code>DeleteListener</code>, with the per-entry results and the
+	// request-level errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>DeleteListener</code>.</p>
 	DeleteListeners(ctx context.Context, in *DeleteListenersRequest, opts ...grpc.CallOption) (*DeleteListenersResponse, error)
-	// <p>Start a single ondewo-sip caller instance at a scheduled time</p>
+	// <p>Creates a scheduled caller: a caller that the server starts at or after <code>scheduled_time</code>, like a
+	// <code>StartCaller</code> of the stored request. The request is checked structurally now; the live checks of
+	// the configuration run when it fires, and a failure then leaves the scheduled caller
+	// <code>SCHEDULED_CALLER_STATUS_FAILED</code> with its <code>error_message</code>. A <code>scheduled_time</code> in
+	// the past is due at once. Not idempotent (use <code>StartScheduledCallers</code> with an
+	// <code>idempotency_key</code>).</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed request, a missing
+	// <code>scheduled_time</code>, a nested request with its own <code>field_mask</code> or
+	// <code>validate_only</code>, or an unknown <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown
+	// project; <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CREATED</code>; later <code>VTSI_EVENT_SCHEDULED_CALLER_FIRED</code>,
+	// <code>VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED</code> or <code>VTSI_EVENT_SCHEDULED_CALLER_FAILED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartScheduledCaller(ctx context.Context, in *StartScheduledCallerRequest, opts ...grpc.CallOption) (*StartScheduledCallerResponse, error)
-	// <p>Start multiple ondewo-sip caller instances, each at its own scheduled time</p>
+	// <p>Creates several scheduled callers, each like <code>StartScheduledCaller</code>, at most 1000. Not atomic: an
+	// entry that fails is reported in its own <code>error_message</code> and does not stop the others. Idempotent
+	// per <code>idempotency_key</code>.</p>
+	// <p>Authorization: as <code>StartScheduledCaller</code>.</p>
 	StartScheduledCallers(ctx context.Context, in *StartScheduledCallersRequest, opts ...grpc.CallOption) (*StartScheduledCallersResponse, error)
 	// <p>Adds callers to a campaign instead of starting them. The campaign then starts them, at most
 	// <code>max_parallel_calls</code> at a time. The request is atomic: either the campaign (when new), every
@@ -125,24 +318,109 @@ type CallsClient interface {
 	// free slot, and follows the campaign&apos;s retries, stop and hard stop. Same atomicity, errors and rolling-update
 	// behaviour as <code>AddCallersToCampaign</code>.</p>
 	AddScheduledCallersToCampaign(ctx context.Context, in *AddScheduledCallersToCampaignRequest, opts ...grpc.CallOption) (*AddScheduledCallersToCampaignResponse, error)
-	// <p>Gets a scheduled caller</p>
+	// <p>Gets a scheduled caller, populated according to <code>call_view</code> and <code>field_mask</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of another project; with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetScheduledCaller(ctx context.Context, in *GetScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error)
-	// <p>Lists the scheduled callers of a vtsi-project</p>
+	// <p>Lists the scheduled callers of a VTSI project, ordered by <code>scheduled_time</code>, oldest first,
+	// optionally narrowed by state, campaign and a <code>scheduled_time</code> window. Paging,
+	// <code>total_size</code> and errors as for <code>ListCallers</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListScheduledCallers(ctx context.Context, in *ListScheduledCallersRequest, opts ...grpc.CallOption) (*ListScheduledCallersResponse, error)
-	// <p>Cancels a scheduled caller that has not fired yet</p>
+	// <p>Changes the <code>scheduled_time</code> and/or the <code>sip_caller_config.sip_headers</code> of a scheduled
+	// caller that has not fired yet; the only updatable <code>update_mask</code> paths (see
+	// <code>UpdateScheduledCallerRequest.update_mask</code>). Allowed only while the status is
+	// <code>SCHEDULED_CALLER_STATUS_PENDING</code>; for a scheduled caller of a campaign only while its campaign call
+	// is <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> (a retry of a campaign call is timed by the campaign&apos;s
+	// <code>retry_delay</code>). The check and the write are one atomic step, so a scheduled caller that fires
+	// concurrently is either updated before it fires or refused. Updating to the stored values is accepted and
+	// changes nothing.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, an empty
+	// <code>update_mask</code>, a path that is not updatable, an unset <code>scheduled_time</code> named by the
+	// mask, invalid <code>sip_headers</code>, or an unknown <code>field_mask</code> path (each naming the path);
+	// <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of another project;
+	// <code>FAILED_PRECONDITION</code> when it is no longer PENDING (<code>reason=not-pending</code>) or its campaign
+	// call has started (<code>reason=campaign-call-started</code>); with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_UPDATED</code> when something changed.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
+	UpdateScheduledCaller(ctx context.Context, in *UpdateScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error)
+	// <p>Cancels a scheduled caller that has not fired yet: a PENDING scheduled caller becomes
+	// <code>SCHEDULED_CALLER_STATUS_CANCELLED</code> and never fires. A scheduled caller that is no longer PENDING
+	// (firing, done, failed or already cancelled) is not an error: the response says <code>cancelled = false</code>
+	// and carries its current <code>status</code>, so cancelling is idempotent.</p>
 	// <p>A scheduled caller of a campaign can be cancelled while its campaign call is
 	// <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> or <code>CAMPAIGN_CALL_STATE_RETRY_PENDING</code>;
 	// the campaign call then becomes <code>CAMPAIGN_CALL_STATE_CANCELLED</code>. While an attempt is
 	// <code>DISPATCHING</code> or <code>IN_PROGRESS</code> the request is refused:
-	// <code>cancelled = false</code> and the scheduled caller keeps its status.</p>
+	// <code>cancelled = false</code>, an <code>error_message</code> saying why, and the scheduled caller keeps its
+	// status.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of
+	// another project; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CANCELLED</code>, only when <code>cancelled = true</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	CancelScheduledCaller(ctx context.Context, in *CancelScheduledCallerRequest, opts ...grpc.CallOption) (*CancelScheduledCallerResponse, error)
-	// <p>Stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.</p>
+	// <p>Cancels several scheduled callers, each like <code>CancelScheduledCaller</code>, at most 1000. Not atomic:
+	// every entry is applied on its own and reported in <code>CancelScheduledCallersResponse</code>, in request
+	// order; a failed entry carries an <code>error_message</code> prefixed with the gRPC status code name
+	// <code>CancelScheduledCaller</code> would have answered (e.g. <code>NOT_FOUND: ...</code>) and does not stop
+	// the others. Errors of the request as a whole (see <code>CancelScheduledCallersRequest</code>) are gRPC status
+	// codes, and then nothing is cancelled.</p>
+	// <p>Events: one <code>VTSI_EVENT_SCHEDULED_CALLER_CANCELLED</code> per entry with <code>cancelled = true</code>.</p>
+	// <p>Authorization: as <code>CancelScheduledCaller</code>.</p>
+	CancelScheduledCallers(ctx context.Context, in *CancelScheduledCallersRequest, opts ...grpc.CallOption) (*CancelScheduledCallersResponse, error)
+	// <p>Retries a FAILED scheduled caller by creating a NEW scheduled caller from its stored request: the same
+	// <code>sip_caller_config</code> and <code>common_services_config</code>, <code>status = PENDING</code>, the
+	// <code>scheduled_time</code> of the request (unset: now), and <code>retry_of_scheduled_caller_name</code> naming
+	// the failed one, whose <code>retried_by_scheduled_caller_name</code> is set to the new one in the same atomic
+	// step. The failed scheduled caller itself is not changed otherwise, so its <code>error_message</code> and
+	// <code>fired_at</code> stay as the history of the failed attempt. Returns the new scheduled caller.</p>
+	// <p>Idempotency: a FAILED scheduled caller is retried at most once. A repeat of the request answers
+	// <code>ALREADY_EXISTS</code> naming the retry in its message (read
+	// <code>retried_by_scheduled_caller_name</code>); to retry again after the retry failed too, retry the new
+	// one.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of
+	// another project; <code>FAILED_PRECONDITION</code> for a scheduled caller that is not
+	// <code>SCHEDULED_CALLER_STATUS_FAILED</code> (<code>reason=not-failed</code>) or that belongs to a campaign
+	// (<code>reason=campaign-scheduled-caller</code>: a campaign call is retried by the campaign&apos;s
+	// <code>max_attempts</code>); <code>ALREADY_EXISTS</code> when it was already retried;
+	// <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CREATED</code> for the new scheduled caller.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
+	RetryScheduledCaller(ctx context.Context, in *RetryScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error)
+	// <p>Stops a call: hangs it up if it is still active and stops (releases) the listener or caller that serves
+	// it, like <code>StopCaller</code> / <code>StopListener</code>. A call that already ended is not an error: its
+	// listener or caller is still released if it is deployed, and when there was nothing left to release the
+	// response carries <code>error_message = Call ... was not released</code>, so a repeat succeeds with that
+	// message.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed request or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or call, or a call of another
+	// project; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_STOPPED</code>, and <code>VTSI_EVENT_CALLER_STOPPED</code> /
+	// <code>VTSI_EVENT_LISTENER_STOPPED</code> for the released resource.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopCall(ctx context.Context, in *StopCallRequest, opts ...grpc.CallOption) (*StopCallResponse, error)
-	// <p>Stop/kill a list of ondewo-sip listener or caller instances for a specific vtsi-project.</p>
-	// <p>Stops both Listener and Caller calls</p>
+	// <p>Stops several calls of one project, each like <code>StopCall</code>, at most 1000 distinct names. Not
+	// atomic: every call is stopped on its own and reported in its own entry, in request order; a failed entry
+	// carries an <code>error_message</code> prefixed with the gRPC status code name <code>StopCall</code> would have
+	// answered and does not stop the others. No entry, more than 1000 names or a malformed
+	// <code>vtsi_project_name</code> is <code>INVALID_ARGUMENT</code>, an unknown project <code>NOT_FOUND</code>, and
+	// then nothing is stopped.</p>
+	// <p>Authorization: as <code>StopCall</code>.</p>
 	StopCalls(ctx context.Context, in *StopCallsRequest, opts ...grpc.CallOption) (*StopCallsResponse, error)
-	// <p>Stop/kill all ondewo-sip listener or caller instance for a specific nlu-project.</p>
-	// <p>Stops all Listener and Caller calls</p>
+	// <p>Stops every call of a VTSI project (listener and caller calls alike), or, with
+	// <code>call_filter</code>, those it matches, each like <code>StopCall</code>. Not atomic and not bounded in
+	// size; a project with nothing to stop answers an empty response, so the RPC is idempotent. If a stop fails
+	// part-way, the remaining calls are still stopped one by one and every call gets its own entry.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid <code>call_filter</code> or an
+	// unknown <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or campaign; with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopAllCalls(ctx context.Context, in *StopAllCallsRequest, opts ...grpc.CallOption) (*StopCallsResponse, error)
 	// <p>Transfer a call to a phone number, a softphone account, another listener or the listener queue.</p>
 	// <p>The target is either the typed <code>target</code> or the legacy raw <code>transfer_id</code>, never both. It is
@@ -163,16 +441,63 @@ type CallsClient interface {
 	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
 	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCall(ctx context.Context, in *TransferCallRequest, opts ...grpc.CallOption) (*TransferCallResponse, error)
-	// <p>Transfer several calls, each like <code>TransferCall</code>.</p>
+	// <p>Transfer several calls, each like <code>TransferCall</code>, at most 1000. Not atomic: every transfer is
+	// run on its own and reported in its own entry, in request order; an entry <code>TransferCall</code> would have
+	// refused with a gRPC status carries that refusal in its <code>error_message</code> (prefixed with the status
+	// code name) and does not stop the others. Idempotent per entry <code>request_id</code>.</p>
 	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
 	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
 	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
 	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCalls(ctx context.Context, in *TransferCallsRequest, opts ...grpc.CallOption) (*TransferCallsResponse, error)
-	// <p>Get call log for single call instance</p>
+	// <p>Gets a call, populated according to <code>call_view</code> and <code>field_mask</code> (the call&apos;s log
+	// lines are read with <code>Logs.ListCallLogs</code>). <code>FULL</code> also returns every participant ever
+	// invited into the call (see <code>Call.participants</code>).</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or call, or a call of another project; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetCall(ctx context.Context, in *GetCallRequest, opts ...grpc.CallOption) (*Call, error)
-	// <p>Get call log for all call instances</p>
+	// <p>Lists the calls of a VTSI project, ended ones included, narrowed by <code>call_filter</code>, ordered by
+	// <code>call_sorting</code> (default: by <code>start_time</code>, oldest first) and paged with
+	// <code>page_size</code> / <code>page_token</code>; <code>total_size</code> counts every match.</p>
+	// <p>With <code>call_filter.campaign_name</code> or <code>call_filter.campaign_display_name</code> set, lists
+	// only the calls of that campaign: the calls placed by the attempts of its campaign calls.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid filter, a negative
+	// <code>page_size</code>, a <code>page_token</code> of another listing or an unknown <code>field_mask</code>
+	// path; <code>NOT_FOUND</code> for an unknown project or campaign; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListCalls(ctx context.Context, in *ListCallsRequest, opts ...grpc.CallOption) (*ListCallsResponse, error)
+	// <p>Aggregate figures (totals, active calls, counts by SIP status type, by call type, by AMD verdict and by
+	// transfer outcome, durations, redial recommendations) over the calls of a VTSI project that
+	// <code>call_filter</code> matches; see <code>CallStatistics</code>. Read only, no side effect.</p>
+	// <p>Errors: as for <code>ListCalls</code> (an invalid filter is <code>INVALID_ARGUMENT</code>, an unknown project
+	// or campaign <code>NOT_FOUND</code>).</p>
+	// <p>Authorization: as <code>ListCalls</code> (<code>PROJECT_EXECUTOR</code> or higher on the project).</p>
+	GetCallStatistics(ctx context.Context, in *GetCallStatisticsRequest, opts ...grpc.CallOption) (*CallStatistics, error)
+	// <p>Updates the descriptive metadata of a call: the only updatable <code>update_mask</code> path is
+	// <code>labels</code>. Allowed on active and ended calls. Refused for the WAITING call of a persistent
+	// listener or a pooled caller (status <code>NO_ONGOING_CALL</code>, not active: the record that waits for the
+	// next call, which <code>ListCalls</code> returns too) with <code>FAILED_PRECONDITION</code> and
+	// <code>reason=call-not-started</code> in the details: label the call once it has started. It changes only
+	// the stored call record: the live call, its SIP container, its status and its media are never touched, and
+	// nothing is sent to the call. Idempotent: writing the stored labels again changes nothing.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_UPDATED</code> when the labels changed.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed <code>call.name</code>, an
+	// empty <code>update_mask</code>, any path other than <code>labels</code> (every other field of a
+	// <code>Call</code> is output only), a path below <code>labels</code>, labels outside the bounds of
+	// <code>Call.labels</code>, or an unknown <code>field_mask</code> path (each naming the path or label);
+	// <code>NOT_FOUND</code> for an unknown call or project; <code>FAILED_PRECONDITION</code>
+	// (<code>reason=call-not-started</code>) for a waiting call; with authorization enforced
+	// <code>PERMISSION_DENIED</code> for a project the caller holds no role on.</p>
+	// <p>Authorization: the role that may stop calls of the project (<code>PROJECT_EXECUTOR</code> or
+	// higher).</p>
+	UpdateCall(ctx context.Context, in *UpdateCallRequest, opts ...grpc.CallOption) (*UpdateCallResponse, error)
+	// <p>Updates several calls, each like <code>UpdateCall</code>, with the per-entry results and the
+	// request-level errors of <code>UpdateCallers</code>.</p>
+	// <p>Authorization: as <code>UpdateCall</code>.</p>
+	UpdateCalls(ctx context.Context, in *UpdateCallsRequest, opts ...grpc.CallOption) (*UpdateCallsResponse, error)
 	// <p>Streams the status of the callers of a project: a snapshot first
 	// (<code>snapshot = true</code>), then every caller whose call or SIP status changed, plus
 	// keep-alive messages. Ends when the client disconnects or at the server-side maximum stream
@@ -208,12 +533,28 @@ type CallsClient interface {
 	InviteToCall(ctx context.Context, in *InviteToCallRequest, opts ...grpc.CallOption) (*InviteToCallResponse, error)
 	// <p>Hang up a participant of a call (ringing or joined). The participant ends as
 	// <code>PARTICIPANT_STATE_LEFT</code> with <code>end_reason = REMOVED</code>; the call and the bot are not
-	// affected.</p>
+	// affected. Returns the participant after the request.</p>
+	// <p>Idempotent: a participant that already FAILED or LEFT (for whatever reason) is returned unchanged with OK,
+	// and nothing is sent.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request; <code>NOT_FOUND</code> with
+	// <code>reason=call-not-found</code> for an unknown call or a call of another project, and with
+	// <code>reason=participant-not-found</code> for an unknown <code>participant_id</code> or a participant of
+	// another call; <code>ABORTED</code> with <code>reason=call-control-busy</code> while another call-control
+	// request for the call runs (retry); <code>UNAVAILABLE</code> with <code>reason=asterisk-unreachable</code> when
+	// the hang-up could not be sent; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_PARTICIPANT_LEFT</code> (or <code>VTSI_EVENT_CALL_PARTICIPANT_FAILED</code>
+	// for a participant that was still ringing).</p>
 	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher. Audited like <code>InviteToCall</code>.</p>
 	RemoveCallParticipant(ctx context.Context, in *RemoveCallParticipantRequest, opts ...grpc.CallOption) (*RemoveCallParticipantResponse, error)
 	// <p>Mute the bot of a connected call and/or stop it listening to the caller, or undo either. Every request sets a
 	// desired level and never toggles: a repeat answers <code>changed = false</code>. The bot stays muted while
 	// anything else (a TALK take-over of <code>StreamCallAudio</code>, a participant bot policy) also holds it muted.</p>
+	// <p>Both settings <code>CALL_MEDIA_SETTING_UNCHANGED</code> is a valid read of the current state: it answers
+	// the effective <code>state</code> with <code>changed = false</code>, changes nothing, and writes no audit record
+	// and no event (see <code>SetCallMediaControlRequest.bot_voice</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_BOT_MUTED</code> / <code>VTSI_EVENT_CALL_BOT_UNMUTED</code> /
+	// <code>VTSI_EVENT_CALL_LISTENING_PAUSED</code> / <code>VTSI_EVENT_CALL_LISTENING_RESUMED</code> when the
+	// effective state changed.</p>
 	// <p>Errors as for <code>InviteToCall</code>, plus <code>FAILED_PRECONDITION</code> <code>reason=sip-image-too-old</code>,
 	// <code>ABORTED</code> <code>reason=call-control-busy</code> (another call-control request for the call is running)
 	// and <code>UNAVAILABLE</code> <code>reason=sip-unreachable</code> or <code>reason=csi-media-control-failed</code> (the
@@ -293,6 +634,26 @@ func (c *callsClient) GetCaller(ctx context.Context, in *GetCallerRequest, opts 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Caller)
 	err := c.cc.Invoke(ctx, Calls_GetCaller_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) UpdateCaller(ctx context.Context, in *UpdateCallerRequest, opts ...grpc.CallOption) (*UpdateCallerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCallerResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateCaller_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) UpdateCallers(ctx context.Context, in *UpdateCallersRequest, opts ...grpc.CallOption) (*UpdateCallersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCallersResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateCallers_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -399,6 +760,26 @@ func (c *callsClient) GetListener(ctx context.Context, in *GetListenerRequest, o
 	return out, nil
 }
 
+func (c *callsClient) UpdateListener(ctx context.Context, in *UpdateListenerRequest, opts ...grpc.CallOption) (*UpdateListenerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateListenerResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateListener_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) UpdateListeners(ctx context.Context, in *UpdateListenersRequest, opts ...grpc.CallOption) (*UpdateListenersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateListenersResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateListeners_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *callsClient) DeleteListener(ctx context.Context, in *DeleteListenerRequest, opts ...grpc.CallOption) (*DeleteListenerResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteListenerResponse)
@@ -479,10 +860,40 @@ func (c *callsClient) ListScheduledCallers(ctx context.Context, in *ListSchedule
 	return out, nil
 }
 
+func (c *callsClient) UpdateScheduledCaller(ctx context.Context, in *UpdateScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ScheduledCaller)
+	err := c.cc.Invoke(ctx, Calls_UpdateScheduledCaller_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *callsClient) CancelScheduledCaller(ctx context.Context, in *CancelScheduledCallerRequest, opts ...grpc.CallOption) (*CancelScheduledCallerResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CancelScheduledCallerResponse)
 	err := c.cc.Invoke(ctx, Calls_CancelScheduledCaller_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) CancelScheduledCallers(ctx context.Context, in *CancelScheduledCallersRequest, opts ...grpc.CallOption) (*CancelScheduledCallersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelScheduledCallersResponse)
+	err := c.cc.Invoke(ctx, Calls_CancelScheduledCallers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) RetryScheduledCaller(ctx context.Context, in *RetryScheduledCallerRequest, opts ...grpc.CallOption) (*ScheduledCaller, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ScheduledCaller)
+	err := c.cc.Invoke(ctx, Calls_RetryScheduledCaller_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -553,6 +964,36 @@ func (c *callsClient) ListCalls(ctx context.Context, in *ListCallsRequest, opts 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListCallsResponse)
 	err := c.cc.Invoke(ctx, Calls_ListCalls_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) GetCallStatistics(ctx context.Context, in *GetCallStatisticsRequest, opts ...grpc.CallOption) (*CallStatistics, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CallStatistics)
+	err := c.cc.Invoke(ctx, Calls_GetCallStatistics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) UpdateCall(ctx context.Context, in *UpdateCallRequest, opts ...grpc.CallOption) (*UpdateCallResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCallResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateCall_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *callsClient) UpdateCalls(ctx context.Context, in *UpdateCallsRequest, opts ...grpc.CallOption) (*UpdateCallsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateCallsResponse)
+	err := c.cc.Invoke(ctx, Calls_UpdateCalls_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -684,41 +1125,224 @@ type Calls_ListenCallAudioClient = grpc.ServerStreamingClient[StreamCallAudioRes
 //
 // <p>ONDEWO VTSI API</p>
 type CallsServer interface {
-	// <p>Start single caller instance for a specific nlu-project.</p>
+	// <p>Starts one caller in a VTSI project: an ondewo-sip container that places one outbound call to
+	// <code>sip_caller_config.callee_id</code> (or a pooled caller of the server&apos;s caller pool that runs the same
+	// configuration). The configuration is validated first, including live checks against the upstream services;
+	// nothing is started when it fails. Not idempotent: every successful request places a new call (send it as a
+	// batch of one with an <code>idempotency_key</code> to make it idempotent). <code>validate_only</code> runs the
+	// validation alone.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed or invalid request or
+	// configuration (also when the NLU credentials are refused) or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project; <code>FAILED_PRECONDITION</code> when an upstream config lacks
+	// the required TLS certificate (<code>UPSTREAM_TLS_REQUIRED</code>) or the project is not deployed;
+	// <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; <code>UNAVAILABLE</code> when an
+	// upstream service could not be reached; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_STARTED</code> or <code>VTSI_EVENT_CALLER_START_FAILED</code>, then the
+	// events of the call (<code>VTSI_EVENT_CALL_*</code>). None with <code>validate_only</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartCaller(context.Context, *StartCallerRequest) (*StartCallerResponse, error)
-	// <p>Start multiple ondewo-sip callers instances for a specific nlu-project.</p>
+	// <p>Starts several callers, each like <code>StartCaller</code>. Not atomic: every caller is started on its own;
+	// a caller that fails to start is rolled back and has no entry in the response, which accounts for it in
+	// <code>StartCallersResponse.error_message</code>. The project&apos;s caller limit is checked for the batch as a
+	// whole before anything is started (<code>RESOURCE_EXHAUSTED</code>, nothing started). Idempotent per
+	// <code>idempotency_key</code>.</p>
+	// <p>Authorization: as <code>StartCaller</code>.</p>
 	StartCallers(context.Context, *StartCallersRequest) (*StartCallersResponse, error)
-	// <p>Lists all available callers</p>
+	// <p>Lists the callers of a VTSI project, ordered by the caller&apos;s uuid (the last segment of
+	// <code>name</code>), ascending: a stable order, not a chronological one. Paged with <code>page_size</code> /
+	// <code>page_token</code>; <code>total_size</code> counts every match.</p>
+	// <p>With <code>campaign_name</code> or <code>campaign_display_name</code> set, lists only the callers of that
+	// campaign: the callers that placed at least one attempt of one of its campaign calls (see
+	// <code>ListCallersRequest.campaign_name</code>). <code>active_only</code> and <code>sip_status_types</code>
+	// narrow the listing further.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid selector, a negative
+	// <code>page_size</code>, a <code>page_token</code> of another listing or an unknown <code>field_mask</code>
+	// path; <code>NOT_FOUND</code> for an unknown project or campaign; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListCallers(context.Context, *ListCallersRequest) (*ListCallersResponse, error)
-	// <p>Gets a caller</p>
+	// <p>Gets a caller, populated according to <code>call_view</code> and <code>field_mask</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or caller, or a caller of another project; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetCaller(context.Context, *GetCallerRequest) (*Caller, error)
-	// <p>Deletes a caller</p>
+	// <p>Updates the STORED configuration of a caller: the fields named in <code>update_mask</code>, i.e.
+	// <code>sip_caller_config</code> and <code>common_services_config</code> or any nested sub-path of them.
+	// Allowed whether or not the caller has a call running.</p>
+	// <p>A running call and its container are NEVER changed: nothing is restarted, redeployed or reconfigured,
+	// and the call goes on with the configuration its container was deployed with.</p>
+	// <p>When the stored configuration takes effect: a caller is ONE call (every <code>StartCaller</code> creates
+	// a new caller carrying its own configuration, and no RPC redeploys an existing one), so for a caller that
+	// is not pooled the update changes ONLY the stored and returned configuration and never any present or
+	// future call. The one case in which the server deploys a container from a caller&apos;s stored
+	// configuration is a POOLED (persistent) caller, which the server keeps warm between calls: when the server
+	// recycles the pooled callers of a project onto its Asterisk (an <code>UpdateVtsiProject</code> of a
+	// deployed project, the recovery after the project&apos;s Asterisk restarted, a change of the project&apos;s
+	// TLS trust anchor), the pooled caller it starts in place of this one is deployed from the stored, i.e.
+	// updated, configuration. An in-place restart of a pooled caller&apos;s container (the call monitor&apos;s
+	// health recovery) keeps the configuration the container was deployed with. Until it is recycled, an idle
+	// pooled caller is matched to later <code>StartCaller</code> requests by the configuration its container
+	// RUNS, never by an updated stored configuration it does not run.</p>
+	// <p>Updating a caller never changes a campaign: the attempts of a campaign call take their configuration
+	// from the campaign and the campaign call, never from a <code>Caller</code>.</p>
+	// <p>A STOPPED caller (its call ended and its configuration was released) has no stored configuration left:
+	// the update starts from an empty one, so it must state a complete configuration
+	// (<code>sip_caller_config</code> and <code>common_services_config</code>), and a partial one is refused as a
+	// configuration a <code>StartCallerRequest</code> would be refused for. Nothing is deployed.</p>
+	// <p>Credentials follow their endpoint: an update that MOVES an upstream (the <code>host</code>,
+	// <code>port</code> or <code>grpc_cert</code> of the NLU, S2T or T2S <code>*_base_config</code>, or the
+	// <code>host</code> / ports of <code>csi_vtsi_config.message_broker_config.rabbit_mq_config</code>) must
+	// also write every credential path of that upstream that holds a stored value -- the NLU
+	// <code>credentials</code>, <code>auth_token</code>, <code>http_basic_auth_token</code> and
+	// <code>contexts</code>, the S2T <code>s2t_transcribe_request_config</code>, the T2S
+	// <code>t2s_request_config</code>, the RabbitMQ <code>user</code> and <code>password</code> -- named itself
+	// or by a shorter path, with the values to use. A stored credential is never sent to an endpoint the request
+	// moved without restating it, also not for the live validation of the result.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed <code>caller.name</code>,
+	// an empty <code>update_mask</code>, an unknown, output-only or immutable <code>update_mask</code> path, an
+	// update that moves an upstream without restating its stored credentials (naming the paths to add), a
+	// resulting configuration that a <code>StartCallerRequest</code> carrying it would be refused for, or an
+	// unknown <code>field_mask</code> path (each naming the path or field); <code>NOT_FOUND</code> for an
+	// unknown caller or project; <code>ABORTED</code> when concurrent updates kept changing the caller, or while
+	// an update, deploy or undeploy of its project is still running (an update waits for it, for a bounded time,
+	// so that a recycle of the project cannot lose it), nothing being written (retry the request); with
+	// authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_UPDATED</code> (none with <code>validate_only</code>).</p>
+	// <p>Authorization: the role that may start and stop callers of the project (<code>PROJECT_EXECUTOR</code>
+	// or higher).</p>
+	UpdateCaller(context.Context, *UpdateCallerRequest) (*UpdateCallerResponse, error)
+	// <p>Updates several callers, each like <code>UpdateCaller</code>. Not atomic: every entry is applied on its
+	// own and reported in <code>UpdateCallersResponse.update_caller_responses</code>, in request order; an entry
+	// that fails changes nothing and does not stop the others. Errors of the request as a whole (see
+	// <code>UpdateCallersRequest</code>) are gRPC status codes, and then no entry is applied.</p>
+	// <p>Authorization: as <code>UpdateCaller</code>.</p>
+	UpdateCallers(context.Context, *UpdateCallersRequest) (*UpdateCallersResponse, error)
+	// <p>Deletes a caller: stops it if it still runs (hanging up its call) and removes it, so it is no longer
+	// listed or returned. Its call records (and their participants) are deleted with it and are no longer returned
+	// by <code>GetCall</code> / <code>ListCalls</code>; stop it instead to keep them.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown caller, a caller of another project, or a
+	// caller that was already deleted (so deleting is NOT idempotent: a repeat answers <code>NOT_FOUND</code>);
+	// with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_DELETED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	DeleteCaller(context.Context, *DeleteCallerRequest) (*DeleteCallerResponse, error)
-	// <p>Deletes multiple callers</p>
+	// <p>Deletes several callers, each like <code>DeleteCaller</code>. Not atomic: every caller is deleted on its own
+	// and reported in its own entry, whose <code>error_message</code> carries the gRPC status code name
+	// <code>DeleteCaller</code> would have answered (e.g. <code>NOT_FOUND: ...</code>); an entry that fails does not
+	// stop the others. The request as a whole is refused, nothing being deleted, for no entry or more than 1000
+	// distinct names, and, when <code>vtsi_project_name</code> is set, as described there.</p>
+	// <p>Authorization: as <code>DeleteCaller</code>.</p>
 	DeleteCallers(context.Context, *DeleteCallersRequest) (*DeleteCallersResponse, error)
-	// <p>Stops a caller</p>
+	// <p>Stops a caller: hangs up its call if one is up and releases its container and SIP account. The caller
+	// stays listed (with <code>active = false</code>) until it is deleted, and its stored configuration stays
+	// updatable (see <code>UpdateCaller</code>). A pooled caller is taken out of the pool.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown caller, a caller of another project, or a
+	// caller that is already stopped (so stopping is NOT idempotent: a repeat answers <code>NOT_FOUND</code>); with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALLER_STOPPED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopCaller(context.Context, *StopCallerRequest) (*StopCallerResponse, error)
-	// <p>Stops multiple callers</p>
+	// <p>Stops several callers, each like <code>StopCaller</code>, with the per-entry results and the request-level
+	// errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>StopCaller</code>.</p>
 	StopCallers(context.Context, *StopCallersRequest) (*StopCallersResponse, error)
-	// <p>Start single listener instance for a specific nlu-project.</p>
+	// <p>Starts one listener in a VTSI project: an ondewo-sip container registered on the project&apos;s Asterisk
+	// that answers inbound calls, one after the other (persistent). Validation, <code>validate_only</code>, errors
+	// (<code>RESOURCE_EXHAUSTED</code> for the project&apos;s listener limit) and idempotency as for
+	// <code>StartCaller</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_STARTED</code> or <code>VTSI_EVENT_LISTENER_START_FAILED</code>. None with
+	// <code>validate_only</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartListener(context.Context, *StartListenerRequest) (*StartListenerResponse, error)
-	// <p>Start multiple ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Starts several listeners, each like <code>StartListener</code>, with the batch semantics of
+	// <code>StartCallers</code> (a listener that fails to start has no entry and is accounted for in
+	// <code>StartListenersResponse.error_message</code>).</p>
+	// <p>Authorization: as <code>StartListener</code>.</p>
 	StartListeners(context.Context, *StartListenersRequest) (*StartListenersResponse, error)
-	// <p>Stop a ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Stops a listener: hangs up its call if one is up and releases its container and SIP account. A stopped
+	// listener has no stored configuration left (see <code>UpdateListener</code>). Errors and idempotency as for
+	// <code>StopCaller</code> (a listener that is already stopped is <code>NOT_FOUND</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_STOPPED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopListener(context.Context, *StopListenerRequest) (*StopListenerResponse, error)
-	// <p>Stop multiple ondewo-sip listeners instances for a specific nlu-project.</p>
+	// <p>Stops several listeners, each like <code>StopListener</code>, with the per-entry results and the
+	// request-level errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>StopListener</code>.</p>
 	StopListeners(context.Context, *StopListenersRequest) (*StopListenersResponse, error)
-	// <p>Lists all available listeners</p>
+	// <p>Lists the listeners of a VTSI project, ordered by the listener&apos;s uuid (the last segment of
+	// <code>name</code>), ascending. Paging, <code>total_size</code>, filters and errors as for
+	// <code>ListCallers</code> (without a campaign selector).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListListeners(context.Context, *ListListenersRequest) (*ListListenersResponse, error)
-	// <p>Gets a listener</p>
+	// <p>Gets a listener, populated according to <code>call_view</code> and <code>field_mask</code>. Errors as for
+	// <code>GetCaller</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetListener(context.Context, *GetListenerRequest) (*Listener, error)
-	// <p>Deletes a listener</p>
+	// <p>Updates the STORED configuration of a listener: the fields named in <code>update_mask</code>, i.e.
+	// <code>sip_base_config</code> and <code>common_services_config</code> or any nested sub-path of them.
+	// Allowed whether or not the listener&apos;s container is running or has a call, as long as the listener is
+	// DEPLOYED: a stopped listener has no stored configuration (it is deployed again only by a
+	// <code>StartListener</code> carrying a complete one) and is <code>NOT_FOUND</code>, unlike a stopped caller,
+	// which <code>UpdateCaller</code> accepts with a complete configuration.</p>
+	// <p>A running container and every call it takes are NEVER changed: nothing is restarted, redeployed or
+	// reconfigured, and the running container answers its calls with the configuration it was deployed with
+	// until it is replaced.</p>
+	// <p>When the stored configuration takes effect: only when the server RECREATES the listener from it, i.e.
+	// when it recycles the listeners of the project onto its Asterisk: an <code>UpdateVtsiProject</code> of a
+	// deployed project, the recovery after the project&apos;s Asterisk restarted, or a change of the
+	// project&apos;s TLS trust anchor. The listener the server starts in place of this one is deployed from the
+	// stored, i.e. updated, configuration. An in-place restart of the listener&apos;s container (the
+	// server&apos;s restore of listener containers when it starts, the call monitor&apos;s restart of an
+	// unhealthy container, a <code>docker restart</code>) keeps the configuration the container was deployed
+	// with. A listener that is never recycled keeps the update only as its stored (and returned)
+	// configuration.</p>
+	// <p>Errors as for <code>UpdateCaller</code> (the credential rule included), with
+	// <code>StartListenerRequest</code> as the validation of the resulting configuration, and
+	// <code>NOT_FOUND</code> also for a stopped listener.</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_UPDATED</code> (none with <code>validate_only</code>).</p>
+	// <p>Authorization: the role that may start and stop listeners of the project (<code>PROJECT_EXECUTOR</code>
+	// or higher).</p>
+	UpdateListener(context.Context, *UpdateListenerRequest) (*UpdateListenerResponse, error)
+	// <p>Updates several listeners, each like <code>UpdateListener</code>, with the per-entry results and the
+	// request-level errors of <code>UpdateCallers</code>.</p>
+	// <p>Authorization: as <code>UpdateListener</code>.</p>
+	UpdateListeners(context.Context, *UpdateListenersRequest) (*UpdateListenersResponse, error)
+	// <p>Deletes a listener: stops it if it still runs (hanging up its call) and removes it, with its call
+	// records, like <code>DeleteCaller</code>. Errors and idempotency as for <code>DeleteCaller</code> (a repeat
+	// answers <code>NOT_FOUND</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_LISTENER_DELETED</code> (and <code>VTSI_EVENT_CALL_STOPPED</code> for a call that
+	// was hung up).</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	DeleteListener(context.Context, *DeleteListenerRequest) (*DeleteListenerResponse, error)
-	// <p>Deletes multiple listeners</p>
+	// <p>Deletes several listeners, each like <code>DeleteListener</code>, with the per-entry results and the
+	// request-level errors of <code>DeleteCallers</code>.</p>
+	// <p>Authorization: as <code>DeleteListener</code>.</p>
 	DeleteListeners(context.Context, *DeleteListenersRequest) (*DeleteListenersResponse, error)
-	// <p>Start a single ondewo-sip caller instance at a scheduled time</p>
+	// <p>Creates a scheduled caller: a caller that the server starts at or after <code>scheduled_time</code>, like a
+	// <code>StartCaller</code> of the stored request. The request is checked structurally now; the live checks of
+	// the configuration run when it fires, and a failure then leaves the scheduled caller
+	// <code>SCHEDULED_CALLER_STATUS_FAILED</code> with its <code>error_message</code>. A <code>scheduled_time</code> in
+	// the past is due at once. Not idempotent (use <code>StartScheduledCallers</code> with an
+	// <code>idempotency_key</code>).</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed request, a missing
+	// <code>scheduled_time</code>, a nested request with its own <code>field_mask</code> or
+	// <code>validate_only</code>, or an unknown <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown
+	// project; <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CREATED</code>; later <code>VTSI_EVENT_SCHEDULED_CALLER_FIRED</code>,
+	// <code>VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED</code> or <code>VTSI_EVENT_SCHEDULED_CALLER_FAILED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StartScheduledCaller(context.Context, *StartScheduledCallerRequest) (*StartScheduledCallerResponse, error)
-	// <p>Start multiple ondewo-sip caller instances, each at its own scheduled time</p>
+	// <p>Creates several scheduled callers, each like <code>StartScheduledCaller</code>, at most 1000. Not atomic: an
+	// entry that fails is reported in its own <code>error_message</code> and does not stop the others. Idempotent
+	// per <code>idempotency_key</code>.</p>
+	// <p>Authorization: as <code>StartScheduledCaller</code>.</p>
 	StartScheduledCallers(context.Context, *StartScheduledCallersRequest) (*StartScheduledCallersResponse, error)
 	// <p>Adds callers to a campaign instead of starting them. The campaign then starts them, at most
 	// <code>max_parallel_calls</code> at a time. The request is atomic: either the campaign (when new), every
@@ -730,24 +1354,109 @@ type CallsServer interface {
 	// free slot, and follows the campaign&apos;s retries, stop and hard stop. Same atomicity, errors and rolling-update
 	// behaviour as <code>AddCallersToCampaign</code>.</p>
 	AddScheduledCallersToCampaign(context.Context, *AddScheduledCallersToCampaignRequest) (*AddScheduledCallersToCampaignResponse, error)
-	// <p>Gets a scheduled caller</p>
+	// <p>Gets a scheduled caller, populated according to <code>call_view</code> and <code>field_mask</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of another project; with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetScheduledCaller(context.Context, *GetScheduledCallerRequest) (*ScheduledCaller, error)
-	// <p>Lists the scheduled callers of a vtsi-project</p>
+	// <p>Lists the scheduled callers of a VTSI project, ordered by <code>scheduled_time</code>, oldest first,
+	// optionally narrowed by state, campaign and a <code>scheduled_time</code> window. Paging,
+	// <code>total_size</code> and errors as for <code>ListCallers</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListScheduledCallers(context.Context, *ListScheduledCallersRequest) (*ListScheduledCallersResponse, error)
-	// <p>Cancels a scheduled caller that has not fired yet</p>
+	// <p>Changes the <code>scheduled_time</code> and/or the <code>sip_caller_config.sip_headers</code> of a scheduled
+	// caller that has not fired yet; the only updatable <code>update_mask</code> paths (see
+	// <code>UpdateScheduledCallerRequest.update_mask</code>). Allowed only while the status is
+	// <code>SCHEDULED_CALLER_STATUS_PENDING</code>; for a scheduled caller of a campaign only while its campaign call
+	// is <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> (a retry of a campaign call is timed by the campaign&apos;s
+	// <code>retry_delay</code>). The check and the write are one atomic step, so a scheduled caller that fires
+	// concurrently is either updated before it fires or refused. Updating to the stored values is accepted and
+	// changes nothing.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, an empty
+	// <code>update_mask</code>, a path that is not updatable, an unset <code>scheduled_time</code> named by the
+	// mask, invalid <code>sip_headers</code>, or an unknown <code>field_mask</code> path (each naming the path);
+	// <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of another project;
+	// <code>FAILED_PRECONDITION</code> when it is no longer PENDING (<code>reason=not-pending</code>) or its campaign
+	// call has started (<code>reason=campaign-call-started</code>); with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_UPDATED</code> when something changed.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
+	UpdateScheduledCaller(context.Context, *UpdateScheduledCallerRequest) (*ScheduledCaller, error)
+	// <p>Cancels a scheduled caller that has not fired yet: a PENDING scheduled caller becomes
+	// <code>SCHEDULED_CALLER_STATUS_CANCELLED</code> and never fires. A scheduled caller that is no longer PENDING
+	// (firing, done, failed or already cancelled) is not an error: the response says <code>cancelled = false</code>
+	// and carries its current <code>status</code>, so cancelling is idempotent.</p>
 	// <p>A scheduled caller of a campaign can be cancelled while its campaign call is
 	// <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> or <code>CAMPAIGN_CALL_STATE_RETRY_PENDING</code>;
 	// the campaign call then becomes <code>CAMPAIGN_CALL_STATE_CANCELLED</code>. While an attempt is
 	// <code>DISPATCHING</code> or <code>IN_PROGRESS</code> the request is refused:
-	// <code>cancelled = false</code> and the scheduled caller keeps its status.</p>
+	// <code>cancelled = false</code>, an <code>error_message</code> saying why, and the scheduled caller keeps its
+	// status.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of
+	// another project; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CANCELLED</code>, only when <code>cancelled = true</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	CancelScheduledCaller(context.Context, *CancelScheduledCallerRequest) (*CancelScheduledCallerResponse, error)
-	// <p>Stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.</p>
+	// <p>Cancels several scheduled callers, each like <code>CancelScheduledCaller</code>, at most 1000. Not atomic:
+	// every entry is applied on its own and reported in <code>CancelScheduledCallersResponse</code>, in request
+	// order; a failed entry carries an <code>error_message</code> prefixed with the gRPC status code name
+	// <code>CancelScheduledCaller</code> would have answered (e.g. <code>NOT_FOUND: ...</code>) and does not stop
+	// the others. Errors of the request as a whole (see <code>CancelScheduledCallersRequest</code>) are gRPC status
+	// codes, and then nothing is cancelled.</p>
+	// <p>Events: one <code>VTSI_EVENT_SCHEDULED_CALLER_CANCELLED</code> per entry with <code>cancelled = true</code>.</p>
+	// <p>Authorization: as <code>CancelScheduledCaller</code>.</p>
+	CancelScheduledCallers(context.Context, *CancelScheduledCallersRequest) (*CancelScheduledCallersResponse, error)
+	// <p>Retries a FAILED scheduled caller by creating a NEW scheduled caller from its stored request: the same
+	// <code>sip_caller_config</code> and <code>common_services_config</code>, <code>status = PENDING</code>, the
+	// <code>scheduled_time</code> of the request (unset: now), and <code>retry_of_scheduled_caller_name</code> naming
+	// the failed one, whose <code>retried_by_scheduled_caller_name</code> is set to the new one in the same atomic
+	// step. The failed scheduled caller itself is not changed otherwise, so its <code>error_message</code> and
+	// <code>fired_at</code> stay as the history of the failed attempt. Returns the new scheduled caller.</p>
+	// <p>Idempotency: a FAILED scheduled caller is retried at most once. A repeat of the request answers
+	// <code>ALREADY_EXISTS</code> naming the retry in its message (read
+	// <code>retried_by_scheduled_caller_name</code>); to retry again after the retry failed too, retry the new
+	// one.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or scheduled caller, or one of
+	// another project; <code>FAILED_PRECONDITION</code> for a scheduled caller that is not
+	// <code>SCHEDULED_CALLER_STATUS_FAILED</code> (<code>reason=not-failed</code>) or that belongs to a campaign
+	// (<code>reason=campaign-scheduled-caller</code>: a campaign call is retried by the campaign&apos;s
+	// <code>max_attempts</code>); <code>ALREADY_EXISTS</code> when it was already retried;
+	// <code>RESOURCE_EXHAUSTED</code> when the project reached its caller limit; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SCHEDULED_CALLER_CREATED</code> for the new scheduled caller.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
+	RetryScheduledCaller(context.Context, *RetryScheduledCallerRequest) (*ScheduledCaller, error)
+	// <p>Stops a call: hangs it up if it is still active and stops (releases) the listener or caller that serves
+	// it, like <code>StopCaller</code> / <code>StopListener</code>. A call that already ended is not an error: its
+	// listener or caller is still released if it is deployed, and when there was nothing left to release the
+	// response carries <code>error_message = Call ... was not released</code>, so a repeat succeeds with that
+	// message.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed request or an unknown
+	// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or call, or a call of another
+	// project; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_STOPPED</code>, and <code>VTSI_EVENT_CALLER_STOPPED</code> /
+	// <code>VTSI_EVENT_LISTENER_STOPPED</code> for the released resource.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopCall(context.Context, *StopCallRequest) (*StopCallResponse, error)
-	// <p>Stop/kill a list of ondewo-sip listener or caller instances for a specific vtsi-project.</p>
-	// <p>Stops both Listener and Caller calls</p>
+	// <p>Stops several calls of one project, each like <code>StopCall</code>, at most 1000 distinct names. Not
+	// atomic: every call is stopped on its own and reported in its own entry, in request order; a failed entry
+	// carries an <code>error_message</code> prefixed with the gRPC status code name <code>StopCall</code> would have
+	// answered and does not stop the others. No entry, more than 1000 names or a malformed
+	// <code>vtsi_project_name</code> is <code>INVALID_ARGUMENT</code>, an unknown project <code>NOT_FOUND</code>, and
+	// then nothing is stopped.</p>
+	// <p>Authorization: as <code>StopCall</code>.</p>
 	StopCalls(context.Context, *StopCallsRequest) (*StopCallsResponse, error)
-	// <p>Stop/kill all ondewo-sip listener or caller instance for a specific nlu-project.</p>
-	// <p>Stops all Listener and Caller calls</p>
+	// <p>Stops every call of a VTSI project (listener and caller calls alike), or, with
+	// <code>call_filter</code>, those it matches, each like <code>StopCall</code>. Not atomic and not bounded in
+	// size; a project with nothing to stop answers an empty response, so the RPC is idempotent. If a stop fails
+	// part-way, the remaining calls are still stopped one by one and every call gets its own entry.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid <code>call_filter</code> or an
+	// unknown <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project or campaign; with
+	// authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	StopAllCalls(context.Context, *StopAllCallsRequest) (*StopCallsResponse, error)
 	// <p>Transfer a call to a phone number, a softphone account, another listener or the listener queue.</p>
 	// <p>The target is either the typed <code>target</code> or the legacy raw <code>transfer_id</code>, never both. It is
@@ -768,16 +1477,63 @@ type CallsServer interface {
 	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
 	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCall(context.Context, *TransferCallRequest) (*TransferCallResponse, error)
-	// <p>Transfer several calls, each like <code>TransferCall</code>.</p>
+	// <p>Transfer several calls, each like <code>TransferCall</code>, at most 1000. Not atomic: every transfer is
+	// run on its own and reported in its own entry, in request order; an entry <code>TransferCall</code> would have
+	// refused with a gRPC status carries that refusal in its <code>error_message</code> (prefixed with the status
+	// code name) and does not stop the others. Idempotent per entry <code>request_id</code>.</p>
 	// <p>Authorization: requires the role <code>PROJECT_DEVELOPER</code> or higher on the project, and the server&apos;s
 	// Keycloak auth mode <code>ENFORCE</code>; otherwise <code>PERMISSION_DENIED</code>, or
 	// <code>FAILED_PRECONDITION</code> with <code>reason=call-supervision-requires-auth</code> when auth is not enforced.
 	// Every action writes an audit record (who, call, when, mode, target). No announcement is played to the caller.</p>
 	TransferCalls(context.Context, *TransferCallsRequest) (*TransferCallsResponse, error)
-	// <p>Get call log for single call instance</p>
+	// <p>Gets a call, populated according to <code>call_view</code> and <code>field_mask</code> (the call&apos;s log
+	// lines are read with <code>Logs.ListCallLogs</code>). <code>FULL</code> also returns every participant ever
+	// invited into the call (see <code>Call.participants</code>).</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed name or an unknown <code>field_mask</code> path;
+	// <code>NOT_FOUND</code> for an unknown project or call, or a call of another project; with authorization
+	// enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	GetCall(context.Context, *GetCallRequest) (*Call, error)
-	// <p>Get call log for all call instances</p>
+	// <p>Lists the calls of a VTSI project, ended ones included, narrowed by <code>call_filter</code>, ordered by
+	// <code>call_sorting</code> (default: by <code>start_time</code>, oldest first) and paged with
+	// <code>page_size</code> / <code>page_token</code>; <code>total_size</code> counts every match.</p>
+	// <p>With <code>call_filter.campaign_name</code> or <code>call_filter.campaign_display_name</code> set, lists
+	// only the calls of that campaign: the calls placed by the attempts of its campaign calls.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request, an invalid filter, a negative
+	// <code>page_size</code>, a <code>page_token</code> of another listing or an unknown <code>field_mask</code>
+	// path; <code>NOT_FOUND</code> for an unknown project or campaign; with authorization enforced
+	// <code>PERMISSION_DENIED</code>.</p>
+	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher on the project.</p>
 	ListCalls(context.Context, *ListCallsRequest) (*ListCallsResponse, error)
+	// <p>Aggregate figures (totals, active calls, counts by SIP status type, by call type, by AMD verdict and by
+	// transfer outcome, durations, redial recommendations) over the calls of a VTSI project that
+	// <code>call_filter</code> matches; see <code>CallStatistics</code>. Read only, no side effect.</p>
+	// <p>Errors: as for <code>ListCalls</code> (an invalid filter is <code>INVALID_ARGUMENT</code>, an unknown project
+	// or campaign <code>NOT_FOUND</code>).</p>
+	// <p>Authorization: as <code>ListCalls</code> (<code>PROJECT_EXECUTOR</code> or higher on the project).</p>
+	GetCallStatistics(context.Context, *GetCallStatisticsRequest) (*CallStatistics, error)
+	// <p>Updates the descriptive metadata of a call: the only updatable <code>update_mask</code> path is
+	// <code>labels</code>. Allowed on active and ended calls. Refused for the WAITING call of a persistent
+	// listener or a pooled caller (status <code>NO_ONGOING_CALL</code>, not active: the record that waits for the
+	// next call, which <code>ListCalls</code> returns too) with <code>FAILED_PRECONDITION</code> and
+	// <code>reason=call-not-started</code> in the details: label the call once it has started. It changes only
+	// the stored call record: the live call, its SIP container, its status and its media are never touched, and
+	// nothing is sent to the call. Idempotent: writing the stored labels again changes nothing.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_UPDATED</code> when the labels changed.</p>
+	// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed <code>call.name</code>, an
+	// empty <code>update_mask</code>, any path other than <code>labels</code> (every other field of a
+	// <code>Call</code> is output only), a path below <code>labels</code>, labels outside the bounds of
+	// <code>Call.labels</code>, or an unknown <code>field_mask</code> path (each naming the path or label);
+	// <code>NOT_FOUND</code> for an unknown call or project; <code>FAILED_PRECONDITION</code>
+	// (<code>reason=call-not-started</code>) for a waiting call; with authorization enforced
+	// <code>PERMISSION_DENIED</code> for a project the caller holds no role on.</p>
+	// <p>Authorization: the role that may stop calls of the project (<code>PROJECT_EXECUTOR</code> or
+	// higher).</p>
+	UpdateCall(context.Context, *UpdateCallRequest) (*UpdateCallResponse, error)
+	// <p>Updates several calls, each like <code>UpdateCall</code>, with the per-entry results and the
+	// request-level errors of <code>UpdateCallers</code>.</p>
+	// <p>Authorization: as <code>UpdateCall</code>.</p>
+	UpdateCalls(context.Context, *UpdateCallsRequest) (*UpdateCallsResponse, error)
 	// <p>Streams the status of the callers of a project: a snapshot first
 	// (<code>snapshot = true</code>), then every caller whose call or SIP status changed, plus
 	// keep-alive messages. Ends when the client disconnects or at the server-side maximum stream
@@ -813,12 +1569,28 @@ type CallsServer interface {
 	InviteToCall(context.Context, *InviteToCallRequest) (*InviteToCallResponse, error)
 	// <p>Hang up a participant of a call (ringing or joined). The participant ends as
 	// <code>PARTICIPANT_STATE_LEFT</code> with <code>end_reason = REMOVED</code>; the call and the bot are not
-	// affected.</p>
+	// affected. Returns the participant after the request.</p>
+	// <p>Idempotent: a participant that already FAILED or LEFT (for whatever reason) is returned unchanged with OK,
+	// and nothing is sent.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed request; <code>NOT_FOUND</code> with
+	// <code>reason=call-not-found</code> for an unknown call or a call of another project, and with
+	// <code>reason=participant-not-found</code> for an unknown <code>participant_id</code> or a participant of
+	// another call; <code>ABORTED</code> with <code>reason=call-control-busy</code> while another call-control
+	// request for the call runs (retry); <code>UNAVAILABLE</code> with <code>reason=asterisk-unreachable</code> when
+	// the hang-up could not be sent; with authorization enforced <code>PERMISSION_DENIED</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_PARTICIPANT_LEFT</code> (or <code>VTSI_EVENT_CALL_PARTICIPANT_FAILED</code>
+	// for a participant that was still ringing).</p>
 	// <p>Authorization: <code>PROJECT_EXECUTOR</code> or higher. Audited like <code>InviteToCall</code>.</p>
 	RemoveCallParticipant(context.Context, *RemoveCallParticipantRequest) (*RemoveCallParticipantResponse, error)
 	// <p>Mute the bot of a connected call and/or stop it listening to the caller, or undo either. Every request sets a
 	// desired level and never toggles: a repeat answers <code>changed = false</code>. The bot stays muted while
 	// anything else (a TALK take-over of <code>StreamCallAudio</code>, a participant bot policy) also holds it muted.</p>
+	// <p>Both settings <code>CALL_MEDIA_SETTING_UNCHANGED</code> is a valid read of the current state: it answers
+	// the effective <code>state</code> with <code>changed = false</code>, changes nothing, and writes no audit record
+	// and no event (see <code>SetCallMediaControlRequest.bot_voice</code>).</p>
+	// <p>Events: <code>VTSI_EVENT_CALL_BOT_MUTED</code> / <code>VTSI_EVENT_CALL_BOT_UNMUTED</code> /
+	// <code>VTSI_EVENT_CALL_LISTENING_PAUSED</code> / <code>VTSI_EVENT_CALL_LISTENING_RESUMED</code> when the
+	// effective state changed.</p>
 	// <p>Errors as for <code>InviteToCall</code>, plus <code>FAILED_PRECONDITION</code> <code>reason=sip-image-too-old</code>,
 	// <code>ABORTED</code> <code>reason=call-control-busy</code> (another call-control request for the call is running)
 	// and <code>UNAVAILABLE</code> <code>reason=sip-unreachable</code> or <code>reason=csi-media-control-failed</code> (the
@@ -876,6 +1648,12 @@ func (UnimplementedCallsServer) ListCallers(context.Context, *ListCallersRequest
 func (UnimplementedCallsServer) GetCaller(context.Context, *GetCallerRequest) (*Caller, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCaller not implemented")
 }
+func (UnimplementedCallsServer) UpdateCaller(context.Context, *UpdateCallerRequest) (*UpdateCallerResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCaller not implemented")
+}
+func (UnimplementedCallsServer) UpdateCallers(context.Context, *UpdateCallersRequest) (*UpdateCallersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCallers not implemented")
+}
 func (UnimplementedCallsServer) DeleteCaller(context.Context, *DeleteCallerRequest) (*DeleteCallerResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteCaller not implemented")
 }
@@ -906,6 +1684,12 @@ func (UnimplementedCallsServer) ListListeners(context.Context, *ListListenersReq
 func (UnimplementedCallsServer) GetListener(context.Context, *GetListenerRequest) (*Listener, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetListener not implemented")
 }
+func (UnimplementedCallsServer) UpdateListener(context.Context, *UpdateListenerRequest) (*UpdateListenerResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateListener not implemented")
+}
+func (UnimplementedCallsServer) UpdateListeners(context.Context, *UpdateListenersRequest) (*UpdateListenersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateListeners not implemented")
+}
 func (UnimplementedCallsServer) DeleteListener(context.Context, *DeleteListenerRequest) (*DeleteListenerResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteListener not implemented")
 }
@@ -930,8 +1714,17 @@ func (UnimplementedCallsServer) GetScheduledCaller(context.Context, *GetSchedule
 func (UnimplementedCallsServer) ListScheduledCallers(context.Context, *ListScheduledCallersRequest) (*ListScheduledCallersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListScheduledCallers not implemented")
 }
+func (UnimplementedCallsServer) UpdateScheduledCaller(context.Context, *UpdateScheduledCallerRequest) (*ScheduledCaller, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateScheduledCaller not implemented")
+}
 func (UnimplementedCallsServer) CancelScheduledCaller(context.Context, *CancelScheduledCallerRequest) (*CancelScheduledCallerResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CancelScheduledCaller not implemented")
+}
+func (UnimplementedCallsServer) CancelScheduledCallers(context.Context, *CancelScheduledCallersRequest) (*CancelScheduledCallersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CancelScheduledCallers not implemented")
+}
+func (UnimplementedCallsServer) RetryScheduledCaller(context.Context, *RetryScheduledCallerRequest) (*ScheduledCaller, error) {
+	return nil, status.Error(codes.Unimplemented, "method RetryScheduledCaller not implemented")
 }
 func (UnimplementedCallsServer) StopCall(context.Context, *StopCallRequest) (*StopCallResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method StopCall not implemented")
@@ -953,6 +1746,15 @@ func (UnimplementedCallsServer) GetCall(context.Context, *GetCallRequest) (*Call
 }
 func (UnimplementedCallsServer) ListCalls(context.Context, *ListCallsRequest) (*ListCallsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListCalls not implemented")
+}
+func (UnimplementedCallsServer) GetCallStatistics(context.Context, *GetCallStatisticsRequest) (*CallStatistics, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCallStatistics not implemented")
+}
+func (UnimplementedCallsServer) UpdateCall(context.Context, *UpdateCallRequest) (*UpdateCallResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCall not implemented")
+}
+func (UnimplementedCallsServer) UpdateCalls(context.Context, *UpdateCallsRequest) (*UpdateCallsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCalls not implemented")
 }
 func (UnimplementedCallsServer) StreamCallerStatus(*StreamCallerStatusRequest, grpc.ServerStreamingServer[StreamCallResourceStatusResponse]) error {
 	return status.Error(codes.Unimplemented, "method StreamCallerStatus not implemented")
@@ -1067,6 +1869,42 @@ func _Calls_GetCaller_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CallsServer).GetCaller(ctx, req.(*GetCallerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_UpdateCaller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCallerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateCaller(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateCaller_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateCaller(ctx, req.(*UpdateCallerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_UpdateCallers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCallersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateCallers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateCallers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateCallers(ctx, req.(*UpdateCallersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1251,6 +2089,42 @@ func _Calls_GetListener_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calls_UpdateListener_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateListenerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateListener(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateListener_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateListener(ctx, req.(*UpdateListenerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_UpdateListeners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateListenersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateListeners(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateListeners_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateListeners(ctx, req.(*UpdateListenersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Calls_DeleteListener_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteListenerRequest)
 	if err := dec(in); err != nil {
@@ -1395,6 +2269,24 @@ func _Calls_ListScheduledCallers_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Calls_UpdateScheduledCaller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateScheduledCallerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateScheduledCaller(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateScheduledCaller_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateScheduledCaller(ctx, req.(*UpdateScheduledCallerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Calls_CancelScheduledCaller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CancelScheduledCallerRequest)
 	if err := dec(in); err != nil {
@@ -1409,6 +2301,42 @@ func _Calls_CancelScheduledCaller_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CallsServer).CancelScheduledCaller(ctx, req.(*CancelScheduledCallerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_CancelScheduledCallers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CancelScheduledCallersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).CancelScheduledCallers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_CancelScheduledCallers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).CancelScheduledCallers(ctx, req.(*CancelScheduledCallersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_RetryScheduledCaller_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetryScheduledCallerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).RetryScheduledCaller(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_RetryScheduledCaller_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).RetryScheduledCaller(ctx, req.(*RetryScheduledCallerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1535,6 +2463,60 @@ func _Calls_ListCalls_Handler(srv interface{}, ctx context.Context, dec func(int
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CallsServer).ListCalls(ctx, req.(*ListCallsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_GetCallStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCallStatisticsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).GetCallStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_GetCallStatistics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).GetCallStatistics(ctx, req.(*GetCallStatisticsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_UpdateCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCallRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateCall(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateCall_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateCall(ctx, req.(*UpdateCallRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Calls_UpdateCalls_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCallsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CallsServer).UpdateCalls(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Calls_UpdateCalls_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CallsServer).UpdateCalls(ctx, req.(*UpdateCallsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1668,6 +2650,14 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Calls_GetCaller_Handler,
 		},
 		{
+			MethodName: "UpdateCaller",
+			Handler:    _Calls_UpdateCaller_Handler,
+		},
+		{
+			MethodName: "UpdateCallers",
+			Handler:    _Calls_UpdateCallers_Handler,
+		},
+		{
 			MethodName: "DeleteCaller",
 			Handler:    _Calls_DeleteCaller_Handler,
 		},
@@ -1708,6 +2698,14 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Calls_GetListener_Handler,
 		},
 		{
+			MethodName: "UpdateListener",
+			Handler:    _Calls_UpdateListener_Handler,
+		},
+		{
+			MethodName: "UpdateListeners",
+			Handler:    _Calls_UpdateListeners_Handler,
+		},
+		{
 			MethodName: "DeleteListener",
 			Handler:    _Calls_DeleteListener_Handler,
 		},
@@ -1740,8 +2738,20 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Calls_ListScheduledCallers_Handler,
 		},
 		{
+			MethodName: "UpdateScheduledCaller",
+			Handler:    _Calls_UpdateScheduledCaller_Handler,
+		},
+		{
 			MethodName: "CancelScheduledCaller",
 			Handler:    _Calls_CancelScheduledCaller_Handler,
+		},
+		{
+			MethodName: "CancelScheduledCallers",
+			Handler:    _Calls_CancelScheduledCallers_Handler,
+		},
+		{
+			MethodName: "RetryScheduledCaller",
+			Handler:    _Calls_RetryScheduledCaller_Handler,
 		},
 		{
 			MethodName: "StopCall",
@@ -1770,6 +2780,18 @@ var Calls_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListCalls",
 			Handler:    _Calls_ListCalls_Handler,
+		},
+		{
+			MethodName: "GetCallStatistics",
+			Handler:    _Calls_GetCallStatistics_Handler,
+		},
+		{
+			MethodName: "UpdateCall",
+			Handler:    _Calls_UpdateCall_Handler,
+		},
+		{
+			MethodName: "UpdateCalls",
+			Handler:    _Calls_UpdateCalls_Handler,
 		},
 		{
 			MethodName: "InviteToCall",

@@ -47,7 +47,9 @@ const (
 	CampaignState_CAMPAIGN_STATE_UNSPECIFIED CampaignState = 0
 	// Created; calls may be added, nothing is dialled until <code>StartCampaign</code>.
 	CampaignState_CAMPAIGN_STATE_CREATED CampaignState = 1
-	// Calls are being started, at most <code>max_parallel_calls</code> at a time.
+	// Calls are being started, at most <code>max_parallel_calls</code> at a time. A campaign with a
+	// <code>calling_window</code> stays in this state outside its slots and starts no call there; see
+	// <code>Campaign.outside_calling_window</code>.
 	CampaignState_CAMPAIGN_STATE_RUNNING CampaignState = 2
 	// <code>StopCampaign</code> was requested, or the server stopped the campaign after repeated
 	// failures that cannot succeed by repetition (see <code>state_reason</code>): no new call is
@@ -191,11 +193,16 @@ func (CampaignCallState) EnumDescriptor() ([]byte, []int) {
 }
 
 // Whether adding calls to a campaign also starts it.
+// <p>Note: unlike most enums of this API, the zero value <code>CAMPAIGN_START_MODE_UNSPECIFIED</code> is not
+// "no value" but a behaviour of its own (the default described below), which differs from both named
+// values for an existing <code>CREATED</code> campaign. It keeps its released name for wire and source
+// compatibility; send it (or leave the field unset) to get that default.</p>
 type CampaignStartMode int32
 
 const (
 	// The default: a NEW campaign is created <code>RUNNING</code>; an EXISTING campaign keeps its
-	// state (except that a <code>COMPLETED</code> one becomes <code>RUNNING</code> again).
+	// state (except that a <code>COMPLETED</code> one becomes <code>RUNNING</code> again). An existing
+	// <code>CREATED</code> campaign therefore stays <code>CREATED</code>.
 	CampaignStartMode_CAMPAIGN_START_MODE_UNSPECIFIED CampaignStartMode = 0
 	// Start the campaign: a new one is created <code>RUNNING</code>, an existing
 	// <code>CREATED</code> one is started. Does NOT resume a stopped campaign.
@@ -362,6 +369,224 @@ func (CampaignCallAttemptOutcome) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{4}
 }
 
+// Day of the week of a <code>CallingWindowSlot</code>, in the window&apos;s time zone. Defined here rather
+// than reusing <code>google.type.DayOfWeek</code> so that this file needs no further import in any
+// generated client; the numbering is the same (ISO 8601, Monday = 1).
+type CallingWindowDayOfWeek int32
+
+const (
+	// Unspecified. Refused in a slot with <code>INVALID_ARGUMENT</code>.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED CallingWindowDayOfWeek = 0
+	// Monday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_MONDAY CallingWindowDayOfWeek = 1
+	// Tuesday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_TUESDAY CallingWindowDayOfWeek = 2
+	// Wednesday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_WEDNESDAY CallingWindowDayOfWeek = 3
+	// Thursday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_THURSDAY CallingWindowDayOfWeek = 4
+	// Friday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_FRIDAY CallingWindowDayOfWeek = 5
+	// Saturday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_SATURDAY CallingWindowDayOfWeek = 6
+	// Sunday.
+	CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_SUNDAY CallingWindowDayOfWeek = 7
+)
+
+// Enum value maps for CallingWindowDayOfWeek.
+var (
+	CallingWindowDayOfWeek_name = map[int32]string{
+		0: "CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED",
+		1: "CALLING_WINDOW_DAY_OF_WEEK_MONDAY",
+		2: "CALLING_WINDOW_DAY_OF_WEEK_TUESDAY",
+		3: "CALLING_WINDOW_DAY_OF_WEEK_WEDNESDAY",
+		4: "CALLING_WINDOW_DAY_OF_WEEK_THURSDAY",
+		5: "CALLING_WINDOW_DAY_OF_WEEK_FRIDAY",
+		6: "CALLING_WINDOW_DAY_OF_WEEK_SATURDAY",
+		7: "CALLING_WINDOW_DAY_OF_WEEK_SUNDAY",
+	}
+	CallingWindowDayOfWeek_value = map[string]int32{
+		"CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED": 0,
+		"CALLING_WINDOW_DAY_OF_WEEK_MONDAY":      1,
+		"CALLING_WINDOW_DAY_OF_WEEK_TUESDAY":     2,
+		"CALLING_WINDOW_DAY_OF_WEEK_WEDNESDAY":   3,
+		"CALLING_WINDOW_DAY_OF_WEEK_THURSDAY":    4,
+		"CALLING_WINDOW_DAY_OF_WEEK_FRIDAY":      5,
+		"CALLING_WINDOW_DAY_OF_WEEK_SATURDAY":    6,
+		"CALLING_WINDOW_DAY_OF_WEEK_SUNDAY":      7,
+	}
+)
+
+func (x CallingWindowDayOfWeek) Enum() *CallingWindowDayOfWeek {
+	p := new(CallingWindowDayOfWeek)
+	*p = x
+	return p
+}
+
+func (x CallingWindowDayOfWeek) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CallingWindowDayOfWeek) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_campaigns_proto_enumTypes[5].Descriptor()
+}
+
+func (CallingWindowDayOfWeek) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_campaigns_proto_enumTypes[5]
+}
+
+func (x CallingWindowDayOfWeek) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CallingWindowDayOfWeek.Descriptor instead.
+func (CallingWindowDayOfWeek) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{5}
+}
+
+// Order of a <code>ListCampaigns</code> listing. Every order breaks ties by the campaign&apos;s resource
+// <code>name</code>, ascending, so paging is stable.
+type CampaignOrderBy int32
+
+const (
+	// The default: <code>created_at</code>, newest first (the order of every release before this value
+	// existed); identical to <code>CAMPAIGN_ORDER_BY_CREATED_AT_DESC</code>.
+	CampaignOrderBy_CAMPAIGN_ORDER_BY_UNSPECIFIED CampaignOrderBy = 0
+	// <code>created_at</code>, newest first.
+	CampaignOrderBy_CAMPAIGN_ORDER_BY_CREATED_AT_DESC CampaignOrderBy = 1
+	// <code>modified_at</code>, most recently modified first (state changes by the server included). A
+	// campaign modified while a client pages can move between pages; page with
+	// <code>CREATED_AT_DESC</code> when a complete, duplicate-free walk is required.
+	CampaignOrderBy_CAMPAIGN_ORDER_BY_MODIFIED_AT_DESC CampaignOrderBy = 2
+	// <code>display_name</code>, ascending, compared byte-wise (case-sensitive, <code>B</code> before
+	// <code>a</code>).
+	CampaignOrderBy_CAMPAIGN_ORDER_BY_DISPLAY_NAME_ASC CampaignOrderBy = 3
+)
+
+// Enum value maps for CampaignOrderBy.
+var (
+	CampaignOrderBy_name = map[int32]string{
+		0: "CAMPAIGN_ORDER_BY_UNSPECIFIED",
+		1: "CAMPAIGN_ORDER_BY_CREATED_AT_DESC",
+		2: "CAMPAIGN_ORDER_BY_MODIFIED_AT_DESC",
+		3: "CAMPAIGN_ORDER_BY_DISPLAY_NAME_ASC",
+	}
+	CampaignOrderBy_value = map[string]int32{
+		"CAMPAIGN_ORDER_BY_UNSPECIFIED":      0,
+		"CAMPAIGN_ORDER_BY_CREATED_AT_DESC":  1,
+		"CAMPAIGN_ORDER_BY_MODIFIED_AT_DESC": 2,
+		"CAMPAIGN_ORDER_BY_DISPLAY_NAME_ASC": 3,
+	}
+)
+
+func (x CampaignOrderBy) Enum() *CampaignOrderBy {
+	p := new(CampaignOrderBy)
+	*p = x
+	return p
+}
+
+func (x CampaignOrderBy) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (CampaignOrderBy) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_campaigns_proto_enumTypes[6].Descriptor()
+}
+
+func (CampaignOrderBy) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_campaigns_proto_enumTypes[6]
+}
+
+func (x CampaignOrderBy) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use CampaignOrderBy.Descriptor instead.
+func (CampaignOrderBy) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{6}
+}
+
+// Why the SERVER ended a stream. Carried, next to the free-text <code>end_reason</code>, on the last
+// message of <code>Campaigns.StreamCampaignStatus</code>
+// (<code>StreamCampaignStatusResponse.end_reason_type</code>) and of <code>Events.SubscribeVtsiEvents</code>
+// (<code>SubscribeVtsiEventsResponse.end_reason_type</code>). A stream ended by the client, by a gRPC status
+// or by a broken connection carries no last message at all. Defined in this file because
+// <code>events.proto</code> imports it and not the other way round. New values may be added: treat an
+// unknown value like <code>STREAM_END_REASON_UNSPECIFIED</code> (reconnect).
+type StreamEndReason int32
+
+const (
+	// Not ended by the server (every message but the last one), or a server that predates this field
+	// (then only <code>end_reason</code> is set): reconnect.
+	StreamEndReason_STREAM_END_REASON_UNSPECIFIED StreamEndReason = 0
+	// The server&apos;s maximum stream duration was reached. Reconnect (with the
+	// <code>resume_token</code> where the stream has one).
+	StreamEndReason_STREAM_END_REASON_MAX_DURATION StreamEndReason = 1
+	// The client read too slowly and the server&apos;s buffer for the stream overflowed; events were
+	// skipped (<code>SubscribeVtsiEventsResponse.dropped_event_count</code>). Reconnect with the
+	// <code>resume_token</code>; the skipped events are replayed from the journal while it still holds
+	// them.
+	StreamEndReason_STREAM_END_REASON_CLIENT_TOO_SLOW StreamEndReason = 2
+	// The event subscription the stream was opened with was deleted. Do not reconnect with it.
+	StreamEndReason_STREAM_END_REASON_SUBSCRIPTION_DELETED StreamEndReason = 3
+	// The event subscription the stream was opened with was disabled. Reconnecting with it is refused
+	// with <code>FAILED_PRECONDITION</code> until it is enabled again.
+	StreamEndReason_STREAM_END_REASON_SUBSCRIPTION_DISABLED StreamEndReason = 4
+	// The project of the stream was deleted. Do not reconnect.
+	StreamEndReason_STREAM_END_REASON_PROJECT_DELETED StreamEndReason = 5
+	// The server replica serving the stream is shutting down. Reconnect (another replica serves it).
+	StreamEndReason_STREAM_END_REASON_SERVER_SHUTDOWN StreamEndReason = 6
+)
+
+// Enum value maps for StreamEndReason.
+var (
+	StreamEndReason_name = map[int32]string{
+		0: "STREAM_END_REASON_UNSPECIFIED",
+		1: "STREAM_END_REASON_MAX_DURATION",
+		2: "STREAM_END_REASON_CLIENT_TOO_SLOW",
+		3: "STREAM_END_REASON_SUBSCRIPTION_DELETED",
+		4: "STREAM_END_REASON_SUBSCRIPTION_DISABLED",
+		5: "STREAM_END_REASON_PROJECT_DELETED",
+		6: "STREAM_END_REASON_SERVER_SHUTDOWN",
+	}
+	StreamEndReason_value = map[string]int32{
+		"STREAM_END_REASON_UNSPECIFIED":           0,
+		"STREAM_END_REASON_MAX_DURATION":          1,
+		"STREAM_END_REASON_CLIENT_TOO_SLOW":       2,
+		"STREAM_END_REASON_SUBSCRIPTION_DELETED":  3,
+		"STREAM_END_REASON_SUBSCRIPTION_DISABLED": 4,
+		"STREAM_END_REASON_PROJECT_DELETED":       5,
+		"STREAM_END_REASON_SERVER_SHUTDOWN":       6,
+	}
+)
+
+func (x StreamEndReason) Enum() *StreamEndReason {
+	p := new(StreamEndReason)
+	*p = x
+	return p
+}
+
+func (x StreamEndReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (StreamEndReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_campaigns_proto_enumTypes[7].Descriptor()
+}
+
+func (StreamEndReason) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_campaigns_proto_enumTypes[7]
+}
+
+func (x StreamEndReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use StreamEndReason.Descriptor instead.
+func (StreamEndReason) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{7}
+}
+
 // A campaign: a set of outbound calls started with a limit on how many run at the same time.
 type Campaign struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -378,19 +603,26 @@ type Campaign struct {
 	// <code>campaign-&lt;campaign_uuid&gt;</code>. Updatable.
 	DisplayName string `protobuf:"bytes,4,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	// Maximum number of calls of this campaign that are being started or are running at the same
-	// time. <code>0</code> on create means the server default (1); the allowed range is 1 to the
-	// server limit (1000 by default). The project&apos;s <code>max_callers</code> still bounds the
+	// time. <code>0</code> on create means the server default
+	// (<code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_MAX_PARALLEL_CALLS</code>, 1 by default); the allowed range is 1 to the
+	// server limit (<code>ONDEWO_VTSI_CAMPAIGN_MAX_PARALLEL_CALLS_LIMIT</code>, 1000 by default). The
+	// project&apos;s <code>max_callers</code> still bounds the
 	// number of callers that exist at all. Updatable; lowering it never ends a running call.
 	MaxParallelCalls int32 `protobuf:"varint,5,opt,name=max_parallel_calls,json=maxParallelCalls,proto3" json:"max_parallel_calls,omitempty"`
 	// Maximum number of attempts per call, the first one included. <code>0</code> on create means
-	// the server default of 1, i.e. no retry; the allowed range is 1 to 10. Updatable. It is read
+	// the server default of 1, i.e. no retry; the allowed range is 1 to
+	// <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10 by default). Updatable. It is read
 	// LIVE, never snapshotted per call: every decision after an attempt fails uses the value current
 	// at that moment, and a call waiting in <code>RETRY_PENDING</code> whose <code>attempts</code>
 	// is no longer below a lowered value becomes <code>FAILED</code> at the next check (its last
-	// error stays). Raising it never revives a <code>FAILED</code> call.
+	// error stays). Raising it never revives a <code>FAILED</code> call; <code>RetryCampaignCalls</code>
+	// does. A call requeued by <code>RetryCampaignCalls</code> may exceed it (see
+	// <code>CampaignCall.max_attempts</code>).
 	MaxAttempts int32 `protobuf:"varint,6,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
 	// Time to wait after a failed attempt before the next one is started. Unset on create means the
-	// server default (60 s); allowed range 0 s to 7 days. Updatable.
+	// server default (<code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_RETRY_DELAY_S</code>, 60 s by default); allowed range
+	// 0 s to 7 days. Updatable. With a <code>calling_window</code>, a retry that falls due outside every slot
+	// waits for the next slot.
 	RetryDelay *durationpb.Duration `protobuf:"bytes,7,opt,name=retry_delay,json=retryDelay,proto3" json:"retry_delay,omitempty"`
 	// Output only. Lifecycle state.
 	State CampaignState `protobuf:"varint,8,opt,name=state,proto3,enum=ondewo.vtsi.CampaignState" json:"state,omitempty"`
@@ -413,9 +645,144 @@ type Campaign struct {
 	// Output only. When the campaign last reached <code>STOPPED</code> or <code>HARD_STOPPED</code>.
 	StoppedAt *timestamppb.Timestamp `protobuf:"bytes,16,opt,name=stopped_at,json=stoppedAt,proto3" json:"stopped_at,omitempty"`
 	// Output only. When the campaign reached <code>COMPLETED</code>.
-	CompletedAt   *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	CompletedAt *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	// Optional. Default <code>CommonServicesConfig</code> of EVERY call of the campaign (speech-to-text,
+	// NLU, text-to-speech, CSI and voice interaction). Settable on <code>CreateCampaign</code> and on
+	// <code>CampaignAssignment.new_campaign</code>; updatable with the <code>update_mask</code> path
+	// <code>campaign_common_services_config</code> or a nested sub-path of it (e.g.
+	// <code>campaign_common_services_config.nlu_vtsi_config.agent_name</code>). Unset (the default)
+	// changes nothing: every call runs exactly with its own <code>StartCallerRequest</code> config, as
+	// before 9.1.0.
+	// <p>Read LIVE, never snapshotted per call: whenever a campaign call is dispatched (its first
+	// attempt and every retry) the server reads the campaign&apos;s CURRENT value. The effective
+	// <code>common_services_config</code> of that call is:</p>
+	// <pre><code>effective = copy(campaign.campaign_common_services_config)
+	// effective.MergeFrom(caller_request.common_services_config)</code></pre>
+	// <p>i.e. protobuf <code>MergeFrom</code> semantics, the call&apos;s own value WINNING:</p>
+	// <ul>
+	//   <li>a singular scalar, enum or string the call sets to a non-default value (or, for an
+	//       <code>optional</code> field, sets at all) replaces the campaign&apos;s value; one the call
+	//       leaves at its default keeps the campaign&apos;s value. A plain (non-<code>optional</code>)
+	//       scalar therefore cannot be reset to its zero value by the call;</li>
+	//   <li>a message field is merged recursively by the same rules;</li>
+	//   <li>a repeated field is CONCATENATED, the campaign&apos;s entries first (e.g.
+	//       <code>nlu_vtsi_config.contexts</code>, the lists of the <code>csi_vtsi_config</code>
+	//       callbacks, <code>voice_interaction_config.response_timing_config.soft_timeout_config.messages</code>);</li>
+	//   <li>a map field is merged by key, the call&apos;s entry winning on a shared key;</li>
+	//   <li>a oneof member the call sets replaces whichever member the campaign set (e.g.
+	//       <code>nlu_vtsi_config.credentials</code> versus <code>nlu_vtsi_config.auth_token</code>).</li>
+	// </ul>
+	// <p>The effective configuration is validated exactly as a <code>StartCallerRequest</code> carrying it,
+	// so an entry of <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code> may leave
+	// out what the campaign supplies. Because the default is read live, an update that makes the effective
+	// configuration of a not yet dispatched call invalid fails that call at dispatch as a failure that
+	// cannot succeed by repetition (it is not retried).</p>
+	// <p>Returned by <code>CreateCampaign</code>, <code>GetCampaign</code>, <code>UpdateCampaign</code>,
+	// <code>ListCampaigns</code>, <code>StartCampaign</code>, <code>StopCampaign</code>,
+	// <code>HardStopCampaign</code> and <code>ResumeCampaign</code>. Left UNSET (whatever is stored) in
+	// <code>StreamCampaignStatusResponse.campaigns</code> and in the <code>campaign</code> of
+	// <code>AddCallersToCampaignResponse</code> / <code>AddScheduledCallersToCampaignResponse</code>; read
+	// it with <code>GetCampaign</code>.</p>
+	// <p>Credentials: the credential-bearing fields (NLU credentials and tokens, gRPC certificates,
+	// message broker and object store settings, callbacks, transcribe and synthesize request configs)
+	// are stored like the <code>common_services_config</code> of a started caller; the server never logs
+	// them. They are RETURNED only to a caller whose role on the project was resolved with authorization
+	// enforced and who may see the whole project (<code>SERVER_ADMIN</code>, <code>PROJECT_ADMIN</code>,
+	// <code>PROJECT_DEVELOPER</code>). Every other caller receives only the identity and routing fields
+	// (agent, language, initial intent, platform, service hosts and ports, CSI control messages, voice
+	// interaction config): a <code>PROJECT_EXECUTOR</code>, and also every caller when authorization is
+	// disabled or only monitored, because a <code>Campaign</code> has no view that could leave the config
+	// out by default. A client that reads such a campaign and writes the whole config back with
+	// <code>update_mask</code> path <code>campaign_common_services_config</code> overwrites the stored
+	// credentials with the withheld (empty) ones; update a sub-path instead.</p>
+	CampaignCommonServicesConfig *CommonServicesConfig `protobuf:"bytes,18,opt,name=campaign_common_services_config,json=campaignCommonServicesConfig,proto3" json:"campaign_common_services_config,omitempty"`
+	// Optional. Default <code>SipCallerConfig</code> of EVERY call of the campaign (SIP image version,
+	// callee and SIP headers). Settable on <code>CreateCampaign</code> and on
+	// <code>CampaignAssignment.new_campaign</code>; updatable with the <code>update_mask</code> path
+	// <code>campaign_sip_caller_config</code> or a nested sub-path of it (e.g.
+	// <code>campaign_sip_caller_config.sip_headers</code>). Unset (the default) changes nothing.
+	// <p>Read LIVE at every dispatch and merged exactly like
+	// <code>campaign_common_services_config</code>: the effective <code>sip_caller_config</code> of a call
+	// is a copy of this value with the call&apos;s own <code>StartCallerRequest.sip_caller_config</code>
+	// merged over it (<code>MergeFrom</code>, the call winning); <code>sip_headers</code> are merged by
+	// key with the call&apos;s header winning on a shared name.</p>
+	// <p>EXCEPT <code>callee_id</code>, which is resolved ONCE, when the call is added to the campaign: the
+	// call&apos;s own <code>callee_id</code> or, when that is empty, this value&apos;s
+	// <code>callee_id</code> at that moment. The result is stored as <code>CampaignCall.phone_number</code>
+	// and is the <code>callee_id</code> of every attempt of that call, retries included. A later update of
+	// <code>campaign_sip_caller_config.callee_id</code> (or of the whole config) therefore changes the callee
+	// only of calls added after it, never of calls already in the campaign, so the number a campaign call
+	// reports (and that <code>ListCampaignCallsRequest.phone_number</code> filters on) is always the number
+	// it dials. An <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code> request of
+	// which an entry takes the default callee is refused with <code>ABORTED</code> (nothing is added; retry
+	// it) when an update of the default callee commits while the request runs, so no call added after an
+	// update dials the previous default.</p>
+	// <p>Returned by the same RPCs as <code>campaign_common_services_config</code> and left unset in the
+	// same responses.</p>
+	CampaignSipCallerConfig *SipCallerConfig `protobuf:"bytes,19,opt,name=campaign_sip_caller_config,json=campaignSipCallerConfig,proto3" json:"campaign_sip_caller_config,omitempty"`
+	// Output only. Resource names
+	// (<pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>) of the callers of the
+	// campaign: the callers that placed at least one attempt of one of its campaign calls
+	// (<code>CampaignCallAttempt.caller_name</code>), whichever way the call was added. A scheduled campaign
+	// call is placed by a caller too and counts; its <code>ScheduledCaller</code> is not a
+	// <code>Caller</code> and is in <code>CampaignCall.scheduled_caller_name</code> instead. A caller that was
+	// deleted is not listed (its name stays in the attempt history), and a caller that placed attempts of
+	// several campaigns (a pooled caller can) is listed in each of them. Exactly the set
+	// <code>Calls.ListCallers</code> returns with <code>ListCallersRequest.campaign_name</code>.
+	// <p>Order: by the start of the first attempt each caller placed for the campaign, oldest first, each name
+	// once. Bounded: at most the first 1000 names; <code>campaign_callers_truncated</code> says whether there are
+	// more. Bounded in work too: the server reads only the campaign&apos;s earliest 10000 attempts, by start, to
+	// compute it, so a campaign with 10000 or more attempts reports <code>campaign_callers_truncated</code>, also
+	// with fewer than 1000 names. The complete, paginated list is <code>Calls.ListCallers</code> with the
+	// campaign selector, and the calls they placed are <code>Calls.ListCalls</code> with
+	// <code>CallFilter.campaign_name</code>.</p>
+	// <p>On <code>UpdateCampaign</code> and the four lifecycle RPCs the change has already been applied when the
+	// callers are read; when that read fails, the RPC still succeeds and returns the campaign with
+	// <code>campaign_callers</code> empty and <code>campaign_callers_truncated</code> true (read them with
+	// <code>GetCampaign</code>).</p>
+	// <p>Populated by <code>CreateCampaign</code> (always empty: a new campaign has placed no call),
+	// <code>GetCampaign</code>, <code>UpdateCampaign</code>, <code>StartCampaign</code>,
+	// <code>StopCampaign</code>, <code>HardStopCampaign</code> and <code>ResumeCampaign</code>; subject to their
+	// <code>field_mask</code> like any other path (path <code>campaign_callers</code>; a path below it is
+	// rejected). <code>ListCampaigns</code> populates it ONLY when its <code>field_mask</code> names it
+	// explicitly, and an unset or empty mask, which returns every other field, leaves it empty: at up to 1000
+	// names (~90 bytes each) per campaign, a default page would otherwise exceed gRPC&apos;s default 4 MiB
+	// message limit. Left empty in
+	// <code>StreamCampaignStatusResponse.campaigns</code> and in the <code>campaign</code> of
+	// <code>AddCallersToCampaignResponse</code> / <code>AddScheduledCallersToCampaignResponse</code>. Setting it
+	// on create is an output-only field set (<code>INVALID_ARGUMENT</code>), naming it in an
+	// <code>update_mask</code> is rejected as output only.</p>
+	CampaignCallers []string `protobuf:"bytes,20,rep,name=campaign_callers,json=campaignCallers,proto3" json:"campaign_callers,omitempty"`
+	// Output only. True when <code>campaign_callers</code> may be incomplete: it was cut at its bound of 1000
+	// names and the campaign has more callers, the campaign has 10000 or more attempts (the most the server
+	// reads for it), or (on <code>UpdateCampaign</code> and the lifecycle RPCs only) the callers could not be
+	// read after the change was applied. Read them all with <code>Calls.ListCallers</code> and the campaign
+	// selector. Populated
+	// and left unset by the same RPCs as <code>campaign_callers</code>, and in <code>ListCampaigns</code> also
+	// only when the <code>field_mask</code> names it explicitly; a <code>field_mask</code> names it like any
+	// other path (name both to read the names and whether they are complete).
+	CampaignCallersTruncated bool `protobuf:"varint,21,opt,name=campaign_callers_truncated,json=campaignCallersTruncated,proto3" json:"campaign_callers_truncated,omitempty"`
+	// Optional. When calls of the campaign may be started: weekly slots in an IANA time zone, see
+	// <a href="index.html#ondewo.vtsi.CampaignCallingWindow">CampaignCallingWindow</a>. Unset (the default)
+	// means at any time, as before this field existed. Settable on <code>CreateCampaign</code>,
+	// <code>CampaignAssignment.new_campaign</code> and copied by <code>CloneCampaign</code>; updatable with the
+	// <code>update_mask</code> path <code>calling_window</code> (replaces the whole window; unset removes it)
+	// or the sub-paths <code>calling_window.time_zone</code> and <code>calling_window.slots</code> (the
+	// repeated field is replaced whole). Its output-only fields must be unset on create and are rejected in
+	// an <code>update_mask</code>. An invalid window is rejected with <code>INVALID_ARGUMENT</code> naming the
+	// problem (see <code>CampaignCallingWindow</code>). Returned by every RPC that returns a
+	// <code>Campaign</code>, <code>StreamCampaignStatusResponse.campaigns</code> and the <code>campaign</code>
+	// of the <code>Add*ToCampaign</code> responses included.
+	CallingWindow *CampaignCallingWindow `protobuf:"bytes,22,opt,name=calling_window,json=callingWindow,proto3" json:"calling_window,omitempty"`
+	// Output only. True while the campaign is <code>RUNNING</code>, has a <code>calling_window</code> and the
+	// current time is outside every slot of it, i.e. it starts no call until
+	// <code>calling_window.next_window_start</code>. False in every other case (no window, inside a slot, or
+	// another state). Evaluated when the campaign is read, so it is exact for the moment of the response;
+	// <code>VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_OPENED</code> / <code>..._CLOSED</code> report the edges of a
+	// running campaign. Returned like <code>calling_window</code>.
+	OutsideCallingWindow bool `protobuf:"varint,23,opt,name=outside_calling_window,json=outsideCallingWindow,proto3" json:"outside_calling_window,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *Campaign) Reset() {
@@ -567,6 +934,205 @@ func (x *Campaign) GetCompletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Campaign) GetCampaignCommonServicesConfig() *CommonServicesConfig {
+	if x != nil {
+		return x.CampaignCommonServicesConfig
+	}
+	return nil
+}
+
+func (x *Campaign) GetCampaignSipCallerConfig() *SipCallerConfig {
+	if x != nil {
+		return x.CampaignSipCallerConfig
+	}
+	return nil
+}
+
+func (x *Campaign) GetCampaignCallers() []string {
+	if x != nil {
+		return x.CampaignCallers
+	}
+	return nil
+}
+
+func (x *Campaign) GetCampaignCallersTruncated() bool {
+	if x != nil {
+		return x.CampaignCallersTruncated
+	}
+	return false
+}
+
+func (x *Campaign) GetCallingWindow() *CampaignCallingWindow {
+	if x != nil {
+		return x.CallingWindow
+	}
+	return nil
+}
+
+func (x *Campaign) GetOutsideCallingWindow() bool {
+	if x != nil {
+		return x.OutsideCallingWindow
+	}
+	return false
+}
+
+// When the calls of a campaign may be started: a set of weekly slots, each a day of the week and a range
+// of minutes of that day, in one time zone.
+// <p>Effect: the campaign engine starts an attempt (a first attempt, a retry, or a due scheduled call) only
+// while the current time, converted to <code>time_zone</code>, lies inside a slot. Outside every slot a
+// <code>RUNNING</code> campaign stays <code>RUNNING</code>, reports
+// <code>Campaign.outside_calling_window = true</code> and starts nothing; calls keep their state
+// (<code>NOT_STARTED</code> / <code>RETRY_PENDING</code>) and are started from the next slot on, under
+// <code>max_parallel_calls</code>, in their usual order. A call already started when a slot ends is NEVER
+// ended by it and may run past the slot; its retry, if any, waits for the next slot. Statistics and the
+// campaign&apos;s state machine are otherwise unaffected; stop, hard stop and resume work as without a
+// window.</p>
+// <p>Validation (<code>INVALID_ARGUMENT</code> naming the problem, on <code>CreateCampaign</code>,
+// <code>UpdateCampaign</code>, <code>CampaignAssignment.new_campaign</code>): <code>time_zone</code> must be a
+// name of the IANA time zone database known to the server (e.g. <code>Europe/Vienna</code>, <code>UTC</code>;
+// not an offset such as <code>+02:00</code>); at least one and at most 50 slots; each slot with a day other
+// than <code>CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED</code>, <code>0 &lt;= start_minute &lt; end_minute
+// &lt;= 1440</code>. A slot cannot span midnight: split it into two slots on consecutive days. Slots may overlap
+// or touch; the window is their union.</p>
+// <p>Local time: slot boundaries are wall-clock times in <code>time_zone</code>, so they follow daylight saving
+// changes. A boundary that does not exist on a given day (the hour skipped when clocks go forward) takes effect
+// at the first instant after it that exists; a boundary that occurs twice (the hour repeated when clocks go
+// back) takes effect at its first occurrence.</p>
+type CampaignCallingWindow struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required. IANA time zone name in which the slots are read, e.g. <code>Europe/Vienna</code>. At most
+	// 64 characters.
+	TimeZone string `protobuf:"bytes,1,opt,name=time_zone,json=timeZone,proto3" json:"time_zone,omitempty"`
+	// Required. The weekly slots, 1 to 50. Order is irrelevant.
+	Slots []*CallingWindowSlot `protobuf:"bytes,2,rep,name=slots,proto3" json:"slots,omitempty"`
+	// Output only. The start of the next slot strictly after the moment the campaign was read, as an
+	// absolute time (UTC); while inside a slot, the start of the slot after the current one ends (the end of
+	// a run of overlapping or touching slots). Unset when the window has no future slot (cannot happen for a
+	// valid window) and in requests. Computed when read, also when the campaign is not <code>RUNNING</code>.
+	NextWindowStart *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=next_window_start,json=nextWindowStart,proto3" json:"next_window_start,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CampaignCallingWindow) Reset() {
+	*x = CampaignCallingWindow{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CampaignCallingWindow) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CampaignCallingWindow) ProtoMessage() {}
+
+func (x *CampaignCallingWindow) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CampaignCallingWindow.ProtoReflect.Descriptor instead.
+func (*CampaignCallingWindow) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CampaignCallingWindow) GetTimeZone() string {
+	if x != nil {
+		return x.TimeZone
+	}
+	return ""
+}
+
+func (x *CampaignCallingWindow) GetSlots() []*CallingWindowSlot {
+	if x != nil {
+		return x.Slots
+	}
+	return nil
+}
+
+func (x *CampaignCallingWindow) GetNextWindowStart() *timestamppb.Timestamp {
+	if x != nil {
+		return x.NextWindowStart
+	}
+	return nil
+}
+
+// One weekly slot of a <code>CampaignCallingWindow</code>: on <code>day_of_week</code>, from
+// <code>start_minute</code> (inclusive) to <code>end_minute</code> (exclusive), counted in minutes after local
+// midnight of <code>CampaignCallingWindow.time_zone</code>. Example: Monday 09:00 to 17:30 is
+// <code>{day_of_week: CALLING_WINDOW_DAY_OF_WEEK_MONDAY, start_minute: 540, end_minute: 1050}</code>.
+type CallingWindowSlot struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required. The day, in the window&apos;s time zone.
+	DayOfWeek CallingWindowDayOfWeek `protobuf:"varint,1,opt,name=day_of_week,json=dayOfWeek,proto3,enum=ondewo.vtsi.CallingWindowDayOfWeek" json:"day_of_week,omitempty"`
+	// Start of the slot in minutes after local midnight, inclusive: 0 to 1439.
+	StartMinute int32 `protobuf:"varint,2,opt,name=start_minute,json=startMinute,proto3" json:"start_minute,omitempty"`
+	// End of the slot in minutes after local midnight, exclusive: 1 to 1440 (1440 = the end of the day),
+	// greater than <code>start_minute</code>.
+	EndMinute     int32 `protobuf:"varint,3,opt,name=end_minute,json=endMinute,proto3" json:"end_minute,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CallingWindowSlot) Reset() {
+	*x = CallingWindowSlot{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CallingWindowSlot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallingWindowSlot) ProtoMessage() {}
+
+func (x *CallingWindowSlot) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallingWindowSlot.ProtoReflect.Descriptor instead.
+func (*CallingWindowSlot) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CallingWindowSlot) GetDayOfWeek() CallingWindowDayOfWeek {
+	if x != nil {
+		return x.DayOfWeek
+	}
+	return CallingWindowDayOfWeek_CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED
+}
+
+func (x *CallingWindowSlot) GetStartMinute() int32 {
+	if x != nil {
+		return x.StartMinute
+	}
+	return 0
+}
+
+func (x *CallingWindowSlot) GetEndMinute() int32 {
+	if x != nil {
+		return x.EndMinute
+	}
+	return 0
+}
+
 // Progress of a campaign. Every call of the campaign is counted in exactly one of
 // <code>not_started</code>, <code>in_progress</code>, <code>retry_pending</code>,
 // <code>completed</code>, <code>failed</code> and <code>cancelled</code>; their sum is
@@ -581,6 +1147,14 @@ func (x *Campaign) GetCompletedAt() *timestamppb.Timestamp {
 // not finished: a call waiting for its next attempt is still being worked on)</li>
 // <li>not started = <code>not_started</code></li>
 // </ul>
+// <p>Bounds: every call counter is at most the campaign&apos;s number of calls, itself at most
+// <code>ONDEWO_VTSI_CAMPAIGN_MAX_CALLS</code> (100000 by default); <code>total_attempts</code> and
+// <code>answering_machine_detected</code> are at most that times the attempt limit (10 by default, plus the
+// budgets added by <code>RetryCampaignCalls</code>), far below the <code>int32</code> range.
+// <code>total_attempts</code>, <code>calls_retried</code> and <code>answering_machine_detected</code> never
+// decrease; the state buckets move as calls change state (<code>RetryCampaignCalls</code> moves calls out of
+// <code>failed</code> / <code>cancelled</code>). The statistics are computed when read, from one consistent
+// snapshot.</p>
 type CampaignStatistics struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the campaign.
@@ -606,14 +1180,23 @@ type CampaignStatistics struct {
 	// Of <code>not_started</code>: scheduled calls whose scheduled time has not come yet.
 	ScheduledNotDue int32 `protobuf:"varint,11,opt,name=scheduled_not_due,json=scheduledNotDue,proto3" json:"scheduled_not_due,omitempty"`
 	// Calls that needed more than one attempt (<code>attempts</code> &gt; 1), whatever their state.
-	CallsRetried  int32 `protobuf:"varint,12,opt,name=calls_retried,json=callsRetried,proto3" json:"calls_retried,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	CallsRetried int32 `protobuf:"varint,12,opt,name=calls_retried,json=callsRetried,proto3" json:"calls_retried,omitempty"`
+	// Mean connected time of the campaign&apos;s FINISHED attempts that were connected: from the moment the
+	// attempt&apos;s call reached <code>OUTGOING_CALL_CONNECTED</code> to the moment it ended, averaged over
+	// those attempts (a running call is not counted until it ended). Unset when no attempt has connected and
+	// ended yet. Millisecond precision.
+	AverageConnectedDuration *durationpb.Duration `protobuf:"bytes,13,opt,name=average_connected_duration,json=averageConnectedDuration,proto3" json:"average_connected_duration,omitempty"`
+	// Attempts whose call reported <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> (answering machine
+	// detection), whatever the call did next; each attempt counts once. <code>0</code> also when answering
+	// machine detection is not configured for the campaign&apos;s calls.
+	AnsweringMachineDetected int32 `protobuf:"varint,14,opt,name=answering_machine_detected,json=answeringMachineDetected,proto3" json:"answering_machine_detected,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *CampaignStatistics) Reset() {
 	*x = CampaignStatistics{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[1]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -625,7 +1208,7 @@ func (x *CampaignStatistics) String() string {
 func (*CampaignStatistics) ProtoMessage() {}
 
 func (x *CampaignStatistics) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[1]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -638,7 +1221,7 @@ func (x *CampaignStatistics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampaignStatistics.ProtoReflect.Descriptor instead.
 func (*CampaignStatistics) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{1}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CampaignStatistics) GetCampaignName() string {
@@ -725,6 +1308,20 @@ func (x *CampaignStatistics) GetCallsRetried() int32 {
 	return 0
 }
 
+func (x *CampaignStatistics) GetAverageConnectedDuration() *durationpb.Duration {
+	if x != nil {
+		return x.AverageConnectedDuration
+	}
+	return nil
+}
+
+func (x *CampaignStatistics) GetAnsweringMachineDetected() int32 {
+	if x != nil {
+		return x.AnsweringMachineDetected
+	}
+	return 0
+}
+
 // One attempt of a campaign call.
 type CampaignCallAttempt struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -753,7 +1350,7 @@ type CampaignCallAttempt struct {
 
 func (x *CampaignCallAttempt) Reset() {
 	*x = CampaignCallAttempt{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[2]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -765,7 +1362,7 @@ func (x *CampaignCallAttempt) String() string {
 func (*CampaignCallAttempt) ProtoMessage() {}
 
 func (x *CampaignCallAttempt) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[2]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -778,7 +1375,7 @@ func (x *CampaignCallAttempt) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampaignCallAttempt.ProtoReflect.Descriptor instead.
 func (*CampaignCallAttempt) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{2}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *CampaignCallAttempt) GetAttemptNumber() int32 {
@@ -856,7 +1453,10 @@ type CampaignCall struct {
 	Position int32 `protobuf:"varint,3,opt,name=position,proto3" json:"position,omitempty"`
 	// State of the call.
 	State CampaignCallState `protobuf:"varint,4,opt,name=state,proto3,enum=ondewo.vtsi.CampaignCallState" json:"state,omitempty"`
-	// The callee: <code>SipCallerConfig.callee_id</code> of the call&apos;s request.
+	// The callee: <code>SipCallerConfig.callee_id</code> of the call&apos;s request or, when the request
+	// leaves it empty, of <code>Campaign.campaign_sip_caller_config</code> at the time the call was added.
+	// Fixed from then on: every attempt of the call dials exactly this number, whatever later updates of
+	// the campaign&apos;s <code>campaign_sip_caller_config</code> say.
 	PhoneNumber string `protobuf:"bytes,5,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
 	// How the call was added.
 	Source CampaignCallSource `protobuf:"varint,6,opt,name=source,proto3,enum=ondewo.vtsi.CampaignCallSource" json:"source,omitempty"`
@@ -866,8 +1466,10 @@ type CampaignCall struct {
 	ScheduledTime *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=scheduled_time,json=scheduledTime,proto3" json:"scheduled_time,omitempty"`
 	// Attempts started so far.
 	Attempts int32 `protobuf:"varint,9,opt,name=attempts,proto3" json:"attempts,omitempty"`
-	// The campaign&apos;s CURRENT <code>max_attempts</code> (read live, see
-	// <code>Campaign.max_attempts</code>); repeated here so a page of calls is readable alone.
+	// The attempt limit of this call: the campaign&apos;s CURRENT <code>max_attempts</code> (read live, see
+	// <code>Campaign.max_attempts</code>), repeated here so a page of calls is readable alone. For a call
+	// requeued by <code>RetryCampaignCalls</code> it is the larger of that value and the call&apos;s own
+	// limit set by the requeue (its attempts at the time plus <code>additional_attempts</code>).
 	MaxAttempts int32 `protobuf:"varint,10,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
 	// Caller of the current or last attempt.
 	CallerName string `protobuf:"bytes,11,opt,name=caller_name,json=callerName,proto3" json:"caller_name,omitempty"`
@@ -900,7 +1502,7 @@ type CampaignCall struct {
 
 func (x *CampaignCall) Reset() {
 	*x = CampaignCall{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[3]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -912,7 +1514,7 @@ func (x *CampaignCall) String() string {
 func (*CampaignCall) ProtoMessage() {}
 
 func (x *CampaignCall) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[3]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -925,7 +1527,7 @@ func (x *CampaignCall) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampaignCall.ProtoReflect.Descriptor instead.
 func (*CampaignCall) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{3}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CampaignCall) GetName() string {
@@ -1082,62 +1684,6 @@ func (x *CampaignCall) GetAttemptHistory() []*CampaignCallAttempt {
 	return nil
 }
 
-// Identifies a campaign by its display name, which is unique within a project.
-type CampaignDisplayName struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project of the campaign.
-	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
-	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Exact, case-sensitive <code>display_name</code> of the campaign.
-	DisplayName   string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CampaignDisplayName) Reset() {
-	*x = CampaignDisplayName{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CampaignDisplayName) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CampaignDisplayName) ProtoMessage() {}
-
-func (x *CampaignDisplayName) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CampaignDisplayName.ProtoReflect.Descriptor instead.
-func (*CampaignDisplayName) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *CampaignDisplayName) GetVtsiProjectName() string {
-	if x != nil {
-		return x.VtsiProjectName
-	}
-	return ""
-}
-
-func (x *CampaignDisplayName) GetDisplayName() string {
-	if x != nil {
-		return x.DisplayName
-	}
-	return ""
-}
-
 // Assigns the callers of an <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code>
 // request to a campaign. The calls are NOT started by the request itself but added to the
 // campaign, which starts them under its <code>max_parallel_calls</code> limit.
@@ -1150,12 +1696,22 @@ func (x *CampaignDisplayName) GetDisplayName() string {
 // <code>CREATED</code>); <code>COMPLETED</code> accepts them and becomes <code>RUNNING</code>.</p>
 // <p>Errors, as gRPC status codes of the <code>AddCallersToCampaign</code> /
 // <code>AddScheduledCallersToCampaign</code> RPC: <code>NOT_FOUND</code> for an unknown
-// <code>campaign_name</code> / <code>campaign_display_name</code>
+// <code>campaign_name</code> / <code>display_name</code>
 // or a campaign deleted while the request ran; <code>INVALID_ARGUMENT</code> for a campaign of
 // another project, an invalid <code>new_campaign</code> (an output-only field set, a value out of
 // range) or an invalid caller entry (the message names its index); <code>ALREADY_EXISTS</code> for a
 // <code>new_campaign.display_name</code> used in the project; <code>FAILED_PRECONDITION</code> when
 // the campaign would exceed the server&apos;s maximum number of calls per campaign.</p>
+// <p>The project of the campaign is the project of the enclosing request:
+// <code>AddCallersToCampaignRequest.vtsi_project_name</code> /
+// <code>AddScheduledCallersToCampaignRequest.vtsi_project_name</code>. It is where a new campaign is
+// created, where <code>display_name</code> is resolved, and the project a <code>campaign_name</code>
+// must belong to.</p>
+// <p>Every caller entry of the request is validated against its EFFECTIVE configuration, i.e. the
+// campaign&apos;s <code>campaign_common_services_config</code> / <code>campaign_sip_caller_config</code>
+// with the entry&apos;s own config merged over it (see
+// <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>), so an entry may leave out what the campaign
+// supplies.</p>
 type CampaignAssignment struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Which campaign.
@@ -1164,7 +1720,7 @@ type CampaignAssignment struct {
 	//
 	//	*CampaignAssignment_CampaignName
 	//	*CampaignAssignment_NewCampaign
-	//	*CampaignAssignment_CampaignDisplayName
+	//	*CampaignAssignment_DisplayName
 	CampaignSelector isCampaignAssignment_CampaignSelector `protobuf_oneof:"campaign_selector"`
 	// Whether the campaign starts dialling; see <code>CampaignStartMode</code>. The default starts a
 	// new campaign and leaves an existing one in its state.
@@ -1175,7 +1731,7 @@ type CampaignAssignment struct {
 
 func (x *CampaignAssignment) Reset() {
 	*x = CampaignAssignment{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[5]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1187,7 +1743,7 @@ func (x *CampaignAssignment) String() string {
 func (*CampaignAssignment) ProtoMessage() {}
 
 func (x *CampaignAssignment) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[5]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1200,7 +1756,7 @@ func (x *CampaignAssignment) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampaignAssignment.ProtoReflect.Descriptor instead.
 func (*CampaignAssignment) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{5}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CampaignAssignment) GetCampaignSelector() isCampaignAssignment_CampaignSelector {
@@ -1228,13 +1784,13 @@ func (x *CampaignAssignment) GetNewCampaign() *Campaign {
 	return nil
 }
 
-func (x *CampaignAssignment) GetCampaignDisplayName() *CampaignDisplayName {
+func (x *CampaignAssignment) GetDisplayName() string {
 	if x != nil {
-		if x, ok := x.CampaignSelector.(*CampaignAssignment_CampaignDisplayName); ok {
-			return x.CampaignDisplayName
+		if x, ok := x.CampaignSelector.(*CampaignAssignment_DisplayName); ok {
+			return x.DisplayName
 		}
 	}
-	return nil
+	return ""
 }
 
 func (x *CampaignAssignment) GetStartMode() CampaignStartMode {
@@ -1255,23 +1811,28 @@ type CampaignAssignment_CampaignName struct {
 }
 
 type CampaignAssignment_NewCampaign struct {
-	// Create a new campaign with these settings and add the calls to it. Only
-	// <code>display_name</code>, <code>max_parallel_calls</code>, <code>max_attempts</code> and
-	// <code>retry_delay</code> are read; output-only fields must be unset.
+	// Create a new campaign with these settings, in the enclosing request&apos;s project, and add the
+	// calls to it. Only <code>display_name</code>, <code>max_parallel_calls</code>,
+	// <code>max_attempts</code>, <code>retry_delay</code>, <code>campaign_common_services_config</code>,
+	// <code>campaign_sip_caller_config</code> and <code>calling_window</code> are read; output-only fields
+	// (<code>calling_window.next_window_start</code> included) must be unset.
 	NewCampaign *Campaign `protobuf:"bytes,2,opt,name=new_campaign,json=newCampaign,proto3,oneof"`
 }
 
-type CampaignAssignment_CampaignDisplayName struct {
-	// Add the calls to the existing campaign with this display name. Its
-	// <code>vtsi_project_name</code> must be the request&apos;s project.
-	CampaignDisplayName *CampaignDisplayName `protobuf:"bytes,4,opt,name=campaign_display_name,json=campaignDisplayName,proto3,oneof"`
+type CampaignAssignment_DisplayName struct {
+	// Add the calls to the existing campaign with this exact, case-sensitive display name, resolved
+	// within the enclosing request&apos;s project
+	// (<code>AddCallersToCampaignRequest.vtsi_project_name</code> /
+	// <code>AddScheduledCallersToCampaignRequest.vtsi_project_name</code>). Replaces the 9.0.0
+	// <code>CampaignDisplayName campaign_display_name = 4</code>.
+	DisplayName string `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*CampaignAssignment_CampaignName) isCampaignAssignment_CampaignSelector() {}
 
 func (*CampaignAssignment_NewCampaign) isCampaignAssignment_CampaignSelector() {}
 
-func (*CampaignAssignment_CampaignDisplayName) isCampaignAssignment_CampaignSelector() {}
+func (*CampaignAssignment_DisplayName) isCampaignAssignment_CampaignSelector() {}
 
 // The request message for
 // <a href="index.html#ondewo.vtsi.Campaigns.CreateCampaign">Campaigns.CreateCampaign</a>.
@@ -1280,15 +1841,41 @@ type CreateCampaignRequest struct {
 	// VTSI project in which to create the campaign.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The campaign to create. Output-only fields must be unset.
-	Campaign      *Campaign `protobuf:"bytes,2,opt,name=campaign,proto3" json:"campaign,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The campaign to create. Output-only fields must be unset. <code>campaign_common_services_config</code>
+	// and <code>campaign_sip_caller_config</code> may be set: they become the defaults of every call of
+	// the campaign (see <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>).
+	Campaign *Campaign `protobuf:"bytes,2,opt,name=campaign,proto3" json:"campaign,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code> and WITHOUT a <code>campaign.</code> prefix, e.g. <code>state</code>,
+	// <code>statistics.completed</code>,
+	// <code>campaign_common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through
+	// singular message fields are allowed; a path below a repeated or map field is not.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it. The mask is applied after the server&apos;s
+	// role-based redaction, so it never reveals a redacted value. It shapes only the response: the
+	// whole campaign is created regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional client idempotency key, with the semantics of
+	// <code>AddCallersToCampaignRequest.idempotency_key</code>: at most 255 printable ASCII characters, no
+	// whitespace; empty means no deduplication. A retry carrying the same key returns the response of the
+	// first successful attempt (the same campaign, as it was returned then) instead of creating a second
+	// campaign, whichever server replica it reaches, for as long as the server retains the key (24 hours by
+	// default). The key is scoped to the VTSI project and to this RPC. Reusing a key with a different request
+	// is refused with <code>INVALID_ARGUMENT</code>; <code>field_mask</code> is not part of that comparison (a
+	// retry with another mask is the same request and its response is shaped by the retry&apos;s mask). A
+	// retry that arrives while the first attempt is still running is answered <code>ABORTED</code> and may be
+	// retried later. A first attempt that fails stores nothing, so a retry after a failure runs the request
+	// again. A replayed response carries no <code>campaign_common_services_config</code> and no
+	// <code>campaign_sip_caller_config</code>: the server keeps no second copy of the credentials it holds;
+	// read them with <code>GetCampaign</code>.
+	IdempotencyKey string `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateCampaignRequest) Reset() {
 	*x = CreateCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[6]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1300,7 +1887,7 @@ func (x *CreateCampaignRequest) String() string {
 func (*CreateCampaignRequest) ProtoMessage() {}
 
 func (x *CreateCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[6]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1313,7 +1900,7 @@ func (x *CreateCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCampaignRequest.ProtoReflect.Descriptor instead.
 func (*CreateCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{6}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *CreateCampaignRequest) GetVtsiProjectName() string {
@@ -1330,24 +1917,54 @@ func (x *CreateCampaignRequest) GetCampaign() *Campaign {
 	return nil
 }
 
+func (x *CreateCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *CreateCampaignRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Campaigns.GetCampaign">Campaigns.GetCampaign</a>.
 type GetCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*GetCampaignRequest_Name
 	//	*GetCampaignRequest_DisplayName
-	Campaign      isGetCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isGetCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code> and WITHOUT a <code>campaign.</code> prefix, e.g. <code>state</code>,
+	// <code>statistics.completed</code>,
+	// <code>campaign_common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through
+	// singular message fields are allowed; a path below a repeated or map field is not.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it. The mask is applied after the server&apos;s
+	// role-based redaction, so it never reveals a redacted value.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCampaignRequest) Reset() {
 	*x = GetCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[7]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1359,7 +1976,7 @@ func (x *GetCampaignRequest) String() string {
 func (*GetCampaignRequest) ProtoMessage() {}
 
 func (x *GetCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[7]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1372,7 +1989,7 @@ func (x *GetCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCampaignRequest.ProtoReflect.Descriptor instead.
 func (*GetCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{7}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetCampaignRequest) GetCampaign() isGetCampaignRequest_Campaign {
@@ -1391,11 +2008,25 @@ func (x *GetCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *GetCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *GetCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*GetCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
+	}
+	return ""
+}
+
+func (x *GetCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *GetCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
 	}
 	return nil
 }
@@ -1406,12 +2037,15 @@ type isGetCampaignRequest_Campaign interface {
 
 type GetCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type GetCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*GetCampaignRequest_Name) isGetCampaignRequest_Campaign() {}
@@ -1427,18 +2061,55 @@ type UpdateCampaignRequest struct {
 	Campaign *Campaign `protobuf:"bytes,1,opt,name=campaign,proto3" json:"campaign,omitempty"`
 	// Required. Paths WITHOUT a <code>campaign.</code> prefix. Updatable paths:
 	// <code>display_name</code>, <code>max_parallel_calls</code>, <code>max_attempts</code>,
-	// <code>retry_delay</code>. An empty mask, or an unknown, output-only or immutable path, is
-	// rejected with <code>INVALID_ARGUMENT</code> naming the path. A path in the mask with an unset
-	// value writes the create default (<code>display_name</code> empty writes
+	// <code>retry_delay</code>, <code>campaign_common_services_config</code> and
+	// <code>campaign_sip_caller_config</code>, the last two also as any nested sub-path (e.g.
+	// <code>campaign_common_services_config.nlu_vtsi_config.agent_name</code>,
+	// <code>campaign_sip_caller_config.sip_headers</code>). An empty mask, or an unknown, output-only
+	// or immutable path (a nested path is checked against the message type it names), is rejected
+	// with <code>INVALID_ARGUMENT</code> naming the path. A path in the mask with an unset value
+	// writes the create default (<code>display_name</code> empty writes
 	// <code>campaign-&lt;campaign_uuid&gt;</code>).
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// <p>The two call-default configs follow <code>FieldMask</code> semantics:</p>
+	// <ul>
+	//   <li>a path naming a message field (<code>campaign_common_services_config</code>, or a
+	//       submessage below it such as <code>campaign_common_services_config.nlu_vtsi_config</code>)
+	//       REPLACES that whole message with the one sent; an unset one clears it (clearing
+	//       <code>campaign_common_services_config</code> or <code>campaign_sip_caller_config</code>
+	//       removes the campaign default);</li>
+	//   <li>a path naming a scalar, repeated or map field below them replaces exactly that field; a
+	//       repeated or map field is replaced as a whole, never appended to;</li>
+	//   <li>a field below them that no path names is left untouched, and is not validated either: only
+	//       what the paths write must be valid;</li>
+	//   <li>clearing, by sub-paths, every field of a stored default removes the default (it then reads
+	//       back unset, exactly as after clearing the whole config);</li>
+	//   <li>a path naming a member of a <code>oneof</code> (e.g.
+	//       <code>campaign_common_services_config.nlu_vtsi_config.auth_token</code> in the
+	//       <code>authentication</code> oneof) SETS that member, clearing the other members, when the
+	//       request&apos;s <code>campaign</code> has that member set; when it does not, the path CLEARS the
+	//       member if it is the stored active one and changes nothing otherwise (another active member
+	//       is kept);</li>
+	//   <li>a path BELOW a repeated or map field (e.g.
+	//       <code>campaign_sip_caller_config.sip_headers.X-Foo</code>) is rejected with
+	//       <code>INVALID_ARGUMENT</code> naming it: name the repeated or map field itself;</li>
+	//   <li>a path and a sub-path of it in the same mask act as the shorter path alone.</li>
+	// </ul>
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code> and WITHOUT a <code>campaign.</code> prefix, e.g. <code>state</code>,
+	// <code>statistics.completed</code>,
+	// <code>campaign_common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through
+	// singular message fields are allowed; a path below a repeated or map field is not.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it. The mask is applied after the server&apos;s
+	// role-based redaction, so it never reveals a redacted value.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *UpdateCampaignRequest) Reset() {
 	*x = UpdateCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[8]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1450,7 +2121,7 @@ func (x *UpdateCampaignRequest) String() string {
 func (*UpdateCampaignRequest) ProtoMessage() {}
 
 func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[8]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1463,7 +2134,7 @@ func (x *UpdateCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCampaignRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{8}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateCampaignRequest) GetCampaign() *Campaign {
@@ -1480,24 +2151,51 @@ func (x *UpdateCampaignRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+func (x *UpdateCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Campaigns.DeleteCampaign">Campaigns.DeleteCampaign</a>.
 type DeleteCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*DeleteCampaignRequest_Name
 	//	*DeleteCampaignRequest_DisplayName
-	Campaign      isDeleteCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isDeleteCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>DeleteCampaignResponse</code> field paths to populate, e.g.
+	// <code>deleted_campaign_call_count</code>. <code>name</code> is always populated. Unset or empty
+	// returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it. It
+	// shapes only the response: the campaign is deleted regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Delete also a campaign that is <code>RUNNING</code>, <code>STOPPING</code> or
+	// <code>HARD_STOPPING</code>: the server hard stops it (every running call is hung up, see
+	// <code>HardStopCampaign</code>) and deletes it once the end of each call is confirmed, waiting at most
+	// <code>ONDEWO_VTSI_CAMPAIGN_FORCE_DELETE_WAIT_S</code> (30 s by default, bounded by the client&apos;s
+	// deadline); otherwise <code>DEADLINE_EXCEEDED</code>, and the campaign stays hard stopped and undeleted
+	// (repeat the request). <code>false</code> (the default): such a campaign is refused with
+	// <code>FAILED_PRECONDITION</code>, as before. No effect on a campaign in any other state.
+	Force         bool `protobuf:"varint,6,opt,name=force,proto3" json:"force,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteCampaignRequest) Reset() {
 	*x = DeleteCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[9]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1509,7 +2207,7 @@ func (x *DeleteCampaignRequest) String() string {
 func (*DeleteCampaignRequest) ProtoMessage() {}
 
 func (x *DeleteCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[9]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1522,7 +2220,7 @@ func (x *DeleteCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCampaignRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{9}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DeleteCampaignRequest) GetCampaign() isDeleteCampaignRequest_Campaign {
@@ -1541,13 +2239,34 @@ func (x *DeleteCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *DeleteCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *DeleteCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*DeleteCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
 	}
+	return ""
+}
+
+func (x *DeleteCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *DeleteCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
 	return nil
+}
+
+func (x *DeleteCampaignRequest) GetForce() bool {
+	if x != nil {
+		return x.Force
+	}
+	return false
 }
 
 type isDeleteCampaignRequest_Campaign interface {
@@ -1556,12 +2275,15 @@ type isDeleteCampaignRequest_Campaign interface {
 
 type DeleteCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type DeleteCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*DeleteCampaignRequest_Name) isDeleteCampaignRequest_Campaign() {}
@@ -1584,7 +2306,7 @@ type DeleteCampaignResponse struct {
 
 func (x *DeleteCampaignResponse) Reset() {
 	*x = DeleteCampaignResponse{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[10]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1596,7 +2318,7 @@ func (x *DeleteCampaignResponse) String() string {
 func (*DeleteCampaignResponse) ProtoMessage() {}
 
 func (x *DeleteCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[10]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1609,7 +2331,7 @@ func (x *DeleteCampaignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCampaignResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{10}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteCampaignResponse) GetName() string {
@@ -1642,14 +2364,28 @@ type CampaignFilter struct {
 	DisplayNameContains string `protobuf:"bytes,2,opt,name=display_name_contains,json=displayNameContains,proto3" json:"display_name_contains,omitempty"`
 	// Only the campaign whose <code>display_name</code> is exactly this (case-sensitive). Empty
 	// means no constraint. Combined with the other fields by AND.
-	DisplayName   string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// Only campaigns created at or after this time (<code>created_at &gt;= created_after</code>). Unset means
+	// no lower bound.
+	CreatedAfter *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_after,json=createdAfter,proto3" json:"created_after,omitempty"`
+	// Only campaigns created strictly before this time (<code>created_at &lt; created_before</code>). Unset
+	// means no upper bound. When both are set, <code>created_after</code> must be before
+	// <code>created_before</code> (<code>INVALID_ARGUMENT</code> otherwise).
+	CreatedBefore *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_before,json=createdBefore,proto3" json:"created_before,omitempty"`
+	// Only campaigns whose <code>created_by</code> is exactly this user (case-sensitive, the value the server
+	// returns in <code>Campaign.created_by</code>). Empty means no constraint.
+	CreatedBy string `protobuf:"bytes,6,opt,name=created_by,json=createdBy,proto3" json:"created_by,omitempty"`
+	// Only campaigns modified at or after this time (<code>modified_at &gt;= modified_since</code>; state
+	// changes made by the server count as modifications). Unset means no constraint. Useful for incremental
+	// polling with <code>CAMPAIGN_ORDER_BY_MODIFIED_AT_DESC</code>.
+	ModifiedSince *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=modified_since,json=modifiedSince,proto3" json:"modified_since,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CampaignFilter) Reset() {
 	*x = CampaignFilter{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[11]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1661,7 +2397,7 @@ func (x *CampaignFilter) String() string {
 func (*CampaignFilter) ProtoMessage() {}
 
 func (x *CampaignFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[11]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1674,7 +2410,7 @@ func (x *CampaignFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampaignFilter.ProtoReflect.Descriptor instead.
 func (*CampaignFilter) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{11}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CampaignFilter) GetStates() []CampaignState {
@@ -1698,6 +2434,34 @@ func (x *CampaignFilter) GetDisplayName() string {
 	return ""
 }
 
+func (x *CampaignFilter) GetCreatedAfter() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAfter
+	}
+	return nil
+}
+
+func (x *CampaignFilter) GetCreatedBefore() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedBefore
+	}
+	return nil
+}
+
+func (x *CampaignFilter) GetCreatedBy() string {
+	if x != nil {
+		return x.CreatedBy
+	}
+	return ""
+}
+
+func (x *CampaignFilter) GetModifiedSince() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ModifiedSince
+	}
+	return nil
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Campaigns.ListCampaigns">Campaigns.ListCampaigns</a>.
 type ListCampaignsRequest struct {
@@ -1708,18 +2472,37 @@ type ListCampaignsRequest struct {
 	// Optional. Narrows the listing.
 	Filter *CampaignFilter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
 	// Optional. Maximum campaigns per page. <code>0</code> means 20; values above 1000 are clamped
-	// to 1000; negative values are rejected with <code>INVALID_ARGUMENT</code>.
+	// to 1000 (to 20 when <code>field_mask</code> names <code>campaign_callers</code> or
+	// <code>campaign_callers_truncated</code>); negative values are rejected with
+	// <code>INVALID_ARGUMENT</code>.
 	PageSize int32 `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Optional. The <code>next_page_token</code> of a previous response; valid only with the same
 	// project and filter.
-	PageToken     *string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	PageToken *string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>Campaign</code>,
+	// relative to the <code>Campaign</code> message (no <code>campaigns.</code> prefix), as in
+	// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>.
+	// <code>name</code> is always populated. Unset or empty returns every field EXCEPT
+	// <code>campaign_callers</code> and <code>campaign_callers_truncated</code>, which are populated only when
+	// the mask names them explicitly (a page of full caller lists could exceed gRPC&apos;s default 4 MiB message
+	// limit). When the mask names either of them, the page holds at most 20 campaigns: a larger
+	// <code>page_size</code> is clamped to 20 (not rejected). For the complete, paginated callers of one
+	// campaign use <code>Calls.ListCallers</code> with the campaign selector. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Not part of the paging contract: a <code>page_token</code> stays
+	// valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Order of the listing; unset means newest first (<code>CAMPAIGN_ORDER_BY_CREATED_AT_DESC</code>),
+	// as before this field existed. Part of the paging contract: a <code>page_token</code> is valid only with
+	// the <code>order_by</code> it was issued for (<code>INVALID_ARGUMENT</code> otherwise). An unknown value
+	// is rejected with <code>INVALID_ARGUMENT</code>.
+	OrderBy       CampaignOrderBy `protobuf:"varint,6,opt,name=order_by,json=orderBy,proto3,enum=ondewo.vtsi.CampaignOrderBy" json:"order_by,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCampaignsRequest) Reset() {
 	*x = ListCampaignsRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[12]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1731,7 +2514,7 @@ func (x *ListCampaignsRequest) String() string {
 func (*ListCampaignsRequest) ProtoMessage() {}
 
 func (x *ListCampaignsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[12]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1744,7 +2527,7 @@ func (x *ListCampaignsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCampaignsRequest.ProtoReflect.Descriptor instead.
 func (*ListCampaignsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{12}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListCampaignsRequest) GetVtsiProjectName() string {
@@ -1775,11 +2558,25 @@ func (x *ListCampaignsRequest) GetPageToken() string {
 	return ""
 }
 
+func (x *ListCampaignsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCampaignsRequest) GetOrderBy() CampaignOrderBy {
+	if x != nil {
+		return x.OrderBy
+	}
+	return CampaignOrderBy_CAMPAIGN_ORDER_BY_UNSPECIFIED
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Campaigns.ListCampaigns">Campaigns.ListCampaigns</a>.
 type ListCampaignsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The campaigns of this page, newest first.
+	// The campaigns of this page, in the request&apos;s <code>order_by</code> (newest first by default).
 	Campaigns []*Campaign `protobuf:"bytes,1,rep,name=campaigns,proto3" json:"campaigns,omitempty"`
 	// Token for the next page. Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
@@ -1789,7 +2586,7 @@ type ListCampaignsResponse struct {
 
 func (x *ListCampaignsResponse) Reset() {
 	*x = ListCampaignsResponse{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[13]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1801,7 +2598,7 @@ func (x *ListCampaignsResponse) String() string {
 func (*ListCampaignsResponse) ProtoMessage() {}
 
 func (x *ListCampaignsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[13]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1814,7 +2611,7 @@ func (x *ListCampaignsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCampaignsResponse.ProtoReflect.Descriptor instead.
 func (*ListCampaignsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{13}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListCampaignsResponse) GetCampaigns() []*Campaign {
@@ -1835,20 +2632,27 @@ func (x *ListCampaignsResponse) GetNextPageToken() string {
 // <a href="index.html#ondewo.vtsi.Campaigns.GetCampaignStatistics">Campaigns.GetCampaignStatistics</a>.
 type GetCampaignStatisticsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*GetCampaignStatisticsRequest_Name
 	//	*GetCampaignStatisticsRequest_DisplayName
-	Campaign      isGetCampaignStatisticsRequest_Campaign `protobuf_oneof:"campaign"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Campaign isGetCampaignStatisticsRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *GetCampaignStatisticsRequest) Reset() {
 	*x = GetCampaignStatisticsRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[14]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1860,7 +2664,7 @@ func (x *GetCampaignStatisticsRequest) String() string {
 func (*GetCampaignStatisticsRequest) ProtoMessage() {}
 
 func (x *GetCampaignStatisticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[14]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1873,7 +2677,7 @@ func (x *GetCampaignStatisticsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCampaignStatisticsRequest.ProtoReflect.Descriptor instead.
 func (*GetCampaignStatisticsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{14}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetCampaignStatisticsRequest) GetCampaign() isGetCampaignStatisticsRequest_Campaign {
@@ -1892,13 +2696,20 @@ func (x *GetCampaignStatisticsRequest) GetName() string {
 	return ""
 }
 
-func (x *GetCampaignStatisticsRequest) GetDisplayName() *CampaignDisplayName {
+func (x *GetCampaignStatisticsRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*GetCampaignStatisticsRequest_DisplayName); ok {
 			return x.DisplayName
 		}
 	}
-	return nil
+	return ""
+}
+
+func (x *GetCampaignStatisticsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
 }
 
 type isGetCampaignStatisticsRequest_Campaign interface {
@@ -1907,12 +2718,15 @@ type isGetCampaignStatisticsRequest_Campaign interface {
 
 type GetCampaignStatisticsRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type GetCampaignStatisticsRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*GetCampaignStatisticsRequest_Name) isGetCampaignStatisticsRequest_Campaign() {}
@@ -1923,13 +2737,20 @@ func (*GetCampaignStatisticsRequest_DisplayName) isGetCampaignStatisticsRequest_
 // <a href="index.html#ondewo.vtsi.Campaigns.ListCampaignCalls">Campaigns.ListCampaignCalls</a>.
 type ListCampaignCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*ListCampaignCallsRequest_CampaignName
-	//	*ListCampaignCallsRequest_CampaignDisplayName
+	//	*ListCampaignCallsRequest_DisplayName
 	Campaign isListCampaignCallsRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>campaign_name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,9,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Only calls in one of these states. Empty means every state.
 	States []CampaignCallState `protobuf:"varint,2,rep,packed,name=states,proto3,enum=ondewo.vtsi.CampaignCallState" json:"states,omitempty"`
 	// Only calls to this callee (exact match on <code>phone_number</code>). Empty means every callee.
@@ -1938,17 +2759,54 @@ type ListCampaignCallsRequest struct {
 	// 1000; negative values are rejected with <code>INVALID_ARGUMENT</code>.
 	PageSize int32 `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Optional. The <code>next_page_token</code> of a previous response; valid only with the same
-	// campaign and filter.
+	// campaign and filter (every filter field above and below, the 9.1.0 ones included).
 	PageToken *string `protobuf:"bytes,5,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
 	// Populate <code>CampaignCall.attempt_history</code>.
 	IncludeAttempts bool `protobuf:"varint,6,opt,name=include_attempts,json=includeAttempts,proto3" json:"include_attempts,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in every returned
+	// <code>CampaignCall</code>, relative to the <code>CampaignCall</code> message (no
+	// <code>campaign_calls.</code> prefix), e.g. <code>state</code>, <code>phone_number</code>,
+	// <code>attempt_history</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field (e.g. <code>attempt_history.outcome</code>) is not. <code>name</code>
+	// is always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. <code>attempt_history</code> is still populated only with
+	// <code>include_attempts</code>: a mask naming it without <code>include_attempts</code> returns it
+	// empty. Not part of the paging contract: a <code>page_token</code> stays valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,10,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Only calls to one of these callees (exact match on <code>phone_number</code>), at most 1000 entries.
+	// Combined with <code>phone_number</code> by OR (a call matches when its number is
+	// <code>phone_number</code> or one of these); both empty means every callee.
+	PhoneNumbers []string `protobuf:"bytes,11,rep,name=phone_numbers,json=phoneNumbers,proto3" json:"phone_numbers,omitempty"`
+	// Only calls added in one of these ways. Empty means every source. An unknown value or
+	// <code>CAMPAIGN_CALL_SOURCE_UNSPECIFIED</code> is rejected with <code>INVALID_ARGUMENT</code>.
+	Sources []CampaignCallSource `protobuf:"varint,12,rep,packed,name=sources,proto3,enum=ondewo.vtsi.CampaignCallSource" json:"sources,omitempty"`
+	// Only calls that finished (<code>finish_time</code> set: <code>COMPLETED</code>, <code>FAILED</code>,
+	// <code>CANCELLED</code>) at or after this time. A call without <code>finish_time</code> never matches
+	// when this or <code>finish_time_max</code> is set. Unset means no lower bound.
+	FinishTimeMin *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=finish_time_min,json=finishTimeMin,proto3" json:"finish_time_min,omitempty"`
+	// Only calls that finished strictly before this time. Unset means no upper bound. When both are set,
+	// <code>finish_time_min</code> must be before <code>finish_time_max</code> (<code>INVALID_ARGUMENT</code>
+	// otherwise).
+	FinishTimeMax *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=finish_time_max,json=finishTimeMax,proto3" json:"finish_time_max,omitempty"`
+	// Only calls whose <code>modified_at</code> is at or after this time, i.e. that changed since then
+	// (incremental reads). Unset means no constraint.
+	ModifiedSince *timestamppb.Timestamp `protobuf:"bytes,15,opt,name=modified_since,json=modifiedSince,proto3" json:"modified_since,omitempty"`
+	// Only calls with at least this many attempts started (<code>attempts &gt;= min_attempts</code>).
+	// <code>0</code> means no constraint; negative is rejected with <code>INVALID_ARGUMENT</code>.
+	MinAttempts int32 `protobuf:"varint,16,opt,name=min_attempts,json=minAttempts,proto3" json:"min_attempts,omitempty"`
+	// Only these calls, by resource name
+	// (<pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;/campaign_calls/&lt;campaign_call_uuid&gt;</code></pre>),
+	// at most 1000. Each must be a call name of the request&apos;s campaign: a malformed name or one of
+	// another campaign is rejected with <code>INVALID_ARGUMENT</code>; a well-formed name of the campaign
+	// that names no call matches nothing. Empty means no constraint.
+	CampaignCallNames []string `protobuf:"bytes,17,rep,name=campaign_call_names,json=campaignCallNames,proto3" json:"campaign_call_names,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *ListCampaignCallsRequest) Reset() {
 	*x = ListCampaignCallsRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[15]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1960,7 +2818,7 @@ func (x *ListCampaignCallsRequest) String() string {
 func (*ListCampaignCallsRequest) ProtoMessage() {}
 
 func (x *ListCampaignCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[15]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1973,7 +2831,7 @@ func (x *ListCampaignCallsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCampaignCallsRequest.ProtoReflect.Descriptor instead.
 func (*ListCampaignCallsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{15}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListCampaignCallsRequest) GetCampaign() isListCampaignCallsRequest_Campaign {
@@ -1992,13 +2850,20 @@ func (x *ListCampaignCallsRequest) GetCampaignName() string {
 	return ""
 }
 
-func (x *ListCampaignCallsRequest) GetCampaignDisplayName() *CampaignDisplayName {
+func (x *ListCampaignCallsRequest) GetDisplayName() string {
 	if x != nil {
-		if x, ok := x.Campaign.(*ListCampaignCallsRequest_CampaignDisplayName); ok {
-			return x.CampaignDisplayName
+		if x, ok := x.Campaign.(*ListCampaignCallsRequest_DisplayName); ok {
+			return x.DisplayName
 		}
 	}
-	return nil
+	return ""
+}
+
+func (x *ListCampaignCallsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
 }
 
 func (x *ListCampaignCallsRequest) GetStates() []CampaignCallState {
@@ -2036,23 +2901,82 @@ func (x *ListCampaignCallsRequest) GetIncludeAttempts() bool {
 	return false
 }
 
+func (x *ListCampaignCallsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetPhoneNumbers() []string {
+	if x != nil {
+		return x.PhoneNumbers
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetSources() []CampaignCallSource {
+	if x != nil {
+		return x.Sources
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetFinishTimeMin() *timestamppb.Timestamp {
+	if x != nil {
+		return x.FinishTimeMin
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetFinishTimeMax() *timestamppb.Timestamp {
+	if x != nil {
+		return x.FinishTimeMax
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetModifiedSince() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ModifiedSince
+	}
+	return nil
+}
+
+func (x *ListCampaignCallsRequest) GetMinAttempts() int32 {
+	if x != nil {
+		return x.MinAttempts
+	}
+	return 0
+}
+
+func (x *ListCampaignCallsRequest) GetCampaignCallNames() []string {
+	if x != nil {
+		return x.CampaignCallNames
+	}
+	return nil
+}
+
 type isListCampaignCallsRequest_Campaign interface {
 	isListCampaignCallsRequest_Campaign()
 }
 
 type ListCampaignCallsRequest_CampaignName struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	CampaignName string `protobuf:"bytes,1,opt,name=campaign_name,json=campaignName,proto3,oneof"`
 }
 
-type ListCampaignCallsRequest_CampaignDisplayName struct {
-	// The campaign with this display name.
-	CampaignDisplayName *CampaignDisplayName `protobuf:"bytes,7,opt,name=campaign_display_name,json=campaignDisplayName,proto3,oneof"`
+type ListCampaignCallsRequest_DisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName campaign_display_name = 7</code>.
+	DisplayName string `protobuf:"bytes,8,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*ListCampaignCallsRequest_CampaignName) isListCampaignCallsRequest_Campaign() {}
 
-func (*ListCampaignCallsRequest_CampaignDisplayName) isListCampaignCallsRequest_Campaign() {}
+func (*ListCampaignCallsRequest_DisplayName) isListCampaignCallsRequest_Campaign() {}
 
 // The response message for
 // <a href="index.html#ondewo.vtsi.Campaigns.ListCampaignCalls">Campaigns.ListCampaignCalls</a>.
@@ -2068,7 +2992,7 @@ type ListCampaignCallsResponse struct {
 
 func (x *ListCampaignCallsResponse) Reset() {
 	*x = ListCampaignCallsResponse{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[16]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2080,7 +3004,7 @@ func (x *ListCampaignCallsResponse) String() string {
 func (*ListCampaignCallsResponse) ProtoMessage() {}
 
 func (x *ListCampaignCallsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[16]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2093,7 +3017,7 @@ func (x *ListCampaignCallsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCampaignCallsResponse.ProtoReflect.Descriptor instead.
 func (*ListCampaignCallsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{16}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListCampaignCallsResponse) GetCampaignCalls() []*CampaignCall {
@@ -2114,20 +3038,34 @@ func (x *ListCampaignCallsResponse) GetNextPageToken() string {
 // <a href="index.html#ondewo.vtsi.Campaigns.StartCampaign">Campaigns.StartCampaign</a>.
 type StartCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*StartCampaignRequest_Name
 	//	*StartCampaignRequest_DisplayName
-	Campaign      isStartCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isStartCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code>, exactly as
+	// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before the state is changed. It shapes only the
+	// response: the state change is applied regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartCampaignRequest) Reset() {
 	*x = StartCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[17]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2139,7 +3077,7 @@ func (x *StartCampaignRequest) String() string {
 func (*StartCampaignRequest) ProtoMessage() {}
 
 func (x *StartCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[17]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2152,7 +3090,7 @@ func (x *StartCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartCampaignRequest.ProtoReflect.Descriptor instead.
 func (*StartCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{17}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *StartCampaignRequest) GetCampaign() isStartCampaignRequest_Campaign {
@@ -2171,11 +3109,25 @@ func (x *StartCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *StartCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *StartCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*StartCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
+	}
+	return ""
+}
+
+func (x *StartCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *StartCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
 	}
 	return nil
 }
@@ -2186,12 +3138,15 @@ type isStartCampaignRequest_Campaign interface {
 
 type StartCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type StartCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*StartCampaignRequest_Name) isStartCampaignRequest_Campaign() {}
@@ -2202,20 +3157,34 @@ func (*StartCampaignRequest_DisplayName) isStartCampaignRequest_Campaign() {}
 // <a href="index.html#ondewo.vtsi.Campaigns.StopCampaign">Campaigns.StopCampaign</a>.
 type StopCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*StopCampaignRequest_Name
 	//	*StopCampaignRequest_DisplayName
-	Campaign      isStopCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isStopCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code>, exactly as
+	// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before the state is changed. It shapes only the
+	// response: the state change is applied regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopCampaignRequest) Reset() {
 	*x = StopCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[18]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2227,7 +3196,7 @@ func (x *StopCampaignRequest) String() string {
 func (*StopCampaignRequest) ProtoMessage() {}
 
 func (x *StopCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[18]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2240,7 +3209,7 @@ func (x *StopCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCampaignRequest.ProtoReflect.Descriptor instead.
 func (*StopCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{18}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *StopCampaignRequest) GetCampaign() isStopCampaignRequest_Campaign {
@@ -2259,11 +3228,25 @@ func (x *StopCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *StopCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *StopCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*StopCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
+	}
+	return ""
+}
+
+func (x *StopCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *StopCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
 	}
 	return nil
 }
@@ -2274,12 +3257,15 @@ type isStopCampaignRequest_Campaign interface {
 
 type StopCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type StopCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*StopCampaignRequest_Name) isStopCampaignRequest_Campaign() {}
@@ -2290,20 +3276,34 @@ func (*StopCampaignRequest_DisplayName) isStopCampaignRequest_Campaign() {}
 // <a href="index.html#ondewo.vtsi.Campaigns.HardStopCampaign">Campaigns.HardStopCampaign</a>.
 type HardStopCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*HardStopCampaignRequest_Name
 	//	*HardStopCampaignRequest_DisplayName
-	Campaign      isHardStopCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isHardStopCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code>, exactly as
+	// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before the state is changed. It shapes only the
+	// response: the state change is applied regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HardStopCampaignRequest) Reset() {
 	*x = HardStopCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[19]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2315,7 +3315,7 @@ func (x *HardStopCampaignRequest) String() string {
 func (*HardStopCampaignRequest) ProtoMessage() {}
 
 func (x *HardStopCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[19]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2328,7 +3328,7 @@ func (x *HardStopCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HardStopCampaignRequest.ProtoReflect.Descriptor instead.
 func (*HardStopCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{19}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *HardStopCampaignRequest) GetCampaign() isHardStopCampaignRequest_Campaign {
@@ -2347,11 +3347,25 @@ func (x *HardStopCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *HardStopCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *HardStopCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*HardStopCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
+	}
+	return ""
+}
+
+func (x *HardStopCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *HardStopCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
 	}
 	return nil
 }
@@ -2362,12 +3376,15 @@ type isHardStopCampaignRequest_Campaign interface {
 
 type HardStopCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type HardStopCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*HardStopCampaignRequest_Name) isHardStopCampaignRequest_Campaign() {}
@@ -2378,20 +3395,34 @@ func (*HardStopCampaignRequest_DisplayName) isHardStopCampaignRequest_Campaign()
 // <a href="index.html#ondewo.vtsi.Campaigns.ResumeCampaign">Campaigns.ResumeCampaign</a>.
 type ResumeCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Which campaign.
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
 	//
 	// Types that are valid to be assigned to Campaign:
 	//
 	//	*ResumeCampaignRequest_Name
 	//	*ResumeCampaignRequest_DisplayName
-	Campaign      isResumeCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	Campaign isResumeCampaignRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,4,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Partial response: the <code>Campaign</code> field paths to populate, relative to the
+	// returned <code>Campaign</code>, exactly as
+	// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>.
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before the state is changed. It shapes only the
+	// response: the state change is applied regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ResumeCampaignRequest) Reset() {
 	*x = ResumeCampaignRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[20]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2403,7 +3434,7 @@ func (x *ResumeCampaignRequest) String() string {
 func (*ResumeCampaignRequest) ProtoMessage() {}
 
 func (x *ResumeCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[20]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2416,7 +3447,7 @@ func (x *ResumeCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeCampaignRequest.ProtoReflect.Descriptor instead.
 func (*ResumeCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{20}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ResumeCampaignRequest) GetCampaign() isResumeCampaignRequest_Campaign {
@@ -2435,11 +3466,25 @@ func (x *ResumeCampaignRequest) GetName() string {
 	return ""
 }
 
-func (x *ResumeCampaignRequest) GetDisplayName() *CampaignDisplayName {
+func (x *ResumeCampaignRequest) GetDisplayName() string {
 	if x != nil {
 		if x, ok := x.Campaign.(*ResumeCampaignRequest_DisplayName); ok {
 			return x.DisplayName
 		}
+	}
+	return ""
+}
+
+func (x *ResumeCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *ResumeCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
 	}
 	return nil
 }
@@ -2450,12 +3495,15 @@ type isResumeCampaignRequest_Campaign interface {
 
 type ResumeCampaignRequest_Name struct {
 	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
 }
 
 type ResumeCampaignRequest_DisplayName struct {
-	// The campaign with this display name.
-	DisplayName *CampaignDisplayName `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required. Replaces the 9.0.0
+	// <code>CampaignDisplayName display_name = 2</code>.
+	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3,oneof"`
 }
 
 func (*ResumeCampaignRequest_Name) isResumeCampaignRequest_Campaign() {}
@@ -2479,14 +3527,23 @@ type StreamCampaignStatusRequest struct {
 	CampaignDisplayNames []string `protobuf:"bytes,4,rep,name=campaign_display_names,json=campaignDisplayNames,proto3" json:"campaign_display_names,omitempty"`
 	// Also stream every campaign call that changes after the stream opened. The snapshot never
 	// contains campaign calls; read them with <code>ListCampaignCalls</code>.
-	IncludeCalls  bool `protobuf:"varint,3,opt,name=include_calls,json=includeCalls,proto3" json:"include_calls,omitempty"`
+	IncludeCalls bool `protobuf:"varint,3,opt,name=include_calls,json=includeCalls,proto3" json:"include_calls,omitempty"`
+	// Only campaigns in one of these states. Empty means every state. Combined with
+	// <code>campaign_names</code> / <code>campaign_display_names</code> by AND. The snapshot carries the
+	// matching campaigns in a selected state. Later, a campaign that ENTERS a selected state is sent (with
+	// every field, as in a snapshot), and a campaign that LEAVES the selection is sent once more with its new
+	// state and then no longer (so a client sees why it left); a campaign deleted while selected is reported
+	// in <code>deleted_campaign_names</code>. With <code>include_calls</code>, only calls of campaigns that are
+	// selected at the moment are sent. <code>CAMPAIGN_STATE_UNSPECIFIED</code> or an unknown value is rejected
+	// with <code>INVALID_ARGUMENT</code>.
+	States        []CampaignState `protobuf:"varint,5,rep,packed,name=states,proto3,enum=ondewo.vtsi.CampaignState" json:"states,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StreamCampaignStatusRequest) Reset() {
 	*x = StreamCampaignStatusRequest{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[21]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2498,7 +3555,7 @@ func (x *StreamCampaignStatusRequest) String() string {
 func (*StreamCampaignStatusRequest) ProtoMessage() {}
 
 func (x *StreamCampaignStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[21]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2511,7 +3568,7 @@ func (x *StreamCampaignStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamCampaignStatusRequest.ProtoReflect.Descriptor instead.
 func (*StreamCampaignStatusRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{21}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *StreamCampaignStatusRequest) GetVtsiProjectName() string {
@@ -2542,11 +3599,20 @@ func (x *StreamCampaignStatusRequest) GetIncludeCalls() bool {
 	return false
 }
 
+func (x *StreamCampaignStatusRequest) GetStates() []CampaignState {
+	if x != nil {
+		return x.States
+	}
+	return nil
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Campaigns.StreamCampaignStatus">Campaigns.StreamCampaignStatus</a>.
 type StreamCampaignStatusResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Campaigns that changed (every matching campaign in the snapshot), with their statistics.
+	// Campaigns that changed (every matching campaign in the snapshot), with their statistics. The call
+	// defaults <code>campaign_common_services_config</code> and <code>campaign_sip_caller_config</code>
+	// are always left unset here; read them with <code>GetCampaign</code>.
 	Campaigns []*Campaign `protobuf:"bytes,1,rep,name=campaigns,proto3" json:"campaigns,omitempty"`
 	// Campaign calls that changed, when <code>include_calls</code> is set.
 	CampaignCalls []*CampaignCall `protobuf:"bytes,2,rep,name=campaign_calls,json=campaignCalls,proto3" json:"campaign_calls,omitempty"`
@@ -2555,15 +3621,20 @@ type StreamCampaignStatusResponse struct {
 	// True on the first message, which carries every matching campaign.
 	Snapshot bool `protobuf:"varint,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
 	// Set on the last message when the server ended the stream, e.g. at the maximum stream
-	// duration. Empty otherwise.
-	EndReason     string `protobuf:"bytes,5,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// duration. Empty otherwise. Human-readable; branch on <code>end_reason_type</code> instead.
+	EndReason string `protobuf:"bytes,5,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// Set on the last message when the server ended the stream, next to <code>end_reason</code>:
+	// <code>STREAM_END_REASON_MAX_DURATION</code>, <code>STREAM_END_REASON_SERVER_SHUTDOWN</code> or
+	// <code>STREAM_END_REASON_PROJECT_DELETED</code>. <code>STREAM_END_REASON_UNSPECIFIED</code> on every other
+	// message (and on the last message of a server that predates this field).
+	EndReasonType StreamEndReason `protobuf:"varint,6,opt,name=end_reason_type,json=endReasonType,proto3,enum=ondewo.vtsi.StreamEndReason" json:"end_reason_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StreamCampaignStatusResponse) Reset() {
 	*x = StreamCampaignStatusResponse{}
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[22]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2575,7 +3646,7 @@ func (x *StreamCampaignStatusResponse) String() string {
 func (*StreamCampaignStatusResponse) ProtoMessage() {}
 
 func (x *StreamCampaignStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[22]
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2588,7 +3659,7 @@ func (x *StreamCampaignStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamCampaignStatusResponse.ProtoReflect.Descriptor instead.
 func (*StreamCampaignStatusResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{22}
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *StreamCampaignStatusResponse) GetCampaigns() []*Campaign {
@@ -2626,11 +3697,764 @@ func (x *StreamCampaignStatusResponse) GetEndReason() string {
 	return ""
 }
 
+func (x *StreamCampaignStatusResponse) GetEndReasonType() StreamEndReason {
+	if x != nil {
+		return x.EndReasonType
+	}
+	return StreamEndReason_STREAM_END_REASON_UNSPECIFIED
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Campaigns.GetCampaignCall">Campaigns.GetCampaignCall</a>.
+type GetCampaignCallRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required. Resource name of the campaign call.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;/campaign_calls/&lt;campaign_call_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>; authorization is checked on its
+	// project segment.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Populate <code>CampaignCall.attempt_history</code> (every attempt, oldest first). <code>false</code>
+	// (the default) leaves it empty.
+	IncludeAttempts bool `protobuf:"varint,2,opt,name=include_attempts,json=includeAttempts,proto3" json:"include_attempts,omitempty"`
+	// Optional. Partial response: the <code>CampaignCall</code> field paths to populate, relative to the
+	// returned <code>CampaignCall</code>, e.g. <code>state</code>, <code>attempts</code>,
+	// <code>attempt_history</code>. A path below a repeated field (e.g. <code>attempt_history.outcome</code>)
+	// is rejected. <code>name</code> is always populated. Unset or empty returns every field. An unknown path
+	// is rejected with <code>INVALID_ARGUMENT</code> naming it. <code>attempt_history</code> is still populated
+	// only with <code>include_attempts</code>.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCampaignCallRequest) Reset() {
+	*x = GetCampaignCallRequest{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCampaignCallRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCampaignCallRequest) ProtoMessage() {}
+
+func (x *GetCampaignCallRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCampaignCallRequest.ProtoReflect.Descriptor instead.
+func (*GetCampaignCallRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *GetCampaignCallRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GetCampaignCallRequest) GetIncludeAttempts() bool {
+	if x != nil {
+		return x.IncludeAttempts
+	}
+	return false
+}
+
+func (x *GetCampaignCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// One campaign call a <code>CancelCampaignCalls</code> / <code>RetryCampaignCalls</code> request did not act on,
+// and why. A refusal is a result, not an error.
+type CampaignCallRefusal struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource name of the campaign call, as named in the request or as matched by its states.
+	CampaignCallName string `protobuf:"bytes,1,opt,name=campaign_call_name,json=campaignCallName,proto3" json:"campaign_call_name,omitempty"`
+	// State of the call when it was refused; <code>CAMPAIGN_CALL_STATE_UNSPECIFIED</code> for
+	// <code>reason=not-found</code>.
+	State CampaignCallState `protobuf:"varint,2,opt,name=state,proto3,enum=ondewo.vtsi.CampaignCallState" json:"state,omitempty"`
+	// Why, a stable kebab-case token: <code>attempt-in-progress</code> (the call is
+	// <code>DISPATCHING</code> or <code>IN_PROGRESS</code>), <code>already-finished</code> (cancel: the call is
+	// <code>COMPLETED</code>, <code>FAILED</code> or <code>CANCELLED</code>), <code>not-finished</code> (retry:
+	// the call is not <code>FAILED</code> or <code>CANCELLED</code>), <code>completed</code> (retry: a
+	// <code>COMPLETED</code> call is never retried), <code>state-not-selected</code> (the named call is not in
+	// one of the request&apos;s <code>states</code>), <code>not-found</code> (no such call in the campaign).
+	Reason        string `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CampaignCallRefusal) Reset() {
+	*x = CampaignCallRefusal{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CampaignCallRefusal) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CampaignCallRefusal) ProtoMessage() {}
+
+func (x *CampaignCallRefusal) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CampaignCallRefusal.ProtoReflect.Descriptor instead.
+func (*CampaignCallRefusal) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *CampaignCallRefusal) GetCampaignCallName() string {
+	if x != nil {
+		return x.CampaignCallName
+	}
+	return ""
+}
+
+func (x *CampaignCallRefusal) GetState() CampaignCallState {
+	if x != nil {
+		return x.State
+	}
+	return CampaignCallState_CAMPAIGN_CALL_STATE_UNSPECIFIED
+}
+
+func (x *CampaignCallRefusal) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Campaigns.CancelCampaignCalls">Campaigns.CancelCampaignCalls</a>.
+type CancelCampaignCallsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
+	//
+	// Types that are valid to be assigned to Campaign:
+	//
+	//	*CancelCampaignCallsRequest_Name
+	//	*CancelCampaignCallsRequest_DisplayName
+	Campaign isCancelCampaignCallsRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The calls to cancel, by resource name
+	// (<pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;/campaign_calls/&lt;campaign_call_uuid&gt;</code></pre>),
+	// at most 1000, duplicates ignored. Each must be a call name of this campaign (a malformed name or one
+	// of another campaign is <code>INVALID_ARGUMENT</code>). Empty with non-empty <code>states</code> means
+	// every call in those states.
+	CampaignCallNames []string `protobuf:"bytes,4,rep,name=campaign_call_names,json=campaignCallNames,proto3" json:"campaign_call_names,omitempty"`
+	// Cancel the calls in one of these states: only <code>CAMPAIGN_CALL_STATE_NOT_STARTED</code> and
+	// <code>CAMPAIGN_CALL_STATE_RETRY_PENDING</code> are allowed (<code>INVALID_ARGUMENT</code> for any other
+	// value). With <code>campaign_call_names</code>, narrows the named calls (a named call in another state is
+	// refused with <code>reason=state-not-selected</code>). At least one of the two fields must be set.
+	States        []CampaignCallState `protobuf:"varint,5,rep,packed,name=states,proto3,enum=ondewo.vtsi.CampaignCallState" json:"states,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelCampaignCallsRequest) Reset() {
+	*x = CancelCampaignCallsRequest{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelCampaignCallsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelCampaignCallsRequest) ProtoMessage() {}
+
+func (x *CancelCampaignCallsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelCampaignCallsRequest.ProtoReflect.Descriptor instead.
+func (*CancelCampaignCallsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *CancelCampaignCallsRequest) GetCampaign() isCancelCampaignCallsRequest_Campaign {
+	if x != nil {
+		return x.Campaign
+	}
+	return nil
+}
+
+func (x *CancelCampaignCallsRequest) GetName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*CancelCampaignCallsRequest_Name); ok {
+			return x.Name
+		}
+	}
+	return ""
+}
+
+func (x *CancelCampaignCallsRequest) GetDisplayName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*CancelCampaignCallsRequest_DisplayName); ok {
+			return x.DisplayName
+		}
+	}
+	return ""
+}
+
+func (x *CancelCampaignCallsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *CancelCampaignCallsRequest) GetCampaignCallNames() []string {
+	if x != nil {
+		return x.CampaignCallNames
+	}
+	return nil
+}
+
+func (x *CancelCampaignCallsRequest) GetStates() []CampaignCallState {
+	if x != nil {
+		return x.States
+	}
+	return nil
+}
+
+type isCancelCampaignCallsRequest_Campaign interface {
+	isCancelCampaignCallsRequest_Campaign()
+}
+
+type CancelCampaignCallsRequest_Name struct {
+	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
+}
+
+type CancelCampaignCallsRequest_DisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+}
+
+func (*CancelCampaignCallsRequest_Name) isCancelCampaignCallsRequest_Campaign() {}
+
+func (*CancelCampaignCallsRequest_DisplayName) isCancelCampaignCallsRequest_Campaign() {}
+
+// The response message for
+// <a href="index.html#ondewo.vtsi.Campaigns.CancelCampaignCalls">Campaigns.CancelCampaignCalls</a>.
+type CancelCampaignCallsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource name of the campaign.
+	CampaignName string `protobuf:"bytes,1,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
+	// The calls this request cancelled (now <code>CAMPAIGN_CALL_STATE_CANCELLED</code>), by
+	// <code>position</code>.
+	CancelledCampaignCallNames []string `protobuf:"bytes,2,rep,name=cancelled_campaign_call_names,json=cancelledCampaignCallNames,proto3" json:"cancelled_campaign_call_names,omitempty"`
+	// The selected calls this request did not cancel, with the reason, by <code>position</code> (refusals of
+	// unknown names last, in request order).
+	Refused []*CampaignCallRefusal `protobuf:"bytes,3,rep,name=refused,proto3" json:"refused,omitempty"`
+	// With <code>states</code> only (no names): how many further calls matched after the first 1000 that
+	// this request acted on. Repeat the request while it is above 0. <code>0</code> otherwise.
+	RemainingCount int32 `protobuf:"varint,4,opt,name=remaining_count,json=remainingCount,proto3" json:"remaining_count,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CancelCampaignCallsResponse) Reset() {
+	*x = CancelCampaignCallsResponse{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelCampaignCallsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelCampaignCallsResponse) ProtoMessage() {}
+
+func (x *CancelCampaignCallsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelCampaignCallsResponse.ProtoReflect.Descriptor instead.
+func (*CancelCampaignCallsResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *CancelCampaignCallsResponse) GetCampaignName() string {
+	if x != nil {
+		return x.CampaignName
+	}
+	return ""
+}
+
+func (x *CancelCampaignCallsResponse) GetCancelledCampaignCallNames() []string {
+	if x != nil {
+		return x.CancelledCampaignCallNames
+	}
+	return nil
+}
+
+func (x *CancelCampaignCallsResponse) GetRefused() []*CampaignCallRefusal {
+	if x != nil {
+		return x.Refused
+	}
+	return nil
+}
+
+func (x *CancelCampaignCallsResponse) GetRemainingCount() int32 {
+	if x != nil {
+		return x.RemainingCount
+	}
+	return 0
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Campaigns.RetryCampaignCalls">Campaigns.RetryCampaignCalls</a>.
+type RetryCampaignCallsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Which campaign. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
+	//
+	// Types that are valid to be assigned to Campaign:
+	//
+	//	*RetryCampaignCallsRequest_Name
+	//	*RetryCampaignCallsRequest_DisplayName
+	Campaign isRetryCampaignCallsRequest_Campaign `protobuf_oneof:"campaign"`
+	// VTSI project of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>name</code>: when set, it must be the project of the campaign
+	// (<code>INVALID_ARGUMENT</code> otherwise).
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The calls to requeue, by resource name, at most 1000, duplicates ignored; same rules as
+	// <code>CancelCampaignCallsRequest.campaign_call_names</code>.
+	CampaignCallNames []string `protobuf:"bytes,4,rep,name=campaign_call_names,json=campaignCallNames,proto3" json:"campaign_call_names,omitempty"`
+	// Requeue the calls in one of these states: only <code>CAMPAIGN_CALL_STATE_FAILED</code> and
+	// <code>CAMPAIGN_CALL_STATE_CANCELLED</code> are allowed (<code>INVALID_ARGUMENT</code> for any other
+	// value). With <code>campaign_call_names</code>, narrows the named calls. At least one of the two fields
+	// must be set.
+	States []CampaignCallState `protobuf:"varint,5,rep,packed,name=states,proto3,enum=ondewo.vtsi.CampaignCallState" json:"states,omitempty"`
+	// Attempts each requeued call may make from now on, on top of the attempts it already made: its attempt
+	// limit becomes <code>attempts + additional_attempts</code> (never below the campaign&apos;s live
+	// <code>max_attempts</code>), reported as <code>CampaignCall.max_attempts</code>. <code>0</code> means 1;
+	// allowed 0 to <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10 by default). Between the new
+	// attempts the campaign&apos;s <code>retry_delay</code> applies as usual.
+	AdditionalAttempts int32 `protobuf:"varint,6,opt,name=additional_attempts,json=additionalAttempts,proto3" json:"additional_attempts,omitempty"`
+	// Optional. The first new attempt starts no earlier than this time (and, with a
+	// <code>calling_window</code>, inside a slot). Unset or in the past means as soon as the campaign has a
+	// free slot. At most 7 days ahead (<code>INVALID_ARGUMENT</code> otherwise).
+	NotBefore     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=not_before,json=notBefore,proto3" json:"not_before,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryCampaignCallsRequest) Reset() {
+	*x = RetryCampaignCallsRequest{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryCampaignCallsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryCampaignCallsRequest) ProtoMessage() {}
+
+func (x *RetryCampaignCallsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryCampaignCallsRequest.ProtoReflect.Descriptor instead.
+func (*RetryCampaignCallsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *RetryCampaignCallsRequest) GetCampaign() isRetryCampaignCallsRequest_Campaign {
+	if x != nil {
+		return x.Campaign
+	}
+	return nil
+}
+
+func (x *RetryCampaignCallsRequest) GetName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*RetryCampaignCallsRequest_Name); ok {
+			return x.Name
+		}
+	}
+	return ""
+}
+
+func (x *RetryCampaignCallsRequest) GetDisplayName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*RetryCampaignCallsRequest_DisplayName); ok {
+			return x.DisplayName
+		}
+	}
+	return ""
+}
+
+func (x *RetryCampaignCallsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *RetryCampaignCallsRequest) GetCampaignCallNames() []string {
+	if x != nil {
+		return x.CampaignCallNames
+	}
+	return nil
+}
+
+func (x *RetryCampaignCallsRequest) GetStates() []CampaignCallState {
+	if x != nil {
+		return x.States
+	}
+	return nil
+}
+
+func (x *RetryCampaignCallsRequest) GetAdditionalAttempts() int32 {
+	if x != nil {
+		return x.AdditionalAttempts
+	}
+	return 0
+}
+
+func (x *RetryCampaignCallsRequest) GetNotBefore() *timestamppb.Timestamp {
+	if x != nil {
+		return x.NotBefore
+	}
+	return nil
+}
+
+type isRetryCampaignCallsRequest_Campaign interface {
+	isRetryCampaignCallsRequest_Campaign()
+}
+
+type RetryCampaignCallsRequest_Name struct {
+	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	Name string `protobuf:"bytes,1,opt,name=name,proto3,oneof"`
+}
+
+type RetryCampaignCallsRequest_DisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3,oneof"`
+}
+
+func (*RetryCampaignCallsRequest_Name) isRetryCampaignCallsRequest_Campaign() {}
+
+func (*RetryCampaignCallsRequest_DisplayName) isRetryCampaignCallsRequest_Campaign() {}
+
+// The response message for
+// <a href="index.html#ondewo.vtsi.Campaigns.RetryCampaignCalls">Campaigns.RetryCampaignCalls</a>.
+type RetryCampaignCallsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Resource name of the campaign.
+	CampaignName string `protobuf:"bytes,1,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
+	// The calls this request requeued (now <code>RETRY_PENDING</code> or <code>NOT_STARTED</code>), by
+	// <code>position</code>.
+	RequeuedCampaignCallNames []string `protobuf:"bytes,2,rep,name=requeued_campaign_call_names,json=requeuedCampaignCallNames,proto3" json:"requeued_campaign_call_names,omitempty"`
+	// The selected calls this request did not requeue, with the reason (see
+	// <code>CancelCampaignCallsResponse.refused</code>).
+	Refused []*CampaignCallRefusal `protobuf:"bytes,3,rep,name=refused,proto3" json:"refused,omitempty"`
+	// With <code>states</code> only: how many further calls matched after the first 1000. Repeat the request
+	// while it is above 0. <code>0</code> otherwise.
+	RemainingCount int32 `protobuf:"varint,4,opt,name=remaining_count,json=remainingCount,proto3" json:"remaining_count,omitempty"`
+	// State of the campaign after the request (a <code>COMPLETED</code> campaign that got a call back is
+	// <code>CAMPAIGN_STATE_RUNNING</code>).
+	CampaignState CampaignState `protobuf:"varint,5,opt,name=campaign_state,json=campaignState,proto3,enum=ondewo.vtsi.CampaignState" json:"campaign_state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryCampaignCallsResponse) Reset() {
+	*x = RetryCampaignCallsResponse{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryCampaignCallsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryCampaignCallsResponse) ProtoMessage() {}
+
+func (x *RetryCampaignCallsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryCampaignCallsResponse.ProtoReflect.Descriptor instead.
+func (*RetryCampaignCallsResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *RetryCampaignCallsResponse) GetCampaignName() string {
+	if x != nil {
+		return x.CampaignName
+	}
+	return ""
+}
+
+func (x *RetryCampaignCallsResponse) GetRequeuedCampaignCallNames() []string {
+	if x != nil {
+		return x.RequeuedCampaignCallNames
+	}
+	return nil
+}
+
+func (x *RetryCampaignCallsResponse) GetRefused() []*CampaignCallRefusal {
+	if x != nil {
+		return x.Refused
+	}
+	return nil
+}
+
+func (x *RetryCampaignCallsResponse) GetRemainingCount() int32 {
+	if x != nil {
+		return x.RemainingCount
+	}
+	return 0
+}
+
+func (x *RetryCampaignCallsResponse) GetCampaignState() CampaignState {
+	if x != nil {
+		return x.CampaignState
+	}
+	return CampaignState_CAMPAIGN_STATE_UNSPECIFIED
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Campaigns.CloneCampaign">Campaigns.CloneCampaign</a>.
+type CloneCampaignRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The campaign to copy. Exactly one must be set; neither is rejected with <code>INVALID_ARGUMENT</code>.
+	//
+	// Types that are valid to be assigned to Source:
+	//
+	//	*CloneCampaignRequest_SourceName
+	//	*CloneCampaignRequest_SourceDisplayName
+	Source isCloneCampaignRequest_Source `protobuf_oneof:"source"`
+	// VTSI project of the source AND of the clone: a campaign is only cloned within its project (its stored
+	// credentials never move to another project).
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// REQUIRED with <code>source_display_name</code>: empty or malformed is rejected with
+	// <code>INVALID_ARGUMENT</code>, an unknown project with <code>NOT_FOUND</code>. Optional with
+	// <code>source_name</code>: when set, it must be the project of the source (<code>INVALID_ARGUMENT</code>
+	// otherwise).
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Display name of the clone, unique within the project, at most 128 characters. Empty means
+	// <code>campaign-&lt;campaign_uuid&gt;</code> of the clone, as on <code>CreateCampaign</code>.
+	NewDisplayName string `protobuf:"bytes,4,opt,name=new_display_name,json=newDisplayName,proto3" json:"new_display_name,omitempty"`
+	// Also copy the source&apos;s calls (see <code>Campaigns.CloneCampaign</code>). <code>false</code> (the
+	// default): the clone has no call.
+	IncludeCalls bool `protobuf:"varint,5,opt,name=include_calls,json=includeCalls,proto3" json:"include_calls,omitempty"`
+	// With <code>include_calls</code>: copy only the calls in one of these states (e.g.
+	// <code>CAMPAIGN_CALL_STATE_FAILED</code> to call the failed numbers again in a new campaign). Empty means
+	// every state. Set without <code>include_calls</code>, or holding <code>CAMPAIGN_CALL_STATE_UNSPECIFIED</code>
+	// or an unknown value, is rejected with <code>INVALID_ARGUMENT</code>.
+	CallStates []CampaignCallState `protobuf:"varint,6,rep,packed,name=call_states,json=callStates,proto3,enum=ondewo.vtsi.CampaignCallState" json:"call_states,omitempty"`
+	// Optional. Partial response: the field paths of the returned clone to populate, exactly as
+	// <a href="index.html#ondewo.vtsi.CreateCampaignRequest">CreateCampaignRequest.field_mask</a>.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,7,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional client idempotency key with the semantics of
+	// <a href="index.html#ondewo.vtsi.CreateCampaignRequest">CreateCampaignRequest.idempotency_key</a>
+	// (scoped to the project and to this RPC; a replayed clone carries no call defaults).
+	IdempotencyKey string `protobuf:"bytes,8,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CloneCampaignRequest) Reset() {
+	*x = CloneCampaignRequest{}
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CloneCampaignRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloneCampaignRequest) ProtoMessage() {}
+
+func (x *CloneCampaignRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_campaigns_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloneCampaignRequest.ProtoReflect.Descriptor instead.
+func (*CloneCampaignRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_campaigns_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *CloneCampaignRequest) GetSource() isCloneCampaignRequest_Source {
+	if x != nil {
+		return x.Source
+	}
+	return nil
+}
+
+func (x *CloneCampaignRequest) GetSourceName() string {
+	if x != nil {
+		if x, ok := x.Source.(*CloneCampaignRequest_SourceName); ok {
+			return x.SourceName
+		}
+	}
+	return ""
+}
+
+func (x *CloneCampaignRequest) GetSourceDisplayName() string {
+	if x != nil {
+		if x, ok := x.Source.(*CloneCampaignRequest_SourceDisplayName); ok {
+			return x.SourceDisplayName
+		}
+	}
+	return ""
+}
+
+func (x *CloneCampaignRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *CloneCampaignRequest) GetNewDisplayName() string {
+	if x != nil {
+		return x.NewDisplayName
+	}
+	return ""
+}
+
+func (x *CloneCampaignRequest) GetIncludeCalls() bool {
+	if x != nil {
+		return x.IncludeCalls
+	}
+	return false
+}
+
+func (x *CloneCampaignRequest) GetCallStates() []CampaignCallState {
+	if x != nil {
+		return x.CallStates
+	}
+	return nil
+}
+
+func (x *CloneCampaignRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *CloneCampaignRequest) GetIdempotencyKey() string {
+	if x != nil {
+		return x.IdempotencyKey
+	}
+	return ""
+}
+
+type isCloneCampaignRequest_Source interface {
+	isCloneCampaignRequest_Source()
+}
+
+type CloneCampaignRequest_SourceName struct {
+	// Resource name of the source campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	SourceName string `protobuf:"bytes,1,opt,name=source_name,json=sourceName,proto3,oneof"`
+}
+
+type CloneCampaignRequest_SourceDisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the source campaign, resolved within
+	// <code>vtsi_project_name</code>, which is then required.
+	SourceDisplayName string `protobuf:"bytes,2,opt,name=source_display_name,json=sourceDisplayName,proto3,oneof"`
+}
+
+func (*CloneCampaignRequest_SourceName) isCloneCampaignRequest_Source() {}
+
+func (*CloneCampaignRequest_SourceDisplayName) isCloneCampaignRequest_Source() {}
+
 var File_ondewo_vtsi_campaigns_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	"\n" +
-	"\x1bondewo/vtsi/campaigns.proto\x12\vondewo.vtsi\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14ondewo/sip/sip.proto\"\x9e\x06\n" +
+	"\x1bondewo/vtsi/campaigns.proto\x12\vondewo.vtsi\x1a\x1egoogle/protobuf/duration.proto\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x14ondewo/sip/sip.proto\x1a\x1eondewo/vtsi/call_configs.proto\"\xcd\t\n" +
 	"\bCampaign\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vcampaign_id\x18\x02 \x01(\tR\n" +
@@ -2659,7 +4483,22 @@ const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	"started_at\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\tstartedAt\x129\n" +
 	"\n" +
 	"stopped_at\x18\x10 \x01(\v2\x1a.google.protobuf.TimestampR\tstoppedAt\x12=\n" +
-	"\fcompleted_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\"\xad\x03\n" +
+	"\fcompleted_at\x18\x11 \x01(\v2\x1a.google.protobuf.TimestampR\vcompletedAt\x12h\n" +
+	"\x1fcampaign_common_services_config\x18\x12 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x1ccampaignCommonServicesConfig\x12Y\n" +
+	"\x1acampaign_sip_caller_config\x18\x13 \x01(\v2\x1c.ondewo.vtsi.SipCallerConfigR\x17campaignSipCallerConfig\x12)\n" +
+	"\x10campaign_callers\x18\x14 \x03(\tR\x0fcampaignCallers\x12<\n" +
+	"\x1acampaign_callers_truncated\x18\x15 \x01(\bR\x18campaignCallersTruncated\x12I\n" +
+	"\x0ecalling_window\x18\x16 \x01(\v2\".ondewo.vtsi.CampaignCallingWindowR\rcallingWindow\x124\n" +
+	"\x16outside_calling_window\x18\x17 \x01(\bR\x14outsideCallingWindow\"\xb2\x01\n" +
+	"\x15CampaignCallingWindow\x12\x1b\n" +
+	"\ttime_zone\x18\x01 \x01(\tR\btimeZone\x124\n" +
+	"\x05slots\x18\x02 \x03(\v2\x1e.ondewo.vtsi.CallingWindowSlotR\x05slots\x12F\n" +
+	"\x11next_window_start\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x0fnextWindowStart\"\x9a\x01\n" +
+	"\x11CallingWindowSlot\x12C\n" +
+	"\vday_of_week\x18\x01 \x01(\x0e2#.ondewo.vtsi.CallingWindowDayOfWeekR\tdayOfWeek\x12!\n" +
+	"\fstart_minute\x18\x02 \x01(\x05R\vstartMinute\x12\x1d\n" +
+	"\n" +
+	"end_minute\x18\x03 \x01(\x05R\tendMinute\"\xc4\x04\n" +
 	"\x12CampaignStatistics\x12#\n" +
 	"\rcampaign_name\x18\x01 \x01(\tR\fcampaignName\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x1f\n" +
@@ -2675,7 +4514,9 @@ const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	"\x10progress_percent\x18\n" +
 	" \x01(\x02R\x0fprogressPercent\x12*\n" +
 	"\x11scheduled_not_due\x18\v \x01(\x05R\x0fscheduledNotDue\x12#\n" +
-	"\rcalls_retried\x18\f \x01(\x05R\fcallsRetried\"\xd4\x03\n" +
+	"\rcalls_retried\x18\f \x01(\x05R\fcallsRetried\x12W\n" +
+	"\x1aaverage_connected_duration\x18\r \x01(\v2\x19.google.protobuf.DurationR\x18averageConnectedDuration\x12<\n" +
+	"\x1aanswering_machine_detected\x18\x0e \x01(\x05R\x18answeringMachineDetected\"\xd4\x03\n" +
 	"\x13CampaignCallAttempt\x12%\n" +
 	"\x0eattempt_number\x18\x01 \x01(\x05R\rattemptNumber\x12\x1f\n" +
 	"\vcaller_name\x18\x02 \x01(\tR\n" +
@@ -2716,104 +4557,199 @@ const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	"created_at\x18\x14 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12;\n" +
 	"\vmodified_at\x18\x15 \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"modifiedAt\x12I\n" +
-	"\x0fattempt_history\x18\x16 \x03(\v2 .ondewo.vtsi.CampaignCallAttemptR\x0eattemptHistory\"d\n" +
-	"\x13CampaignDisplayName\x12*\n" +
-	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12!\n" +
-	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\"\xa3\x02\n" +
+	"\x0fattempt_history\x18\x16 \x03(\v2 .ondewo.vtsi.CampaignCallAttemptR\x0eattemptHistory\"\x8d\x02\n" +
 	"\x12CampaignAssignment\x12%\n" +
 	"\rcampaign_name\x18\x01 \x01(\tH\x00R\fcampaignName\x12:\n" +
-	"\fnew_campaign\x18\x02 \x01(\v2\x15.ondewo.vtsi.CampaignH\x00R\vnewCampaign\x12V\n" +
-	"\x15campaign_display_name\x18\x04 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\x13campaignDisplayName\x12=\n" +
+	"\fnew_campaign\x18\x02 \x01(\v2\x15.ondewo.vtsi.CampaignH\x00R\vnewCampaign\x12#\n" +
+	"\fdisplay_name\x18\x05 \x01(\tH\x00R\vdisplayName\x12=\n" +
 	"\n" +
 	"start_mode\x18\x03 \x01(\x0e2\x1e.ondewo.vtsi.CampaignStartModeR\tstartModeB\x13\n" +
-	"\x11campaign_selector\"v\n" +
+	"\x11campaign_selectorJ\x04\b\x04\x10\x05R\x15campaign_display_name\"\xda\x01\n" +
 	"\x15CreateCampaignRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x121\n" +
-	"\bcampaign\x18\x02 \x01(\v2\x15.ondewo.vtsi.CampaignR\bcampaign\"}\n" +
-	"\x12GetCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\bcampaign\x18\x02 \x01(\v2\x15.ondewo.vtsi.CampaignR\bcampaign\x129\n" +
 	"\n" +
-	"\bcampaign\"\x87\x01\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12'\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\"\xc8\x01\n" +
+	"\x12GetCampaignRequest\x12\x14\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xc2\x01\n" +
 	"\x15UpdateCampaignRequest\x121\n" +
 	"\bcampaign\x18\x01 \x01(\v2\x15.ondewo.vtsi.CampaignR\bcampaign\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"\x80\x01\n" +
-	"\x15DeleteCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"updateMask\x129\n" +
 	"\n" +
-	"\bcampaign\"\xb4\x01\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xe1\x01\n" +
+	"\x15DeleteCampaignRequest\x12\x14\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x14\n" +
+	"\x05force\x18\x06 \x01(\bR\x05forceB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xb4\x01\n" +
 	"\x16DeleteCampaignResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12=\n" +
 	"\x1bdeleted_campaign_call_count\x18\x02 \x01(\x05R\x18deletedCampaignCallCount\x12G\n" +
-	" cancelled_scheduled_caller_count\x18\x03 \x01(\x05R\x1dcancelledScheduledCallerCount\"\x9b\x01\n" +
+	" cancelled_scheduled_caller_count\x18\x03 \x01(\x05R\x1dcancelledScheduledCallerCount\"\x81\x03\n" +
 	"\x0eCampaignFilter\x122\n" +
 	"\x06states\x18\x01 \x03(\x0e2\x1a.ondewo.vtsi.CampaignStateR\x06states\x122\n" +
 	"\x15display_name_contains\x18\x02 \x01(\tR\x13displayNameContains\x12!\n" +
-	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\"\xc7\x01\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12?\n" +
+	"\rcreated_after\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\fcreatedAfter\x12A\n" +
+	"\x0ecreated_before\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\rcreatedBefore\x12\x1d\n" +
+	"\n" +
+	"created_by\x18\x06 \x01(\tR\tcreatedBy\x12A\n" +
+	"\x0emodified_since\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\rmodifiedSince\"\xbb\x02\n" +
 	"\x14ListCampaignsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x123\n" +
 	"\x06filter\x18\x02 \x01(\v2\x1b.ondewo.vtsi.CampaignFilterR\x06filter\x12\x1b\n" +
 	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\"\n" +
 	"\n" +
-	"page_token\x18\x04 \x01(\tH\x00R\tpageToken\x88\x01\x01B\r\n" +
+	"page_token\x18\x04 \x01(\tH\x00R\tpageToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x127\n" +
+	"\border_by\x18\x06 \x01(\x0e2\x1c.ondewo.vtsi.CampaignOrderByR\aorderByB\r\n" +
 	"\v_page_token\"t\n" +
 	"\x15ListCampaignsResponse\x123\n" +
 	"\tcampaigns\x18\x01 \x03(\v2\x15.ondewo.vtsi.CampaignR\tcampaigns\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x87\x01\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x97\x01\n" +
 	"\x1cGetCampaignStatisticsRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectNameB\n" +
 	"\n" +
-	"\bcampaign\"\xfb\x02\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xca\x06\n" +
 	"\x18ListCampaignCallsRequest\x12%\n" +
-	"\rcampaign_name\x18\x01 \x01(\tH\x00R\fcampaignName\x12V\n" +
-	"\x15campaign_display_name\x18\a \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\x13campaignDisplayName\x126\n" +
+	"\rcampaign_name\x18\x01 \x01(\tH\x00R\fcampaignName\x12#\n" +
+	"\fdisplay_name\x18\b \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\t \x01(\tR\x0fvtsiProjectName\x126\n" +
 	"\x06states\x18\x02 \x03(\x0e2\x1e.ondewo.vtsi.CampaignCallStateR\x06states\x12!\n" +
 	"\fphone_number\x18\x03 \x01(\tR\vphoneNumber\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x12\"\n" +
 	"\n" +
 	"page_token\x18\x05 \x01(\tH\x01R\tpageToken\x88\x01\x01\x12)\n" +
-	"\x10include_attempts\x18\x06 \x01(\bR\x0fincludeAttemptsB\n" +
+	"\x10include_attempts\x18\x06 \x01(\bR\x0fincludeAttempts\x129\n" +
+	"\n" +
+	"field_mask\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rphone_numbers\x18\v \x03(\tR\fphoneNumbers\x129\n" +
+	"\asources\x18\f \x03(\x0e2\x1f.ondewo.vtsi.CampaignCallSourceR\asources\x12B\n" +
+	"\x0ffinish_time_min\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\rfinishTimeMin\x12B\n" +
+	"\x0ffinish_time_max\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\rfinishTimeMax\x12A\n" +
+	"\x0emodified_since\x18\x0f \x01(\v2\x1a.google.protobuf.TimestampR\rmodifiedSince\x12!\n" +
+	"\fmin_attempts\x18\x10 \x01(\x05R\vminAttempts\x12.\n" +
+	"\x13campaign_call_names\x18\x11 \x03(\tR\x11campaignCallNamesB\n" +
 	"\n" +
 	"\bcampaignB\r\n" +
-	"\v_page_token\"\x85\x01\n" +
+	"\v_page_tokenJ\x04\b\a\x10\bR\x15campaign_display_name\"\x85\x01\n" +
 	"\x19ListCampaignCallsResponse\x12@\n" +
 	"\x0ecampaign_calls\x18\x01 \x03(\v2\x19.ondewo.vtsi.CampaignCallR\rcampaignCalls\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x7f\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xca\x01\n" +
 	"\x14StartCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
 	"\n" +
-	"\bcampaign\"~\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xc9\x01\n" +
 	"\x13StopCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
 	"\n" +
-	"\bcampaign\"\x82\x01\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xcd\x01\n" +
 	"\x17HardStopCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
 	"\n" +
-	"\bcampaign\"\x80\x01\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xcb\x01\n" +
 	"\x15ResumeCampaignRequest\x12\x14\n" +
-	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12E\n" +
-	"\fdisplay_name\x18\x02 \x01(\v2 .ondewo.vtsi.CampaignDisplayNameH\x00R\vdisplayNameB\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x03 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x04 \x01(\tR\x0fvtsiProjectName\x129\n" +
 	"\n" +
-	"\bcampaign\"\xcb\x01\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\n" +
+	"\n" +
+	"\bcampaignJ\x04\b\x02\x10\x03\"\xff\x01\n" +
 	"\x1bStreamCampaignStatusRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12%\n" +
 	"\x0ecampaign_names\x18\x02 \x03(\tR\rcampaignNames\x124\n" +
 	"\x16campaign_display_names\x18\x04 \x03(\tR\x14campaignDisplayNames\x12#\n" +
-	"\rinclude_calls\x18\x03 \x01(\bR\fincludeCalls\"\x86\x02\n" +
+	"\rinclude_calls\x18\x03 \x01(\bR\fincludeCalls\x122\n" +
+	"\x06states\x18\x05 \x03(\x0e2\x1a.ondewo.vtsi.CampaignStateR\x06states\"\xcc\x02\n" +
 	"\x1cStreamCampaignStatusResponse\x123\n" +
 	"\tcampaigns\x18\x01 \x03(\v2\x15.ondewo.vtsi.CampaignR\tcampaigns\x12@\n" +
 	"\x0ecampaign_calls\x18\x02 \x03(\v2\x19.ondewo.vtsi.CampaignCallR\rcampaignCalls\x124\n" +
 	"\x16deleted_campaign_names\x18\x03 \x03(\tR\x14deletedCampaignNames\x12\x1a\n" +
 	"\bsnapshot\x18\x04 \x01(\bR\bsnapshot\x12\x1d\n" +
 	"\n" +
-	"end_reason\x18\x05 \x01(\tR\tendReason*\x81\x02\n" +
+	"end_reason\x18\x05 \x01(\tR\tendReason\x12D\n" +
+	"\x0fend_reason_type\x18\x06 \x01(\x0e2\x1c.ondewo.vtsi.StreamEndReasonR\rendReasonType\"\x92\x01\n" +
+	"\x16GetCampaignCallRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12)\n" +
+	"\x10include_attempts\x18\x02 \x01(\bR\x0fincludeAttempts\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\x91\x01\n" +
+	"\x13CampaignCallRefusal\x12,\n" +
+	"\x12campaign_call_name\x18\x01 \x01(\tR\x10campaignCallName\x124\n" +
+	"\x05state\x18\x02 \x01(\x0e2\x1e.ondewo.vtsi.CampaignCallStateR\x05state\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\xf7\x01\n" +
+	"\x1aCancelCampaignCallsRequest\x12\x14\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x02 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\x12.\n" +
+	"\x13campaign_call_names\x18\x04 \x03(\tR\x11campaignCallNames\x126\n" +
+	"\x06states\x18\x05 \x03(\x0e2\x1e.ondewo.vtsi.CampaignCallStateR\x06statesB\n" +
+	"\n" +
+	"\bcampaign\"\xea\x01\n" +
+	"\x1bCancelCampaignCallsResponse\x12#\n" +
+	"\rcampaign_name\x18\x01 \x01(\tR\fcampaignName\x12A\n" +
+	"\x1dcancelled_campaign_call_names\x18\x02 \x03(\tR\x1acancelledCampaignCallNames\x12:\n" +
+	"\arefused\x18\x03 \x03(\v2 .ondewo.vtsi.CampaignCallRefusalR\arefused\x12'\n" +
+	"\x0fremaining_count\x18\x04 \x01(\x05R\x0eremainingCount\"\xe2\x02\n" +
+	"\x19RetryCampaignCallsRequest\x12\x14\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x12#\n" +
+	"\fdisplay_name\x18\x02 \x01(\tH\x00R\vdisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\x12.\n" +
+	"\x13campaign_call_names\x18\x04 \x03(\tR\x11campaignCallNames\x126\n" +
+	"\x06states\x18\x05 \x03(\x0e2\x1e.ondewo.vtsi.CampaignCallStateR\x06states\x12/\n" +
+	"\x13additional_attempts\x18\x06 \x01(\x05R\x12additionalAttempts\x129\n" +
+	"\n" +
+	"not_before\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tnotBeforeB\n" +
+	"\n" +
+	"\bcampaign\"\xaa\x02\n" +
+	"\x1aRetryCampaignCallsResponse\x12#\n" +
+	"\rcampaign_name\x18\x01 \x01(\tR\fcampaignName\x12?\n" +
+	"\x1crequeued_campaign_call_names\x18\x02 \x03(\tR\x19requeuedCampaignCallNames\x12:\n" +
+	"\arefused\x18\x03 \x03(\v2 .ondewo.vtsi.CampaignCallRefusalR\arefused\x12'\n" +
+	"\x0fremaining_count\x18\x04 \x01(\x05R\x0eremainingCount\x12A\n" +
+	"\x0ecampaign_state\x18\x05 \x01(\x0e2\x1a.ondewo.vtsi.CampaignStateR\rcampaignState\"\x95\x03\n" +
+	"\x14CloneCampaignRequest\x12!\n" +
+	"\vsource_name\x18\x01 \x01(\tH\x00R\n" +
+	"sourceName\x120\n" +
+	"\x13source_display_name\x18\x02 \x01(\tH\x00R\x11sourceDisplayName\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\x12(\n" +
+	"\x10new_display_name\x18\x04 \x01(\tR\x0enewDisplayName\x12#\n" +
+	"\rinclude_calls\x18\x05 \x01(\bR\fincludeCalls\x12?\n" +
+	"\vcall_states\x18\x06 \x03(\x0e2\x1e.ondewo.vtsi.CampaignCallStateR\n" +
+	"callStates\x129\n" +
+	"\n" +
+	"field_mask\x18\a \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12'\n" +
+	"\x0fidempotency_key\x18\b \x01(\tR\x0eidempotencyKeyB\b\n" +
+	"\x06source*\x81\x02\n" +
 	"\rCampaignState\x12\x1e\n" +
 	"\x1aCAMPAIGN_STATE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CAMPAIGN_STATE_CREATED\x10\x01\x12\x1a\n" +
@@ -2845,7 +4781,30 @@ const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	")CAMPAIGN_CALL_ATTEMPT_OUTCOME_IN_PROGRESS\x10\x01\x12+\n" +
 	"'CAMPAIGN_CALL_ATTEMPT_OUTCOME_COMPLETED\x10\x02\x12(\n" +
 	"$CAMPAIGN_CALL_ATTEMPT_OUTCOME_FAILED\x10\x03\x12+\n" +
-	"'CAMPAIGN_CALL_ATTEMPT_OUTCOME_CANCELLED\x10\x042\x89\b\n" +
+	"'CAMPAIGN_CALL_ATTEMPT_OUTCOME_CANCELLED\x10\x04*\xdd\x02\n" +
+	"\x16CallingWindowDayOfWeek\x12*\n" +
+	"&CALLING_WINDOW_DAY_OF_WEEK_UNSPECIFIED\x10\x00\x12%\n" +
+	"!CALLING_WINDOW_DAY_OF_WEEK_MONDAY\x10\x01\x12&\n" +
+	"\"CALLING_WINDOW_DAY_OF_WEEK_TUESDAY\x10\x02\x12(\n" +
+	"$CALLING_WINDOW_DAY_OF_WEEK_WEDNESDAY\x10\x03\x12'\n" +
+	"#CALLING_WINDOW_DAY_OF_WEEK_THURSDAY\x10\x04\x12%\n" +
+	"!CALLING_WINDOW_DAY_OF_WEEK_FRIDAY\x10\x05\x12'\n" +
+	"#CALLING_WINDOW_DAY_OF_WEEK_SATURDAY\x10\x06\x12%\n" +
+	"!CALLING_WINDOW_DAY_OF_WEEK_SUNDAY\x10\a*\xab\x01\n" +
+	"\x0fCampaignOrderBy\x12!\n" +
+	"\x1dCAMPAIGN_ORDER_BY_UNSPECIFIED\x10\x00\x12%\n" +
+	"!CAMPAIGN_ORDER_BY_CREATED_AT_DESC\x10\x01\x12&\n" +
+	"\"CAMPAIGN_ORDER_BY_MODIFIED_AT_DESC\x10\x02\x12&\n" +
+	"\"CAMPAIGN_ORDER_BY_DISPLAY_NAME_ASC\x10\x03*\xa6\x02\n" +
+	"\x0fStreamEndReason\x12!\n" +
+	"\x1dSTREAM_END_REASON_UNSPECIFIED\x10\x00\x12\"\n" +
+	"\x1eSTREAM_END_REASON_MAX_DURATION\x10\x01\x12%\n" +
+	"!STREAM_END_REASON_CLIENT_TOO_SLOW\x10\x02\x12*\n" +
+	"&STREAM_END_REASON_SUBSCRIPTION_DELETED\x10\x03\x12+\n" +
+	"'STREAM_END_REASON_SUBSCRIPTION_DISABLED\x10\x04\x12%\n" +
+	"!STREAM_END_REASON_PROJECT_DELETED\x10\x05\x12%\n" +
+	"!STREAM_END_REASON_SERVER_SHUTDOWN\x10\x062\xf8\n" +
+	"\n" +
 	"\tCampaigns\x12K\n" +
 	"\x0eCreateCampaign\x12\".ondewo.vtsi.CreateCampaignRequest\x1a\x15.ondewo.vtsi.Campaign\x12E\n" +
 	"\vGetCampaign\x12\x1f.ondewo.vtsi.GetCampaignRequest\x1a\x15.ondewo.vtsi.Campaign\x12K\n" +
@@ -2858,7 +4817,11 @@ const file_ondewo_vtsi_campaigns_proto_rawDesc = "" +
 	"\fStopCampaign\x12 .ondewo.vtsi.StopCampaignRequest\x1a\x15.ondewo.vtsi.Campaign\x12O\n" +
 	"\x10HardStopCampaign\x12$.ondewo.vtsi.HardStopCampaignRequest\x1a\x15.ondewo.vtsi.Campaign\x12K\n" +
 	"\x0eResumeCampaign\x12\".ondewo.vtsi.ResumeCampaignRequest\x1a\x15.ondewo.vtsi.Campaign\x12m\n" +
-	"\x14StreamCampaignStatus\x12(.ondewo.vtsi.StreamCampaignStatusRequest\x1a).ondewo.vtsi.StreamCampaignStatusResponse0\x01b\x06proto3"
+	"\x14StreamCampaignStatus\x12(.ondewo.vtsi.StreamCampaignStatusRequest\x1a).ondewo.vtsi.StreamCampaignStatusResponse0\x01\x12Q\n" +
+	"\x0fGetCampaignCall\x12#.ondewo.vtsi.GetCampaignCallRequest\x1a\x19.ondewo.vtsi.CampaignCall\x12h\n" +
+	"\x13CancelCampaignCalls\x12'.ondewo.vtsi.CancelCampaignCallsRequest\x1a(.ondewo.vtsi.CancelCampaignCallsResponse\x12e\n" +
+	"\x12RetryCampaignCalls\x12&.ondewo.vtsi.RetryCampaignCallsRequest\x1a'.ondewo.vtsi.RetryCampaignCallsResponse\x12I\n" +
+	"\rCloneCampaign\x12!.ondewo.vtsi.CloneCampaignRequest\x1a\x15.ondewo.vtsi.Campaignb\x06proto3"
 
 var (
 	file_ondewo_vtsi_campaigns_proto_rawDescOnce sync.Once
@@ -2872,116 +4835,165 @@ func file_ondewo_vtsi_campaigns_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_campaigns_proto_rawDescData
 }
 
-var file_ondewo_vtsi_campaigns_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_ondewo_vtsi_campaigns_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_ondewo_vtsi_campaigns_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
+var file_ondewo_vtsi_campaigns_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_ondewo_vtsi_campaigns_proto_goTypes = []any{
 	(CampaignState)(0),                   // 0: ondewo.vtsi.CampaignState
 	(CampaignCallState)(0),               // 1: ondewo.vtsi.CampaignCallState
 	(CampaignStartMode)(0),               // 2: ondewo.vtsi.CampaignStartMode
 	(CampaignCallSource)(0),              // 3: ondewo.vtsi.CampaignCallSource
 	(CampaignCallAttemptOutcome)(0),      // 4: ondewo.vtsi.CampaignCallAttemptOutcome
-	(*Campaign)(nil),                     // 5: ondewo.vtsi.Campaign
-	(*CampaignStatistics)(nil),           // 6: ondewo.vtsi.CampaignStatistics
-	(*CampaignCallAttempt)(nil),          // 7: ondewo.vtsi.CampaignCallAttempt
-	(*CampaignCall)(nil),                 // 8: ondewo.vtsi.CampaignCall
-	(*CampaignDisplayName)(nil),          // 9: ondewo.vtsi.CampaignDisplayName
-	(*CampaignAssignment)(nil),           // 10: ondewo.vtsi.CampaignAssignment
-	(*CreateCampaignRequest)(nil),        // 11: ondewo.vtsi.CreateCampaignRequest
-	(*GetCampaignRequest)(nil),           // 12: ondewo.vtsi.GetCampaignRequest
-	(*UpdateCampaignRequest)(nil),        // 13: ondewo.vtsi.UpdateCampaignRequest
-	(*DeleteCampaignRequest)(nil),        // 14: ondewo.vtsi.DeleteCampaignRequest
-	(*DeleteCampaignResponse)(nil),       // 15: ondewo.vtsi.DeleteCampaignResponse
-	(*CampaignFilter)(nil),               // 16: ondewo.vtsi.CampaignFilter
-	(*ListCampaignsRequest)(nil),         // 17: ondewo.vtsi.ListCampaignsRequest
-	(*ListCampaignsResponse)(nil),        // 18: ondewo.vtsi.ListCampaignsResponse
-	(*GetCampaignStatisticsRequest)(nil), // 19: ondewo.vtsi.GetCampaignStatisticsRequest
-	(*ListCampaignCallsRequest)(nil),     // 20: ondewo.vtsi.ListCampaignCallsRequest
-	(*ListCampaignCallsResponse)(nil),    // 21: ondewo.vtsi.ListCampaignCallsResponse
-	(*StartCampaignRequest)(nil),         // 22: ondewo.vtsi.StartCampaignRequest
-	(*StopCampaignRequest)(nil),          // 23: ondewo.vtsi.StopCampaignRequest
-	(*HardStopCampaignRequest)(nil),      // 24: ondewo.vtsi.HardStopCampaignRequest
-	(*ResumeCampaignRequest)(nil),        // 25: ondewo.vtsi.ResumeCampaignRequest
-	(*StreamCampaignStatusRequest)(nil),  // 26: ondewo.vtsi.StreamCampaignStatusRequest
-	(*StreamCampaignStatusResponse)(nil), // 27: ondewo.vtsi.StreamCampaignStatusResponse
-	(*durationpb.Duration)(nil),          // 28: google.protobuf.Duration
-	(*timestamppb.Timestamp)(nil),        // 29: google.protobuf.Timestamp
-	(sip.SipStatus_StatusType)(0),        // 30: ondewo.sip.SipStatus.StatusType
-	(*fieldmaskpb.FieldMask)(nil),        // 31: google.protobuf.FieldMask
+	(CallingWindowDayOfWeek)(0),          // 5: ondewo.vtsi.CallingWindowDayOfWeek
+	(CampaignOrderBy)(0),                 // 6: ondewo.vtsi.CampaignOrderBy
+	(StreamEndReason)(0),                 // 7: ondewo.vtsi.StreamEndReason
+	(*Campaign)(nil),                     // 8: ondewo.vtsi.Campaign
+	(*CampaignCallingWindow)(nil),        // 9: ondewo.vtsi.CampaignCallingWindow
+	(*CallingWindowSlot)(nil),            // 10: ondewo.vtsi.CallingWindowSlot
+	(*CampaignStatistics)(nil),           // 11: ondewo.vtsi.CampaignStatistics
+	(*CampaignCallAttempt)(nil),          // 12: ondewo.vtsi.CampaignCallAttempt
+	(*CampaignCall)(nil),                 // 13: ondewo.vtsi.CampaignCall
+	(*CampaignAssignment)(nil),           // 14: ondewo.vtsi.CampaignAssignment
+	(*CreateCampaignRequest)(nil),        // 15: ondewo.vtsi.CreateCampaignRequest
+	(*GetCampaignRequest)(nil),           // 16: ondewo.vtsi.GetCampaignRequest
+	(*UpdateCampaignRequest)(nil),        // 17: ondewo.vtsi.UpdateCampaignRequest
+	(*DeleteCampaignRequest)(nil),        // 18: ondewo.vtsi.DeleteCampaignRequest
+	(*DeleteCampaignResponse)(nil),       // 19: ondewo.vtsi.DeleteCampaignResponse
+	(*CampaignFilter)(nil),               // 20: ondewo.vtsi.CampaignFilter
+	(*ListCampaignsRequest)(nil),         // 21: ondewo.vtsi.ListCampaignsRequest
+	(*ListCampaignsResponse)(nil),        // 22: ondewo.vtsi.ListCampaignsResponse
+	(*GetCampaignStatisticsRequest)(nil), // 23: ondewo.vtsi.GetCampaignStatisticsRequest
+	(*ListCampaignCallsRequest)(nil),     // 24: ondewo.vtsi.ListCampaignCallsRequest
+	(*ListCampaignCallsResponse)(nil),    // 25: ondewo.vtsi.ListCampaignCallsResponse
+	(*StartCampaignRequest)(nil),         // 26: ondewo.vtsi.StartCampaignRequest
+	(*StopCampaignRequest)(nil),          // 27: ondewo.vtsi.StopCampaignRequest
+	(*HardStopCampaignRequest)(nil),      // 28: ondewo.vtsi.HardStopCampaignRequest
+	(*ResumeCampaignRequest)(nil),        // 29: ondewo.vtsi.ResumeCampaignRequest
+	(*StreamCampaignStatusRequest)(nil),  // 30: ondewo.vtsi.StreamCampaignStatusRequest
+	(*StreamCampaignStatusResponse)(nil), // 31: ondewo.vtsi.StreamCampaignStatusResponse
+	(*GetCampaignCallRequest)(nil),       // 32: ondewo.vtsi.GetCampaignCallRequest
+	(*CampaignCallRefusal)(nil),          // 33: ondewo.vtsi.CampaignCallRefusal
+	(*CancelCampaignCallsRequest)(nil),   // 34: ondewo.vtsi.CancelCampaignCallsRequest
+	(*CancelCampaignCallsResponse)(nil),  // 35: ondewo.vtsi.CancelCampaignCallsResponse
+	(*RetryCampaignCallsRequest)(nil),    // 36: ondewo.vtsi.RetryCampaignCallsRequest
+	(*RetryCampaignCallsResponse)(nil),   // 37: ondewo.vtsi.RetryCampaignCallsResponse
+	(*CloneCampaignRequest)(nil),         // 38: ondewo.vtsi.CloneCampaignRequest
+	(*durationpb.Duration)(nil),          // 39: google.protobuf.Duration
+	(*timestamppb.Timestamp)(nil),        // 40: google.protobuf.Timestamp
+	(*CommonServicesConfig)(nil),         // 41: ondewo.vtsi.CommonServicesConfig
+	(*SipCallerConfig)(nil),              // 42: ondewo.vtsi.SipCallerConfig
+	(sip.SipStatus_StatusType)(0),        // 43: ondewo.sip.SipStatus.StatusType
+	(*fieldmaskpb.FieldMask)(nil),        // 44: google.protobuf.FieldMask
 }
 var file_ondewo_vtsi_campaigns_proto_depIdxs = []int32{
-	28, // 0: ondewo.vtsi.Campaign.retry_delay:type_name -> google.protobuf.Duration
+	39, // 0: ondewo.vtsi.Campaign.retry_delay:type_name -> google.protobuf.Duration
 	0,  // 1: ondewo.vtsi.Campaign.state:type_name -> ondewo.vtsi.CampaignState
-	6,  // 2: ondewo.vtsi.Campaign.statistics:type_name -> ondewo.vtsi.CampaignStatistics
-	29, // 3: ondewo.vtsi.Campaign.created_at:type_name -> google.protobuf.Timestamp
-	29, // 4: ondewo.vtsi.Campaign.modified_at:type_name -> google.protobuf.Timestamp
-	29, // 5: ondewo.vtsi.Campaign.started_at:type_name -> google.protobuf.Timestamp
-	29, // 6: ondewo.vtsi.Campaign.stopped_at:type_name -> google.protobuf.Timestamp
-	29, // 7: ondewo.vtsi.Campaign.completed_at:type_name -> google.protobuf.Timestamp
-	29, // 8: ondewo.vtsi.CampaignCallAttempt.start_time:type_name -> google.protobuf.Timestamp
-	29, // 9: ondewo.vtsi.CampaignCallAttempt.end_time:type_name -> google.protobuf.Timestamp
-	4,  // 10: ondewo.vtsi.CampaignCallAttempt.outcome:type_name -> ondewo.vtsi.CampaignCallAttemptOutcome
-	30, // 11: ondewo.vtsi.CampaignCallAttempt.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	1,  // 12: ondewo.vtsi.CampaignCall.state:type_name -> ondewo.vtsi.CampaignCallState
-	3,  // 13: ondewo.vtsi.CampaignCall.source:type_name -> ondewo.vtsi.CampaignCallSource
-	29, // 14: ondewo.vtsi.CampaignCall.scheduled_time:type_name -> google.protobuf.Timestamp
-	30, // 15: ondewo.vtsi.CampaignCall.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	29, // 16: ondewo.vtsi.CampaignCall.next_attempt_time:type_name -> google.protobuf.Timestamp
-	29, // 17: ondewo.vtsi.CampaignCall.first_attempt_time:type_name -> google.protobuf.Timestamp
-	29, // 18: ondewo.vtsi.CampaignCall.last_attempt_time:type_name -> google.protobuf.Timestamp
-	29, // 19: ondewo.vtsi.CampaignCall.finish_time:type_name -> google.protobuf.Timestamp
-	29, // 20: ondewo.vtsi.CampaignCall.created_at:type_name -> google.protobuf.Timestamp
-	29, // 21: ondewo.vtsi.CampaignCall.modified_at:type_name -> google.protobuf.Timestamp
-	7,  // 22: ondewo.vtsi.CampaignCall.attempt_history:type_name -> ondewo.vtsi.CampaignCallAttempt
-	5,  // 23: ondewo.vtsi.CampaignAssignment.new_campaign:type_name -> ondewo.vtsi.Campaign
-	9,  // 24: ondewo.vtsi.CampaignAssignment.campaign_display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	2,  // 25: ondewo.vtsi.CampaignAssignment.start_mode:type_name -> ondewo.vtsi.CampaignStartMode
-	5,  // 26: ondewo.vtsi.CreateCampaignRequest.campaign:type_name -> ondewo.vtsi.Campaign
-	9,  // 27: ondewo.vtsi.GetCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	5,  // 28: ondewo.vtsi.UpdateCampaignRequest.campaign:type_name -> ondewo.vtsi.Campaign
-	31, // 29: ondewo.vtsi.UpdateCampaignRequest.update_mask:type_name -> google.protobuf.FieldMask
-	9,  // 30: ondewo.vtsi.DeleteCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	0,  // 31: ondewo.vtsi.CampaignFilter.states:type_name -> ondewo.vtsi.CampaignState
-	16, // 32: ondewo.vtsi.ListCampaignsRequest.filter:type_name -> ondewo.vtsi.CampaignFilter
-	5,  // 33: ondewo.vtsi.ListCampaignsResponse.campaigns:type_name -> ondewo.vtsi.Campaign
-	9,  // 34: ondewo.vtsi.GetCampaignStatisticsRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	9,  // 35: ondewo.vtsi.ListCampaignCallsRequest.campaign_display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	1,  // 36: ondewo.vtsi.ListCampaignCallsRequest.states:type_name -> ondewo.vtsi.CampaignCallState
-	8,  // 37: ondewo.vtsi.ListCampaignCallsResponse.campaign_calls:type_name -> ondewo.vtsi.CampaignCall
-	9,  // 38: ondewo.vtsi.StartCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	9,  // 39: ondewo.vtsi.StopCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	9,  // 40: ondewo.vtsi.HardStopCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	9,  // 41: ondewo.vtsi.ResumeCampaignRequest.display_name:type_name -> ondewo.vtsi.CampaignDisplayName
-	5,  // 42: ondewo.vtsi.StreamCampaignStatusResponse.campaigns:type_name -> ondewo.vtsi.Campaign
-	8,  // 43: ondewo.vtsi.StreamCampaignStatusResponse.campaign_calls:type_name -> ondewo.vtsi.CampaignCall
-	11, // 44: ondewo.vtsi.Campaigns.CreateCampaign:input_type -> ondewo.vtsi.CreateCampaignRequest
-	12, // 45: ondewo.vtsi.Campaigns.GetCampaign:input_type -> ondewo.vtsi.GetCampaignRequest
-	13, // 46: ondewo.vtsi.Campaigns.UpdateCampaign:input_type -> ondewo.vtsi.UpdateCampaignRequest
-	14, // 47: ondewo.vtsi.Campaigns.DeleteCampaign:input_type -> ondewo.vtsi.DeleteCampaignRequest
-	17, // 48: ondewo.vtsi.Campaigns.ListCampaigns:input_type -> ondewo.vtsi.ListCampaignsRequest
-	19, // 49: ondewo.vtsi.Campaigns.GetCampaignStatistics:input_type -> ondewo.vtsi.GetCampaignStatisticsRequest
-	20, // 50: ondewo.vtsi.Campaigns.ListCampaignCalls:input_type -> ondewo.vtsi.ListCampaignCallsRequest
-	22, // 51: ondewo.vtsi.Campaigns.StartCampaign:input_type -> ondewo.vtsi.StartCampaignRequest
-	23, // 52: ondewo.vtsi.Campaigns.StopCampaign:input_type -> ondewo.vtsi.StopCampaignRequest
-	24, // 53: ondewo.vtsi.Campaigns.HardStopCampaign:input_type -> ondewo.vtsi.HardStopCampaignRequest
-	25, // 54: ondewo.vtsi.Campaigns.ResumeCampaign:input_type -> ondewo.vtsi.ResumeCampaignRequest
-	26, // 55: ondewo.vtsi.Campaigns.StreamCampaignStatus:input_type -> ondewo.vtsi.StreamCampaignStatusRequest
-	5,  // 56: ondewo.vtsi.Campaigns.CreateCampaign:output_type -> ondewo.vtsi.Campaign
-	5,  // 57: ondewo.vtsi.Campaigns.GetCampaign:output_type -> ondewo.vtsi.Campaign
-	5,  // 58: ondewo.vtsi.Campaigns.UpdateCampaign:output_type -> ondewo.vtsi.Campaign
-	15, // 59: ondewo.vtsi.Campaigns.DeleteCampaign:output_type -> ondewo.vtsi.DeleteCampaignResponse
-	18, // 60: ondewo.vtsi.Campaigns.ListCampaigns:output_type -> ondewo.vtsi.ListCampaignsResponse
-	6,  // 61: ondewo.vtsi.Campaigns.GetCampaignStatistics:output_type -> ondewo.vtsi.CampaignStatistics
-	21, // 62: ondewo.vtsi.Campaigns.ListCampaignCalls:output_type -> ondewo.vtsi.ListCampaignCallsResponse
-	5,  // 63: ondewo.vtsi.Campaigns.StartCampaign:output_type -> ondewo.vtsi.Campaign
-	5,  // 64: ondewo.vtsi.Campaigns.StopCampaign:output_type -> ondewo.vtsi.Campaign
-	5,  // 65: ondewo.vtsi.Campaigns.HardStopCampaign:output_type -> ondewo.vtsi.Campaign
-	5,  // 66: ondewo.vtsi.Campaigns.ResumeCampaign:output_type -> ondewo.vtsi.Campaign
-	27, // 67: ondewo.vtsi.Campaigns.StreamCampaignStatus:output_type -> ondewo.vtsi.StreamCampaignStatusResponse
-	56, // [56:68] is the sub-list for method output_type
-	44, // [44:56] is the sub-list for method input_type
-	44, // [44:44] is the sub-list for extension type_name
-	44, // [44:44] is the sub-list for extension extendee
-	0,  // [0:44] is the sub-list for field type_name
+	11, // 2: ondewo.vtsi.Campaign.statistics:type_name -> ondewo.vtsi.CampaignStatistics
+	40, // 3: ondewo.vtsi.Campaign.created_at:type_name -> google.protobuf.Timestamp
+	40, // 4: ondewo.vtsi.Campaign.modified_at:type_name -> google.protobuf.Timestamp
+	40, // 5: ondewo.vtsi.Campaign.started_at:type_name -> google.protobuf.Timestamp
+	40, // 6: ondewo.vtsi.Campaign.stopped_at:type_name -> google.protobuf.Timestamp
+	40, // 7: ondewo.vtsi.Campaign.completed_at:type_name -> google.protobuf.Timestamp
+	41, // 8: ondewo.vtsi.Campaign.campaign_common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	42, // 9: ondewo.vtsi.Campaign.campaign_sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
+	9,  // 10: ondewo.vtsi.Campaign.calling_window:type_name -> ondewo.vtsi.CampaignCallingWindow
+	10, // 11: ondewo.vtsi.CampaignCallingWindow.slots:type_name -> ondewo.vtsi.CallingWindowSlot
+	40, // 12: ondewo.vtsi.CampaignCallingWindow.next_window_start:type_name -> google.protobuf.Timestamp
+	5,  // 13: ondewo.vtsi.CallingWindowSlot.day_of_week:type_name -> ondewo.vtsi.CallingWindowDayOfWeek
+	39, // 14: ondewo.vtsi.CampaignStatistics.average_connected_duration:type_name -> google.protobuf.Duration
+	40, // 15: ondewo.vtsi.CampaignCallAttempt.start_time:type_name -> google.protobuf.Timestamp
+	40, // 16: ondewo.vtsi.CampaignCallAttempt.end_time:type_name -> google.protobuf.Timestamp
+	4,  // 17: ondewo.vtsi.CampaignCallAttempt.outcome:type_name -> ondewo.vtsi.CampaignCallAttemptOutcome
+	43, // 18: ondewo.vtsi.CampaignCallAttempt.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	1,  // 19: ondewo.vtsi.CampaignCall.state:type_name -> ondewo.vtsi.CampaignCallState
+	3,  // 20: ondewo.vtsi.CampaignCall.source:type_name -> ondewo.vtsi.CampaignCallSource
+	40, // 21: ondewo.vtsi.CampaignCall.scheduled_time:type_name -> google.protobuf.Timestamp
+	43, // 22: ondewo.vtsi.CampaignCall.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	40, // 23: ondewo.vtsi.CampaignCall.next_attempt_time:type_name -> google.protobuf.Timestamp
+	40, // 24: ondewo.vtsi.CampaignCall.first_attempt_time:type_name -> google.protobuf.Timestamp
+	40, // 25: ondewo.vtsi.CampaignCall.last_attempt_time:type_name -> google.protobuf.Timestamp
+	40, // 26: ondewo.vtsi.CampaignCall.finish_time:type_name -> google.protobuf.Timestamp
+	40, // 27: ondewo.vtsi.CampaignCall.created_at:type_name -> google.protobuf.Timestamp
+	40, // 28: ondewo.vtsi.CampaignCall.modified_at:type_name -> google.protobuf.Timestamp
+	12, // 29: ondewo.vtsi.CampaignCall.attempt_history:type_name -> ondewo.vtsi.CampaignCallAttempt
+	8,  // 30: ondewo.vtsi.CampaignAssignment.new_campaign:type_name -> ondewo.vtsi.Campaign
+	2,  // 31: ondewo.vtsi.CampaignAssignment.start_mode:type_name -> ondewo.vtsi.CampaignStartMode
+	8,  // 32: ondewo.vtsi.CreateCampaignRequest.campaign:type_name -> ondewo.vtsi.Campaign
+	44, // 33: ondewo.vtsi.CreateCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44, // 34: ondewo.vtsi.GetCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	8,  // 35: ondewo.vtsi.UpdateCampaignRequest.campaign:type_name -> ondewo.vtsi.Campaign
+	44, // 36: ondewo.vtsi.UpdateCampaignRequest.update_mask:type_name -> google.protobuf.FieldMask
+	44, // 37: ondewo.vtsi.UpdateCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44, // 38: ondewo.vtsi.DeleteCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	0,  // 39: ondewo.vtsi.CampaignFilter.states:type_name -> ondewo.vtsi.CampaignState
+	40, // 40: ondewo.vtsi.CampaignFilter.created_after:type_name -> google.protobuf.Timestamp
+	40, // 41: ondewo.vtsi.CampaignFilter.created_before:type_name -> google.protobuf.Timestamp
+	40, // 42: ondewo.vtsi.CampaignFilter.modified_since:type_name -> google.protobuf.Timestamp
+	20, // 43: ondewo.vtsi.ListCampaignsRequest.filter:type_name -> ondewo.vtsi.CampaignFilter
+	44, // 44: ondewo.vtsi.ListCampaignsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	6,  // 45: ondewo.vtsi.ListCampaignsRequest.order_by:type_name -> ondewo.vtsi.CampaignOrderBy
+	8,  // 46: ondewo.vtsi.ListCampaignsResponse.campaigns:type_name -> ondewo.vtsi.Campaign
+	1,  // 47: ondewo.vtsi.ListCampaignCallsRequest.states:type_name -> ondewo.vtsi.CampaignCallState
+	44, // 48: ondewo.vtsi.ListCampaignCallsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	3,  // 49: ondewo.vtsi.ListCampaignCallsRequest.sources:type_name -> ondewo.vtsi.CampaignCallSource
+	40, // 50: ondewo.vtsi.ListCampaignCallsRequest.finish_time_min:type_name -> google.protobuf.Timestamp
+	40, // 51: ondewo.vtsi.ListCampaignCallsRequest.finish_time_max:type_name -> google.protobuf.Timestamp
+	40, // 52: ondewo.vtsi.ListCampaignCallsRequest.modified_since:type_name -> google.protobuf.Timestamp
+	13, // 53: ondewo.vtsi.ListCampaignCallsResponse.campaign_calls:type_name -> ondewo.vtsi.CampaignCall
+	44, // 54: ondewo.vtsi.StartCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44, // 55: ondewo.vtsi.StopCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44, // 56: ondewo.vtsi.HardStopCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44, // 57: ondewo.vtsi.ResumeCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	0,  // 58: ondewo.vtsi.StreamCampaignStatusRequest.states:type_name -> ondewo.vtsi.CampaignState
+	8,  // 59: ondewo.vtsi.StreamCampaignStatusResponse.campaigns:type_name -> ondewo.vtsi.Campaign
+	13, // 60: ondewo.vtsi.StreamCampaignStatusResponse.campaign_calls:type_name -> ondewo.vtsi.CampaignCall
+	7,  // 61: ondewo.vtsi.StreamCampaignStatusResponse.end_reason_type:type_name -> ondewo.vtsi.StreamEndReason
+	44, // 62: ondewo.vtsi.GetCampaignCallRequest.field_mask:type_name -> google.protobuf.FieldMask
+	1,  // 63: ondewo.vtsi.CampaignCallRefusal.state:type_name -> ondewo.vtsi.CampaignCallState
+	1,  // 64: ondewo.vtsi.CancelCampaignCallsRequest.states:type_name -> ondewo.vtsi.CampaignCallState
+	33, // 65: ondewo.vtsi.CancelCampaignCallsResponse.refused:type_name -> ondewo.vtsi.CampaignCallRefusal
+	1,  // 66: ondewo.vtsi.RetryCampaignCallsRequest.states:type_name -> ondewo.vtsi.CampaignCallState
+	40, // 67: ondewo.vtsi.RetryCampaignCallsRequest.not_before:type_name -> google.protobuf.Timestamp
+	33, // 68: ondewo.vtsi.RetryCampaignCallsResponse.refused:type_name -> ondewo.vtsi.CampaignCallRefusal
+	0,  // 69: ondewo.vtsi.RetryCampaignCallsResponse.campaign_state:type_name -> ondewo.vtsi.CampaignState
+	1,  // 70: ondewo.vtsi.CloneCampaignRequest.call_states:type_name -> ondewo.vtsi.CampaignCallState
+	44, // 71: ondewo.vtsi.CloneCampaignRequest.field_mask:type_name -> google.protobuf.FieldMask
+	15, // 72: ondewo.vtsi.Campaigns.CreateCampaign:input_type -> ondewo.vtsi.CreateCampaignRequest
+	16, // 73: ondewo.vtsi.Campaigns.GetCampaign:input_type -> ondewo.vtsi.GetCampaignRequest
+	17, // 74: ondewo.vtsi.Campaigns.UpdateCampaign:input_type -> ondewo.vtsi.UpdateCampaignRequest
+	18, // 75: ondewo.vtsi.Campaigns.DeleteCampaign:input_type -> ondewo.vtsi.DeleteCampaignRequest
+	21, // 76: ondewo.vtsi.Campaigns.ListCampaigns:input_type -> ondewo.vtsi.ListCampaignsRequest
+	23, // 77: ondewo.vtsi.Campaigns.GetCampaignStatistics:input_type -> ondewo.vtsi.GetCampaignStatisticsRequest
+	24, // 78: ondewo.vtsi.Campaigns.ListCampaignCalls:input_type -> ondewo.vtsi.ListCampaignCallsRequest
+	26, // 79: ondewo.vtsi.Campaigns.StartCampaign:input_type -> ondewo.vtsi.StartCampaignRequest
+	27, // 80: ondewo.vtsi.Campaigns.StopCampaign:input_type -> ondewo.vtsi.StopCampaignRequest
+	28, // 81: ondewo.vtsi.Campaigns.HardStopCampaign:input_type -> ondewo.vtsi.HardStopCampaignRequest
+	29, // 82: ondewo.vtsi.Campaigns.ResumeCampaign:input_type -> ondewo.vtsi.ResumeCampaignRequest
+	30, // 83: ondewo.vtsi.Campaigns.StreamCampaignStatus:input_type -> ondewo.vtsi.StreamCampaignStatusRequest
+	32, // 84: ondewo.vtsi.Campaigns.GetCampaignCall:input_type -> ondewo.vtsi.GetCampaignCallRequest
+	34, // 85: ondewo.vtsi.Campaigns.CancelCampaignCalls:input_type -> ondewo.vtsi.CancelCampaignCallsRequest
+	36, // 86: ondewo.vtsi.Campaigns.RetryCampaignCalls:input_type -> ondewo.vtsi.RetryCampaignCallsRequest
+	38, // 87: ondewo.vtsi.Campaigns.CloneCampaign:input_type -> ondewo.vtsi.CloneCampaignRequest
+	8,  // 88: ondewo.vtsi.Campaigns.CreateCampaign:output_type -> ondewo.vtsi.Campaign
+	8,  // 89: ondewo.vtsi.Campaigns.GetCampaign:output_type -> ondewo.vtsi.Campaign
+	8,  // 90: ondewo.vtsi.Campaigns.UpdateCampaign:output_type -> ondewo.vtsi.Campaign
+	19, // 91: ondewo.vtsi.Campaigns.DeleteCampaign:output_type -> ondewo.vtsi.DeleteCampaignResponse
+	22, // 92: ondewo.vtsi.Campaigns.ListCampaigns:output_type -> ondewo.vtsi.ListCampaignsResponse
+	11, // 93: ondewo.vtsi.Campaigns.GetCampaignStatistics:output_type -> ondewo.vtsi.CampaignStatistics
+	25, // 94: ondewo.vtsi.Campaigns.ListCampaignCalls:output_type -> ondewo.vtsi.ListCampaignCallsResponse
+	8,  // 95: ondewo.vtsi.Campaigns.StartCampaign:output_type -> ondewo.vtsi.Campaign
+	8,  // 96: ondewo.vtsi.Campaigns.StopCampaign:output_type -> ondewo.vtsi.Campaign
+	8,  // 97: ondewo.vtsi.Campaigns.HardStopCampaign:output_type -> ondewo.vtsi.Campaign
+	8,  // 98: ondewo.vtsi.Campaigns.ResumeCampaign:output_type -> ondewo.vtsi.Campaign
+	31, // 99: ondewo.vtsi.Campaigns.StreamCampaignStatus:output_type -> ondewo.vtsi.StreamCampaignStatusResponse
+	13, // 100: ondewo.vtsi.Campaigns.GetCampaignCall:output_type -> ondewo.vtsi.CampaignCall
+	35, // 101: ondewo.vtsi.Campaigns.CancelCampaignCalls:output_type -> ondewo.vtsi.CancelCampaignCallsResponse
+	37, // 102: ondewo.vtsi.Campaigns.RetryCampaignCalls:output_type -> ondewo.vtsi.RetryCampaignCallsResponse
+	8,  // 103: ondewo.vtsi.Campaigns.CloneCampaign:output_type -> ondewo.vtsi.Campaign
+	88, // [88:104] is the sub-list for method output_type
+	72, // [72:88] is the sub-list for method input_type
+	72, // [72:72] is the sub-list for extension type_name
+	72, // [72:72] is the sub-list for extension extendee
+	0,  // [0:72] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_campaigns_proto_init() }
@@ -2989,51 +5001,64 @@ func file_ondewo_vtsi_campaigns_proto_init() {
 	if File_ondewo_vtsi_campaigns_proto != nil {
 		return
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[5].OneofWrappers = []any{
+	file_ondewo_vtsi_call_configs_proto_init()
+	file_ondewo_vtsi_campaigns_proto_msgTypes[6].OneofWrappers = []any{
 		(*CampaignAssignment_CampaignName)(nil),
 		(*CampaignAssignment_NewCampaign)(nil),
-		(*CampaignAssignment_CampaignDisplayName)(nil),
+		(*CampaignAssignment_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[7].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[8].OneofWrappers = []any{
 		(*GetCampaignRequest_Name)(nil),
 		(*GetCampaignRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[9].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[10].OneofWrappers = []any{
 		(*DeleteCampaignRequest_Name)(nil),
 		(*DeleteCampaignRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[12].OneofWrappers = []any{}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[14].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[13].OneofWrappers = []any{}
+	file_ondewo_vtsi_campaigns_proto_msgTypes[15].OneofWrappers = []any{
 		(*GetCampaignStatisticsRequest_Name)(nil),
 		(*GetCampaignStatisticsRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[15].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[16].OneofWrappers = []any{
 		(*ListCampaignCallsRequest_CampaignName)(nil),
-		(*ListCampaignCallsRequest_CampaignDisplayName)(nil),
+		(*ListCampaignCallsRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[17].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[18].OneofWrappers = []any{
 		(*StartCampaignRequest_Name)(nil),
 		(*StartCampaignRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[18].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[19].OneofWrappers = []any{
 		(*StopCampaignRequest_Name)(nil),
 		(*StopCampaignRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[19].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[20].OneofWrappers = []any{
 		(*HardStopCampaignRequest_Name)(nil),
 		(*HardStopCampaignRequest_DisplayName)(nil),
 	}
-	file_ondewo_vtsi_campaigns_proto_msgTypes[20].OneofWrappers = []any{
+	file_ondewo_vtsi_campaigns_proto_msgTypes[21].OneofWrappers = []any{
 		(*ResumeCampaignRequest_Name)(nil),
 		(*ResumeCampaignRequest_DisplayName)(nil),
+	}
+	file_ondewo_vtsi_campaigns_proto_msgTypes[26].OneofWrappers = []any{
+		(*CancelCampaignCallsRequest_Name)(nil),
+		(*CancelCampaignCallsRequest_DisplayName)(nil),
+	}
+	file_ondewo_vtsi_campaigns_proto_msgTypes[28].OneofWrappers = []any{
+		(*RetryCampaignCallsRequest_Name)(nil),
+		(*RetryCampaignCallsRequest_DisplayName)(nil),
+	}
+	file_ondewo_vtsi_campaigns_proto_msgTypes[30].OneofWrappers = []any{
+		(*CloneCampaignRequest_SourceName)(nil),
+		(*CloneCampaignRequest_SourceDisplayName)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_campaigns_proto_rawDesc), len(file_ondewo_vtsi_campaigns_proto_rawDesc)),
-			NumEnums:      5,
-			NumMessages:   23,
+			NumEnums:      8,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -43,6 +43,7 @@ const (
 	Softphones_GetSoftphoneCertificate_FullMethodName    = "/ondewo.vtsi.Softphones/GetSoftphoneCertificate"
 	Softphones_RevokeSoftphoneCertificate_FullMethodName = "/ondewo.vtsi.Softphones/RevokeSoftphoneCertificate"
 	Softphones_GetSoftphoneProvisioning_FullMethodName   = "/ondewo.vtsi.Softphones/GetSoftphoneProvisioning"
+	Softphones_GetSoftphoneRegistration_FullMethodName   = "/ondewo.vtsi.Softphones/GetSoftphoneRegistration"
 )
 
 // SoftphonesClient is the client API for Softphones service.
@@ -76,6 +77,10 @@ const (
 // not be updated, the RPC fails with <code>FAILED_PRECONDITION</code>; the stored change is applied by
 // the next successful change or deployment. <code>CreateSoftphoneAccount</code> and
 // <code>RotateSoftphoneCredentials</code> return their one-time secrets even then.</p>
+// <p>Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller
+// without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires
+// <code>PROJECT_DEVELOPER</code> or higher on the account&apos;s project, otherwise
+// <code>PERMISSION_DENIED</code>, also for an unknown project.</p>
 type SoftphonesClient interface {
 	// <p>Creates a softphone account in a VTSI project, generates its SIP password and, for
 	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code>, issues its first client certificate.
@@ -91,6 +96,13 @@ type SoftphonesClient interface {
 	// <p>The account is reachable on either TLS port only from the project&apos;s
 	// <code>softphone_permit_cidrs</code> (default: the server&apos;s list, private networks unless the
 	// operator changed it); see <code>AsteriskConfigsVariables.softphone_permit_cidrs</code>.</p>
+	// <p>Idempotency: with <code>idempotency_key</code> a retry after a lost response does not create a
+	// second account; it ROTATES the credentials of the account the first attempt created and returns
+	// NEW one-time secrets (see <code>CreateSoftphoneAccountRequest.idempotency_key</code>). Without a key a
+	// retry is answered <code>ALREADY_EXISTS</code> for the same <code>sip_username</code>; recover the
+	// lost secrets then with <code>RotateSoftphoneCredentials</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SOFTPHONE_ACCOUNT_CREATED</code> (a replayed key:
+	// <code>VTSI_EVENT_SOFTPHONE_CREDENTIALS_ROTATED</code>).</p>
 	CreateSoftphoneAccount(ctx context.Context, in *CreateSoftphoneAccountRequest, opts ...grpc.CallOption) (*CreateSoftphoneAccountResponse, error)
 	// <p>Returns a softphone account. Never returns a secret.</p>
 	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
@@ -108,8 +120,19 @@ type SoftphonesClient interface {
 	// operator changed it); see <code>AsteriskConfigsVariables.softphone_permit_cidrs</code>.</p>
 	UpdateSoftphoneAccount(ctx context.Context, in *UpdateSoftphoneAccountRequest, opts ...grpc.CallOption) (*SoftphoneAccount, error)
 	// <p>Deletes a softphone account. Its endpoint is removed from the Asterisk, its registrations are
-	// dropped and every certificate it holds is revoked. Deletion is permanent.</p>
-	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist.</p>
+	// dropped, its calls in progress are hung up and every certificate it holds is revoked. Deletion is
+	// permanent.</p>
+	// <p>Not idempotent: deleting an account that no longer exists (also a retry of a deletion that
+	// succeeded) is <code>NOT_FOUND</code>. Allowed in every project status, also while the project is
+	// being deleted.</p>
+	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
+	// malformed name; <code>FAILED_PRECONDITION</code> when the deletion was STORED but the running
+	// Asterisk of a deployed project could not be updated (reload failed, container unreachable, or the
+	// project&apos;s Asterisk configuration stayed locked by another change for too long): the account is
+	// gone from the database and its removal from the Asterisk is applied by the next successful change or
+	// deployment, so a retry is <code>NOT_FOUND</code>; <code>INTERNAL</code> when the account was removed
+	// but one of its calls could not be hung up. Never <code>ABORTED</code>: a deletion is not compared
+	// against concurrent changes, it wins over them.</p>
 	DeleteSoftphoneAccount(ctx context.Context, in *DeleteSoftphoneAccountRequest, opts ...grpc.CallOption) (*DeleteSoftphoneAccountResponse, error)
 	// <p>Lists the softphone accounts of a VTSI project, filtered, sorted and paged. Never returns a
 	// secret.</p>
@@ -159,7 +182,14 @@ type SoftphonesClient interface {
 	// Revoking an already revoked certificate is idempotent and keeps the original revocation time and
 	// reason.</p>
 	// <p>Errors: <code>NOT_FOUND</code> if the certificate does not exist; <code>INVALID_ARGUMENT</code>
-	// for a malformed name or an over-long reason.</p>
+	// for a malformed name or an over-long reason; <code>FAILED_PRECONDITION</code> when the revocation
+	// (and the lock) was STORED but the running Asterisk of a deployed project could not be updated
+	// (reload failed, container unreachable, or the project&apos;s Asterisk configuration stayed locked by
+	// another change for too long): it is applied by the next successful change or deployment, and a
+	// retry is idempotent; <code>ABORTED</code> when the account was changed concurrently (e.g. a rotation
+	// or an update committed between the read and the write), in which case nothing was stored and the
+	// request can be retried.</p>
+	// <p>Events: <code>VTSI_EVENT_SOFTPHONE_CERTIFICATE_REVOKED</code> (not for an idempotent repeat).</p>
 	RevokeSoftphoneCertificate(ctx context.Context, in *RevokeSoftphoneCertificateRequest, opts ...grpc.CallOption) (*SoftphoneCertificate, error)
 	// <p>Returns everything needed to configure a softphone for an account: server, port, transport,
 	// outbound proxy, SIP identity, SRTP mode, codecs, the certificate authority to trust, which client
@@ -171,6 +201,19 @@ type SoftphonesClient interface {
 	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code> account has no
 	// <code>SOFTPHONE_CERTIFICATE_STATUS_ACTIVE</code> certificate.</p>
 	GetSoftphoneProvisioning(ctx context.Context, in *GetSoftphoneProvisioningRequest, opts ...grpc.CallOption) (*SoftphoneProvisioning, error)
+	// <p>Returns the CURRENT registrations (contacts) of a softphone account, read LIVE from the running
+	// Asterisk of the project at the moment of the request (in the manner of <code>pjsip show
+	// contacts</code>). Nothing is stored: two calls may differ, and an empty <code>contacts</code> list
+	// means no device is registered right now (a disabled or locked account never has one). Answers
+	// &quot;is the softphone of this account connected, from where, with which client, and is it
+	// reachable?&quot;.</p>
+	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
+	// malformed name or an unknown <code>field_mask</code> path; <code>FAILED_PRECONDITION</code> if the
+	// project is not <code>DEPLOYED</code> (there is no running Asterisk to ask);
+	// <code>UNAVAILABLE</code> if the project&apos;s Asterisk could not be queried (container not running
+	// or not answering within the server&apos;s timeout); retry later.</p>
+	// <p>Read only, no event. Authorization: <code>PROJECT_DEVELOPER</code> or higher on the project.</p>
+	GetSoftphoneRegistration(ctx context.Context, in *GetSoftphoneRegistrationRequest, opts ...grpc.CallOption) (*SoftphoneRegistration, error)
 }
 
 type softphonesClient struct {
@@ -281,6 +324,16 @@ func (c *softphonesClient) GetSoftphoneProvisioning(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *softphonesClient) GetSoftphoneRegistration(ctx context.Context, in *GetSoftphoneRegistrationRequest, opts ...grpc.CallOption) (*SoftphoneRegistration, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SoftphoneRegistration)
+	err := c.cc.Invoke(ctx, Softphones_GetSoftphoneRegistration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SoftphonesServer is the server API for Softphones service.
 // All implementations must embed UnimplementedSoftphonesServer
 // for forward compatibility.
@@ -312,6 +365,10 @@ func (c *softphonesClient) GetSoftphoneProvisioning(ctx context.Context, in *Get
 // not be updated, the RPC fails with <code>FAILED_PRECONDITION</code>; the stored change is applied by
 // the next successful change or deployment. <code>CreateSoftphoneAccount</code> and
 // <code>RotateSoftphoneCredentials</code> return their one-time secrets even then.</p>
+// <p>Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller
+// without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires
+// <code>PROJECT_DEVELOPER</code> or higher on the account&apos;s project, otherwise
+// <code>PERMISSION_DENIED</code>, also for an unknown project.</p>
 type SoftphonesServer interface {
 	// <p>Creates a softphone account in a VTSI project, generates its SIP password and, for
 	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code>, issues its first client certificate.
@@ -327,6 +384,13 @@ type SoftphonesServer interface {
 	// <p>The account is reachable on either TLS port only from the project&apos;s
 	// <code>softphone_permit_cidrs</code> (default: the server&apos;s list, private networks unless the
 	// operator changed it); see <code>AsteriskConfigsVariables.softphone_permit_cidrs</code>.</p>
+	// <p>Idempotency: with <code>idempotency_key</code> a retry after a lost response does not create a
+	// second account; it ROTATES the credentials of the account the first attempt created and returns
+	// NEW one-time secrets (see <code>CreateSoftphoneAccountRequest.idempotency_key</code>). Without a key a
+	// retry is answered <code>ALREADY_EXISTS</code> for the same <code>sip_username</code>; recover the
+	// lost secrets then with <code>RotateSoftphoneCredentials</code>.</p>
+	// <p>Events: <code>VTSI_EVENT_SOFTPHONE_ACCOUNT_CREATED</code> (a replayed key:
+	// <code>VTSI_EVENT_SOFTPHONE_CREDENTIALS_ROTATED</code>).</p>
 	CreateSoftphoneAccount(context.Context, *CreateSoftphoneAccountRequest) (*CreateSoftphoneAccountResponse, error)
 	// <p>Returns a softphone account. Never returns a secret.</p>
 	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
@@ -344,8 +408,19 @@ type SoftphonesServer interface {
 	// operator changed it); see <code>AsteriskConfigsVariables.softphone_permit_cidrs</code>.</p>
 	UpdateSoftphoneAccount(context.Context, *UpdateSoftphoneAccountRequest) (*SoftphoneAccount, error)
 	// <p>Deletes a softphone account. Its endpoint is removed from the Asterisk, its registrations are
-	// dropped and every certificate it holds is revoked. Deletion is permanent.</p>
-	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist.</p>
+	// dropped, its calls in progress are hung up and every certificate it holds is revoked. Deletion is
+	// permanent.</p>
+	// <p>Not idempotent: deleting an account that no longer exists (also a retry of a deletion that
+	// succeeded) is <code>NOT_FOUND</code>. Allowed in every project status, also while the project is
+	// being deleted.</p>
+	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
+	// malformed name; <code>FAILED_PRECONDITION</code> when the deletion was STORED but the running
+	// Asterisk of a deployed project could not be updated (reload failed, container unreachable, or the
+	// project&apos;s Asterisk configuration stayed locked by another change for too long): the account is
+	// gone from the database and its removal from the Asterisk is applied by the next successful change or
+	// deployment, so a retry is <code>NOT_FOUND</code>; <code>INTERNAL</code> when the account was removed
+	// but one of its calls could not be hung up. Never <code>ABORTED</code>: a deletion is not compared
+	// against concurrent changes, it wins over them.</p>
 	DeleteSoftphoneAccount(context.Context, *DeleteSoftphoneAccountRequest) (*DeleteSoftphoneAccountResponse, error)
 	// <p>Lists the softphone accounts of a VTSI project, filtered, sorted and paged. Never returns a
 	// secret.</p>
@@ -395,7 +470,14 @@ type SoftphonesServer interface {
 	// Revoking an already revoked certificate is idempotent and keeps the original revocation time and
 	// reason.</p>
 	// <p>Errors: <code>NOT_FOUND</code> if the certificate does not exist; <code>INVALID_ARGUMENT</code>
-	// for a malformed name or an over-long reason.</p>
+	// for a malformed name or an over-long reason; <code>FAILED_PRECONDITION</code> when the revocation
+	// (and the lock) was STORED but the running Asterisk of a deployed project could not be updated
+	// (reload failed, container unreachable, or the project&apos;s Asterisk configuration stayed locked by
+	// another change for too long): it is applied by the next successful change or deployment, and a
+	// retry is idempotent; <code>ABORTED</code> when the account was changed concurrently (e.g. a rotation
+	// or an update committed between the read and the write), in which case nothing was stored and the
+	// request can be retried.</p>
+	// <p>Events: <code>VTSI_EVENT_SOFTPHONE_CERTIFICATE_REVOKED</code> (not for an idempotent repeat).</p>
 	RevokeSoftphoneCertificate(context.Context, *RevokeSoftphoneCertificateRequest) (*SoftphoneCertificate, error)
 	// <p>Returns everything needed to configure a softphone for an account: server, port, transport,
 	// outbound proxy, SIP identity, SRTP mode, codecs, the certificate authority to trust, which client
@@ -407,6 +489,19 @@ type SoftphonesServer interface {
 	// <code>SOFTPHONE_TRANSPORT_SECURITY_CLIENT_CERTIFICATE</code> account has no
 	// <code>SOFTPHONE_CERTIFICATE_STATUS_ACTIVE</code> certificate.</p>
 	GetSoftphoneProvisioning(context.Context, *GetSoftphoneProvisioningRequest) (*SoftphoneProvisioning, error)
+	// <p>Returns the CURRENT registrations (contacts) of a softphone account, read LIVE from the running
+	// Asterisk of the project at the moment of the request (in the manner of <code>pjsip show
+	// contacts</code>). Nothing is stored: two calls may differ, and an empty <code>contacts</code> list
+	// means no device is registered right now (a disabled or locked account never has one). Answers
+	// &quot;is the softphone of this account connected, from where, with which client, and is it
+	// reachable?&quot;.</p>
+	// <p>Errors: <code>NOT_FOUND</code> if the account does not exist; <code>INVALID_ARGUMENT</code> for a
+	// malformed name or an unknown <code>field_mask</code> path; <code>FAILED_PRECONDITION</code> if the
+	// project is not <code>DEPLOYED</code> (there is no running Asterisk to ask);
+	// <code>UNAVAILABLE</code> if the project&apos;s Asterisk could not be queried (container not running
+	// or not answering within the server&apos;s timeout); retry later.</p>
+	// <p>Read only, no event. Authorization: <code>PROJECT_DEVELOPER</code> or higher on the project.</p>
+	GetSoftphoneRegistration(context.Context, *GetSoftphoneRegistrationRequest) (*SoftphoneRegistration, error)
 	mustEmbedUnimplementedSoftphonesServer()
 }
 
@@ -446,6 +541,9 @@ func (UnimplementedSoftphonesServer) RevokeSoftphoneCertificate(context.Context,
 }
 func (UnimplementedSoftphonesServer) GetSoftphoneProvisioning(context.Context, *GetSoftphoneProvisioningRequest) (*SoftphoneProvisioning, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetSoftphoneProvisioning not implemented")
+}
+func (UnimplementedSoftphonesServer) GetSoftphoneRegistration(context.Context, *GetSoftphoneRegistrationRequest) (*SoftphoneRegistration, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetSoftphoneRegistration not implemented")
 }
 func (UnimplementedSoftphonesServer) mustEmbedUnimplementedSoftphonesServer() {}
 func (UnimplementedSoftphonesServer) testEmbeddedByValue()                    {}
@@ -648,6 +746,24 @@ func _Softphones_GetSoftphoneProvisioning_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Softphones_GetSoftphoneRegistration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSoftphoneRegistrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SoftphonesServer).GetSoftphoneRegistration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Softphones_GetSoftphoneRegistration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SoftphonesServer).GetSoftphoneRegistration(ctx, req.(*GetSoftphoneRegistrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Softphones_ServiceDesc is the grpc.ServiceDesc for Softphones service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -694,6 +810,10 @@ var Softphones_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSoftphoneProvisioning",
 			Handler:    _Softphones_GetSoftphoneProvisioning_Handler,
+		},
+		{
+			MethodName: "GetSoftphoneRegistration",
+			Handler:    _Softphones_GetSoftphoneRegistration_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

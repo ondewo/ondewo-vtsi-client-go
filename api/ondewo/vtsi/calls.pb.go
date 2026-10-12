@@ -22,14 +22,10 @@ package vtsi
 
 import (
 	nlu "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/nlu"
-	s2t "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/s2t"
 	sip "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/sip"
-	t2s "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/t2s"
-	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/emptypb"
-	_ "google.golang.org/protobuf/types/known/structpb"
+	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -469,6 +465,90 @@ func (ParticipantState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{6}
 }
 
+// <p>Why an invited participant failed or left: the typed form of <code>CallParticipant.end_reason</code>, one value
+// per string that field documents. New values may be added; a client that meets a value it does not know reads
+// <code>CallParticipant.end_reason</code> instead.</p>
+type ParticipantEndReason int32
+
+const (
+	// No end reason: the participant is still ringing or joined, or its end reason is a string this enum has no
+	// value for (read <code>CallParticipant.end_reason</code> then)
+	ParticipantEndReason_PARTICIPANT_END_REASON_UNSPECIFIED ParticipantEndReason = 0
+	// <code>NOANSWER</code>: the softphone rang until <code>ring_timeout_s</code> without being answered
+	ParticipantEndReason_PARTICIPANT_END_REASON_NO_ANSWER ParticipantEndReason = 1
+	// <code>BUSY</code>: the softphone answered busy
+	ParticipantEndReason_PARTICIPANT_END_REASON_BUSY ParticipantEndReason = 2
+	// <code>CHANUNAVAIL</code>: the softphone could not be reached (not registered, unreachable contact)
+	ParticipantEndReason_PARTICIPANT_END_REASON_CHANNEL_UNAVAILABLE ParticipantEndReason = 3
+	// <code>CALL_ENDED</code>: the call (the bot&apos;s leg) ended, which hangs up every participant
+	ParticipantEndReason_PARTICIPANT_END_REASON_CALL_ENDED ParticipantEndReason = 4
+	// <code>REMOVED</code>: <code>RemoveCallParticipant</code> hung the participant up
+	ParticipantEndReason_PARTICIPANT_END_REASON_REMOVED ParticipantEndReason = 5
+	// <code>HANGUP</code>: the participant hung up
+	ParticipantEndReason_PARTICIPANT_END_REASON_HANGUP ParticipantEndReason = 6
+	// <code>HANDED_OVER</code>: the participant took the call over from the bot (a WARM <code>TransferCall</code>)
+	ParticipantEndReason_PARTICIPANT_END_REASON_HANDED_OVER ParticipantEndReason = 7
+	// <code>JOIN_FAILED</code>: the participant answered but could not be joined into the call
+	ParticipantEndReason_PARTICIPANT_END_REASON_JOIN_FAILED ParticipantEndReason = 8
+	// <code>TIMEOUT</code>: the server gave up waiting for the participant&apos;s state
+	ParticipantEndReason_PARTICIPANT_END_REASON_TIMEOUT ParticipantEndReason = 9
+)
+
+// Enum value maps for ParticipantEndReason.
+var (
+	ParticipantEndReason_name = map[int32]string{
+		0: "PARTICIPANT_END_REASON_UNSPECIFIED",
+		1: "PARTICIPANT_END_REASON_NO_ANSWER",
+		2: "PARTICIPANT_END_REASON_BUSY",
+		3: "PARTICIPANT_END_REASON_CHANNEL_UNAVAILABLE",
+		4: "PARTICIPANT_END_REASON_CALL_ENDED",
+		5: "PARTICIPANT_END_REASON_REMOVED",
+		6: "PARTICIPANT_END_REASON_HANGUP",
+		7: "PARTICIPANT_END_REASON_HANDED_OVER",
+		8: "PARTICIPANT_END_REASON_JOIN_FAILED",
+		9: "PARTICIPANT_END_REASON_TIMEOUT",
+	}
+	ParticipantEndReason_value = map[string]int32{
+		"PARTICIPANT_END_REASON_UNSPECIFIED":         0,
+		"PARTICIPANT_END_REASON_NO_ANSWER":           1,
+		"PARTICIPANT_END_REASON_BUSY":                2,
+		"PARTICIPANT_END_REASON_CHANNEL_UNAVAILABLE": 3,
+		"PARTICIPANT_END_REASON_CALL_ENDED":          4,
+		"PARTICIPANT_END_REASON_REMOVED":             5,
+		"PARTICIPANT_END_REASON_HANGUP":              6,
+		"PARTICIPANT_END_REASON_HANDED_OVER":         7,
+		"PARTICIPANT_END_REASON_JOIN_FAILED":         8,
+		"PARTICIPANT_END_REASON_TIMEOUT":             9,
+	}
+)
+
+func (x ParticipantEndReason) Enum() *ParticipantEndReason {
+	p := new(ParticipantEndReason)
+	*p = x
+	return p
+}
+
+func (x ParticipantEndReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ParticipantEndReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_calls_proto_enumTypes[7].Descriptor()
+}
+
+func (ParticipantEndReason) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_calls_proto_enumTypes[7]
+}
+
+func (x ParticipantEndReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ParticipantEndReason.Descriptor instead.
+func (ParticipantEndReason) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{7}
+}
+
 // <p>Mode of a call audio stream</p>
 type CallAudioMode int32
 
@@ -506,11 +586,11 @@ func (x CallAudioMode) String() string {
 }
 
 func (CallAudioMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[7].Descriptor()
+	return file_ondewo_vtsi_calls_proto_enumTypes[8].Descriptor()
 }
 
 func (CallAudioMode) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[7]
+	return &file_ondewo_vtsi_calls_proto_enumTypes[8]
 }
 
 func (x CallAudioMode) Number() protoreflect.EnumNumber {
@@ -519,7 +599,7 @@ func (x CallAudioMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CallAudioMode.Descriptor instead.
 func (CallAudioMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{7}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8}
 }
 
 // <p>Why a call audio stream ended</p>
@@ -575,11 +655,11 @@ func (x CallAudioEndReason) String() string {
 }
 
 func (CallAudioEndReason) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[8].Descriptor()
+	return file_ondewo_vtsi_calls_proto_enumTypes[9].Descriptor()
 }
 
 func (CallAudioEndReason) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[8]
+	return &file_ondewo_vtsi_calls_proto_enumTypes[9]
 }
 
 func (x CallAudioEndReason) Number() protoreflect.EnumNumber {
@@ -588,10 +668,14 @@ func (x CallAudioEndReason) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CallAudioEndReason.Descriptor instead.
 func (CallAudioEndReason) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{9}
 }
 
-// Call view options
+// How much of a <code>Call</code>, <code>Caller</code>, <code>Listener</code> or <code>ScheduledCaller</code> a read
+// RPC populates. The <code>call_view</code> fields that take it are <code>optional</code>, so an unset view can be
+// told apart from <code>MINIMUM</code>; each request documents what an unset view means. Quirk kept for wire
+// compatibility: the zero value is <code>MINIMUM</code>, not an <code>*_UNSPECIFIED</code> sentinel, so a client
+// that SETS the field to its zero value asks for the minimum view.
 type CallView int32
 
 const (
@@ -628,11 +712,11 @@ func (x CallView) String() string {
 }
 
 func (CallView) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[9].Descriptor()
+	return file_ondewo_vtsi_calls_proto_enumTypes[10].Descriptor()
 }
 
 func (CallView) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[9]
+	return &file_ondewo_vtsi_calls_proto_enumTypes[10]
 }
 
 func (x CallView) Number() protoreflect.EnumNumber {
@@ -641,18 +725,19 @@ func (x CallView) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CallView.Descriptor instead.
 func (CallView) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{9}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{10}
 }
 
-// Call view options
+// Whether a call is active (set up or connected) or not, as a filter value of <code>CallFilter.call_status</code>.
 type CallStatus int32
 
 const (
-	// Unspecified call status
+	// Unspecified call status: does not filter
 	CallStatus_CALL_STATUS_UNSPECIFIED CallStatus = 0
-	// Call is active
+	// Call is active (<code>Call.active</code> is true)
 	CallStatus_CALL_STATUS_ACTIVE CallStatus = 1
-	// Call is inactive
+	// Call is inactive (<code>Call.active</code> is false): ended, or the waiting call of a persistent listener or
+	// pooled caller
 	CallStatus_CALL_STATUS_INACTIVE CallStatus = 2
 )
 
@@ -681,11 +766,11 @@ func (x CallStatus) String() string {
 }
 
 func (CallStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[10].Descriptor()
+	return file_ondewo_vtsi_calls_proto_enumTypes[11].Descriptor()
 }
 
 func (CallStatus) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[10]
+	return &file_ondewo_vtsi_calls_proto_enumTypes[11]
 }
 
 func (x CallStatus) Number() protoreflect.EnumNumber {
@@ -694,14 +779,18 @@ func (x CallStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CallStatus.Descriptor instead.
 func (CallStatus) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{10}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{11}
 }
 
-// CallType
+// The kind of resource a call, a status or a statistics bucket belongs to.
+// <p>Quirk kept for wire compatibility: the zero value is <code>BOTH</code>, not an <code>*_UNSPECIFIED</code>
+// sentinel. It is never the type of a stored call: <code>Call.call_type</code> is <code>LISTENER</code>,
+// <code>CALLER</code> or, for a call placed by a scheduled caller, <code>SCHEDULED_CALLER</code>. In
+// <code>CallFilter.call_types</code> an empty list, or a list holding <code>BOTH</code>, matches every call.</p>
 type CallType int32
 
 const (
-	// Both listener and caller
+	// Both listener and caller: the zero value, used only as "any type" in a filter; never a stored call&apos;s type
 	CallType_BOTH CallType = 0
 	// Listener
 	CallType_LISTENER CallType = 1
@@ -738,11 +827,11 @@ func (x CallType) String() string {
 }
 
 func (CallType) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[11].Descriptor()
+	return file_ondewo_vtsi_calls_proto_enumTypes[12].Descriptor()
 }
 
 func (CallType) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[11]
+	return &file_ondewo_vtsi_calls_proto_enumTypes[12]
 }
 
 func (x CallType) Number() protoreflect.EnumNumber {
@@ -751,626 +840,58 @@ func (x CallType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CallType.Descriptor instead.
 func (CallType) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{11}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{12}
 }
 
-// Mode of the turn detection
-type TurnDetectionConfig_TurnDetectionMode int32
+// The field by which calls are sorted.
+type CallSorting_CallSortingField int32
 
 const (
-	// Unspecified turn detection mode defaults to SEMANTIC_MODEL
-	TurnDetectionConfig_TURN_DETECTION_MODE_UNSPECIFIED TurnDetectionConfig_TurnDetectionMode = 0
-	// Turn detection based on voice activity detection, i.e. pauses in the caller audio (fallback mode)
-	TurnDetectionConfig_VAD TurnDetectionConfig_TurnDetectionMode = 1
-	// Turn detection based on a semantic (LLM) turn detection model of the speech-to-text service (default)
-	TurnDetectionConfig_SEMANTIC_MODEL TurnDetectionConfig_TurnDetectionMode = 2
-	// Turn detection based on an audio-native turn detection model
-	TurnDetectionConfig_AUDIO_MODEL TurnDetectionConfig_TurnDetectionMode = 3
+	// The default order of <code>ListCalls</code> (see <code>ListCallsResponse.calls</code>): by
+	// <code>start_time</code>, ascending. <code>sorting_mode</code> is ignored.
+	CallSorting_NO_CALL_SORTING CallSorting_CallSortingField = 0
+	// Sort by <code>Call.start_time</code>. Calls without a start time (the waiting call of a persistent listener
+	// or pooled caller) come last in either mode.
+	CallSorting_SORT_CALL_BY_START_TIME CallSorting_CallSortingField = 1
 )
 
-// Enum value maps for TurnDetectionConfig_TurnDetectionMode.
+// Enum value maps for CallSorting_CallSortingField.
 var (
-	TurnDetectionConfig_TurnDetectionMode_name = map[int32]string{
-		0: "TURN_DETECTION_MODE_UNSPECIFIED",
-		1: "VAD",
-		2: "SEMANTIC_MODEL",
-		3: "AUDIO_MODEL",
+	CallSorting_CallSortingField_name = map[int32]string{
+		0: "NO_CALL_SORTING",
+		1: "SORT_CALL_BY_START_TIME",
 	}
-	TurnDetectionConfig_TurnDetectionMode_value = map[string]int32{
-		"TURN_DETECTION_MODE_UNSPECIFIED": 0,
-		"VAD":                             1,
-		"SEMANTIC_MODEL":                  2,
-		"AUDIO_MODEL":                     3,
+	CallSorting_CallSortingField_value = map[string]int32{
+		"NO_CALL_SORTING":         0,
+		"SORT_CALL_BY_START_TIME": 1,
 	}
 )
 
-func (x TurnDetectionConfig_TurnDetectionMode) Enum() *TurnDetectionConfig_TurnDetectionMode {
-	p := new(TurnDetectionConfig_TurnDetectionMode)
+func (x CallSorting_CallSortingField) Enum() *CallSorting_CallSortingField {
+	p := new(CallSorting_CallSortingField)
 	*p = x
 	return p
 }
 
-func (x TurnDetectionConfig_TurnDetectionMode) String() string {
+func (x CallSorting_CallSortingField) String() string {
 	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
 }
 
-func (TurnDetectionConfig_TurnDetectionMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[12].Descriptor()
-}
-
-func (TurnDetectionConfig_TurnDetectionMode) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[12]
-}
-
-func (x TurnDetectionConfig_TurnDetectionMode) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use TurnDetectionConfig_TurnDetectionMode.Descriptor instead.
-func (TurnDetectionConfig_TurnDetectionMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8, 0}
-}
-
-// Eagerness of the turn detection
-type TurnDetectionConfig_TurnEagerness int32
-
-const (
-	// Unspecified turn eagerness defaults to NORMAL
-	TurnDetectionConfig_TURN_EAGERNESS_UNSPECIFIED TurnDetectionConfig_TurnEagerness = 0
-	// Patient turn taking: scales the endpointing delays by a factor of 1.7
-	TurnDetectionConfig_PATIENT TurnDetectionConfig_TurnEagerness = 1
-	// Normal turn taking: keeps the endpointing delays unchanged (factor 1.0)
-	TurnDetectionConfig_NORMAL TurnDetectionConfig_TurnEagerness = 2
-	// Eager turn taking: scales the endpointing delays by a factor of 0.6
-	TurnDetectionConfig_EAGER TurnDetectionConfig_TurnEagerness = 3
-)
-
-// Enum value maps for TurnDetectionConfig_TurnEagerness.
-var (
-	TurnDetectionConfig_TurnEagerness_name = map[int32]string{
-		0: "TURN_EAGERNESS_UNSPECIFIED",
-		1: "PATIENT",
-		2: "NORMAL",
-		3: "EAGER",
-	}
-	TurnDetectionConfig_TurnEagerness_value = map[string]int32{
-		"TURN_EAGERNESS_UNSPECIFIED": 0,
-		"PATIENT":                    1,
-		"NORMAL":                     2,
-		"EAGER":                      3,
-	}
-)
-
-func (x TurnDetectionConfig_TurnEagerness) Enum() *TurnDetectionConfig_TurnEagerness {
-	p := new(TurnDetectionConfig_TurnEagerness)
-	*p = x
-	return p
-}
-
-func (x TurnDetectionConfig_TurnEagerness) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (TurnDetectionConfig_TurnEagerness) Descriptor() protoreflect.EnumDescriptor {
+func (CallSorting_CallSortingField) Descriptor() protoreflect.EnumDescriptor {
 	return file_ondewo_vtsi_calls_proto_enumTypes[13].Descriptor()
 }
 
-func (TurnDetectionConfig_TurnEagerness) Type() protoreflect.EnumType {
+func (CallSorting_CallSortingField) Type() protoreflect.EnumType {
 	return &file_ondewo_vtsi_calls_proto_enumTypes[13]
 }
 
-func (x TurnDetectionConfig_TurnEagerness) Number() protoreflect.EnumNumber {
+func (x CallSorting_CallSortingField) Number() protoreflect.EnumNumber {
 	return protoreflect.EnumNumber(x)
 }
 
-// Deprecated: Use TurnDetectionConfig_TurnEagerness.Descriptor instead.
-func (TurnDetectionConfig_TurnEagerness) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8, 1}
-}
-
-// What to do once a non-human verdict is reached
-type AnsweringMachineDetectionConfig_AmdAction int32
-
-const (
-	// Unspecified action defaults to HANG_UP
-	AnsweringMachineDetectionConfig_AMD_ACTION_UNSPECIFIED AnsweringMachineDetectionConfig_AmdAction = 0
-	// Hang up at once on a non-human verdict whose per-verdict hang-up switch is on
-	// (an answering machine is always hung up on) (default)
-	AnsweringMachineDetectionConfig_HANG_UP AnsweringMachineDetectionConfig_AmdAction = 1
-	// Only detect and record the verdict, never hang up: OUTGOING_CALL_ANSWERING_MACHINE_DETECTED is still
-	// set, then the far end is treated as a person and the call continues with the greeting and ends
-	// normally (shadow mode to calibrate the detection before enabling HANG_UP)
-	AnsweringMachineDetectionConfig_DETECT_ONLY AnsweringMachineDetectionConfig_AmdAction = 2
-	// Leave a voice message on a hang-up-eligible verdict, then hang up: the fulfillment of
-	// voice_message_intent is spoken once after the beep (or after the end of the machine greeting),
-	// and the call is hung up when it finished playing or when voice_message_timeout_ms elapsed,
-	// whichever comes first. A FAX verdict never gets a voice message; it is hung up on when
-	// hang_up_on_fax is on. See the compliance note above before enabling it
-	AnsweringMachineDetectionConfig_LEAVE_VOICE_MESSAGE AnsweringMachineDetectionConfig_AmdAction = 3
-)
-
-// Enum value maps for AnsweringMachineDetectionConfig_AmdAction.
-var (
-	AnsweringMachineDetectionConfig_AmdAction_name = map[int32]string{
-		0: "AMD_ACTION_UNSPECIFIED",
-		1: "HANG_UP",
-		2: "DETECT_ONLY",
-		3: "LEAVE_VOICE_MESSAGE",
-	}
-	AnsweringMachineDetectionConfig_AmdAction_value = map[string]int32{
-		"AMD_ACTION_UNSPECIFIED": 0,
-		"HANG_UP":                1,
-		"DETECT_ONLY":            2,
-		"LEAVE_VOICE_MESSAGE":    3,
-	}
-)
-
-func (x AnsweringMachineDetectionConfig_AmdAction) Enum() *AnsweringMachineDetectionConfig_AmdAction {
-	p := new(AnsweringMachineDetectionConfig_AmdAction)
-	*p = x
-	return p
-}
-
-func (x AnsweringMachineDetectionConfig_AmdAction) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (AnsweringMachineDetectionConfig_AmdAction) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[14].Descriptor()
-}
-
-func (AnsweringMachineDetectionConfig_AmdAction) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[14]
-}
-
-func (x AnsweringMachineDetectionConfig_AmdAction) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use AnsweringMachineDetectionConfig_AmdAction.Descriptor instead.
-func (AnsweringMachineDetectionConfig_AmdAction) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{12, 0}
-}
-
-// Sensitivity of the detection: selects the enabled detection rules and their internal thresholds
-type AnsweringMachineDetectionConfig_AmdSensitivity int32
-
-const (
-	// Unspecified sensitivity defaults to LOW
-	AnsweringMachineDetectionConfig_AMD_SENSITIVITY_UNSPECIFIED AnsweringMachineDetectionConfig_AmdSensitivity = 0
-	// Most conservative towards people: only strong machine evidence leads to a machine verdict (default)
-	AnsweringMachineDetectionConfig_LOW AnsweringMachineDetectionConfig_AmdSensitivity = 1
-	// Balanced between missed machines and people classified as machines
-	AnsweringMachineDetectionConfig_MEDIUM AnsweringMachineDetectionConfig_AmdSensitivity = 2
-	// Most aggressive: detects more machines at a higher risk of hanging up on a person
-	AnsweringMachineDetectionConfig_HIGH AnsweringMachineDetectionConfig_AmdSensitivity = 3
-)
-
-// Enum value maps for AnsweringMachineDetectionConfig_AmdSensitivity.
-var (
-	AnsweringMachineDetectionConfig_AmdSensitivity_name = map[int32]string{
-		0: "AMD_SENSITIVITY_UNSPECIFIED",
-		1: "LOW",
-		2: "MEDIUM",
-		3: "HIGH",
-	}
-	AnsweringMachineDetectionConfig_AmdSensitivity_value = map[string]int32{
-		"AMD_SENSITIVITY_UNSPECIFIED": 0,
-		"LOW":                         1,
-		"MEDIUM":                      2,
-		"HIGH":                        3,
-	}
-)
-
-func (x AnsweringMachineDetectionConfig_AmdSensitivity) Enum() *AnsweringMachineDetectionConfig_AmdSensitivity {
-	p := new(AnsweringMachineDetectionConfig_AmdSensitivity)
-	*p = x
-	return p
-}
-
-func (x AnsweringMachineDetectionConfig_AmdSensitivity) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (AnsweringMachineDetectionConfig_AmdSensitivity) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_calls_proto_enumTypes[15].Descriptor()
-}
-
-func (AnsweringMachineDetectionConfig_AmdSensitivity) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_calls_proto_enumTypes[15]
-}
-
-func (x AnsweringMachineDetectionConfig_AmdSensitivity) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use AnsweringMachineDetectionConfig_AmdSensitivity.Descriptor instead.
-func (AnsweringMachineDetectionConfig_AmdSensitivity) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{12, 1}
-}
-
-// Base configuration of services (ondewo-nlu, text-to-speech, speech-to-text, asterisk)
-type BaseServiceConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// service host IP
-	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	// service port
-	Port int32 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
-	// PEM certificate(s) the service&apos;s gRPC server certificate chains to (CA or self-signed leaf), with real or
-	// escaped newlines; never a private key. Required for the S2T, NLU and T2S configs of a call unless the VTSI
-	// server runs with ONDEWO_VTSI_ALLOW_INSECURE_UPSTREAM=True (lab and CI only); an empty value is otherwise
-	// refused with FAILED_PRECONDITION (UPSTREAM_TLS_REQUIRED).
-	GrpcCert      string `protobuf:"bytes,3,opt,name=grpc_cert,json=grpcCert,proto3" json:"grpc_cert,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BaseServiceConfig) Reset() {
-	*x = BaseServiceConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BaseServiceConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BaseServiceConfig) ProtoMessage() {}
-
-func (x *BaseServiceConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BaseServiceConfig.ProtoReflect.Descriptor instead.
-func (*BaseServiceConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *BaseServiceConfig) GetHost() string {
-	if x != nil {
-		return x.Host
-	}
-	return ""
-}
-
-func (x *BaseServiceConfig) GetPort() int32 {
-	if x != nil {
-		return x.Port
-	}
-	return 0
-}
-
-func (x *BaseServiceConfig) GetGrpcCert() string {
-	if x != nil {
-		return x.GrpcCert
-	}
-	return ""
-}
-
-// Credentials
-type Credentials struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Account name - usually email address
-	AccountName string `protobuf:"bytes,1,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
-	// password of the account
-	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Credentials) Reset() {
-	*x = Credentials{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Credentials) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Credentials) ProtoMessage() {}
-
-func (x *Credentials) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Credentials.ProtoReflect.Descriptor instead.
-func (*Credentials) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *Credentials) GetAccountName() string {
-	if x != nil {
-		return x.AccountName
-	}
-	return ""
-}
-
-func (x *Credentials) GetPassword() string {
-	if x != nil {
-		return x.Password
-	}
-	return ""
-}
-
-// NLU Configuration
-type NluVtsiConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Base config
-	// Host, Port, and [Optional] GRPC cert
-	NluBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=nlu_base_config,json=nluBaseConfig,proto3" json:"nlu_base_config,omitempty"`
-	// authentication information (login information)
-	//
-	// Types that are valid to be assigned to Authentication:
-	//
-	//	*NluVtsiConfig_Credentials
-	//	*NluVtsiConfig_AuthToken
-	Authentication isNluVtsiConfig_Authentication `protobuf_oneof:"authentication"`
-	// The resource name of the agent.
-	// Format: <pre><code>projects/&lt;uuid&gt;/agent</code></pre>
-	AgentName string `protobuf:"bytes,4,opt,name=agent_name,json=agentName,proto3" json:"agent_name,omitempty"`
-	// language code in a two letter iso code, e.g. de, en, etc.
-	LanguageCode string `protobuf:"bytes,5,opt,name=language_code,json=languageCode,proto3" json:"language_code,omitempty"`
-	// name of intent to trigger at the start of a call
-	InitialIntent string `protobuf:"bytes,6,opt,name=initial_intent,json=initialIntent,proto3" json:"initial_intent,omitempty"`
-	// ondewo-nlu list of contexts
-	Contexts []*nlu.Context `protobuf:"bytes,7,rep,name=contexts,proto3" json:"contexts,omitempty"`
-	// http basic auth token
-	HttpBasicAuthToken string `protobuf:"bytes,8,opt,name=http_basic_auth_token,json=httpBasicAuthToken,proto3" json:"http_basic_auth_token,omitempty"`
-	// Return the message specified in Intent.Message.Platform platform to the user in the DetectIntentResponse
-	Platform      *nlu.Intent_Message_Platform `protobuf:"varint,9,opt,name=platform,proto3,enum=ondewo.nlu.Intent_Message_Platform,oneof" json:"platform,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *NluVtsiConfig) Reset() {
-	*x = NluVtsiConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NluVtsiConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NluVtsiConfig) ProtoMessage() {}
-
-func (x *NluVtsiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NluVtsiConfig.ProtoReflect.Descriptor instead.
-func (*NluVtsiConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *NluVtsiConfig) GetNluBaseConfig() *BaseServiceConfig {
-	if x != nil {
-		return x.NluBaseConfig
-	}
-	return nil
-}
-
-func (x *NluVtsiConfig) GetAuthentication() isNluVtsiConfig_Authentication {
-	if x != nil {
-		return x.Authentication
-	}
-	return nil
-}
-
-func (x *NluVtsiConfig) GetCredentials() *Credentials {
-	if x != nil {
-		if x, ok := x.Authentication.(*NluVtsiConfig_Credentials); ok {
-			return x.Credentials
-		}
-	}
-	return nil
-}
-
-func (x *NluVtsiConfig) GetAuthToken() string {
-	if x != nil {
-		if x, ok := x.Authentication.(*NluVtsiConfig_AuthToken); ok {
-			return x.AuthToken
-		}
-	}
-	return ""
-}
-
-func (x *NluVtsiConfig) GetAgentName() string {
-	if x != nil {
-		return x.AgentName
-	}
-	return ""
-}
-
-func (x *NluVtsiConfig) GetLanguageCode() string {
-	if x != nil {
-		return x.LanguageCode
-	}
-	return ""
-}
-
-func (x *NluVtsiConfig) GetInitialIntent() string {
-	if x != nil {
-		return x.InitialIntent
-	}
-	return ""
-}
-
-func (x *NluVtsiConfig) GetContexts() []*nlu.Context {
-	if x != nil {
-		return x.Contexts
-	}
-	return nil
-}
-
-func (x *NluVtsiConfig) GetHttpBasicAuthToken() string {
-	if x != nil {
-		return x.HttpBasicAuthToken
-	}
-	return ""
-}
-
-func (x *NluVtsiConfig) GetPlatform() nlu.Intent_Message_Platform {
-	if x != nil && x.Platform != nil {
-		return *x.Platform
-	}
-	return nlu.Intent_Message_Platform(0)
-}
-
-type isNluVtsiConfig_Authentication interface {
-	isNluVtsiConfig_Authentication()
-}
-
-type NluVtsiConfig_Credentials struct {
-	// Credentials with classical username and password
-	Credentials *Credentials `protobuf:"bytes,2,opt,name=credentials,proto3,oneof"`
-}
-
-type NluVtsiConfig_AuthToken struct {
-	// Authentication token
-	AuthToken string `protobuf:"bytes,3,opt,name=auth_token,json=authToken,proto3,oneof"`
-}
-
-func (*NluVtsiConfig_Credentials) isNluVtsiConfig_Authentication() {}
-
-func (*NluVtsiConfig_AuthToken) isNluVtsiConfig_Authentication() {}
-
-// Text-2-Speech Configuration
-type T2SVtsiConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Host, Port, and [Optional] GRPC cert
-	T2SBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=t2s_base_config,json=t2sBaseConfig,proto3" json:"t2s_base_config,omitempty"`
-	// Configuration of Text-2-Speech
-	T2SRequestConfig *t2s.RequestConfig `protobuf:"bytes,2,opt,name=t2s_request_config,json=t2sRequestConfig,proto3" json:"t2s_request_config,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *T2SVtsiConfig) Reset() {
-	*x = T2SVtsiConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *T2SVtsiConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*T2SVtsiConfig) ProtoMessage() {}
-
-func (x *T2SVtsiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use T2SVtsiConfig.ProtoReflect.Descriptor instead.
-func (*T2SVtsiConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *T2SVtsiConfig) GetT2SBaseConfig() *BaseServiceConfig {
-	if x != nil {
-		return x.T2SBaseConfig
-	}
-	return nil
-}
-
-func (x *T2SVtsiConfig) GetT2SRequestConfig() *t2s.RequestConfig {
-	if x != nil {
-		return x.T2SRequestConfig
-	}
-	return nil
-}
-
-// Speech-2-Text Configuration
-type S2TVtsiConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Host, Port, and [Optional] GRPC cert
-	S2TBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=s2t_base_config,json=s2tBaseConfig,proto3" json:"s2t_base_config,omitempty"`
-	// Configuration of Speech-2-Text
-	S2TTranscribeRequestConfig *s2t.TranscribeRequestConfig `protobuf:"bytes,2,opt,name=s2t_transcribe_request_config,json=s2tTranscribeRequestConfig,proto3" json:"s2t_transcribe_request_config,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
-}
-
-func (x *S2TVtsiConfig) Reset() {
-	*x = S2TVtsiConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *S2TVtsiConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*S2TVtsiConfig) ProtoMessage() {}
-
-func (x *S2TVtsiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use S2TVtsiConfig.ProtoReflect.Descriptor instead.
-func (*S2TVtsiConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *S2TVtsiConfig) GetS2TBaseConfig() *BaseServiceConfig {
-	if x != nil {
-		return x.S2TBaseConfig
-	}
-	return nil
-}
-
-func (x *S2TVtsiConfig) GetS2TTranscribeRequestConfig() *s2t.TranscribeRequestConfig {
-	if x != nil {
-		return x.S2TTranscribeRequestConfig
-	}
-	return nil
+// Deprecated: Use CallSorting_CallSortingField.Descriptor instead.
+func (CallSorting_CallSortingField) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{90, 0}
 }
 
 // Asterisk configuration
@@ -1384,7 +905,7 @@ type AsteriskConfig struct {
 
 func (x *AsteriskConfig) Reset() {
 	*x = AsteriskConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[5]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1396,7 +917,7 @@ func (x *AsteriskConfig) String() string {
 func (*AsteriskConfig) ProtoMessage() {}
 
 func (x *AsteriskConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[5]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1409,7 +930,7 @@ func (x *AsteriskConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AsteriskConfig.ProtoReflect.Descriptor instead.
 func (*AsteriskConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{5}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *AsteriskConfig) GetAsteriskBaseConfig() *BaseServiceConfig {
@@ -1419,1537 +940,48 @@ func (x *AsteriskConfig) GetAsteriskBaseConfig() *BaseServiceConfig {
 	return nil
 }
 
-// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI which are common for both listener and caller
-type CommonServicesConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// speech-to-text service configuration
-	S2TVtsiConfig *S2TVtsiConfig `protobuf:"bytes,1,opt,name=s2t_vtsi_config,json=s2tVtsiConfig,proto3" json:"s2t_vtsi_config,omitempty"`
-	// ondewo-nlu configuration
-	NluVtsiConfig *NluVtsiConfig `protobuf:"bytes,2,opt,name=nlu_vtsi_config,json=nluVtsiConfig,proto3" json:"nlu_vtsi_config,omitempty"`
-	// text-to-speech service configuration
-	T2SVtsiConfig *T2SVtsiConfig `protobuf:"bytes,3,opt,name=t2s_vtsi_config,json=t2sVtsiConfig,proto3" json:"t2s_vtsi_config,omitempty"`
-	// CSI service configuration
-	CsiVtsiConfig *CsiVtsiConfig `protobuf:"bytes,4,opt,name=csi_vtsi_config,json=csiVtsiConfig,proto3" json:"csi_vtsi_config,omitempty"`
-	// Voice interaction configuration for turn detection, interruption (barge-in) handling and response timing
-	VoiceInteractionConfig *VoiceInteractionConfig `protobuf:"bytes,5,opt,name=voice_interaction_config,json=voiceInteractionConfig,proto3" json:"voice_interaction_config,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *CommonServicesConfig) Reset() {
-	*x = CommonServicesConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CommonServicesConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CommonServicesConfig) ProtoMessage() {}
-
-func (x *CommonServicesConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CommonServicesConfig.ProtoReflect.Descriptor instead.
-func (*CommonServicesConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *CommonServicesConfig) GetS2TVtsiConfig() *S2TVtsiConfig {
-	if x != nil {
-		return x.S2TVtsiConfig
-	}
-	return nil
-}
-
-func (x *CommonServicesConfig) GetNluVtsiConfig() *NluVtsiConfig {
-	if x != nil {
-		return x.NluVtsiConfig
-	}
-	return nil
-}
-
-func (x *CommonServicesConfig) GetT2SVtsiConfig() *T2SVtsiConfig {
-	if x != nil {
-		return x.T2SVtsiConfig
-	}
-	return nil
-}
-
-func (x *CommonServicesConfig) GetCsiVtsiConfig() *CsiVtsiConfig {
-	if x != nil {
-		return x.CsiVtsiConfig
-	}
-	return nil
-}
-
-func (x *CommonServicesConfig) GetVoiceInteractionConfig() *VoiceInteractionConfig {
-	if x != nil {
-		return x.VoiceInteractionConfig
-	}
-	return nil
-}
-
-// Configuration of the voice interaction behavior of a call:
-// turn detection, interruption (barge-in) handling and response timing
-type VoiceInteractionConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Configuration of the turn detection
-	TurnDetectionConfig *TurnDetectionConfig `protobuf:"bytes,1,opt,name=turn_detection_config,json=turnDetectionConfig,proto3" json:"turn_detection_config,omitempty"`
-	// Configuration of the interruption (barge-in) handling
-	InterruptionHandlingConfig *InterruptionHandlingConfig `protobuf:"bytes,2,opt,name=interruption_handling_config,json=interruptionHandlingConfig,proto3" json:"interruption_handling_config,omitempty"`
-	// Configuration of the response timing
-	ResponseTimingConfig *ResponseTimingConfig `protobuf:"bytes,3,opt,name=response_timing_config,json=responseTimingConfig,proto3" json:"response_timing_config,omitempty"`
-	// Configuration of the answering machine detection (AMD) of an outbound call.
-	// Only accepted for pooled persistent callers: a listener or a one-shot caller that carries it
-	// is rejected with INVALID_ARGUMENT
-	AnsweringMachineDetectionConfig *AnsweringMachineDetectionConfig `protobuf:"bytes,4,opt,name=answering_machine_detection_config,json=answeringMachineDetectionConfig,proto3" json:"answering_machine_detection_config,omitempty"`
-	unknownFields                   protoimpl.UnknownFields
-	sizeCache                       protoimpl.SizeCache
-}
-
-func (x *VoiceInteractionConfig) Reset() {
-	*x = VoiceInteractionConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *VoiceInteractionConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VoiceInteractionConfig) ProtoMessage() {}
-
-func (x *VoiceInteractionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use VoiceInteractionConfig.ProtoReflect.Descriptor instead.
-func (*VoiceInteractionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *VoiceInteractionConfig) GetTurnDetectionConfig() *TurnDetectionConfig {
-	if x != nil {
-		return x.TurnDetectionConfig
-	}
-	return nil
-}
-
-func (x *VoiceInteractionConfig) GetInterruptionHandlingConfig() *InterruptionHandlingConfig {
-	if x != nil {
-		return x.InterruptionHandlingConfig
-	}
-	return nil
-}
-
-func (x *VoiceInteractionConfig) GetResponseTimingConfig() *ResponseTimingConfig {
-	if x != nil {
-		return x.ResponseTimingConfig
-	}
-	return nil
-}
-
-func (x *VoiceInteractionConfig) GetAnsweringMachineDetectionConfig() *AnsweringMachineDetectionConfig {
-	if x != nil {
-		return x.AnsweringMachineDetectionConfig
-	}
-	return nil
-}
-
-// Configuration of the turn detection, i.e. deciding when the caller has finished speaking
-type TurnDetectionConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Mode of the turn detection. Defaults to SEMANTIC_MODEL if unspecified
-	Mode TurnDetectionConfig_TurnDetectionMode `protobuf:"varint,1,opt,name=mode,proto3,enum=ondewo.vtsi.TurnDetectionConfig_TurnDetectionMode" json:"mode,omitempty"`
-	// Optional: Minimum delay in seconds before a confidently detected end of turn is committed (default: 0.5)
-	MinEndpointingDelaySeconds *float32 `protobuf:"fixed32,2,opt,name=min_endpointing_delay_seconds,json=minEndpointingDelaySeconds,proto3,oneof" json:"min_endpointing_delay_seconds,omitempty"`
-	// Optional: Maximum delay in seconds to wait for an end of turn before the turn is committed
-	// from the latest stable partial transcription (default: 3.0)
-	MaxEndpointingDelaySeconds *float32 `protobuf:"fixed32,3,opt,name=max_endpointing_delay_seconds,json=maxEndpointingDelaySeconds,proto3,oneof" json:"max_endpointing_delay_seconds,omitempty"`
-	// Eagerness of the turn detection: scales both endpointing delays. Defaults to NORMAL if unspecified
-	TurnEagerness TurnDetectionConfig_TurnEagerness `protobuf:"varint,4,opt,name=turn_eagerness,json=turnEagerness,proto3,enum=ondewo.vtsi.TurnDetectionConfig_TurnEagerness" json:"turn_eagerness,omitempty"`
-	// System prompt for the semantic (LLM) turn detection model of the speech-to-text service
-	TurnDetectionSystemPrompt *string `protobuf:"bytes,5,opt,name=turn_detection_system_prompt,json=turnDetectionSystemPrompt,proto3,oneof" json:"turn_detection_system_prompt,omitempty"`
-	// User prompt for the semantic (LLM) turn detection model of the speech-to-text service
-	TurnDetectionUserPrompt *string `protobuf:"bytes,6,opt,name=turn_detection_user_prompt,json=turnDetectionUserPrompt,proto3,oneof" json:"turn_detection_user_prompt,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
-}
-
-func (x *TurnDetectionConfig) Reset() {
-	*x = TurnDetectionConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TurnDetectionConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TurnDetectionConfig) ProtoMessage() {}
-
-func (x *TurnDetectionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TurnDetectionConfig.ProtoReflect.Descriptor instead.
-func (*TurnDetectionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *TurnDetectionConfig) GetMode() TurnDetectionConfig_TurnDetectionMode {
-	if x != nil {
-		return x.Mode
-	}
-	return TurnDetectionConfig_TURN_DETECTION_MODE_UNSPECIFIED
-}
-
-func (x *TurnDetectionConfig) GetMinEndpointingDelaySeconds() float32 {
-	if x != nil && x.MinEndpointingDelaySeconds != nil {
-		return *x.MinEndpointingDelaySeconds
-	}
-	return 0
-}
-
-func (x *TurnDetectionConfig) GetMaxEndpointingDelaySeconds() float32 {
-	if x != nil && x.MaxEndpointingDelaySeconds != nil {
-		return *x.MaxEndpointingDelaySeconds
-	}
-	return 0
-}
-
-func (x *TurnDetectionConfig) GetTurnEagerness() TurnDetectionConfig_TurnEagerness {
-	if x != nil {
-		return x.TurnEagerness
-	}
-	return TurnDetectionConfig_TURN_EAGERNESS_UNSPECIFIED
-}
-
-func (x *TurnDetectionConfig) GetTurnDetectionSystemPrompt() string {
-	if x != nil && x.TurnDetectionSystemPrompt != nil {
-		return *x.TurnDetectionSystemPrompt
-	}
-	return ""
-}
-
-func (x *TurnDetectionConfig) GetTurnDetectionUserPrompt() string {
-	if x != nil && x.TurnDetectionUserPrompt != nil {
-		return *x.TurnDetectionUserPrompt
-	}
-	return ""
-}
-
-// Configuration of the interruption (barge-in) handling, i.e. the caller speaking while the bot is speaking
-type InterruptionHandlingConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Enable interruption (barge-in) handling, i.e. the caller can interrupt the bot while it is speaking
-	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
-	// Optional: Minimum duration in seconds of caller speech while the bot is speaking
-	// to trigger an interruption (noise gate) (default: 0.5)
-	MinInterruptionDurationSeconds *float32 `protobuf:"fixed32,2,opt,name=min_interruption_duration_seconds,json=minInterruptionDurationSeconds,proto3,oneof" json:"min_interruption_duration_seconds,omitempty"`
-	// Optional: Minimum number of transcribed words of caller speech while the bot is speaking
-	// to trigger an interruption (default: 2)
-	MinInterruptionWords *int32 `protobuf:"varint,3,opt,name=min_interruption_words,json=minInterruptionWords,proto3,oneof" json:"min_interruption_words,omitempty"`
-	// Optional: Time in seconds after an interruption trigger without a committed transcription
-	// after which the interruption is classified as a false interruption (default: 2.0)
-	FalseInterruptionTimeoutSeconds *float32 `protobuf:"fixed32,4,opt,name=false_interruption_timeout_seconds,json=falseInterruptionTimeoutSeconds,proto3,oneof" json:"false_interruption_timeout_seconds,omitempty"`
-	// Optional: Resume the paused bot response after a false interruption,
-	// e.g. a cough or brief background noise (default: true)
-	ResumeAfterFalseInterruption *bool `protobuf:"varint,5,opt,name=resume_after_false_interruption,json=resumeAfterFalseInterruption,proto3,oneof" json:"resume_after_false_interruption,omitempty"`
-	// Optional: Silence in seconds after a real interruption before the next bot response is played (default: 1.0)
-	BackoffSeconds *float32 `protobuf:"fixed32,6,opt,name=backoff_seconds,json=backoffSeconds,proto3,oneof" json:"backoff_seconds,omitempty"`
-	// Optional: Protect the first bot message from interruptions
-	// for the given number of seconds (default: 0 = no protection)
-	FirstMessageProtectedSeconds *float32 `protobuf:"fixed32,7,opt,name=first_message_protected_seconds,json=firstMessageProtectedSeconds,proto3,oneof" json:"first_message_protected_seconds,omitempty"`
-	// Transcribe caller speech while the bot is speaking even if interruptions are disabled
-	TranscribeOnDisabledInterruptions *bool `protobuf:"varint,8,opt,name=transcribe_on_disabled_interruptions,json=transcribeOnDisabledInterruptions,proto3,oneof" json:"transcribe_on_disabled_interruptions,omitempty"`
-	unknownFields                     protoimpl.UnknownFields
-	sizeCache                         protoimpl.SizeCache
-}
-
-func (x *InterruptionHandlingConfig) Reset() {
-	*x = InterruptionHandlingConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *InterruptionHandlingConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InterruptionHandlingConfig) ProtoMessage() {}
-
-func (x *InterruptionHandlingConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InterruptionHandlingConfig.ProtoReflect.Descriptor instead.
-func (*InterruptionHandlingConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *InterruptionHandlingConfig) GetEnabled() bool {
-	if x != nil && x.Enabled != nil {
-		return *x.Enabled
-	}
-	return false
-}
-
-func (x *InterruptionHandlingConfig) GetMinInterruptionDurationSeconds() float32 {
-	if x != nil && x.MinInterruptionDurationSeconds != nil {
-		return *x.MinInterruptionDurationSeconds
-	}
-	return 0
-}
-
-func (x *InterruptionHandlingConfig) GetMinInterruptionWords() int32 {
-	if x != nil && x.MinInterruptionWords != nil {
-		return *x.MinInterruptionWords
-	}
-	return 0
-}
-
-func (x *InterruptionHandlingConfig) GetFalseInterruptionTimeoutSeconds() float32 {
-	if x != nil && x.FalseInterruptionTimeoutSeconds != nil {
-		return *x.FalseInterruptionTimeoutSeconds
-	}
-	return 0
-}
-
-func (x *InterruptionHandlingConfig) GetResumeAfterFalseInterruption() bool {
-	if x != nil && x.ResumeAfterFalseInterruption != nil {
-		return *x.ResumeAfterFalseInterruption
-	}
-	return false
-}
-
-func (x *InterruptionHandlingConfig) GetBackoffSeconds() float32 {
-	if x != nil && x.BackoffSeconds != nil {
-		return *x.BackoffSeconds
-	}
-	return 0
-}
-
-func (x *InterruptionHandlingConfig) GetFirstMessageProtectedSeconds() float32 {
-	if x != nil && x.FirstMessageProtectedSeconds != nil {
-		return *x.FirstMessageProtectedSeconds
-	}
-	return 0
-}
-
-func (x *InterruptionHandlingConfig) GetTranscribeOnDisabledInterruptions() bool {
-	if x != nil && x.TranscribeOnDisabledInterruptions != nil {
-		return *x.TranscribeOnDisabledInterruptions
-	}
-	return false
-}
-
-// Configuration of the response timing, i.e. when and how the bot responds
-type ResponseTimingConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Seconds of caller silence after a bot response until a follow-up event
-	// is triggered (default: 20.0, valid range: 1.0 - 30.0)
-	TurnTimeoutSeconds *float32 `protobuf:"fixed32,1,opt,name=turn_timeout_seconds,json=turnTimeoutSeconds,proto3,oneof" json:"turn_timeout_seconds,omitempty"`
-	// Optional: Seconds of caller silence until the call is ended.
-	// Unset = off (-1 is also accepted as explicit off)
-	SilenceEndCallTimeoutSeconds *float32 `protobuf:"fixed32,2,opt,name=silence_end_call_timeout_seconds,json=silenceEndCallTimeoutSeconds,proto3,oneof" json:"silence_end_call_timeout_seconds,omitempty"`
-	// Configuration of the soft timeout filler messages
-	SoftTimeoutConfig *SoftTimeoutConfig `protobuf:"bytes,3,opt,name=soft_timeout_config,json=softTimeoutConfig,proto3" json:"soft_timeout_config,omitempty"`
-	// Optional: Enable preemptive response generation on an eagerly detected end of turn (default: false)
-	PreemptiveGenerationEnabled *bool `protobuf:"varint,4,opt,name=preemptive_generation_enabled,json=preemptiveGenerationEnabled,proto3,oneof" json:"preemptive_generation_enabled,omitempty"`
-	// Optional: Enable chunked text-to-speech streaming for a lower time to first audio (default: false)
-	T2SChunkedStreamingEnabled *bool `protobuf:"varint,5,opt,name=t2s_chunked_streaming_enabled,json=t2sChunkedStreamingEnabled,proto3,oneof" json:"t2s_chunked_streaming_enabled,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
-}
-
-func (x *ResponseTimingConfig) Reset() {
-	*x = ResponseTimingConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ResponseTimingConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResponseTimingConfig) ProtoMessage() {}
-
-func (x *ResponseTimingConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResponseTimingConfig.ProtoReflect.Descriptor instead.
-func (*ResponseTimingConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *ResponseTimingConfig) GetTurnTimeoutSeconds() float32 {
-	if x != nil && x.TurnTimeoutSeconds != nil {
-		return *x.TurnTimeoutSeconds
-	}
-	return 0
-}
-
-func (x *ResponseTimingConfig) GetSilenceEndCallTimeoutSeconds() float32 {
-	if x != nil && x.SilenceEndCallTimeoutSeconds != nil {
-		return *x.SilenceEndCallTimeoutSeconds
-	}
-	return 0
-}
-
-func (x *ResponseTimingConfig) GetSoftTimeoutConfig() *SoftTimeoutConfig {
-	if x != nil {
-		return x.SoftTimeoutConfig
-	}
-	return nil
-}
-
-func (x *ResponseTimingConfig) GetPreemptiveGenerationEnabled() bool {
-	if x != nil && x.PreemptiveGenerationEnabled != nil {
-		return *x.PreemptiveGenerationEnabled
-	}
-	return false
-}
-
-func (x *ResponseTimingConfig) GetT2SChunkedStreamingEnabled() bool {
-	if x != nil && x.T2SChunkedStreamingEnabled != nil {
-		return *x.T2SChunkedStreamingEnabled
-	}
-	return false
-}
-
-// Configuration of the soft timeout, i.e. filler messages played
-// when the response generation takes longer than the timeout
-type SoftTimeoutConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Seconds after which a filler message is played while the response is still being generated.
-	// Unset = off (-1 is also accepted as explicit off). Recommended: 3.0
-	TimeoutSeconds *float32 `protobuf:"fixed32,1,opt,name=timeout_seconds,json=timeoutSeconds,proto3,oneof" json:"timeout_seconds,omitempty"`
-	// Filler messages, rotated per soft timeout (maximum 7 messages, each 1 - 200 characters)
-	Messages []string `protobuf:"bytes,2,rep,name=messages,proto3" json:"messages,omitempty"`
-	// Optional: Maximum number of filler messages per response generation (default: 1)
-	MaxPerGeneration *int32 `protobuf:"varint,3,opt,name=max_per_generation,json=maxPerGeneration,proto3,oneof" json:"max_per_generation,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *SoftTimeoutConfig) Reset() {
-	*x = SoftTimeoutConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SoftTimeoutConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SoftTimeoutConfig) ProtoMessage() {}
-
-func (x *SoftTimeoutConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SoftTimeoutConfig.ProtoReflect.Descriptor instead.
-func (*SoftTimeoutConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{11}
-}
-
-func (x *SoftTimeoutConfig) GetTimeoutSeconds() float32 {
-	if x != nil && x.TimeoutSeconds != nil {
-		return *x.TimeoutSeconds
-	}
-	return 0
-}
-
-func (x *SoftTimeoutConfig) GetMessages() []string {
-	if x != nil {
-		return x.Messages
-	}
-	return nil
-}
-
-func (x *SoftTimeoutConfig) GetMaxPerGeneration() int32 {
-	if x != nil && x.MaxPerGeneration != nil {
-		return *x.MaxPerGeneration
-	}
-	return 0
-}
-
-// Configuration of the answering machine detection (AMD) of an outbound call, i.e. deciding in the first
-// seconds after the callee answered whether a person, an answering machine, a fax, an IVR or a network
-// announcement picked up, and hanging up on the non-human ones.
-// Detection listens first: the bot stays silent until the verdict is reached or the decision window ends.
-// Every field is optional: an unset field takes the default of the CSI container (listed per field below).
-// Only accepted for pooled persistent callers; the settings are part of the caller container configuration,
-// so callers with different AMD settings are never pooled together.
-// The verdict of a call is reported as ondewo.sip.SipStatus.amd_result. Reaching a hang-up-eligible verdict sets
-// the non-terminal status ondewo.sip.SipStatus.StatusType.OUTGOING_CALL_ANSWERING_MACHINE_DETECTED (the call is
-// still up), and a call ended by AMD reaches the terminal status OUTGOING_CALL_FINISHED with one of these
-// descriptions:
-// <ul>
-// <li>"Answering machine detected with hang up": the caller hung up without leaving a voice message</li>
-// <li>"Answering machine detected with left voice message and hang up": the caller hung up after starting the
-// voice message</li>
-// <li>"Answering machine detected, call ended by the answering machine": the far end hung up before a voice
-// message was started</li>
-// <li>"Answering machine detected, call ended by the answering machine after leaving a voice message": the far
-// end hung up after the voice message was started</li>
-// </ul>
-// The description is also recorded on the call as Call.answering_machine_detection_end_description.
-// Compliance: leaving a recorded message on a consumer's mailbox for marketing purposes requires the consent of
-// the callee in many jurisdictions (e.g. in Germany § 7 UWG). HANG_UP is therefore the default action.
-type AnsweringMachineDetectionConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Master switch of the answering machine detection (default: false)
-	Active *bool `protobuf:"varint,1,opt,name=active,proto3,oneof" json:"active,omitempty"`
-	// Optional: Action on a non-human verdict (default: HANG_UP)
-	Action *AnsweringMachineDetectionConfig_AmdAction `protobuf:"varint,2,opt,name=action,proto3,enum=ondewo.vtsi.AnsweringMachineDetectionConfig_AmdAction,oneof" json:"action,omitempty"`
-	// Optional: Sensitivity of the detection (default: LOW)
-	Sensitivity *AnsweringMachineDetectionConfig_AmdSensitivity `protobuf:"varint,3,opt,name=sensitivity,proto3,enum=ondewo.vtsi.AnsweringMachineDetectionConfig_AmdSensitivity,oneof" json:"sensitivity,omitempty"`
-	// Optional: Maximum time in milliseconds after the callee answered to reach a verdict when no
-	// machine-leaning evidence was seen; the verdict is UNKNOWN when it is reached
-	// (default: 4000, valid range: 1500 - 10000)
-	MaxDecisionTimeMs *int32 `protobuf:"varint,4,opt,name=max_decision_time_ms,json=maxDecisionTimeMs,proto3,oneof" json:"max_decision_time_ms,omitempty"`
-	// Optional: Maximum time in milliseconds after the callee answered to reach a verdict once
-	// machine-leaning evidence extended the decision window (default: 11000, valid range: 4000 - 20000)
-	MaxMachineWaitMs *int32 `protobuf:"varint,5,opt,name=max_machine_wait_ms,json=maxMachineWaitMs,proto3,oneof" json:"max_machine_wait_ms,omitempty"`
-	// Optional: Time in milliseconds to wait for a beep after a long greeting ended
-	// (default: 1500, valid range: 0 - 4000)
-	BeepWaitAfterGreetingMs *int32 `protobuf:"varint,6,opt,name=beep_wait_after_greeting_ms,json=beepWaitAfterGreetingMs,proto3,oneof" json:"beep_wait_after_greeting_ms,omitempty"`
-	// Optional: Silence in milliseconds after the callee answered without any speech, after which the verdict
-	// is NO_SPEECH, which is treated like a person (default: 3500, valid range: 1000 - 10000)
-	InitialSilenceMs *int32 `protobuf:"varint,7,opt,name=initial_silence_ms,json=initialSilenceMs,proto3,oneof" json:"initial_silence_ms,omitempty"`
-	// Optional: Continuous speech in milliseconds beyond which a greeting is machine-leaning
-	// (default: 2400, valid range: 1000 - 6000)
-	MaxHumanGreetingMs *int32 `protobuf:"varint,8,opt,name=max_human_greeting_ms,json=maxHumanGreetingMs,proto3,oneof" json:"max_human_greeting_ms,omitempty"`
-	// Optional: Silence in milliseconds after the first speech burst that ends a human greeting
-	// (default: 900, valid range: 300 - 3000)
-	GreetingEndSilenceMs *int32 `protobuf:"varint,9,opt,name=greeting_end_silence_ms,json=greetingEndSilenceMs,proto3,oneof" json:"greeting_end_silence_ms,omitempty"`
-	// Optional: Enable the tone detector for the beep of an answering machine (default: true)
-	BeepDetectionActive *bool `protobuf:"varint,10,opt,name=beep_detection_active,json=beepDetectionActive,proto3,oneof" json:"beep_detection_active,omitempty"`
-	// Additional phrases that indicate an answering machine, added to the built-in de and en phrase lists
-	// (maximum 50 phrases, each 1 - 80 characters)
-	AdditionalMachinePhrases []string `protobuf:"bytes,11,rep,name=additional_machine_phrases,json=additionalMachinePhrases,proto3" json:"additional_machine_phrases,omitempty"`
-	// Additional phrases that indicate a person, added to the built-in de and en phrase lists
-	// (maximum 50 phrases, each 1 - 80 characters)
-	AdditionalHumanPhrases []string `protobuf:"bytes,12,rep,name=additional_human_phrases,json=additionalHumanPhrases,proto3" json:"additional_human_phrases,omitempty"`
-	// Optional: Hang up on a FAX verdict when the action is HANG_UP (default: true)
-	HangUpOnFax *bool `protobuf:"varint,13,opt,name=hang_up_on_fax,json=hangUpOnFax,proto3,oneof" json:"hang_up_on_fax,omitempty"`
-	// Optional: Hang up on a NETWORK_ANNOUNCEMENT verdict, e.g. "the number is not reachable",
-	// when the action is HANG_UP (default: true)
-	HangUpOnNetworkAnnouncement *bool `protobuf:"varint,14,opt,name=hang_up_on_network_announcement,json=hangUpOnNetworkAnnouncement,proto3,oneof" json:"hang_up_on_network_announcement,omitempty"`
-	// Optional: Hang up on an IVR verdict, i.e. an automated menu, when the action is HANG_UP (default: false)
-	HangUpOnIvr *bool `protobuf:"varint,15,opt,name=hang_up_on_ivr,json=hangUpOnIvr,proto3,oneof" json:"hang_up_on_ivr,omitempty"`
-	// Optional: Hang up on a CALL_SCREENING verdict, i.e. a call screening assistant asking for the reason of
-	// the call, when the action is HANG_UP (default: false)
-	HangUpOnCallScreening *bool `protobuf:"varint,16,opt,name=hang_up_on_call_screening,json=hangUpOnCallScreening,proto3,oneof" json:"hang_up_on_call_screening,omitempty"`
-	// Optional: Name of the NLU intent whose fulfillment is the voice message when the action is
-	// LEAVE_VOICE_MESSAGE; it is triggered once (default: the welcome intent of the NLU project,
-	// 1 - 200 characters when set)
-	VoiceMessageIntent *string `protobuf:"bytes,17,opt,name=voice_message_intent,json=voiceMessageIntent,proto3,oneof" json:"voice_message_intent,omitempty"`
-	// Optional: Maximum time in milliseconds after the verdict to wait for the beep, or for the end of the
-	// machine greeting, before the voice message is spoken when the action is LEAVE_VOICE_MESSAGE;
-	// 0 speaks immediately (default: 10000, valid range: 0 - 30000)
-	VoiceMessageMaxBeepWaitMs *int32 `protobuf:"varint,18,opt,name=voice_message_max_beep_wait_ms,json=voiceMessageMaxBeepWaitMs,proto3,oneof" json:"voice_message_max_beep_wait_ms,omitempty"`
-	// Optional: Maximum time in milliseconds after the verdict until the call is hung up when the action is
-	// LEAVE_VOICE_MESSAGE, also when the voice message has not finished playing
-	// (default: 30000, valid range: 5000 - 120000)
-	VoiceMessageTimeoutMs *int32 `protobuf:"varint,19,opt,name=voice_message_timeout_ms,json=voiceMessageTimeoutMs,proto3,oneof" json:"voice_message_timeout_ms,omitempty"`
-	// Optional: Enable the detection of machine and person phrases in the transcribed greeting, i.e. the
-	// built-in phrase lists plus additional_machine_phrases and additional_human_phrases; turning it off
-	// removes this evidence and the detection rules that need it (default: true)
-	KeywordDetectionActive *bool `protobuf:"varint,20,opt,name=keyword_detection_active,json=keywordDetectionActive,proto3,oneof" json:"keyword_detection_active,omitempty"`
-	// Optional: Enable the detection based on the speech and silence cadence of the greeting, e.g. its
-	// length and the silence after it; turning it off removes this evidence and the detection rules that
-	// need it (default: true)
-	CadenceDetectionActive *bool `protobuf:"varint,21,opt,name=cadence_detection_active,json=cadenceDetectionActive,proto3,oneof" json:"cadence_detection_active,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *AnsweringMachineDetectionConfig) Reset() {
-	*x = AnsweringMachineDetectionConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AnsweringMachineDetectionConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AnsweringMachineDetectionConfig) ProtoMessage() {}
-
-func (x *AnsweringMachineDetectionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AnsweringMachineDetectionConfig.ProtoReflect.Descriptor instead.
-func (*AnsweringMachineDetectionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *AnsweringMachineDetectionConfig) GetActive() bool {
-	if x != nil && x.Active != nil {
-		return *x.Active
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetAction() AnsweringMachineDetectionConfig_AmdAction {
-	if x != nil && x.Action != nil {
-		return *x.Action
-	}
-	return AnsweringMachineDetectionConfig_AMD_ACTION_UNSPECIFIED
-}
-
-func (x *AnsweringMachineDetectionConfig) GetSensitivity() AnsweringMachineDetectionConfig_AmdSensitivity {
-	if x != nil && x.Sensitivity != nil {
-		return *x.Sensitivity
-	}
-	return AnsweringMachineDetectionConfig_AMD_SENSITIVITY_UNSPECIFIED
-}
-
-func (x *AnsweringMachineDetectionConfig) GetMaxDecisionTimeMs() int32 {
-	if x != nil && x.MaxDecisionTimeMs != nil {
-		return *x.MaxDecisionTimeMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetMaxMachineWaitMs() int32 {
-	if x != nil && x.MaxMachineWaitMs != nil {
-		return *x.MaxMachineWaitMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetBeepWaitAfterGreetingMs() int32 {
-	if x != nil && x.BeepWaitAfterGreetingMs != nil {
-		return *x.BeepWaitAfterGreetingMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetInitialSilenceMs() int32 {
-	if x != nil && x.InitialSilenceMs != nil {
-		return *x.InitialSilenceMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetMaxHumanGreetingMs() int32 {
-	if x != nil && x.MaxHumanGreetingMs != nil {
-		return *x.MaxHumanGreetingMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetGreetingEndSilenceMs() int32 {
-	if x != nil && x.GreetingEndSilenceMs != nil {
-		return *x.GreetingEndSilenceMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetBeepDetectionActive() bool {
-	if x != nil && x.BeepDetectionActive != nil {
-		return *x.BeepDetectionActive
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetAdditionalMachinePhrases() []string {
-	if x != nil {
-		return x.AdditionalMachinePhrases
-	}
-	return nil
-}
-
-func (x *AnsweringMachineDetectionConfig) GetAdditionalHumanPhrases() []string {
-	if x != nil {
-		return x.AdditionalHumanPhrases
-	}
-	return nil
-}
-
-func (x *AnsweringMachineDetectionConfig) GetHangUpOnFax() bool {
-	if x != nil && x.HangUpOnFax != nil {
-		return *x.HangUpOnFax
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetHangUpOnNetworkAnnouncement() bool {
-	if x != nil && x.HangUpOnNetworkAnnouncement != nil {
-		return *x.HangUpOnNetworkAnnouncement
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetHangUpOnIvr() bool {
-	if x != nil && x.HangUpOnIvr != nil {
-		return *x.HangUpOnIvr
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetHangUpOnCallScreening() bool {
-	if x != nil && x.HangUpOnCallScreening != nil {
-		return *x.HangUpOnCallScreening
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetVoiceMessageIntent() string {
-	if x != nil && x.VoiceMessageIntent != nil {
-		return *x.VoiceMessageIntent
-	}
-	return ""
-}
-
-func (x *AnsweringMachineDetectionConfig) GetVoiceMessageMaxBeepWaitMs() int32 {
-	if x != nil && x.VoiceMessageMaxBeepWaitMs != nil {
-		return *x.VoiceMessageMaxBeepWaitMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetVoiceMessageTimeoutMs() int32 {
-	if x != nil && x.VoiceMessageTimeoutMs != nil {
-		return *x.VoiceMessageTimeoutMs
-	}
-	return 0
-}
-
-func (x *AnsweringMachineDetectionConfig) GetKeywordDetectionActive() bool {
-	if x != nil && x.KeywordDetectionActive != nil {
-		return *x.KeywordDetectionActive
-	}
-	return false
-}
-
-func (x *AnsweringMachineDetectionConfig) GetCadenceDetectionActive() bool {
-	if x != nil && x.CadenceDetectionActive != nil {
-		return *x.CadenceDetectionActive
-	}
-	return false
-}
-
-// The base config is for both the listener and caller. If you only provide it you will get a listener
-// You will need to provide <code>SipCallerConfig</code> for the caller
-type SipBaseConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// version of sip to use for call, semantic versioning e.g., 1.0.0, 1.1.0-pre-release, etc.
-	SipSimVersion string `protobuf:"bytes,1,opt,name=sip_sim_version,json=sipSimVersion,proto3" json:"sip_sim_version,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SipBaseConfig) Reset() {
-	*x = SipBaseConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[13]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SipBaseConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SipBaseConfig) ProtoMessage() {}
-
-func (x *SipBaseConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[13]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SipBaseConfig.ProtoReflect.Descriptor instead.
-func (*SipBaseConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *SipBaseConfig) GetSipSimVersion() string {
-	if x != nil {
-		return x.SipSimVersion
-	}
-	return ""
-}
-
-// Configuration of the SIP caller
-type SipCallerConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// SIP configuration
-	SipBaseConfig *SipBaseConfig `protobuf:"bytes,1,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
-	// callee id e.g. phone number to call, +4365012345678 or VOIP phone ondewo0001@ondewo.com, etc.
-	CalleeId string `protobuf:"bytes,2,opt,name=callee_id,json=calleeId,proto3" json:"callee_id,omitempty"`
-	// dictionary of sip headers that are sent on call
-	SipHeaders    map[string]string `protobuf:"bytes,3,rep,name=sip_headers,json=sipHeaders,proto3" json:"sip_headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SipCallerConfig) Reset() {
-	*x = SipCallerConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[14]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SipCallerConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SipCallerConfig) ProtoMessage() {}
-
-func (x *SipCallerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[14]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SipCallerConfig.ProtoReflect.Descriptor instead.
-func (*SipCallerConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *SipCallerConfig) GetSipBaseConfig() *SipBaseConfig {
-	if x != nil {
-		return x.SipBaseConfig
-	}
-	return nil
-}
-
-func (x *SipCallerConfig) GetCalleeId() string {
-	if x != nil {
-		return x.CalleeId
-	}
-	return ""
-}
-
-func (x *SipCallerConfig) GetSipHeaders() map[string]string {
-	if x != nil {
-		return x.SipHeaders
-	}
-	return nil
-}
-
-// CSI configuration
-type CsiVtsiConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback for the Speech-2-Text platform
-	S2TVtsiCallbacks *S2TVtsiCallbacks `protobuf:"bytes,1,opt,name=s2t_vtsi_callbacks,json=s2tVtsiCallbacks,proto3" json:"s2t_vtsi_callbacks,omitempty"`
-	// Callback for the NLU platform
-	NluVtsiCallbacks *NluVtsiCallbacks `protobuf:"bytes,2,opt,name=nlu_vtsi_callbacks,json=nluVtsiCallbacks,proto3" json:"nlu_vtsi_callbacks,omitempty"`
-	// Callback for the Text-2-Speech platform
-	T2SVtsiCallbacks *T2SVtsiCallbacks `protobuf:"bytes,3,opt,name=t2s_vtsi_callbacks,json=t2sVtsiCallbacks,proto3" json:"t2s_vtsi_callbacks,omitempty"`
-	// Configuration of the Minio Audio Object Store
-	AudioObjectStoreConfig *AudioObjectStorageConfig `protobuf:"bytes,4,opt,name=audio_object_store_config,json=audioObjectStoreConfig,proto3" json:"audio_object_store_config,omitempty"`
-	// Configuration of the RabbitMQ Message Broker
-	MessageBrokerConfig *MessageBrokerConfig `protobuf:"bytes,5,opt,name=message_broker_config,json=messageBrokerConfig,proto3" json:"message_broker_config,omitempty"`
-	// Setting to activate if it is possible to send control messages
-	// <ul>
-	//   <li>via RabbitMQ to remote control the system</li>
-	//   <li>via embeddings in NLU text responses</li>
-	// </ul>
-	// Explicitly optional: leaving the field unset means the caller expresses no preference and the
-	// server keeps its own configured default. That is NOT the same as sending
-	// <pre><code>false</code></pre>, which is a request to switch control messages off. A
-	// presence-less bool cannot tell the two apart, so an unset field arrived as
-	// <pre><code>false</code></pre> and silently disabled control messages for callers that never
-	// mentioned them.
-	ActivateControlMessages *bool `protobuf:"varint,6,opt,name=activate_control_messages,json=activateControlMessages,proto3,oneof" json:"activate_control_messages,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
-}
-
-func (x *CsiVtsiConfig) Reset() {
-	*x = CsiVtsiConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[15]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CsiVtsiConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CsiVtsiConfig) ProtoMessage() {}
-
-func (x *CsiVtsiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[15]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CsiVtsiConfig.ProtoReflect.Descriptor instead.
-func (*CsiVtsiConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *CsiVtsiConfig) GetS2TVtsiCallbacks() *S2TVtsiCallbacks {
-	if x != nil {
-		return x.S2TVtsiCallbacks
-	}
-	return nil
-}
-
-func (x *CsiVtsiConfig) GetNluVtsiCallbacks() *NluVtsiCallbacks {
-	if x != nil {
-		return x.NluVtsiCallbacks
-	}
-	return nil
-}
-
-func (x *CsiVtsiConfig) GetT2SVtsiCallbacks() *T2SVtsiCallbacks {
-	if x != nil {
-		return x.T2SVtsiCallbacks
-	}
-	return nil
-}
-
-func (x *CsiVtsiConfig) GetAudioObjectStoreConfig() *AudioObjectStorageConfig {
-	if x != nil {
-		return x.AudioObjectStoreConfig
-	}
-	return nil
-}
-
-func (x *CsiVtsiConfig) GetMessageBrokerConfig() *MessageBrokerConfig {
-	if x != nil {
-		return x.MessageBrokerConfig
-	}
-	return nil
-}
-
-func (x *CsiVtsiConfig) GetActivateControlMessages() bool {
-	if x != nil && x.ActivateControlMessages != nil {
-		return *x.ActivateControlMessages
-	}
-	return false
-}
-
-// Minio Audio Object Store
-type AudioObjectStorageConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Audio storage should be activated or not
-	ActivateAudioObjectStorage *bool `protobuf:"varint,1,opt,name=activate_audio_object_storage,json=activateAudioObjectStorage,proto3,oneof" json:"activate_audio_object_storage,omitempty"`
-	// Configuration of the Minio Audio Object Store
-	AudioObjectStorageServicesActivationConfig *AudioObjectStorageServicesActivationConfig `protobuf:"bytes,2,opt,name=audio_object_storage_services_activation_config,json=audioObjectStorageServicesActivationConfig,proto3" json:"audio_object_storage_services_activation_config,omitempty"`
-	unknownFields                              protoimpl.UnknownFields
-	sizeCache                                  protoimpl.SizeCache
-}
-
-func (x *AudioObjectStorageConfig) Reset() {
-	*x = AudioObjectStorageConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[16]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AudioObjectStorageConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AudioObjectStorageConfig) ProtoMessage() {}
-
-func (x *AudioObjectStorageConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[16]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AudioObjectStorageConfig.ProtoReflect.Descriptor instead.
-func (*AudioObjectStorageConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{16}
-}
-
-func (x *AudioObjectStorageConfig) GetActivateAudioObjectStorage() bool {
-	if x != nil && x.ActivateAudioObjectStorage != nil {
-		return *x.ActivateAudioObjectStorage
-	}
-	return false
-}
-
-func (x *AudioObjectStorageConfig) GetAudioObjectStorageServicesActivationConfig() *AudioObjectStorageServicesActivationConfig {
-	if x != nil {
-		return x.AudioObjectStorageServicesActivationConfig
-	}
-	return nil
-}
-
-// Configuration of the Minio Audio Object Store
-type AudioObjectStorageServicesActivationConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Should audio object store save audio sent to the Speech-2-Text platform
-	ActivateS2T *bool `protobuf:"varint,1,opt,name=activate_s2t,json=activateS2t,proto3,oneof" json:"activate_s2t,omitempty"`
-	// Should audio object store save audio generated from the Text-2-Speech platform
-	ActivateT2S   *bool `protobuf:"varint,2,opt,name=activate_t2s,json=activateT2s,proto3,oneof" json:"activate_t2s,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AudioObjectStorageServicesActivationConfig) Reset() {
-	*x = AudioObjectStorageServicesActivationConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[17]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AudioObjectStorageServicesActivationConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AudioObjectStorageServicesActivationConfig) ProtoMessage() {}
-
-func (x *AudioObjectStorageServicesActivationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[17]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AudioObjectStorageServicesActivationConfig.ProtoReflect.Descriptor instead.
-func (*AudioObjectStorageServicesActivationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{17}
-}
-
-func (x *AudioObjectStorageServicesActivationConfig) GetActivateS2T() bool {
-	if x != nil && x.ActivateS2T != nil {
-		return *x.ActivateS2T
-	}
-	return false
-}
-
-func (x *AudioObjectStorageServicesActivationConfig) GetActivateT2S() bool {
-	if x != nil && x.ActivateT2S != nil {
-		return *x.ActivateT2S
-	}
-	return false
-}
-
-// Configuration of the RabbitMQ Message Broker
-type MessageBrokerConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Should the broker be activated or not
-	ActivateMessageBroker *bool `protobuf:"varint,1,opt,name=activate_message_broker,json=activateMessageBroker,proto3,oneof" json:"activate_message_broker,omitempty"`
-	// Configuration of the Broker service activation
-	MessageBrokerServicesActivationConfig *MessageBrokerServicesActivationConfig `protobuf:"bytes,2,opt,name=message_broker_services_activation_config,json=messageBrokerServicesActivationConfig,proto3" json:"message_broker_services_activation_config,omitempty"`
-	// Types that are valid to be assigned to MessageBrokerConfig:
-	//
-	//	*MessageBrokerConfig_RabbitMqConfig
-	MessageBrokerConfig isMessageBrokerConfig_MessageBrokerConfig `protobuf_oneof:"message_broker_config"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *MessageBrokerConfig) Reset() {
-	*x = MessageBrokerConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MessageBrokerConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MessageBrokerConfig) ProtoMessage() {}
-
-func (x *MessageBrokerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[18]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MessageBrokerConfig.ProtoReflect.Descriptor instead.
-func (*MessageBrokerConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *MessageBrokerConfig) GetActivateMessageBroker() bool {
-	if x != nil && x.ActivateMessageBroker != nil {
-		return *x.ActivateMessageBroker
-	}
-	return false
-}
-
-func (x *MessageBrokerConfig) GetMessageBrokerServicesActivationConfig() *MessageBrokerServicesActivationConfig {
-	if x != nil {
-		return x.MessageBrokerServicesActivationConfig
-	}
-	return nil
-}
-
-func (x *MessageBrokerConfig) GetMessageBrokerConfig() isMessageBrokerConfig_MessageBrokerConfig {
-	if x != nil {
-		return x.MessageBrokerConfig
-	}
-	return nil
-}
-
-func (x *MessageBrokerConfig) GetRabbitMqConfig() *RabbitMqConfig {
-	if x != nil {
-		if x, ok := x.MessageBrokerConfig.(*MessageBrokerConfig_RabbitMqConfig); ok {
-			return x.RabbitMqConfig
-		}
-	}
-	return nil
-}
-
-type isMessageBrokerConfig_MessageBrokerConfig interface {
-	isMessageBrokerConfig_MessageBrokerConfig()
-}
-
-type MessageBrokerConfig_RabbitMqConfig struct {
-	// Configuration of the RabbitMQ Message Broker
-	RabbitMqConfig *RabbitMqConfig `protobuf:"bytes,3,opt,name=rabbit_mq_config,json=rabbitMqConfig,proto3,oneof"`
-}
-
-func (*MessageBrokerConfig_RabbitMqConfig) isMessageBrokerConfig_MessageBrokerConfig() {}
-
-// Configuration of the RabbitMQ Message Broker
-type MessageBrokerServicesActivationConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// should RabbitMQ Message Broker be activated for Speech-2-Text platform
-	ActivateS2T *bool `protobuf:"varint,1,opt,name=activate_s2t,json=activateS2t,proto3,oneof" json:"activate_s2t,omitempty"`
-	// should RabbitMQ Message Broker be activated for NLU platform
-	ActivateNlu *bool `protobuf:"varint,2,opt,name=activate_nlu,json=activateNlu,proto3,oneof" json:"activate_nlu,omitempty"`
-	// should RabbitMQ Message Broker be activated for Text-2-Speech platform
-	ActivateT2S *bool `protobuf:"varint,3,opt,name=activate_t2s,json=activateT2s,proto3,oneof" json:"activate_t2s,omitempty"`
-	// should RabbitMQ Message Broker be activated for SIP platform
-	ActivateSip   *bool `protobuf:"varint,4,opt,name=activate_sip,json=activateSip,proto3,oneof" json:"activate_sip,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *MessageBrokerServicesActivationConfig) Reset() {
-	*x = MessageBrokerServicesActivationConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *MessageBrokerServicesActivationConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*MessageBrokerServicesActivationConfig) ProtoMessage() {}
-
-func (x *MessageBrokerServicesActivationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use MessageBrokerServicesActivationConfig.ProtoReflect.Descriptor instead.
-func (*MessageBrokerServicesActivationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *MessageBrokerServicesActivationConfig) GetActivateS2T() bool {
-	if x != nil && x.ActivateS2T != nil {
-		return *x.ActivateS2T
-	}
-	return false
-}
-
-func (x *MessageBrokerServicesActivationConfig) GetActivateNlu() bool {
-	if x != nil && x.ActivateNlu != nil {
-		return *x.ActivateNlu
-	}
-	return false
-}
-
-func (x *MessageBrokerServicesActivationConfig) GetActivateT2S() bool {
-	if x != nil && x.ActivateT2S != nil {
-		return *x.ActivateT2S
-	}
-	return false
-}
-
-func (x *MessageBrokerServicesActivationConfig) GetActivateSip() bool {
-	if x != nil && x.ActivateSip != nil {
-		return *x.ActivateSip
-	}
-	return false
-}
-
-// Configuration of the RabbitMQ Message Broker
-type RabbitMqConfig struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// host where the rabbit mq server runs
-	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	// port where the rabbit mq server runs
-	Port int32 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
-	// secondary port where the rabbit mq server runs
-	Port_2 int32 `protobuf:"varint,3,opt,name=port_2,json=port2,proto3" json:"port_2,omitempty"`
-	// user of server
-	User string `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
-	// password of server
-	Password      string `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RabbitMqConfig) Reset() {
-	*x = RabbitMqConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[20]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RabbitMqConfig) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RabbitMqConfig) ProtoMessage() {}
-
-func (x *RabbitMqConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[20]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RabbitMqConfig.ProtoReflect.Descriptor instead.
-func (*RabbitMqConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{20}
-}
-
-func (x *RabbitMqConfig) GetHost() string {
-	if x != nil {
-		return x.Host
-	}
-	return ""
-}
-
-func (x *RabbitMqConfig) GetPort() int32 {
-	if x != nil {
-		return x.Port
-	}
-	return 0
-}
-
-func (x *RabbitMqConfig) GetPort_2() int32 {
-	if x != nil {
-		return x.Port_2
-	}
-	return 0
-}
-
-func (x *RabbitMqConfig) GetUser() string {
-	if x != nil {
-		return x.User
-	}
-	return ""
-}
-
-func (x *RabbitMqConfig) GetPassword() string {
-	if x != nil {
-		return x.Password
-	}
-	return ""
-}
-
-// Callback for the Speech-2-Text platform
-type S2TVtsiCallbacks struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the Speech-2-Text will be called
-	PreS2TCallbacks []string `protobuf:"bytes,1,rep,name=pre_s2t_callbacks,json=preS2tCallbacks,proto3" json:"pre_s2t_callbacks,omitempty"`
-	// Callback executed after the Speech-2-Text has been called
-	PostS2TCallbacks []string `protobuf:"bytes,2,rep,name=post_s2t_callbacks,json=postS2tCallbacks,proto3" json:"post_s2t_callbacks,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *S2TVtsiCallbacks) Reset() {
-	*x = S2TVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[21]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *S2TVtsiCallbacks) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*S2TVtsiCallbacks) ProtoMessage() {}
-
-func (x *S2TVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[21]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use S2TVtsiCallbacks.ProtoReflect.Descriptor instead.
-func (*S2TVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{21}
-}
-
-func (x *S2TVtsiCallbacks) GetPreS2TCallbacks() []string {
-	if x != nil {
-		return x.PreS2TCallbacks
-	}
-	return nil
-}
-
-func (x *S2TVtsiCallbacks) GetPostS2TCallbacks() []string {
-	if x != nil {
-		return x.PostS2TCallbacks
-	}
-	return nil
-}
-
-// Callback for the NLU platform
-type NluVtsiCallbacks struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the NLU will be called
-	PreNluCallbacks []string `protobuf:"bytes,1,rep,name=pre_nlu_callbacks,json=preNluCallbacks,proto3" json:"pre_nlu_callbacks,omitempty"`
-	// Callback executed after the NLU has been called
-	PostNluCallbacks []string `protobuf:"bytes,2,rep,name=post_nlu_callbacks,json=postNluCallbacks,proto3" json:"post_nlu_callbacks,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *NluVtsiCallbacks) Reset() {
-	*x = NluVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[22]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NluVtsiCallbacks) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NluVtsiCallbacks) ProtoMessage() {}
-
-func (x *NluVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[22]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NluVtsiCallbacks.ProtoReflect.Descriptor instead.
-func (*NluVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{22}
-}
-
-func (x *NluVtsiCallbacks) GetPreNluCallbacks() []string {
-	if x != nil {
-		return x.PreNluCallbacks
-	}
-	return nil
-}
-
-func (x *NluVtsiCallbacks) GetPostNluCallbacks() []string {
-	if x != nil {
-		return x.PostNluCallbacks
-	}
-	return nil
-}
-
-// Callback for the Text-2-Speech platform
-type T2SVtsiCallbacks struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the Text-2-Speech will be called
-	PreT2SCallbacks []string `protobuf:"bytes,1,rep,name=pre_t2s_callbacks,json=preT2sCallbacks,proto3" json:"pre_t2s_callbacks,omitempty"`
-	// Callback executed after the Text-2-Speech has been called
-	PostT2SCallbacks []string `protobuf:"bytes,2,rep,name=post_t2s_callbacks,json=postT2sCallbacks,proto3" json:"post_t2s_callbacks,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *T2SVtsiCallbacks) Reset() {
-	*x = T2SVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *T2SVtsiCallbacks) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*T2SVtsiCallbacks) ProtoMessage() {}
-
-func (x *T2SVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use T2SVtsiCallbacks.ProtoReflect.Descriptor instead.
-func (*T2SVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{23}
-}
-
-func (x *T2SVtsiCallbacks) GetPreT2SCallbacks() []string {
-	if x != nil {
-		return x.PreT2SCallbacks
-	}
-	return nil
-}
-
-func (x *T2SVtsiCallbacks) GetPostT2SCallbacks() []string {
-	if x != nil {
-		return x.PostT2SCallbacks
-	}
-	return nil
-}
-
-// Listener represents a listener instance that waits for incoming calls
+// Listener represents a listener instance that waits for incoming calls.
+// <p>A listener is persistent: its container takes one call after the other, and <code>call_name</code> names
+// the current call (or the record that waits for the next one). Listeners are never pooled, so a
+// <code>Listener</code> has no <code>pooled</code> field.</p>
 type Listener struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name with which to perform the call of the form
+	// Resource name of the listener, of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	// Output only. Identifies the listener on <code>UpdateListener</code>.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The call name that was assigned to the call
 	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
+	// Output only.
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// SIP service configuration
+	// SIP service configuration. Updatable with <code>UpdateListener</code> (stored configuration only, see
+	// there).
 	SipBaseConfig *SipBaseConfig `protobuf:"bytes,3,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
+	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI. Updatable with <code>UpdateListener</code>
+	// (stored configuration only, see there).
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Output only. VTSI project of the listener, the project segment of <code>name</code>, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Set in every view. A 9.0.0 server leaves it empty.
+	VtsiProjectName string `protobuf:"bytes,5,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Output only. Whether the listener&apos;s current call is active (set up or connected), i.e.
+	// <code>Call.active</code> of <code>call_name</code>; false while the listener waits for a call. The same value
+	// as <code>CallResourceStatus.active</code> of the status streams. Set in the SHALLOW and FULL views.
+	Active bool `protobuf:"varint,6,opt,name=active,proto3" json:"active,omitempty"`
+	// Output only. SIP status type of the listener&apos;s current or last call (<code>Call.sip_status_type</code> of
+	// <code>call_name</code>), as <code>CallResourceStatus.sip_status_type</code>. <code>NO_SESSION</code> (the zero
+	// value) when it never had a call record. Set in the SHALLOW and FULL views.
+	SipStatusType sip.SipStatus_StatusType `protobuf:"varint,7,opt,name=sip_status_type,json=sipStatusType,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_type,omitempty"`
+	// Output only. When the listener was created (<code>StartListener</code> or a recycle by the server that
+	// recreated it). Set in the SHALLOW and FULL views.
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Listener) Reset() {
 	*x = Listener{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[24]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2961,7 +993,7 @@ func (x *Listener) String() string {
 func (*Listener) ProtoMessage() {}
 
 func (x *Listener) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[24]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2974,7 +1006,7 @@ func (x *Listener) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Listener.ProtoReflect.Descriptor instead.
 func (*Listener) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{24}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Listener) GetName() string {
@@ -3005,26 +1037,86 @@ func (x *Listener) GetCommonServicesConfig() *CommonServicesConfig {
 	return nil
 }
 
+func (x *Listener) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *Listener) GetActive() bool {
+	if x != nil {
+		return x.Active
+	}
+	return false
+}
+
+func (x *Listener) GetSipStatusType() sip.SipStatus_StatusType {
+	if x != nil {
+		return x.SipStatusType
+	}
+	return sip.SipStatus_StatusType(0)
+}
+
+func (x *Listener) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
 // Caller represents a caller instance that initiates outbound calls
 type Caller struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Caller name with which to perform the call of the form
+	// Resource name of the caller, of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
+	// Output only. Identifies the caller on <code>UpdateCaller</code>.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The call name that was assigned to the call
 	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
+	// Output only.
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// SIP service configuration
+	// SIP service configuration. Updatable with <code>UpdateCaller</code> (stored configuration only, see
+	// there).
 	SipCallerConfig *SipCallerConfig `protobuf:"bytes,3,opt,name=sip_caller_config,json=sipCallerConfig,proto3" json:"sip_caller_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
+	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI. Updatable with <code>UpdateCaller</code>
+	// (stored configuration only, see there).
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Output only. VTSI project of the caller, the project segment of <code>name</code>, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Set in every view. A 9.0.0 server leaves it empty.
+	VtsiProjectName string `protobuf:"bytes,5,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Output only. Whether the caller&apos;s current call is active (set up or connected), i.e.
+	// <code>Call.active</code> of <code>call_name</code>; false for an idle pooled caller and for a caller whose
+	// call ended. The same value as <code>CallResourceStatus.active</code> of the status streams. Set in the
+	// SHALLOW and FULL views.
+	Active bool `protobuf:"varint,6,opt,name=active,proto3" json:"active,omitempty"`
+	// Output only. SIP status type of the caller&apos;s current or last call (<code>Call.sip_status_type</code> of
+	// <code>call_name</code>), as <code>CallResourceStatus.sip_status_type</code>. <code>NO_SESSION</code> (the zero
+	// value) when it never had a call record. Set in the SHALLOW and FULL views.
+	SipStatusType sip.SipStatus_StatusType `protobuf:"varint,7,opt,name=sip_status_type,json=sipStatusType,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_type,omitempty"`
+	// Output only. When the caller was created (<code>StartCaller</code>, the dispatch of a campaign attempt or of
+	// a scheduled caller, or a recycle by the server that recreated a pooled caller). Set in the SHALLOW and FULL
+	// views.
+	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	// Output only. Whether the caller is a POOLED (persistent) caller, which the server keeps warm between calls
+	// and reuses for later <code>StartCaller</code> requests with the same configuration, rather than a one-shot
+	// caller that is one call. Set in the SHALLOW and FULL views.
+	Pooled bool `protobuf:"varint,9,opt,name=pooled,proto3" json:"pooled,omitempty"`
+	// Output only. The campaign of the caller&apos;s current or last campaign attempt
+	// (<code>CampaignCallAttempt.caller_name</code> names this caller), of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	// Empty when the caller never placed a campaign attempt. A pooled caller can place attempts of several
+	// campaigns one after the other; this field names only the latest one (<code>ListCallers</code> with a campaign
+	// selector finds every caller of a campaign). Set in the SHALLOW and FULL views.
+	CampaignName  string `protobuf:"bytes,10,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Caller) Reset() {
 	*x = Caller{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[25]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3036,7 +1128,7 @@ func (x *Caller) String() string {
 func (*Caller) ProtoMessage() {}
 
 func (x *Caller) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[25]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3049,7 +1141,7 @@ func (x *Caller) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Caller.ProtoReflect.Descriptor instead.
 func (*Caller) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{25}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Caller) GetName() string {
@@ -3080,6 +1172,48 @@ func (x *Caller) GetCommonServicesConfig() *CommonServicesConfig {
 	return nil
 }
 
+func (x *Caller) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *Caller) GetActive() bool {
+	if x != nil {
+		return x.Active
+	}
+	return false
+}
+
+func (x *Caller) GetSipStatusType() sip.SipStatus_StatusType {
+	if x != nil {
+		return x.SipStatusType
+	}
+	return sip.SipStatus_StatusType(0)
+}
+
+func (x *Caller) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Caller) GetPooled() bool {
+	if x != nil {
+		return x.Pooled
+	}
+	return false
+}
+
+func (x *Caller) GetCampaignName() string {
+	if x != nil {
+		return x.CampaignName
+	}
+	return ""
+}
+
 // Request for starting a listener
 type StartListenerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -3089,13 +1223,37 @@ type StartListenerRequest struct {
 	SipBaseConfig *SipBaseConfig `protobuf:"bytes,2,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
 	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,3,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in <code>StartListenerResponse.listener</code>, relative to the
+	// <code>Listener</code> message (no <code>listener.</code> prefix), e.g. <code>call_name</code>, <code>common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through singular
+	// message fields are allowed; a path below a repeated or map field is not. <code>listener.name</code> and the
+	// other fields of the response are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is started. Applied after the
+	// server&apos;s role-based redaction of <code>common_services_config</code>, so it can only narrow the
+	// response. It shapes only the response: the listener is started regardless.
+	// <p>Read only by the RPC this message is the request of. Where it is an entry of another request
+	// (<code>StartListenersRequest.listener_requests</code>) it must be unset, otherwise that whole request is rejected with <code>INVALID_ARGUMENT</code>
+	// naming the entry and nothing is started; use the enclosing request&apos;s own <code>field_mask</code>
+	// where it has one.</p>
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run: when true, the request runs every validation <code>StartListener</code> runs, including the live
+	// validation of the configuration against the upstream services (NLU, S2T, T2S, RabbitMQ) and the
+	// project&apos;s listener limit, but starts, deploys and stores NOTHING and emits no event. It answers with the
+	// same error a real request would answer, or with the response a real request would return, except that the
+	// returned <code>listener</code> was never created: its <code>name</code>, <code>call_name</code> and every other
+	// output-only field are empty. A request that passes a dry run can still fail for real, e.g. when the project
+	// reached its limit in between. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	// <p>Where this message is an entry of another request (<code>StartListenersRequest.listener_requests</code>) it must be unset, otherwise that whole request
+	// is rejected with <code>INVALID_ARGUMENT</code> naming the entry; use the enclosing request&apos;s own
+	// <code>validate_only</code> where it has one.</p>
+	ValidateOnly  bool `protobuf:"varint,5,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartListenerRequest) Reset() {
 	*x = StartListenerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[26]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3107,7 +1265,7 @@ func (x *StartListenerRequest) String() string {
 func (*StartListenerRequest) ProtoMessage() {}
 
 func (x *StartListenerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[26]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3120,7 +1278,7 @@ func (x *StartListenerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartListenerRequest.ProtoReflect.Descriptor instead.
 func (*StartListenerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{26}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *StartListenerRequest) GetVtsiProjectName() string {
@@ -3144,14 +1302,31 @@ func (x *StartListenerRequest) GetCommonServicesConfig() *CommonServicesConfig {
 	return nil
 }
 
-// Response to start multiple listeners
+func (x *StartListenerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StartListenerRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// Response to start a listener, and one entry of <code>StartListenersResponse</code>
 type StartListenerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The listener that was started
+	// The listener that was started (with <code>validate_only</code>: the listener that would have been started),
+	// shaped by the request&apos;s <code>field_mask</code>
 	Listener *Listener `protobuf:"bytes,2,opt,name=listener,proto3" json:"listener,omitempty"`
-	// error message if you have any so if it's unhealthy
+	// Always empty: <code>StartListener</code> reports its errors as gRPC status codes, and an entry of
+	// <code>StartListenersResponse</code> exists only for a listener that was started (failures are accounted for
+	// in <code>StartListenersResponse.error_message</code>)
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3159,7 +1334,7 @@ type StartListenerResponse struct {
 
 func (x *StartListenerResponse) Reset() {
 	*x = StartListenerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[27]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3171,7 +1346,7 @@ func (x *StartListenerResponse) String() string {
 func (*StartListenerResponse) ProtoMessage() {}
 
 func (x *StartListenerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[27]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3184,7 +1359,7 @@ func (x *StartListenerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartListenerResponse.ProtoReflect.Descriptor instead.
 func (*StartListenerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{27}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StartListenerResponse) GetVtsiProjectName() string {
@@ -3225,13 +1400,33 @@ type StartListenersRequest struct {
 	// no <code>common_services_config</code>: the server keeps no second copy of the credentials it holds. To
 	// make a single caller or listener idempotent, send it as a batch of one.
 	IdempotencyKey string `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in the <code>listener</code> of EVERY entry of
+	// <code>StartListenersResponse.listener_responses</code>, relative to the <code>Listener</code> message (no prefix), e.g.
+	// <code>call_name</code>. Nested paths through singular message fields are allowed; a path below a repeated or map
+	// field is not. <code>listener.name</code> and every other field of the response and of its entries are
+	// always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is started. Applied after the server&apos;s
+	// role-based redaction of <code>common_services_config</code>, so it can only narrow the response. It
+	// shapes only the response: the listeners are started regardless. The entries&apos; own
+	// <code>field_mask</code> must be unset. Not part of the <code>idempotency_key</code> comparison: a retry
+	// with the same key and another mask replays the first response shaped by the retry&apos;s mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run of the whole batch: every entry is validated like <code>StartListener</code> with
+	// <code>validate_only</code> (see <code>StartListenerRequest.validate_only</code>), the project&apos;s listener
+	// limit is checked for the batch as a whole, nothing is started, deployed or stored and no event is emitted.
+	// The response is shaped like a real one: one entry per listener that would have been started, and the entries
+	// that would have failed accounted for in <code>error_message</code>. The <code>idempotency_key</code> is
+	// neither read nor stored by a dry run. The entries&apos; own
+	// <code>validate_only</code> must be unset. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	ValidateOnly  bool `protobuf:"varint,5,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartListenersRequest) Reset() {
 	*x = StartListenersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[28]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3243,7 +1438,7 @@ func (x *StartListenersRequest) String() string {
 func (*StartListenersRequest) ProtoMessage() {}
 
 func (x *StartListenersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[28]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3256,7 +1451,7 @@ func (x *StartListenersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartListenersRequest.ProtoReflect.Descriptor instead.
 func (*StartListenersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{28}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *StartListenersRequest) GetVtsiProjectName() string {
@@ -3280,14 +1475,31 @@ func (x *StartListenersRequest) GetIdempotencyKey() string {
 	return ""
 }
 
+func (x *StartListenersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StartListenersRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
 // Response to start multiple listeners
 type StartListenersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The call ids that were assigned to each listener
+	// One entry per listener that was STARTED, in request order. A requested listener that failed to start was rolled
+	// back and has NO entry here (so the list can be shorter than the request); <code>error_message</code> accounts
+	// for it.
 	ListenerResponses []*StartListenerResponse `protobuf:"bytes,2,rep,name=listener_responses,json=listenerResponses,proto3" json:"listener_responses,omitempty"`
-	// overall error message if you have any so if it's unhealthy
+	// Empty when every requested listener was started. Otherwise an accounting of the batch: how many listeners were
+	// requested, how many were started, and why each of the others was not
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3295,7 +1507,7 @@ type StartListenersResponse struct {
 
 func (x *StartListenersResponse) Reset() {
 	*x = StartListenersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[29]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3307,7 +1519,7 @@ func (x *StartListenersResponse) String() string {
 func (*StartListenersResponse) ProtoMessage() {}
 
 func (x *StartListenersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[29]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3320,7 +1532,7 @@ func (x *StartListenersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartListenersResponse.ProtoReflect.Descriptor instead.
 func (*StartListenersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{29}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *StartListenersResponse) GetVtsiProjectName() string {
@@ -3353,13 +1565,38 @@ type StartCallerRequest struct {
 	SipCallerConfig *SipCallerConfig `protobuf:"bytes,2,opt,name=sip_caller_config,json=sipCallerConfig,proto3" json:"sip_caller_config,omitempty"`
 	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,3,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in <code>StartCallerResponse.caller</code>, relative to the
+	// <code>Caller</code> message (no <code>caller.</code> prefix), e.g. <code>call_name</code>, <code>sip_caller_config.callee_id</code>. Nested paths through singular
+	// message fields are allowed; a path below a repeated or map field is not. <code>caller.name</code> and the
+	// other fields of the response are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is started. Applied after the
+	// server&apos;s role-based redaction of <code>common_services_config</code>, so it can only narrow the
+	// response. It shapes only the response: the caller is started regardless.
+	// <p>Read only by the RPC this message is the request of. Where it is an entry of another request
+	// (<code>StartCallersRequest.caller_requests</code>, <code>StartScheduledCallerRequest.request</code>, <code>AddCallersToCampaignRequest.caller_requests</code>) it must be unset, otherwise that whole request is rejected with <code>INVALID_ARGUMENT</code>
+	// naming the entry and nothing is started; use the enclosing request&apos;s own <code>field_mask</code>
+	// where it has one.</p>
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run: when true, the request runs every validation <code>StartCaller</code> runs, including the live
+	// validation of the configuration against the upstream services (NLU, S2T, T2S, RabbitMQ) and the
+	// project&apos;s caller limit, but starts, deploys and stores NOTHING and emits no event. It answers with the
+	// same error a real request would answer, or with the response a real request would return, except that the
+	// returned <code>caller</code> was never created: its <code>name</code>, <code>call_name</code> and every other
+	// output-only field are empty. A request that passes a dry run can still fail for real, e.g. when the project
+	// reached its limit in between. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	// <p>Where this message is an entry of another request (<code>StartCallersRequest.caller_requests</code>,
+	// <code>StartScheduledCallerRequest.request</code>, <code>AddCallersToCampaignRequest.caller_requests</code>) it must be unset, otherwise that whole request
+	// is rejected with <code>INVALID_ARGUMENT</code> naming the entry; use the enclosing request&apos;s own
+	// <code>validate_only</code> where it has one.</p>
+	ValidateOnly  bool `protobuf:"varint,5,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartCallerRequest) Reset() {
 	*x = StartCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[30]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3371,7 +1608,7 @@ func (x *StartCallerRequest) String() string {
 func (*StartCallerRequest) ProtoMessage() {}
 
 func (x *StartCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[30]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3384,7 +1621,7 @@ func (x *StartCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartCallerRequest.ProtoReflect.Descriptor instead.
 func (*StartCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{30}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *StartCallerRequest) GetVtsiProjectName() string {
@@ -3408,14 +1645,31 @@ func (x *StartCallerRequest) GetCommonServicesConfig() *CommonServicesConfig {
 	return nil
 }
 
-// Response to start multiple listeners
+func (x *StartCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StartCallerRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// Response to start a caller, and one entry of <code>StartCallersResponse</code>
 type StartCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The caller that was started
+	// The caller that was started (with <code>validate_only</code>: the caller that would have been started),
+	// shaped by the request&apos;s <code>field_mask</code>
 	Caller *Caller `protobuf:"bytes,2,opt,name=caller,proto3" json:"caller,omitempty"`
-	// error message if you have any so if it's unhealthy
+	// Always empty: <code>StartCaller</code> reports its errors as gRPC status codes, and an entry of
+	// <code>StartCallersResponse</code> exists only for a caller that was started (failures are accounted for in
+	// <code>StartCallersResponse.error_message</code>)
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3423,7 +1677,7 @@ type StartCallerResponse struct {
 
 func (x *StartCallerResponse) Reset() {
 	*x = StartCallerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[31]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3435,7 +1689,7 @@ func (x *StartCallerResponse) String() string {
 func (*StartCallerResponse) ProtoMessage() {}
 
 func (x *StartCallerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[31]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3448,7 +1702,7 @@ func (x *StartCallerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartCallerResponse.ProtoReflect.Descriptor instead.
 func (*StartCallerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{31}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *StartCallerResponse) GetVtsiProjectName() string {
@@ -3489,13 +1743,33 @@ type StartCallersRequest struct {
 	// no <code>common_services_config</code>: the server keeps no second copy of the credentials it holds. To
 	// make a single caller or listener idempotent, send it as a batch of one.
 	IdempotencyKey string `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in the <code>caller</code> of EVERY entry of
+	// <code>StartCallersResponse.caller_responses</code>, relative to the <code>Caller</code> message (no prefix), e.g.
+	// <code>call_name</code>, <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed; a path below a repeated or map
+	// field is not. <code>caller.name</code> and every other field of the response and of its entries are
+	// always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is started. Applied after the server&apos;s
+	// role-based redaction of <code>common_services_config</code>, so it can only narrow the response. It
+	// shapes only the response: the callers are started regardless. The entries&apos; own
+	// <code>field_mask</code> must be unset. Not part of the <code>idempotency_key</code> comparison: a retry
+	// with the same key and another mask replays the first response shaped by the retry&apos;s mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run of the whole batch: every entry is validated like <code>StartCaller</code> with
+	// <code>validate_only</code> (see <code>StartCallerRequest.validate_only</code>), the project&apos;s caller limit
+	// is checked for the batch as a whole, nothing is started, deployed or stored and no event is emitted. The
+	// The response is shaped like a real one: one entry per caller that would have been started, and the entries
+	// that would have failed accounted for in <code>error_message</code>. The <code>idempotency_key</code> is
+	// neither read nor stored by a dry run. The entries&apos; own
+	// <code>validate_only</code> must be unset. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	ValidateOnly  bool `protobuf:"varint,6,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartCallersRequest) Reset() {
 	*x = StartCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[32]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3507,7 +1781,7 @@ func (x *StartCallersRequest) String() string {
 func (*StartCallersRequest) ProtoMessage() {}
 
 func (x *StartCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[32]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3520,7 +1794,7 @@ func (x *StartCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartCallersRequest.ProtoReflect.Descriptor instead.
 func (*StartCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{32}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *StartCallersRequest) GetVtsiProjectName() string {
@@ -3544,14 +1818,31 @@ func (x *StartCallersRequest) GetIdempotencyKey() string {
 	return ""
 }
 
-// Response to the start caller request
+func (x *StartCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StartCallersRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// Response to the start callers request
 type StartCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The call ids that were assigned to each listener
+	// One entry per caller that was STARTED, in request order. A requested caller that failed to start was rolled
+	// back and has NO entry here (so the list can be shorter than the request); <code>error_message</code> accounts
+	// for it.
 	CallerResponses []*StartCallerResponse `protobuf:"bytes,2,rep,name=caller_responses,json=callerResponses,proto3" json:"caller_responses,omitempty"`
-	// overall error message if you have any so if it's unhealthy
+	// Empty when every requested caller was started. Otherwise an accounting of the batch: how many callers were
+	// requested, how many were started, and why each of the others was not
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3559,7 +1850,7 @@ type StartCallersResponse struct {
 
 func (x *StartCallersResponse) Reset() {
 	*x = StartCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[33]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3571,7 +1862,7 @@ func (x *StartCallersResponse) String() string {
 func (*StartCallersResponse) ProtoMessage() {}
 
 func (x *StartCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[33]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3584,7 +1875,7 @@ func (x *StartCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartCallersResponse.ProtoReflect.Descriptor instead.
 func (*StartCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{33}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *StartCallersResponse) GetVtsiProjectName() string {
@@ -3614,18 +1905,66 @@ type ListCallersRequest struct {
 	// VTSI project name for which to perform the call.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
+	// Optional. The <code>next_page_token</code> of a previous response. Opaque: its content is not part of the
+	// API. Valid only with the same <code>vtsi_project_name</code>, campaign selector, <code>active_only</code> and
+	// <code>sip_status_types</code>; a token issued for another listing is
+	// rejected with <code>INVALID_ARGUMENT</code>. <code>page_size</code>, <code>call_view</code> and
+	// <code>field_mask</code> may change between pages.
 	PageToken *string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
-	// you can specify the view to be shallow or full
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Optional. How much of each caller to populate; see <code>CallView</code>. Unset means <code>SHALLOW</code>.
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>Caller</code>,
+	// relative to the <code>Caller</code> message (no <code>callers.</code> prefix), e.g.
+	// <code>call_name</code>, <code>sip_caller_config.callee_id</code>,
+	// <code>common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through singular message
+	// fields are allowed; a path below a repeated or map field is not. <code>name</code> is always
+	// populated. Unset or empty returns every field the <code>call_view</code> populates. An unknown path
+	// is rejected with <code>INVALID_ARGUMENT</code> naming it. Applied after the <code>call_view</code>
+	// and the server&apos;s role-based redaction of <code>common_services_config</code>, so it can only
+	// narrow the response and never populates a field that was left empty. Not part of the paging contract:
+	// a <code>page_token</code> stays valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Only the callers of one campaign. Neither set lists every caller of the project, as before
+	// 9.1.0.
+	// <p>The callers of a campaign are the callers that placed at least one attempt of one of its campaign calls
+	// (<code>CampaignCallAttempt.caller_name</code>), whichever way the call was added
+	// (<code>AddCallersToCampaign</code> or <code>AddScheduledCallersToCampaign</code>: the attempts of a
+	// scheduled campaign call are placed by callers too, while its <code>ScheduledCaller</code> is not a
+	// <code>Caller</code> and is never listed here). A caller that was deleted is not listed. A caller that
+	// placed attempts of several campaigns (a pooled caller of the server&apos;s caller pool can) is listed for
+	// each of them. Order: the same as without a selector, i.e. by the caller&apos;s uuid (the last segment of
+	// <code>name</code>), ascending: a stable order, not a chronological one. <code>Campaign.campaign_callers</code>
+	// reports the same SET in a different order (by the start of each caller&apos;s first attempt for the
+	// campaign, oldest first) and bounded.</p>
+	// <p>Paging: the <code>page_token</code> is bound to the selector; a token sent with another selector (or
+	// none) is rejected with <code>INVALID_ARGUMENT</code>.</p>
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed <code>campaign_name</code>, a campaign of
+	// another project than <code>vtsi_project_name</code>, or an empty <code>campaign_display_name</code>
+	// sent as the set member; <code>NOT_FOUND</code> for an unknown campaign.</p>
+	//
+	// Types that are valid to be assigned to Campaign:
+	//
+	//	*ListCallersRequest_CampaignName
+	//	*ListCallersRequest_CampaignDisplayName
+	Campaign isListCallersRequest_Campaign `protobuf_oneof:"campaign"`
+	// Optional. Maximum number of callers per page. <code>0</code> keeps the page size the <code>page_token</code>
+	// was issued with, and means the server default of 25 on a first page; values above 1000 are clamped to 1000;
+	// negative values are rejected with <code>INVALID_ARGUMENT</code>. May differ between the pages of one listing.
+	PageSize int32 `protobuf:"varint,7,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Only callers whose current call is active (<code>Caller.active</code>), as
+	// <code>StreamCallerStatusRequest.active_only</code>. False does not filter.
+	ActiveOnly bool `protobuf:"varint,8,opt,name=active_only,json=activeOnly,proto3" json:"active_only,omitempty"`
+	// Optional. Only callers whose current or last call has one of these SIP status types
+	// (<code>Caller.sip_status_type</code>). A caller that never had a call has none and matches no entry. Empty
+	// does not filter. Combined with the other filters by AND.
+	SipStatusTypes []sip.SipStatus_StatusType `protobuf:"varint,9,rep,packed,name=sip_status_types,json=sipStatusTypes,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_types,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ListCallersRequest) Reset() {
 	*x = ListCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[34]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3637,7 +1976,7 @@ func (x *ListCallersRequest) String() string {
 func (*ListCallersRequest) ProtoMessage() {}
 
 func (x *ListCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[34]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3650,7 +1989,7 @@ func (x *ListCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCallersRequest.ProtoReflect.Descriptor instead.
 func (*ListCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{34}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListCallersRequest) GetVtsiProjectName() string {
@@ -3674,22 +2013,98 @@ func (x *ListCallersRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
+func (x *ListCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCallersRequest) GetCampaign() isListCallersRequest_Campaign {
+	if x != nil {
+		return x.Campaign
+	}
+	return nil
+}
+
+func (x *ListCallersRequest) GetCampaignName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*ListCallersRequest_CampaignName); ok {
+			return x.CampaignName
+		}
+	}
+	return ""
+}
+
+func (x *ListCallersRequest) GetCampaignDisplayName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*ListCallersRequest_CampaignDisplayName); ok {
+			return x.CampaignDisplayName
+		}
+	}
+	return ""
+}
+
+func (x *ListCallersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListCallersRequest) GetActiveOnly() bool {
+	if x != nil {
+		return x.ActiveOnly
+	}
+	return false
+}
+
+func (x *ListCallersRequest) GetSipStatusTypes() []sip.SipStatus_StatusType {
+	if x != nil {
+		return x.SipStatusTypes
+	}
+	return nil
+}
+
+type isListCallersRequest_Campaign interface {
+	isListCallersRequest_Campaign()
+}
+
+type ListCallersRequest_CampaignName struct {
+	// Resource name of the campaign. It must be a campaign of <code>vtsi_project_name</code>.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	CampaignName string `protobuf:"bytes,5,opt,name=campaign_name,json=campaignName,proto3,oneof"`
+}
+
+type ListCallersRequest_CampaignDisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// <code>vtsi_project_name</code>.
+	CampaignDisplayName string `protobuf:"bytes,6,opt,name=campaign_display_name,json=campaignDisplayName,proto3,oneof"`
+}
+
+func (*ListCallersRequest_CampaignName) isListCallersRequest_Campaign() {}
+
+func (*ListCallersRequest_CampaignDisplayName) isListCallersRequest_Campaign() {}
+
 // Represents the response for listing callers.
 type ListCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of callers.
+	// The callers of this page, ordered by the caller&apos;s uuid (the last segment of <code>name</code>),
+	// ascending.
 	Callers []*Caller `protobuf:"bytes,1,rep,name=callers,proto3" json:"callers,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque. Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// The number of callers the request matches across all pages (its selector and filters, not
+	// <code>page_size</code>), counted exactly when this page was read. It can change between the pages of one
+	// listing as callers are started, stopped or deleted.
+	TotalSize     int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCallersResponse) Reset() {
 	*x = ListCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[35]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3701,7 +2116,7 @@ func (x *ListCallersResponse) String() string {
 func (*ListCallersResponse) ProtoMessage() {}
 
 func (x *ListCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[35]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3714,7 +2129,7 @@ func (x *ListCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCallersResponse.ProtoReflect.Descriptor instead.
 func (*ListCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{35}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListCallersResponse) GetCallers() []*Caller {
@@ -3731,22 +2146,51 @@ func (x *ListCallersResponse) GetNextPageToken() string {
 	return ""
 }
 
+func (x *ListCallersResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
 // Represents a request to get a specific caller.
 type GetCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the caller, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Required (empty or malformed is <code>INVALID_ARGUMENT</code>, an unknown project <code>NOT_FOUND</code>).
+	// <p>Redundant with the project segment of <code>name</code>, and the same rule holds for every single-resource
+	// request that carries both a <code>vtsi_project_name</code> and a resource name (<code>GetListener</code>,
+	// <code>GetCall</code>, <code>StopCall</code>, <code>GetScheduledCaller</code>,
+	// <code>CancelScheduledCaller</code>, <code>RetryScheduledCaller</code>, <code>TransferCall</code>,
+	// <code>InviteToCall</code>, <code>RemoveCallParticipant</code>, <code>SetCallMediaControl</code>): the
+	// resource must belong to <code>vtsi_project_name</code>, and a resource name whose project segment differs is
+	// answered <code>NOT_FOUND</code>, not <code>INVALID_ARGUMENT</code>, so that the answer never confirms that
+	// the resource exists in another project. (The batch requests, which check their entries before anything is
+	// done, answer such an entry with <code>INVALID_ARGUMENT</code> instead.)</p>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The name of caller to retrieve.
+	// The name of the caller to retrieve, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// you can specify the view to be shallow or full
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. How much of the caller to populate; see <code>CallView</code>. Unset means <code>SHALLOW</code>.
+	// <code>MINIMUM</code>: <code>name</code>, <code>call_name</code> and <code>vtsi_project_name</code>;
+	// <code>SHALLOW</code>: also <code>sip_caller_config</code> and the output-only state; <code>FULL</code>: also
+	// <code>common_services_config</code> (redacted by role).
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned <code>Caller</code>, relative to
+	// the <code>Caller</code> message, e.g. <code>call_name</code>, <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed;
+	// a path below a repeated or map field is not. <code>name</code> is always populated. Unset or empty
+	// returns every field the <code>call_view</code> populates. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Applied after the <code>call_view</code> and the server&apos;s
+	// role-based redaction of <code>common_services_config</code>, so it can only narrow the response and never
+	// populates a field that was left empty.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCallerRequest) Reset() {
 	*x = GetCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[36]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3758,7 +2202,7 @@ func (x *GetCallerRequest) String() string {
 func (*GetCallerRequest) ProtoMessage() {}
 
 func (x *GetCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[36]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3771,7 +2215,7 @@ func (x *GetCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCallerRequest.ProtoReflect.Descriptor instead.
 func (*GetCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{36}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetCallerRequest) GetVtsiProjectName() string {
@@ -3795,24 +2239,53 @@ func (x *GetCallerRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
+func (x *GetCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // Represents a request to list listeners.
 type ListListenersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to perform the call.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
+	// Optional. The <code>next_page_token</code> of a previous response. Opaque: its content is not part of the
+	// API. Valid only with the same <code>vtsi_project_name</code>, <code>active_only</code> and <code>sip_status_types</code>; a token issued for another listing is
+	// rejected with <code>INVALID_ARGUMENT</code>. <code>page_size</code>, <code>call_view</code> and
+	// <code>field_mask</code> may change between pages.
 	PageToken *string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
-	// you can specify the view to be shallow or full
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Optional. How much of each listener to populate; see <code>CallView</code>. Unset means <code>SHALLOW</code>.
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>Listener</code>,
+	// relative to the <code>Listener</code> message (no <code>listeners.</code> prefix), e.g.
+	// <code>call_name</code>, <code>common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths
+	// through singular message fields are allowed; a path below a repeated or map field is not.
+	// <code>name</code> is always populated. Unset or empty returns every field the <code>call_view</code>
+	// populates. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it. Applied after
+	// the <code>call_view</code> and the server&apos;s role-based redaction of
+	// <code>common_services_config</code>, so it can only narrow the response and never populates a field
+	// that was left empty. Not part of the paging contract: a <code>page_token</code> stays valid with
+	// another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Maximum number of listeners per page, with the default, cap and validation of
+	// <code>ListCallersRequest.page_size</code>.
+	PageSize int32 `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Only listeners whose current call is active (<code>Listener.active</code>), as
+	// <code>StreamListenerStatusRequest.active_only</code>. False does not filter.
+	ActiveOnly bool `protobuf:"varint,6,opt,name=active_only,json=activeOnly,proto3" json:"active_only,omitempty"`
+	// Optional. Only listeners whose current or last call has one of these SIP status types
+	// (<code>Listener.sip_status_type</code>), with the rules of <code>ListCallersRequest.sip_status_types</code>.
+	SipStatusTypes []sip.SipStatus_StatusType `protobuf:"varint,7,rep,packed,name=sip_status_types,json=sipStatusTypes,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_types,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *ListListenersRequest) Reset() {
 	*x = ListListenersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[37]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3824,7 +2297,7 @@ func (x *ListListenersRequest) String() string {
 func (*ListListenersRequest) ProtoMessage() {}
 
 func (x *ListListenersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[37]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3837,7 +2310,7 @@ func (x *ListListenersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListListenersRequest.ProtoReflect.Descriptor instead.
 func (*ListListenersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{37}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListListenersRequest) GetVtsiProjectName() string {
@@ -3861,22 +2334,52 @@ func (x *ListListenersRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
+func (x *ListListenersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListListenersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListListenersRequest) GetActiveOnly() bool {
+	if x != nil {
+		return x.ActiveOnly
+	}
+	return false
+}
+
+func (x *ListListenersRequest) GetSipStatusTypes() []sip.SipStatus_StatusType {
+	if x != nil {
+		return x.SipStatusTypes
+	}
+	return nil
+}
+
 // Represents the response for listing listeners.
 type ListListenersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of listeners.
+	// The listeners of this page, ordered by the listener&apos;s uuid (the last segment of <code>name</code>),
+	// ascending.
 	Listeners []*Listener `protobuf:"bytes,1,rep,name=listeners,proto3" json:"listeners,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque. Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// The number of listeners the request matches across all pages (its filters, not <code>page_size</code>),
+	// counted exactly when this page was read; as <code>ListCallersResponse.total_size</code>.
+	TotalSize     int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListListenersResponse) Reset() {
 	*x = ListListenersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[38]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3888,7 +2391,7 @@ func (x *ListListenersResponse) String() string {
 func (*ListListenersResponse) ProtoMessage() {}
 
 func (x *ListListenersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[38]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3901,7 +2404,7 @@ func (x *ListListenersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListListenersResponse.ProtoReflect.Descriptor instead.
 func (*ListListenersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{38}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListListenersResponse) GetListeners() []*Listener {
@@ -3918,22 +2421,42 @@ func (x *ListListenersResponse) GetNextPageToken() string {
 	return ""
 }
 
+func (x *ListListenersResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
 // Represents a request to get a specific listener.
 type GetListenerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the listener, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Required. Redundant with the project segment of <code>name</code>, by the rule of
+	// <code>GetCallerRequest.vtsi_project_name</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The name of listener to retrieve.
+	// The name of the listener to retrieve, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// you can specify the view to be shallow or full
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. How much of the listener to populate; see <code>CallView</code>. Unset means <code>SHALLOW</code>.
+	// The views populate the fields as <code>GetCallerRequest.call_view</code> does, with
+	// <code>sip_base_config</code> in place of <code>sip_caller_config</code>.
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned <code>Listener</code>, relative to
+	// the <code>Listener</code> message, e.g. <code>call_name</code>, <code>common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through singular message fields are allowed;
+	// a path below a repeated or map field is not. <code>name</code> is always populated. Unset or empty
+	// returns every field the <code>call_view</code> populates. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Applied after the <code>call_view</code> and the server&apos;s
+	// role-based redaction of <code>common_services_config</code>, so it can only narrow the response and never
+	// populates a field that was left empty.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetListenerRequest) Reset() {
 	*x = GetListenerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[39]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3945,7 +2468,7 @@ func (x *GetListenerRequest) String() string {
 func (*GetListenerRequest) ProtoMessage() {}
 
 func (x *GetListenerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[39]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3958,7 +2481,7 @@ func (x *GetListenerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetListenerRequest.ProtoReflect.Descriptor instead.
 func (*GetListenerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{39}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetListenerRequest) GetVtsiProjectName() string {
@@ -3982,18 +2505,30 @@ func (x *GetListenerRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
+func (x *GetListenerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // Represents a request to stop a specific listener.
 type StopListenerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the listener to stop in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the field paths of <code>StopListenerResponse</code> to populate, i.e.
+	// <code>error_message</code> (the response carries no <code>Listener</code>). <code>name</code> is always populated.
+	// Unset or empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming
+	// it, before anything is stopped. It shapes only the response: the listener is stopped regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopListenerRequest) Reset() {
 	*x = StopListenerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[40]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4005,7 +2540,7 @@ func (x *StopListenerRequest) String() string {
 func (*StopListenerRequest) ProtoMessage() {}
 
 func (x *StopListenerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[40]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4018,7 +2553,7 @@ func (x *StopListenerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopListenerRequest.ProtoReflect.Descriptor instead.
 func (*StopListenerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{40}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *StopListenerRequest) GetName() string {
@@ -4028,12 +2563,22 @@ func (x *StopListenerRequest) GetName() string {
 	return ""
 }
 
-// Represents a request to stop a specific listener.
+func (x *StopListenerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to stopping a listener, and one entry of <code>StopListenersResponse</code>.
 type StopListenerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The name of the stop listener in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	// The name of the stopped listener in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Empty on success. <code>StopListener</code> reports its errors as gRPC status codes, so it is empty there. In an
+	// entry of <code>StopListenersResponse</code> it is the error of that entry, prefixed with the name of the gRPC
+	// status code <code>StopListener</code> would have answered, e.g.
+	// <code>NOT_FOUND: listener projects/.../listeners/... does not exist</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4041,7 +2586,7 @@ type StopListenerResponse struct {
 
 func (x *StopListenerResponse) Reset() {
 	*x = StopListenerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[41]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4053,7 +2598,7 @@ func (x *StopListenerResponse) String() string {
 func (*StopListenerResponse) ProtoMessage() {}
 
 func (x *StopListenerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[41]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4066,7 +2611,7 @@ func (x *StopListenerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopListenerResponse.ProtoReflect.Descriptor instead.
 func (*StopListenerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{41}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *StopListenerResponse) GetName() string {
@@ -4086,15 +2631,33 @@ func (x *StopListenerResponse) GetErrorMessage() string {
 // Represents a request to stop multiple listeners.
 type StopListenersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The names of the listeners to stop in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
-	Names         []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The names of the listeners to stop, 1 to 1000 distinct names, in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	Names []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>StopListenersResponse.stop_listener_responses</code>, relative to the entry message <code>StopListenerResponse</code>, i.e.
+	// <code>error_message</code> (the entries carry no <code>Listener</code>). <code>name</code> of each entry and the
+	// response&apos;s own fields are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is stopped. It shapes only the
+	// response: the listeners are stopped regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. VTSI project of every listener of the request, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// When set, the request is checked as a whole like <code>UpdateListenersRequest</code> before anything is
+	// stopped, and refused with <code>INVALID_ARGUMENT</code> (naming the entry index) for a malformed
+	// <code>vtsi_project_name</code>, a name given twice, or a name that is malformed or whose project segment
+	// differs from <code>vtsi_project_name</code>; with <code>NOT_FOUND</code> for an unknown project; and with
+	// authorization enforced with <code>PERMISSION_DENIED</code> for a project the caller holds no role on. Empty
+	// keeps the behaviour of 9.0.0 clients, which do not send it: each name is checked on its own (a name of
+	// another project is that entry&apos;s <code>NOT_FOUND</code>) and a name given twice is stopped once and
+	// reported once. Either way, no entry and more than 1000 distinct names are <code>INVALID_ARGUMENT</code>.
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *StopListenersRequest) Reset() {
 	*x = StopListenersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[42]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4106,7 +2669,7 @@ func (x *StopListenersRequest) String() string {
 func (*StopListenersRequest) ProtoMessage() {}
 
 func (x *StopListenersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[42]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4119,7 +2682,7 @@ func (x *StopListenersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopListenersRequest.ProtoReflect.Descriptor instead.
 func (*StopListenersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{42}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *StopListenersRequest) GetNames() []string {
@@ -4129,12 +2692,28 @@ func (x *StopListenersRequest) GetNames() []string {
 	return nil
 }
 
+func (x *StopListenersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StopListenersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
 // Response to stop multiple listeners
 type StopListenersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// responses to stop listeners
+	// One entry per distinct name of the request, in request order (a name given twice is reported once), each
+	// with its own <code>error_message</code>.
 	StopListenerResponses []*StopListenerResponse `protobuf:"bytes,1,rep,name=stop_listener_responses,json=stopListenerResponses,proto3" json:"stop_listener_responses,omitempty"`
-	// error message if there are any.
+	// A summary when at least one entry failed (e.g. <code>2 of 5 listeners were not stopped</code>), empty when every
+	// entry succeeded. The failed entries carry their own <code>error_message</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4142,7 +2721,7 @@ type StopListenersResponse struct {
 
 func (x *StopListenersResponse) Reset() {
 	*x = StopListenersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[43]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4154,7 +2733,7 @@ func (x *StopListenersResponse) String() string {
 func (*StopListenersResponse) ProtoMessage() {}
 
 func (x *StopListenersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[43]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4167,7 +2746,7 @@ func (x *StopListenersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopListenersResponse.ProtoReflect.Descriptor instead.
 func (*StopListenersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{43}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *StopListenersResponse) GetStopListenerResponses() []*StopListenerResponse {
@@ -4188,14 +2767,19 @@ func (x *StopListenersResponse) GetErrorMessage() string {
 type StopCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the caller to stop in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the field paths of <code>StopCallerResponse</code> to populate, i.e.
+	// <code>error_message</code> (the response carries no <code>Caller</code>). <code>name</code> is always populated.
+	// Unset or empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming
+	// it, before anything is stopped. It shapes only the response: the caller is stopped regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopCallerRequest) Reset() {
 	*x = StopCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[44]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4207,7 +2791,7 @@ func (x *StopCallerRequest) String() string {
 func (*StopCallerRequest) ProtoMessage() {}
 
 func (x *StopCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[44]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4220,7 +2804,7 @@ func (x *StopCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallerRequest.ProtoReflect.Descriptor instead.
 func (*StopCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{44}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *StopCallerRequest) GetName() string {
@@ -4230,12 +2814,22 @@ func (x *StopCallerRequest) GetName() string {
 	return ""
 }
 
-// Represents a request to stop a specific caller.
+func (x *StopCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to stopping a caller, and one entry of <code>StopCallersResponse</code>.
 type StopCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The name of the stop caller in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
+	// The name of the stopped caller in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Empty on success. <code>StopCaller</code> reports its errors as gRPC status codes, so it is empty there. In an
+	// entry of <code>StopCallersResponse</code> it is the error of that entry, prefixed with the name of the gRPC
+	// status code <code>StopCaller</code> would have answered, e.g.
+	// <code>NOT_FOUND: caller projects/.../callers/... does not exist</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4243,7 +2837,7 @@ type StopCallerResponse struct {
 
 func (x *StopCallerResponse) Reset() {
 	*x = StopCallerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[45]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4255,7 +2849,7 @@ func (x *StopCallerResponse) String() string {
 func (*StopCallerResponse) ProtoMessage() {}
 
 func (x *StopCallerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[45]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4268,7 +2862,7 @@ func (x *StopCallerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallerResponse.ProtoReflect.Descriptor instead.
 func (*StopCallerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{45}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *StopCallerResponse) GetName() string {
@@ -4288,15 +2882,33 @@ func (x *StopCallerResponse) GetErrorMessage() string {
 // Represents a request to stop multiple callers.
 type StopCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The names of the callers to stop in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
-	Names         []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The names of the callers to stop, 1 to 1000 distinct names, in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
+	Names []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>StopCallersResponse.stop_caller_responses</code>, relative to the entry message <code>StopCallerResponse</code>, i.e.
+	// <code>error_message</code> (the entries carry no <code>Caller</code>). <code>name</code> of each entry and the
+	// response&apos;s own fields are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is stopped. It shapes only the
+	// response: the callers are stopped regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. VTSI project of every caller of the request, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// When set, the request is checked as a whole like <code>UpdateCallersRequest</code> before anything is
+	// stopped, and refused with <code>INVALID_ARGUMENT</code> (naming the entry index) for a malformed
+	// <code>vtsi_project_name</code>, a name given twice, or a name that is malformed or whose project segment
+	// differs from <code>vtsi_project_name</code>; with <code>NOT_FOUND</code> for an unknown project; and with
+	// authorization enforced with <code>PERMISSION_DENIED</code> for a project the caller holds no role on. Empty
+	// keeps the behaviour of 9.0.0 clients, which do not send it: each name is checked on its own (a name of
+	// another project is that entry&apos;s <code>NOT_FOUND</code>) and a name given twice is stopped once and
+	// reported once. Either way, no entry and more than 1000 distinct names are <code>INVALID_ARGUMENT</code>.
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *StopCallersRequest) Reset() {
 	*x = StopCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[46]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4308,7 +2920,7 @@ func (x *StopCallersRequest) String() string {
 func (*StopCallersRequest) ProtoMessage() {}
 
 func (x *StopCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[46]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4321,7 +2933,7 @@ func (x *StopCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallersRequest.ProtoReflect.Descriptor instead.
 func (*StopCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{46}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *StopCallersRequest) GetNames() []string {
@@ -4331,12 +2943,28 @@ func (x *StopCallersRequest) GetNames() []string {
 	return nil
 }
 
+func (x *StopCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StopCallersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
 // Response to stop multiple callers
 type StopCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// responses to stop callers
+	// One entry per distinct name of the request, in request order (a name given twice is reported once), each
+	// with its own <code>error_message</code>.
 	StopCallerResponses []*StopCallerResponse `protobuf:"bytes,1,rep,name=stop_caller_responses,json=stopCallerResponses,proto3" json:"stop_caller_responses,omitempty"`
-	// error message if there are any.
+	// A summary when at least one entry failed (e.g. <code>2 of 5 callers were not stopped</code>), empty when every
+	// entry succeeded. The failed entries carry their own <code>error_message</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4344,7 +2972,7 @@ type StopCallersResponse struct {
 
 func (x *StopCallersResponse) Reset() {
 	*x = StopCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[47]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4356,7 +2984,7 @@ func (x *StopCallersResponse) String() string {
 func (*StopCallersResponse) ProtoMessage() {}
 
 func (x *StopCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[47]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4369,7 +2997,7 @@ func (x *StopCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallersResponse.ProtoReflect.Descriptor instead.
 func (*StopCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{47}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *StopCallersResponse) GetStopCallerResponses() []*StopCallerResponse {
@@ -4390,14 +3018,19 @@ func (x *StopCallersResponse) GetErrorMessage() string {
 type DeleteListenerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the listener to delete in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the field paths of <code>DeleteListenerResponse</code> to populate, i.e.
+	// <code>error_message</code> (the response carries no <code>Listener</code>). <code>name</code> is always populated.
+	// Unset or empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming
+	// it, before anything is deleted. It shapes only the response: the listener is deleted regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteListenerRequest) Reset() {
 	*x = DeleteListenerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[48]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4409,7 +3042,7 @@ func (x *DeleteListenerRequest) String() string {
 func (*DeleteListenerRequest) ProtoMessage() {}
 
 func (x *DeleteListenerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[48]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4422,7 +3055,7 @@ func (x *DeleteListenerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteListenerRequest.ProtoReflect.Descriptor instead.
 func (*DeleteListenerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{48}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *DeleteListenerRequest) GetName() string {
@@ -4432,12 +3065,22 @@ func (x *DeleteListenerRequest) GetName() string {
 	return ""
 }
 
-// Represents a request to delete a specific listener.
+func (x *DeleteListenerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to deleting a listener, and one entry of <code>DeleteListenersResponse</code>.
 type DeleteListenerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the deleted listener in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Empty on success. <code>DeleteListener</code> reports its errors as gRPC status codes, so it is empty there. In an
+	// entry of <code>DeleteListenersResponse</code> it is the error of that entry, prefixed with the name of the gRPC
+	// status code <code>DeleteListener</code> would have answered, e.g.
+	// <code>NOT_FOUND: listener projects/.../listeners/... does not exist</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4445,7 +3088,7 @@ type DeleteListenerResponse struct {
 
 func (x *DeleteListenerResponse) Reset() {
 	*x = DeleteListenerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[49]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4457,7 +3100,7 @@ func (x *DeleteListenerResponse) String() string {
 func (*DeleteListenerResponse) ProtoMessage() {}
 
 func (x *DeleteListenerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[49]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4470,7 +3113,7 @@ func (x *DeleteListenerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteListenerResponse.ProtoReflect.Descriptor instead.
 func (*DeleteListenerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{49}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *DeleteListenerResponse) GetName() string {
@@ -4490,15 +3133,33 @@ func (x *DeleteListenerResponse) GetErrorMessage() string {
 // Represents a request to delete multiple listeners.
 type DeleteListenersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The names of the listeners to delete in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
-	Names         []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The names of the listeners to delete, 1 to 1000 distinct names, in the form <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	Names []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>DeleteListenersResponse.delete_listener_responses</code>, relative to the entry message <code>DeleteListenerResponse</code>, i.e.
+	// <code>error_message</code> (the entries carry no <code>Listener</code>). <code>name</code> of each entry and the
+	// response&apos;s own fields are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is deleted. It shapes only the
+	// response: the listeners are deleted regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. VTSI project of every listener of the request, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// When set, the request is checked as a whole like <code>UpdateListenersRequest</code> before anything is
+	// deleted, and refused with <code>INVALID_ARGUMENT</code> (naming the entry index) for a malformed
+	// <code>vtsi_project_name</code>, a name given twice, or a name that is malformed or whose project segment
+	// differs from <code>vtsi_project_name</code>; with <code>NOT_FOUND</code> for an unknown project; and with
+	// authorization enforced with <code>PERMISSION_DENIED</code> for a project the caller holds no role on. Empty
+	// keeps the behaviour of 9.0.0 clients, which do not send it: each name is checked on its own (a name of
+	// another project is that entry&apos;s <code>NOT_FOUND</code>) and a name given twice is deleted once and
+	// reported once. Either way, no entry and more than 1000 distinct names are <code>INVALID_ARGUMENT</code>.
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *DeleteListenersRequest) Reset() {
 	*x = DeleteListenersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[50]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4510,7 +3171,7 @@ func (x *DeleteListenersRequest) String() string {
 func (*DeleteListenersRequest) ProtoMessage() {}
 
 func (x *DeleteListenersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[50]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4523,7 +3184,7 @@ func (x *DeleteListenersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteListenersRequest.ProtoReflect.Descriptor instead.
 func (*DeleteListenersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{50}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *DeleteListenersRequest) GetNames() []string {
@@ -4533,12 +3194,28 @@ func (x *DeleteListenersRequest) GetNames() []string {
 	return nil
 }
 
+func (x *DeleteListenersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *DeleteListenersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
 // Response to delete multiple listeners
 type DeleteListenersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// responses to delete listeners
+	// One entry per distinct name of the request, in request order (a name given twice is reported once), each
+	// with its own <code>error_message</code>.
 	DeleteListenerResponses []*DeleteListenerResponse `protobuf:"bytes,1,rep,name=delete_listener_responses,json=deleteListenerResponses,proto3" json:"delete_listener_responses,omitempty"`
-	// error message if there are any.
+	// A summary when at least one entry failed (e.g. <code>2 of 5 listeners were not deleted</code>), empty when every
+	// entry succeeded. The failed entries carry their own <code>error_message</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4546,7 +3223,7 @@ type DeleteListenersResponse struct {
 
 func (x *DeleteListenersResponse) Reset() {
 	*x = DeleteListenersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[51]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4558,7 +3235,7 @@ func (x *DeleteListenersResponse) String() string {
 func (*DeleteListenersResponse) ProtoMessage() {}
 
 func (x *DeleteListenersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[51]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4571,7 +3248,7 @@ func (x *DeleteListenersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteListenersResponse.ProtoReflect.Descriptor instead.
 func (*DeleteListenersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{51}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *DeleteListenersResponse) GetDeleteListenerResponses() []*DeleteListenerResponse {
@@ -4592,14 +3269,19 @@ func (x *DeleteListenersResponse) GetErrorMessage() string {
 type DeleteCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the caller to delete in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the field paths of <code>DeleteCallerResponse</code> to populate, i.e.
+	// <code>error_message</code> (the response carries no <code>Caller</code>). <code>name</code> is always populated.
+	// Unset or empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming
+	// it, before anything is deleted. It shapes only the response: the caller is deleted regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DeleteCallerRequest) Reset() {
 	*x = DeleteCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[52]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4611,7 +3293,7 @@ func (x *DeleteCallerRequest) String() string {
 func (*DeleteCallerRequest) ProtoMessage() {}
 
 func (x *DeleteCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[52]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4624,7 +3306,7 @@ func (x *DeleteCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCallerRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{52}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *DeleteCallerRequest) GetName() string {
@@ -4634,12 +3316,22 @@ func (x *DeleteCallerRequest) GetName() string {
 	return ""
 }
 
-// Represents a request to delete a specific caller.
+func (x *DeleteCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to deleting a caller, and one entry of <code>DeleteCallersResponse</code>.
 type DeleteCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the deleted caller in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Empty on success. <code>DeleteCaller</code> reports its errors as gRPC status codes, so it is empty there. In an
+	// entry of <code>DeleteCallersResponse</code> it is the error of that entry, prefixed with the name of the gRPC
+	// status code <code>DeleteCaller</code> would have answered, e.g.
+	// <code>NOT_FOUND: caller projects/.../callers/... does not exist</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4647,7 +3339,7 @@ type DeleteCallerResponse struct {
 
 func (x *DeleteCallerResponse) Reset() {
 	*x = DeleteCallerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[53]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4659,7 +3351,7 @@ func (x *DeleteCallerResponse) String() string {
 func (*DeleteCallerResponse) ProtoMessage() {}
 
 func (x *DeleteCallerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[53]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4672,7 +3364,7 @@ func (x *DeleteCallerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCallerResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCallerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{53}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *DeleteCallerResponse) GetName() string {
@@ -4692,15 +3384,33 @@ func (x *DeleteCallerResponse) GetErrorMessage() string {
 // Represents a request to delete multiple callers.
 type DeleteCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The name of the caller to delete in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
-	Names         []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The names of the callers to delete, 1 to 1000 distinct names, in the form <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
+	Names []string `protobuf:"bytes,1,rep,name=names,proto3" json:"names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>DeleteCallersResponse.delete_caller_responses</code>, relative to the entry message <code>DeleteCallerResponse</code>, i.e.
+	// <code>error_message</code> (the entries carry no <code>Caller</code>). <code>name</code> of each entry and the
+	// response&apos;s own fields are always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is deleted. It shapes only the
+	// response: the callers are deleted regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. VTSI project of every caller of the request, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// When set, the request is checked as a whole like <code>UpdateCallersRequest</code> before anything is
+	// deleted, and refused with <code>INVALID_ARGUMENT</code> (naming the entry index) for a malformed
+	// <code>vtsi_project_name</code>, a name given twice, or a name that is malformed or whose project segment
+	// differs from <code>vtsi_project_name</code>; with <code>NOT_FOUND</code> for an unknown project; and with
+	// authorization enforced with <code>PERMISSION_DENIED</code> for a project the caller holds no role on. Empty
+	// keeps the behaviour of 9.0.0 clients, which do not send it: each name is checked on its own (a name of
+	// another project is that entry&apos;s <code>NOT_FOUND</code>) and a name given twice is deleted once and
+	// reported once. Either way, no entry and more than 1000 distinct names are <code>INVALID_ARGUMENT</code>.
+	VtsiProjectName string `protobuf:"bytes,3,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *DeleteCallersRequest) Reset() {
 	*x = DeleteCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[54]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4712,7 +3422,7 @@ func (x *DeleteCallersRequest) String() string {
 func (*DeleteCallersRequest) ProtoMessage() {}
 
 func (x *DeleteCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[54]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4725,7 +3435,7 @@ func (x *DeleteCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCallersRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{54}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *DeleteCallersRequest) GetNames() []string {
@@ -4735,12 +3445,28 @@ func (x *DeleteCallersRequest) GetNames() []string {
 	return nil
 }
 
+func (x *DeleteCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *DeleteCallersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
 // Response to delete multiple callers
 type DeleteCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// responses to delete callers
+	// One entry per distinct name of the request, in request order (a name given twice is reported once), each
+	// with its own <code>error_message</code>.
 	DeleteCallerResponses []*DeleteCallerResponse `protobuf:"bytes,1,rep,name=delete_caller_responses,json=deleteCallerResponses,proto3" json:"delete_caller_responses,omitempty"`
-	// error message if there are any.
+	// A summary when at least one entry failed (e.g. <code>2 of 5 callers were not deleted</code>), empty when every
+	// entry succeeded. The failed entries carry their own <code>error_message</code>.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4748,7 +3474,7 @@ type DeleteCallersResponse struct {
 
 func (x *DeleteCallersResponse) Reset() {
 	*x = DeleteCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[55]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4760,7 +3486,7 @@ func (x *DeleteCallersResponse) String() string {
 func (*DeleteCallersResponse) ProtoMessage() {}
 
 func (x *DeleteCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[55]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4773,7 +3499,7 @@ func (x *DeleteCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCallersResponse.ProtoReflect.Descriptor instead.
 func (*DeleteCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{55}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *DeleteCallersResponse) GetDeleteCallerResponses() []*DeleteCallerResponse {
@@ -4790,23 +3516,699 @@ func (x *DeleteCallersResponse) GetErrorMessage() string {
 	return ""
 }
 
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCaller">Calls.UpdateCaller</a>.
+type UpdateCallerRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The caller to update, identified by <code>caller.name</code>
+	// (<pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>), carrying the new values
+	// of the fields named in <code>update_mask</code>. Its fields that no path names are ignored.
+	Caller *Caller `protobuf:"bytes,1,opt,name=caller,proto3" json:"caller,omitempty"`
+	// Required. Paths relative to <code>Caller</code>, WITHOUT a <code>caller.</code> prefix. Updatable paths:
+	// <code>sip_caller_config</code> and <code>common_services_config</code>, each also as any nested sub-path
+	// (e.g. <code>sip_caller_config.callee_id</code>, <code>sip_caller_config.sip_headers</code>,
+	// <code>sip_caller_config.sip_base_config.sip_sim_version</code>,
+	// <code>common_services_config.nlu_vtsi_config.agent_name</code>). An empty mask, or an unknown, output-only
+	// or immutable path (<code>name</code>, <code>call_name</code>, <code>vtsi_project_name</code>,
+	// <code>active</code>, <code>sip_status_type</code>, <code>created_at</code>, <code>pooled</code>,
+	// <code>campaign_name</code>; a nested path is checked against the message type it names), is rejected with
+	// <code>INVALID_ARGUMENT</code> naming the path, and nothing is written.
+	// <p>The semantics are those of <code>UpdateCampaignRequest.update_mask</code> for the campaign call
+	// defaults:</p>
+	// <ul>
+	//   <li>a path naming a message field REPLACES that whole message with the one sent; an unset one clears it
+	//       (the create default of a message field is unset);</li>
+	//   <li>a path naming a scalar, repeated or map field replaces exactly that field; a repeated or map field is
+	//       replaced as a whole, never appended to; a named scalar left at its zero value writes what
+	//       <code>StartCaller</code> stores for that value (the create default);</li>
+	//   <li>a field that no path names is left untouched;</li>
+	//   <li>a path naming a member of a <code>oneof</code> (e.g.
+	//       <code>common_services_config.nlu_vtsi_config.auth_token</code>) SETS that member, clearing the other
+	//       members, when the request&apos;s <code>caller</code> has that member set; when it does not, the path
+	//       CLEARS the member if it is the stored active one and changes nothing otherwise;</li>
+	//   <li>a path BELOW a repeated or map field (e.g. <code>sip_caller_config.sip_headers.X-Foo</code>) is
+	//       rejected with <code>INVALID_ARGUMENT</code> naming it: name the repeated or map field itself;</li>
+	//   <li>a path and a sub-path of it in the same mask act as the shorter path alone.</li>
+	// </ul>
+	// <p>The resulting stored configuration must be one a <code>StartCallerRequest</code> carrying it would be
+	// accepted with; otherwise the request is rejected with <code>INVALID_ARGUMENT</code> and nothing is
+	// written.</p>
+	// <p>Credentials: values written to credential-bearing fields are stored like those of
+	// <code>StartCaller</code> and never logged. A caller that is returned the redacted
+	// <code>common_services_config</code> (see <code>GetCaller</code>) and writes it back whole with the path
+	// <code>common_services_config</code> overwrites the stored credentials with the withheld (empty) ones;
+	// update a sub-path instead.</p>
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the field paths to populate in <code>UpdateCallerResponse.caller</code>,
+	// relative to the <code>Caller</code> message (no <code>caller.</code> prefix), e.g.
+	// <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed; a
+	// path below a repeated or map field is not. <code>caller.name</code> and the other fields of the response
+	// are always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is written. The returned caller is the one
+	// <code>GetCaller</code> with <code>call_view = FULL</code> would return after the update, including the
+	// server&apos;s role-based redaction of <code>common_services_config</code>, and the mask is applied after
+	// that redaction, so it can only narrow the response. In an entry of <code>UpdateCallersRequest</code> it
+	// must be unset (use <code>UpdateCallersRequest.field_mask</code>).
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run: when true, the request runs every validation <code>UpdateCaller</code> runs (the
+	// <code>update_mask</code> rules, the credential rule and the validation of the resulting configuration as a
+	// <code>StartCallerRequest</code>, the live checks against the upstream services included) but writes NOTHING
+	// and emits no event. It answers with the same error a real request would answer, or with the response a real
+	// request would return: the caller as it would be after the update. It does not wait for a running update,
+	// deploy or undeploy of the project. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it. In an entry of <code>UpdateCallersRequest</code> it must be
+	// unset (use <code>UpdateCallersRequest.validate_only</code>).
+	ValidateOnly  bool `protobuf:"varint,4,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallerRequest) Reset() {
+	*x = UpdateCallerRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallerRequest) ProtoMessage() {}
+
+func (x *UpdateCallerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallerRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCallerRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *UpdateCallerRequest) GetCaller() *Caller {
+	if x != nil {
+		return x.Caller
+	}
+	return nil
+}
+
+func (x *UpdateCallerRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *UpdateCallerRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCaller">Calls.UpdateCaller</a>, and one
+// entry of <code>UpdateCallersResponse</code>.
+type UpdateCallerResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the caller the request named, in the form
+	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>
+	// Always populated, also for a failed entry of <code>UpdateCallers</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The caller after the update, shaped by the request&apos;s <code>field_mask</code>. Unset for a failed entry.
+	Caller *Caller `protobuf:"bytes,2,opt,name=caller,proto3" json:"caller,omitempty"`
+	// Empty on success. <code>UpdateCaller</code> reports every error as a gRPC status code, so it is always
+	// empty there. In an entry of <code>UpdateCallersResponse</code> it is the error of that entry, prefixed with
+	// the name of the gRPC status code <code>UpdateCaller</code> would have answered, e.g.
+	// <code>NOT_FOUND: caller projects/.../callers/... does not exist</code> or
+	// <code>INVALID_ARGUMENT: update_mask path 'call_name' is output only</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallerResponse) Reset() {
+	*x = UpdateCallerResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallerResponse) ProtoMessage() {}
+
+func (x *UpdateCallerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallerResponse.ProtoReflect.Descriptor instead.
+func (*UpdateCallerResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *UpdateCallerResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCallerResponse) GetCaller() *Caller {
+	if x != nil {
+		return x.Caller
+	}
+	return nil
+}
+
+func (x *UpdateCallerResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCallers">Calls.UpdateCallers</a>.
+// <p>Rejected as a whole, nothing being written, with: <code>INVALID_ARGUMENT</code> for a malformed
+// <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same caller, an entry
+// whose <code>caller.name</code> is malformed or whose project segment differs from
+// <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code> or <code>validate_only</code> set, or an unknown
+// <code>field_mask</code> path (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown
+// project; with authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on
+// or a role below the one <code>UpdateCaller</code> requires. Every other error is reported per entry, e.g. a
+// well-formed name of the right project that names no caller is that entry&apos;s
+// <code>NOT_FOUND</code>.</p>
+type UpdateCallersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of every caller of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The updates, applied one by one and each like <code>UpdateCaller</code>.
+	UpdateCallerRequests []*UpdateCallerRequest `protobuf:"bytes,2,rep,name=update_caller_requests,json=updateCallerRequests,proto3" json:"update_caller_requests,omitempty"`
+	// Optional. Partial response: the field paths to populate in the <code>caller</code> of EVERY entry of
+	// <code>UpdateCallersResponse.update_caller_responses</code>, relative to the <code>Caller</code> message (no
+	// prefix), as in <code>UpdateCallerRequest.field_mask</code>. <code>caller.name</code>, <code>name</code>
+	// and <code>error_message</code> of each entry and the response&apos;s own fields are always populated.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run of every entry, each like <code>UpdateCallerRequest.validate_only</code>: the request-level
+	// checks and every entry are validated and reported as for a real request, and nothing is written. The
+	// entries&apos; own <code>validate_only</code> must be unset. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	ValidateOnly  bool `protobuf:"varint,4,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallersRequest) Reset() {
+	*x = UpdateCallersRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallersRequest) ProtoMessage() {}
+
+func (x *UpdateCallersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallersRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCallersRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *UpdateCallersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateCallersRequest) GetUpdateCallerRequests() []*UpdateCallerRequest {
+	if x != nil {
+		return x.UpdateCallerRequests
+	}
+	return nil
+}
+
+func (x *UpdateCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *UpdateCallersRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCallers">Calls.UpdateCallers</a>.
+type UpdateCallersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// One entry per entry of the request, in request order.
+	UpdateCallerResponses []*UpdateCallerResponse `protobuf:"bytes,2,rep,name=update_caller_responses,json=updateCallerResponses,proto3" json:"update_caller_responses,omitempty"`
+	// A summary when at least one entry failed (e.g. <code>2 of 5 updates failed</code>), empty when every entry
+	// succeeded. The failed entries carry their own <code>error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallersResponse) Reset() {
+	*x = UpdateCallersResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallersResponse) ProtoMessage() {}
+
+func (x *UpdateCallersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallersResponse.ProtoReflect.Descriptor instead.
+func (*UpdateCallersResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *UpdateCallersResponse) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateCallersResponse) GetUpdateCallerResponses() []*UpdateCallerResponse {
+	if x != nil {
+		return x.UpdateCallerResponses
+	}
+	return nil
+}
+
+func (x *UpdateCallersResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateListener">Calls.UpdateListener</a>.
+type UpdateListenerRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The listener to update, identified by <code>listener.name</code>
+	// (<pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>), carrying the new
+	// values of the fields named in <code>update_mask</code>. Its fields that no path names are ignored.
+	Listener *Listener `protobuf:"bytes,1,opt,name=listener,proto3" json:"listener,omitempty"`
+	// Required. Paths relative to <code>Listener</code>, WITHOUT a <code>listener.</code> prefix. Updatable
+	// paths: <code>sip_base_config</code> and <code>common_services_config</code>, each also as any nested
+	// sub-path (e.g. <code>sip_base_config.sip_sim_version</code>,
+	// <code>common_services_config.nlu_vtsi_config.agent_name</code>). <code>name</code>, <code>call_name</code>,
+	// <code>vtsi_project_name</code>, <code>active</code>, <code>sip_status_type</code> and <code>created_at</code>
+	// are output only. Rejections, path semantics, validation (against a
+	// <code>StartListenerRequest</code> carrying the result) and the credential note are exactly those of
+	// <code>UpdateCallerRequest.update_mask</code>.
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the field paths to populate in <code>UpdateListenerResponse.listener</code>,
+	// relative to the <code>Listener</code> message (no <code>listener.</code> prefix), with the rules of
+	// <code>UpdateCallerRequest.field_mask</code> (<code>GetListener</code> with <code>call_view = FULL</code>
+	// after the update, redacted, then masked). In an entry of <code>UpdateListenersRequest</code> it must be
+	// unset (use <code>UpdateListenersRequest.field_mask</code>).
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run, as <code>UpdateCallerRequest.validate_only</code> with <code>UpdateListener</code> and a
+	// <code>StartListenerRequest</code> as the validation of the result: nothing is written, the response is the
+	// listener as it would be after the update. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it. In an entry of <code>UpdateListenersRequest</code>
+	// it must be unset (use <code>UpdateListenersRequest.validate_only</code>).
+	ValidateOnly  bool `protobuf:"varint,4,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateListenerRequest) Reset() {
+	*x = UpdateListenerRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateListenerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateListenerRequest) ProtoMessage() {}
+
+func (x *UpdateListenerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateListenerRequest.ProtoReflect.Descriptor instead.
+func (*UpdateListenerRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *UpdateListenerRequest) GetListener() *Listener {
+	if x != nil {
+		return x.Listener
+	}
+	return nil
+}
+
+func (x *UpdateListenerRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateListenerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *UpdateListenerRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateListener">Calls.UpdateListener</a>, and
+// one entry of <code>UpdateListenersResponse</code>.
+type UpdateListenerResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the listener the request named, in the form
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	// Always populated, also for a failed entry of <code>UpdateListeners</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The listener after the update, shaped by the request&apos;s <code>field_mask</code>. Unset for a failed
+	// entry.
+	Listener *Listener `protobuf:"bytes,2,opt,name=listener,proto3" json:"listener,omitempty"`
+	// Empty on success; as <code>UpdateCallerResponse.error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateListenerResponse) Reset() {
+	*x = UpdateListenerResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateListenerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateListenerResponse) ProtoMessage() {}
+
+func (x *UpdateListenerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateListenerResponse.ProtoReflect.Descriptor instead.
+func (*UpdateListenerResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *UpdateListenerResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateListenerResponse) GetListener() *Listener {
+	if x != nil {
+		return x.Listener
+	}
+	return nil
+}
+
+func (x *UpdateListenerResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateListeners">Calls.UpdateListeners</a>.
+// <p>Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with listeners instead of callers and
+// <code>UpdateListener</code> as the role reference; every other error is reported per entry, e.g. a
+// well-formed name of the right project that names no listener is that entry&apos;s <code>NOT_FOUND</code>.</p>
+type UpdateListenersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of every listener of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The updates, applied one by one and each like <code>UpdateListener</code>.
+	UpdateListenerRequests []*UpdateListenerRequest `protobuf:"bytes,2,rep,name=update_listener_requests,json=updateListenerRequests,proto3" json:"update_listener_requests,omitempty"`
+	// Optional. Partial response: the field paths to populate in the <code>listener</code> of EVERY entry of
+	// <code>UpdateListenersResponse.update_listener_responses</code>, relative to the <code>Listener</code>
+	// message (no prefix), as in <code>UpdateListenerRequest.field_mask</code>. <code>listener.name</code>,
+	// <code>name</code> and <code>error_message</code> of each entry and the response&apos;s own fields are
+	// always populated.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Dry run of every entry, each like <code>UpdateListenerRequest.validate_only</code>; nothing is
+	// written. The entries&apos; own <code>validate_only</code> must be unset. Default false. A server older than 9.1.0 ignores this field and runs the request for real; check
+	// the server version before relying on it.
+	ValidateOnly  bool `protobuf:"varint,4,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateListenersRequest) Reset() {
+	*x = UpdateListenersRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateListenersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateListenersRequest) ProtoMessage() {}
+
+func (x *UpdateListenersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateListenersRequest.ProtoReflect.Descriptor instead.
+func (*UpdateListenersRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *UpdateListenersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateListenersRequest) GetUpdateListenerRequests() []*UpdateListenerRequest {
+	if x != nil {
+		return x.UpdateListenerRequests
+	}
+	return nil
+}
+
+func (x *UpdateListenersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *UpdateListenersRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateListeners">Calls.UpdateListeners</a>.
+type UpdateListenersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// One entry per entry of the request, in request order.
+	UpdateListenerResponses []*UpdateListenerResponse `protobuf:"bytes,2,rep,name=update_listener_responses,json=updateListenerResponses,proto3" json:"update_listener_responses,omitempty"`
+	// A summary when at least one entry failed, empty when every entry succeeded; as
+	// <code>UpdateCallersResponse.error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateListenersResponse) Reset() {
+	*x = UpdateListenersResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateListenersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateListenersResponse) ProtoMessage() {}
+
+func (x *UpdateListenersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateListenersResponse.ProtoReflect.Descriptor instead.
+func (*UpdateListenersResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *UpdateListenersResponse) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateListenersResponse) GetUpdateListenerResponses() []*UpdateListenerResponse {
+	if x != nil {
+		return x.UpdateListenerResponses
+	}
+	return nil
+}
+
+func (x *UpdateListenersResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
 // Request for starting a scheduled call
 type StartScheduledCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Normal start caller request
+	// The caller to start at <code>scheduled_time</code>, validated like a <code>StartCallerRequest</code> of
+	// <code>StartCaller</code> (the live checks of the configuration run when the call is started, not when it
+	// is scheduled). Its own <code>field_mask</code> and <code>validate_only</code> must be unset, otherwise the
+	// request is refused with <code>INVALID_ARGUMENT</code>.
 	Request *StartCallerRequest `protobuf:"bytes,2,opt,name=request,proto3" json:"request,omitempty"`
-	// Time the call is scheduled
-	// TODO to be refactored with a more complex scheduling object
+	// Time at or after which the call is started, in UTC. The scheduler checks for due scheduled callers
+	// periodically, so the call starts at the first check at or after this time (typically within a few seconds),
+	// never before it. A time in the past is due at once.
 	ScheduledTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=scheduled_time,json=scheduledTime,proto3" json:"scheduled_time,omitempty"`
+	// Optional. Partial response: the field paths to populate in
+	// <code>StartScheduledCallerResponse.scheduled_caller</code>, relative to the <code>ScheduledCaller</code>
+	// message (no <code>scheduled_caller.</code> prefix), e.g. <code>status</code>, <code>scheduled_time</code>,
+	// <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>scheduled_caller.name</code> and the other fields of the response
+	// are always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is created. Applied after the server&apos;s
+	// role-based redaction of <code>common_services_config</code>, so it can only narrow the response. It shapes
+	// only the response: the scheduled caller is created regardless.
+	// <p>Read only by the RPC this message is the request of. Where it is an entry of another request
+	// (<code>StartScheduledCallersRequest.scheduled_caller_requests</code>,
+	// <code>AddScheduledCallersToCampaignRequest.scheduled_caller_requests</code>) it must be unset, otherwise that
+	// whole request is rejected with <code>INVALID_ARGUMENT</code> naming the entry and nothing is created; use the
+	// enclosing request&apos;s own <code>field_mask</code> where it has one.</p>
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartScheduledCallerRequest) Reset() {
 	*x = StartScheduledCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[56]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4818,7 +4220,7 @@ func (x *StartScheduledCallerRequest) String() string {
 func (*StartScheduledCallerRequest) ProtoMessage() {}
 
 func (x *StartScheduledCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[56]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4831,7 +4233,7 @@ func (x *StartScheduledCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartScheduledCallerRequest.ProtoReflect.Descriptor instead.
 func (*StartScheduledCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{56}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *StartScheduledCallerRequest) GetVtsiProjectName() string {
@@ -4855,12 +4257,22 @@ func (x *StartScheduledCallerRequest) GetScheduledTime() *timestamppb.Timestamp 
 	return nil
 }
 
+func (x *StartScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // Request to start scheduled callers
 type StartScheduledCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// requests to start scheduled callers
+	// The scheduled callers to create, 1 to 1000, each like <code>StartScheduledCaller</code> and on its own (not
+	// atomic: an entry that fails is reported in its <code>StartScheduledCallerResponse.error_message</code> and
+	// does not stop the others). Each entry&apos;s <code>vtsi_project_name</code> is overwritten with this
+	// request&apos;s; its <code>field_mask</code> must be unset.
 	ScheduledCallerRequests []*StartScheduledCallerRequest `protobuf:"bytes,2,rep,name=scheduled_caller_requests,json=scheduledCallerRequests,proto3" json:"scheduled_caller_requests,omitempty"`
 	// Optional client idempotency key: at most 255 printable ASCII characters, no whitespace; empty means no
 	// deduplication. A retry carrying the same key returns the response of the first successful attempt instead
@@ -4872,13 +4284,22 @@ type StartScheduledCallersRequest struct {
 	// no <code>common_services_config</code>: the server keeps no second copy of the credentials it holds. To
 	// make a single caller or listener idempotent, send it as a batch of one.
 	IdempotencyKey string `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in the <code>scheduled_caller</code> of EVERY entry
+	// of <code>StartScheduledCallersResponse.scheduled_caller_responses</code>, relative to the
+	// <code>ScheduledCaller</code> message (no prefix), as in <code>StartScheduledCallerRequest.field_mask</code>.
+	// <code>scheduled_caller.name</code> and every other field of the response and of its entries are always
+	// populated. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// created. The entries&apos; own <code>field_mask</code> must be unset. Not part of the
+	// <code>idempotency_key</code> comparison: a retry with the same key and another mask replays the first
+	// response shaped by the retry&apos;s mask.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartScheduledCallersRequest) Reset() {
 	*x = StartScheduledCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[57]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4890,7 +4311,7 @@ func (x *StartScheduledCallersRequest) String() string {
 func (*StartScheduledCallersRequest) ProtoMessage() {}
 
 func (x *StartScheduledCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[57]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4903,7 +4324,7 @@ func (x *StartScheduledCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartScheduledCallersRequest.ProtoReflect.Descriptor instead.
 func (*StartScheduledCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{57}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *StartScheduledCallersRequest) GetVtsiProjectName() string {
@@ -4927,12 +4348,20 @@ func (x *StartScheduledCallersRequest) GetIdempotencyKey() string {
 	return ""
 }
 
-// Response to start multiple listeners
+func (x *StartScheduledCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to start multiple scheduled callers
 type StartScheduledCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The call ids that were assigned to each listener
+	// One entry per entry of the request, in request order: the scheduled caller that was created, or the
+	// entry&apos;s error
 	ScheduledCallerResponses []*StartScheduledCallerResponse `protobuf:"bytes,2,rep,name=scheduled_caller_responses,json=scheduledCallerResponses,proto3" json:"scheduled_caller_responses,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
@@ -4940,7 +4369,7 @@ type StartScheduledCallersResponse struct {
 
 func (x *StartScheduledCallersResponse) Reset() {
 	*x = StartScheduledCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[58]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4952,7 +4381,7 @@ func (x *StartScheduledCallersResponse) String() string {
 func (*StartScheduledCallersResponse) ProtoMessage() {}
 
 func (x *StartScheduledCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[58]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4965,7 +4394,7 @@ func (x *StartScheduledCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartScheduledCallersResponse.ProtoReflect.Descriptor instead.
 func (*StartScheduledCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{58}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *StartScheduledCallersResponse) GetVtsiProjectName() string {
@@ -5008,7 +4437,7 @@ type AddCallersToCampaignRequest struct {
 
 func (x *AddCallersToCampaignRequest) Reset() {
 	*x = AddCallersToCampaignRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[59]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5020,7 +4449,7 @@ func (x *AddCallersToCampaignRequest) String() string {
 func (*AddCallersToCampaignRequest) ProtoMessage() {}
 
 func (x *AddCallersToCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[59]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5033,7 +4462,7 @@ func (x *AddCallersToCampaignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddCallersToCampaignRequest.ProtoReflect.Descriptor instead.
 func (*AddCallersToCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{59}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *AddCallersToCampaignRequest) GetVtsiProjectName() string {
@@ -5070,7 +4499,9 @@ type AddCallersToCampaignResponse struct {
 	// VTSI project of the callers and the campaign.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The campaign the callers were added to.
+	// The campaign the callers were added to. Its call defaults (<code>campaign_common_services_config</code>,
+	// <code>campaign_sip_caller_config</code>) are always left unset here; read them with
+	// <code>Campaigns.GetCampaign</code>.
 	Campaign *Campaign `protobuf:"bytes,2,opt,name=campaign,proto3" json:"campaign,omitempty"`
 	// The campaign calls created by this request, in request order.
 	CampaignCallNames []string `protobuf:"bytes,3,rep,name=campaign_call_names,json=campaignCallNames,proto3" json:"campaign_call_names,omitempty"`
@@ -5080,7 +4511,7 @@ type AddCallersToCampaignResponse struct {
 
 func (x *AddCallersToCampaignResponse) Reset() {
 	*x = AddCallersToCampaignResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[60]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5092,7 +4523,7 @@ func (x *AddCallersToCampaignResponse) String() string {
 func (*AddCallersToCampaignResponse) ProtoMessage() {}
 
 func (x *AddCallersToCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[60]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5105,7 +4536,7 @@ func (x *AddCallersToCampaignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddCallersToCampaignResponse.ProtoReflect.Descriptor instead.
 func (*AddCallersToCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{60}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *AddCallersToCampaignResponse) GetVtsiProjectName() string {
@@ -5157,7 +4588,7 @@ type AddScheduledCallersToCampaignRequest struct {
 
 func (x *AddScheduledCallersToCampaignRequest) Reset() {
 	*x = AddScheduledCallersToCampaignRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[61]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5169,7 +4600,7 @@ func (x *AddScheduledCallersToCampaignRequest) String() string {
 func (*AddScheduledCallersToCampaignRequest) ProtoMessage() {}
 
 func (x *AddScheduledCallersToCampaignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[61]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5182,7 +4613,7 @@ func (x *AddScheduledCallersToCampaignRequest) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use AddScheduledCallersToCampaignRequest.ProtoReflect.Descriptor instead.
 func (*AddScheduledCallersToCampaignRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{61}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *AddScheduledCallersToCampaignRequest) GetVtsiProjectName() string {
@@ -5222,7 +4653,9 @@ type AddScheduledCallersToCampaignResponse struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// The scheduled callers created, in request order.
 	ScheduledCallerResponses []*StartScheduledCallerResponse `protobuf:"bytes,2,rep,name=scheduled_caller_responses,json=scheduledCallerResponses,proto3" json:"scheduled_caller_responses,omitempty"`
-	// The campaign the scheduled callers were added to.
+	// The campaign the scheduled callers were added to. Its call defaults
+	// (<code>campaign_common_services_config</code>, <code>campaign_sip_caller_config</code>) are always
+	// left unset here; read them with <code>Campaigns.GetCampaign</code>.
 	Campaign *Campaign `protobuf:"bytes,3,opt,name=campaign,proto3" json:"campaign,omitempty"`
 	// The campaign calls created by this request, in request order.
 	CampaignCallNames []string `protobuf:"bytes,4,rep,name=campaign_call_names,json=campaignCallNames,proto3" json:"campaign_call_names,omitempty"`
@@ -5232,7 +4665,7 @@ type AddScheduledCallersToCampaignResponse struct {
 
 func (x *AddScheduledCallersToCampaignResponse) Reset() {
 	*x = AddScheduledCallersToCampaignResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[62]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5244,7 +4677,7 @@ func (x *AddScheduledCallersToCampaignResponse) String() string {
 func (*AddScheduledCallersToCampaignResponse) ProtoMessage() {}
 
 func (x *AddScheduledCallersToCampaignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[62]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5257,7 +4690,7 @@ func (x *AddScheduledCallersToCampaignResponse) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use AddScheduledCallersToCampaignResponse.ProtoReflect.Descriptor instead.
 func (*AddScheduledCallersToCampaignResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{62}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *AddScheduledCallersToCampaignResponse) GetVtsiProjectName() string {
@@ -5288,14 +4721,15 @@ func (x *AddScheduledCallersToCampaignResponse) GetCampaignCallNames() []string 
 	return nil
 }
 
-// Response to start multiple listeners
+// Response to start a scheduled caller, and one entry of <code>StartScheduledCallersResponse</code>
 type StartScheduledCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The scheduled caller that was created
+	// The scheduled caller that was created, shaped by the request&apos;s <code>field_mask</code>. Unset when
+	// <code>error_message</code> is set.
 	ScheduledCaller *ScheduledCaller `protobuf:"bytes,2,opt,name=scheduled_caller,json=scheduledCaller,proto3" json:"scheduled_caller,omitempty"`
-	// error message if you have any so if it's unhealthy
+	// Empty on success, otherwise why the scheduled caller was not created (nothing was created for this entry)
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5303,7 +4737,7 @@ type StartScheduledCallerResponse struct {
 
 func (x *StartScheduledCallerResponse) Reset() {
 	*x = StartScheduledCallerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[63]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5315,7 +4749,7 @@ func (x *StartScheduledCallerResponse) String() string {
 func (*StartScheduledCallerResponse) ProtoMessage() {}
 
 func (x *StartScheduledCallerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[63]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5328,7 +4762,7 @@ func (x *StartScheduledCallerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartScheduledCallerResponse.ProtoReflect.Descriptor instead.
 func (*StartScheduledCallerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{63}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *StartScheduledCallerResponse) GetVtsiProjectName() string {
@@ -5368,8 +4802,9 @@ type ScheduledCaller struct {
 	SipConfig *SipBaseConfig `protobuf:"bytes,3,opt,name=sip_config,json=sipConfig,proto3" json:"sip_config,omitempty"`
 	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
-	// Time the call is scheduled
-	// TODO to be refactored with a more complex scheduling object
+	// Time at or after which the call is started, in UTC (see
+	// <code>StartScheduledCallerRequest.scheduled_time</code>). Updatable with <code>UpdateScheduledCaller</code>
+	// while the status is <code>SCHEDULED_CALLER_STATUS_PENDING</code>.
 	ScheduledTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=scheduled_time,json=scheduledTime,proto3" json:"scheduled_time,omitempty"`
 	// Full SIP caller configuration, including the callee_id that will be dialled and the sip_headers
 	// that will be sent. sip_config (field 3) carries only the sip_base_config half of this message
@@ -5393,14 +4828,24 @@ type ScheduledCaller struct {
 	// <code>FAILED</code> / <code>CANCELLED</code> when the call is completed / failed / cancelled;
 	// <code>call_name</code> and <code>error_message</code> are those of the latest attempt. Its
 	// own retry settings are not used; the campaign&apos;s apply.
-	CampaignName  string `protobuf:"bytes,12,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	CampaignName string `protobuf:"bytes,12,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
+	// Output only. Set on a scheduled caller that <code>RetryScheduledCaller</code> created: the FAILED scheduled
+	// caller it retries, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
+	// Empty for a scheduled caller created by <code>StartScheduledCaller(s)</code> or
+	// <code>AddScheduledCallersToCampaign</code>. Kept when the retried scheduled caller is deleted.
+	RetryOfScheduledCallerName string `protobuf:"bytes,13,opt,name=retry_of_scheduled_caller_name,json=retryOfScheduledCallerName,proto3" json:"retry_of_scheduled_caller_name,omitempty"`
+	// Output only. Set on a FAILED scheduled caller once <code>RetryScheduledCaller</code> retried it: the
+	// scheduled caller the retry created. A FAILED scheduled caller is retried at most once; retry the newest one of
+	// a chain. Empty otherwise.
+	RetriedByScheduledCallerName string `protobuf:"bytes,14,opt,name=retried_by_scheduled_caller_name,json=retriedByScheduledCallerName,proto3" json:"retried_by_scheduled_caller_name,omitempty"`
+	unknownFields                protoimpl.UnknownFields
+	sizeCache                    protoimpl.SizeCache
 }
 
 func (x *ScheduledCaller) Reset() {
 	*x = ScheduledCaller{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[64]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5412,7 +4857,7 @@ func (x *ScheduledCaller) String() string {
 func (*ScheduledCaller) ProtoMessage() {}
 
 func (x *ScheduledCaller) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[64]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5425,7 +4870,7 @@ func (x *ScheduledCaller) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ScheduledCaller.ProtoReflect.Descriptor instead.
 func (*ScheduledCaller) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{64}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *ScheduledCaller) GetName() string {
@@ -5512,23 +4957,49 @@ func (x *ScheduledCaller) GetCampaignName() string {
 	return ""
 }
 
+func (x *ScheduledCaller) GetRetryOfScheduledCallerName() string {
+	if x != nil {
+		return x.RetryOfScheduledCallerName
+	}
+	return ""
+}
+
+func (x *ScheduledCaller) GetRetriedByScheduledCallerName() string {
+	if x != nil {
+		return x.RetriedByScheduledCallerName
+	}
+	return ""
+}
+
 // Represents a request to get a specific scheduled caller.
 type GetScheduledCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Redundant with the project segment of <code>name</code>: when set it must name the same project (see
+	// <code>GetCallerRequest.vtsi_project_name</code>).
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// The name of the scheduled caller to retrieve of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// you can specify the view to be shallow or full
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. How much of the scheduled caller to populate; see <code>CallView</code>. Unset means
+	// <code>SHALLOW</code>.
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned <code>ScheduledCaller</code>,
+	// relative to the <code>ScheduledCaller</code> message, e.g. <code>status</code>, <code>scheduled_time</code>,
+	// <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field the <code>call_view</code> populates. An unknown path is rejected with <code>INVALID_ARGUMENT</code>
+	// naming it. Applied after the <code>call_view</code> and the server&apos;s role-based redaction of
+	// <code>common_services_config</code>, so it can only narrow the response and never populates a field that was
+	// left empty.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetScheduledCallerRequest) Reset() {
 	*x = GetScheduledCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[65]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5540,7 +5011,7 @@ func (x *GetScheduledCallerRequest) String() string {
 func (*GetScheduledCallerRequest) ProtoMessage() {}
 
 func (x *GetScheduledCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[65]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5553,7 +5024,7 @@ func (x *GetScheduledCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetScheduledCallerRequest.ProtoReflect.Descriptor instead.
 func (*GetScheduledCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{65}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *GetScheduledCallerRequest) GetVtsiProjectName() string {
@@ -5577,27 +5048,67 @@ func (x *GetScheduledCallerRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
-// Represents a request to list the scheduled callers of a vtsi-project.
+func (x *GetScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Represents a request to list the scheduled callers of a VTSI project.
 type ListScheduledCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to perform the call.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
+	// Optional. The <code>next_page_token</code> of a previous response. Opaque: its content is not part of the
+	// API. Valid only with the same <code>vtsi_project_name</code>, <code>statuses</code>,
+	// <code>campaign_name</code>, <code>scheduled_after</code> and <code>scheduled_before</code>; a token issued
+	// for another listing is rejected with <code>INVALID_ARGUMENT</code>. <code>page_size</code>,
+	// <code>call_view</code> and <code>field_mask</code> may change between pages.
 	PageToken *string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
-	// you can specify the view to be shallow or full
+	// Optional. How much of each scheduled caller to populate; see <code>CallView</code>. Unset means
+	// <code>SHALLOW</code>.
 	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
 	// Optional. Only return scheduled callers in one of these states.
 	// An empty list returns every state.
-	Statuses      []ScheduledCallerStatus `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=ondewo.vtsi.ScheduledCallerStatus" json:"statuses,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	Statuses []ScheduledCallerStatus `protobuf:"varint,4,rep,packed,name=statuses,proto3,enum=ondewo.vtsi.ScheduledCallerStatus" json:"statuses,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned
+	// <code>ScheduledCaller</code>, relative to the <code>ScheduledCaller</code> message (no
+	// <code>scheduled_callers.</code> prefix), e.g. <code>scheduled_time</code>,
+	// <code>sip_caller_config.callee_id</code>. Nested paths through singular message fields are allowed; a
+	// path below a repeated or map field is not. <code>name</code> is always populated. Unset or empty
+	// returns every field the <code>call_view</code> populates. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Applied after the <code>call_view</code> and the
+	// server&apos;s role-based redaction of <code>common_services_config</code>, so it can only narrow the
+	// response and never populates a field that was left empty. Not part of the paging contract: a
+	// <code>page_token</code> stays valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Maximum number of scheduled callers per page. <code>0</code> keeps the page size the
+	// <code>page_token</code> was issued with, and means the server default of 25 on a first page; values above
+	// 1000 are clamped to 1000; negative values are rejected with <code>INVALID_ARGUMENT</code>. May differ between
+	// the pages of one listing.
+	PageSize int32 `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Only the scheduled callers of this campaign (<code>ScheduledCaller.campaign_name</code>). Empty
+	// does not filter. It must be a campaign of <code>vtsi_project_name</code>: a malformed name or a campaign of
+	// another project is <code>INVALID_ARGUMENT</code>, an unknown campaign <code>NOT_FOUND</code>.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	CampaignName string `protobuf:"bytes,7,opt,name=campaign_name,json=campaignName,proto3" json:"campaign_name,omitempty"`
+	// Optional. Only scheduled callers whose <code>scheduled_time</code> is at or after this instant (inclusive).
+	// Unset does not filter.
+	ScheduledAfter *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=scheduled_after,json=scheduledAfter,proto3" json:"scheduled_after,omitempty"`
+	// Optional. Only scheduled callers whose <code>scheduled_time</code> is strictly before this instant
+	// (exclusive), so that consecutive windows never overlap. Unset does not filter. When both bounds are set,
+	// <code>scheduled_before</code> must be after <code>scheduled_after</code>, otherwise
+	// <code>INVALID_ARGUMENT</code>.
+	ScheduledBefore *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=scheduled_before,json=scheduledBefore,proto3" json:"scheduled_before,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *ListScheduledCallersRequest) Reset() {
 	*x = ListScheduledCallersRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[66]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5609,7 +5120,7 @@ func (x *ListScheduledCallersRequest) String() string {
 func (*ListScheduledCallersRequest) ProtoMessage() {}
 
 func (x *ListScheduledCallersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[66]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5622,7 +5133,7 @@ func (x *ListScheduledCallersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListScheduledCallersRequest.ProtoReflect.Descriptor instead.
 func (*ListScheduledCallersRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{66}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *ListScheduledCallersRequest) GetVtsiProjectName() string {
@@ -5653,22 +5164,61 @@ func (x *ListScheduledCallersRequest) GetStatuses() []ScheduledCallerStatus {
 	return nil
 }
 
+func (x *ListScheduledCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListScheduledCallersRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListScheduledCallersRequest) GetCampaignName() string {
+	if x != nil {
+		return x.CampaignName
+	}
+	return ""
+}
+
+func (x *ListScheduledCallersRequest) GetScheduledAfter() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledAfter
+	}
+	return nil
+}
+
+func (x *ListScheduledCallersRequest) GetScheduledBefore() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledBefore
+	}
+	return nil
+}
+
 // Represents the response for listing scheduled callers.
 type ListScheduledCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of scheduled callers, oldest scheduled_time first.
+	// The scheduled callers of this page, ordered by <code>scheduled_time</code>, oldest first; scheduled callers
+	// with the same <code>scheduled_time</code> are ordered by their uuid (the last segment of <code>name</code>),
+	// ascending.
 	ScheduledCallers []*ScheduledCaller `protobuf:"bytes,1,rep,name=scheduled_callers,json=scheduledCallers,proto3" json:"scheduled_callers,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque. Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// The number of scheduled callers the request matches across all pages (its filters, not
+	// <code>page_size</code>), counted exactly when this page was read. It can change between the pages of one
+	// listing as scheduled callers are created or change state.
+	TotalSize     int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListScheduledCallersResponse) Reset() {
 	*x = ListScheduledCallersResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[67]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5680,7 +5230,7 @@ func (x *ListScheduledCallersResponse) String() string {
 func (*ListScheduledCallersResponse) ProtoMessage() {}
 
 func (x *ListScheduledCallersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[67]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5693,7 +5243,7 @@ func (x *ListScheduledCallersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListScheduledCallersResponse.ProtoReflect.Descriptor instead.
 func (*ListScheduledCallersResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{67}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *ListScheduledCallersResponse) GetScheduledCallers() []*ScheduledCaller {
@@ -5710,6 +5260,13 @@ func (x *ListScheduledCallersResponse) GetNextPageToken() string {
 	return ""
 }
 
+func (x *ListScheduledCallersResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
 // Represents a request to cancel a scheduled caller that has not fired yet.
 type CancelScheduledCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -5717,14 +5274,21 @@ type CancelScheduledCallerRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// The name of the scheduled caller to cancel of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the field paths of <code>CancelScheduledCallerResponse</code> to populate, i.e.
+	// <code>status</code>, <code>cancelled</code> and <code>error_message</code> (the response carries no
+	// <code>ScheduledCaller</code>). <code>name</code> is always populated. Unset or empty returns every field. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is cancelled. It shapes
+	// only the response: the scheduled caller is cancelled regardless. In a <code>CancelScheduledCallers</code>
+	// batch the batch&apos;s own <code>field_mask</code> applies.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CancelScheduledCallerRequest) Reset() {
 	*x = CancelScheduledCallerRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[68]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5736,7 +5300,7 @@ func (x *CancelScheduledCallerRequest) String() string {
 func (*CancelScheduledCallerRequest) ProtoMessage() {}
 
 func (x *CancelScheduledCallerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[68]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5749,7 +5313,7 @@ func (x *CancelScheduledCallerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelScheduledCallerRequest.ProtoReflect.Descriptor instead.
 func (*CancelScheduledCallerRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{68}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *CancelScheduledCallerRequest) GetVtsiProjectName() string {
@@ -5766,20 +5330,36 @@ func (x *CancelScheduledCallerRequest) GetName() string {
 	return ""
 }
 
-// Response to cancelling a scheduled caller.
+func (x *CancelScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to cancelling a scheduled caller, and one entry of <code>CancelScheduledCallersResponse</code>.
 type CancelScheduledCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the scheduled caller of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
+	// Always populated, also for a failed entry of <code>CancelScheduledCallers</code>.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// The state of the scheduled caller AFTER this request. A scheduled caller that was already
 	// firing, done, failed or cancelled keeps the state it had
 	Status ScheduledCallerStatus `protobuf:"varint,2,opt,name=status,proto3,enum=ondewo.vtsi.ScheduledCallerStatus" json:"status,omitempty"`
 	// True when this request performed the transition to SCHEDULED_CALLER_STATUS_CANCELLED.
 	// False means the scheduled caller was already in a state it cannot be cancelled from -
-	// read status to find out which one, this is not an error
+	// read status to find out which one, this is not an error. Cancelling an already cancelled scheduled caller
+	// is therefore idempotent: <code>cancelled = false</code>, <code>status = SCHEDULED_CALLER_STATUS_CANCELLED</code>.
 	Cancelled bool `protobuf:"varint,3,opt,name=cancelled,proto3" json:"cancelled,omitempty"`
-	// error message if you have any so if it's unhealthy
+	// Why the scheduled caller was not cancelled, where there is more to say than <code>status</code>: set (with
+	// <code>cancelled = false</code>) for a scheduled caller of a campaign whose attempt is dispatching or in
+	// progress; empty otherwise, also for a scheduled caller that was simply no longer PENDING.
+	// <code>CancelScheduledCaller</code> reports every other error as a gRPC status code. In an entry of
+	// <code>CancelScheduledCallersResponse</code> it is, in addition, the error of an entry that failed, prefixed
+	// with the name of the gRPC status code <code>CancelScheduledCaller</code> would have answered, e.g.
+	// <code>NOT_FOUND: scheduled caller projects/.../scheduled_callers/... does not exist</code>; <code>status</code>
+	// and <code>cancelled</code> are then left at their zero values.
 	ErrorMessage  string `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5787,7 +5367,7 @@ type CancelScheduledCallerResponse struct {
 
 func (x *CancelScheduledCallerResponse) Reset() {
 	*x = CancelScheduledCallerResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[69]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5799,7 +5379,7 @@ func (x *CancelScheduledCallerResponse) String() string {
 func (*CancelScheduledCallerResponse) ProtoMessage() {}
 
 func (x *CancelScheduledCallerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[69]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5812,7 +5392,7 @@ func (x *CancelScheduledCallerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelScheduledCallerResponse.ProtoReflect.Descriptor instead.
 func (*CancelScheduledCallerResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{69}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *CancelScheduledCallerResponse) GetName() string {
@@ -5843,22 +5423,345 @@ func (x *CancelScheduledCallerResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.
+// The request message for
+// <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
+// <p>Rejected as a whole, nothing being cancelled, with: <code>INVALID_ARGUMENT</code> for a malformed
+// <code>vtsi_project_name</code>, no entry, more than 1000 entries, a name given twice, a name that is malformed or
+// whose project segment differs from <code>vtsi_project_name</code>, or an unknown <code>field_mask</code> path
+// (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown project; with authorization
+// enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on or a role below the one
+// <code>CancelScheduledCaller</code> requires. Every other error is reported per entry, e.g. a well-formed name of
+// the right project that names no scheduled caller is that entry&apos;s <code>NOT_FOUND</code>.</p>
+type CancelScheduledCallersRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of every scheduled caller of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The scheduled callers to cancel, 1 to 1000 distinct names of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
+	Names []string `protobuf:"bytes,2,rep,name=names,proto3" json:"names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>CancelScheduledCallersResponse.cancel_scheduled_caller_responses</code>, relative to the entry message
+	// <code>CancelScheduledCallerResponse</code>, i.e. <code>status</code>, <code>cancelled</code> and
+	// <code>error_message</code>. <code>name</code> of each entry and the response&apos;s own fields are always
+	// populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is cancelled. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelScheduledCallersRequest) Reset() {
+	*x = CancelScheduledCallersRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelScheduledCallersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelScheduledCallersRequest) ProtoMessage() {}
+
+func (x *CancelScheduledCallersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelScheduledCallersRequest.ProtoReflect.Descriptor instead.
+func (*CancelScheduledCallersRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *CancelScheduledCallersRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *CancelScheduledCallersRequest) GetNames() []string {
+	if x != nil {
+		return x.Names
+	}
+	return nil
+}
+
+func (x *CancelScheduledCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// The response message for
+// <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
+type CancelScheduledCallersResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// One entry per name of the request, in request order, each like the response of
+	// <code>CancelScheduledCaller</code> (an entry that could not be cancelled because of its state is
+	// <code>cancelled = false</code> without an <code>error_message</code>, as there).
+	CancelScheduledCallerResponses []*CancelScheduledCallerResponse `protobuf:"bytes,2,rep,name=cancel_scheduled_caller_responses,json=cancelScheduledCallerResponses,proto3" json:"cancel_scheduled_caller_responses,omitempty"`
+	// A summary when at least one entry failed, i.e. carries an <code>error_message</code> prefixed with a gRPC
+	// status code name (e.g. <code>2 of 5 cancellations failed</code>); empty when no entry failed. An entry with
+	// <code>cancelled = false</code> because of its state is not a failure, whether or not it explains itself in
+	// <code>error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelScheduledCallersResponse) Reset() {
+	*x = CancelScheduledCallersResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelScheduledCallersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelScheduledCallersResponse) ProtoMessage() {}
+
+func (x *CancelScheduledCallersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelScheduledCallersResponse.ProtoReflect.Descriptor instead.
+func (*CancelScheduledCallersResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *CancelScheduledCallersResponse) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *CancelScheduledCallersResponse) GetCancelScheduledCallerResponses() []*CancelScheduledCallerResponse {
+	if x != nil {
+		return x.CancelScheduledCallerResponses
+	}
+	return nil
+}
+
+func (x *CancelScheduledCallersResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Calls.UpdateScheduledCaller">Calls.UpdateScheduledCaller</a>.
+type UpdateScheduledCallerRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The scheduled caller to update, identified by <code>scheduled_caller.name</code>
+	// (<pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>),
+	// carrying the new values of the fields named in <code>update_mask</code>. Its fields that no path names are
+	// ignored.
+	ScheduledCaller *ScheduledCaller `protobuf:"bytes,1,opt,name=scheduled_caller,json=scheduledCaller,proto3" json:"scheduled_caller,omitempty"`
+	// Required. Paths relative to <code>ScheduledCaller</code>, WITHOUT a <code>scheduled_caller.</code> prefix.
+	// The only updatable paths are:
+	// <ul>
+	//   <li><code>scheduled_time</code>: the new time at or after which the call is started. Unset is
+	//       <code>INVALID_ARGUMENT</code> (a scheduled caller always has a time). A time in the past makes it due
+	//       at once.</li>
+	//   <li><code>sip_caller_config.sip_headers</code>: replaces the whole header map (an empty map clears it),
+	//       validated like the <code>sip_headers</code> of a <code>StartCallerRequest</code>. A path below it (e.g.
+	//       <code>sip_caller_config.sip_headers.X-Foo</code>) is rejected.</li>
+	// </ul>
+	// An empty mask, or any other path (output-only, immutable or unknown, e.g. <code>status</code>,
+	// <code>sip_caller_config</code> as a whole, <code>sip_caller_config.callee_id</code>,
+	// <code>common_services_config</code>), is rejected with <code>INVALID_ARGUMENT</code> naming the path, and
+	// nothing is written. To change anything else, cancel the scheduled caller and start a new one.
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned <code>ScheduledCaller</code>,
+	// relative to the <code>ScheduledCaller</code> message, with the rules of
+	// <code>GetScheduledCallerRequest.field_mask</code>. The returned scheduled caller is the one
+	// <code>GetScheduledCaller</code> with <code>call_view = FULL</code> would return after the update. An unknown
+	// path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is written.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateScheduledCallerRequest) Reset() {
+	*x = UpdateScheduledCallerRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateScheduledCallerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateScheduledCallerRequest) ProtoMessage() {}
+
+func (x *UpdateScheduledCallerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateScheduledCallerRequest.ProtoReflect.Descriptor instead.
+func (*UpdateScheduledCallerRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *UpdateScheduledCallerRequest) GetScheduledCaller() *ScheduledCaller {
+	if x != nil {
+		return x.ScheduledCaller
+	}
+	return nil
+}
+
+func (x *UpdateScheduledCallerRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// The request message for
+// <a href="index.html#ondewo.vtsi.Calls.RetryScheduledCaller">Calls.RetryScheduledCaller</a>.
+type RetryScheduledCallerRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the scheduled caller. Redundant with the project segment of <code>name</code>: when set it
+	// must name the same project (see <code>GetCallerRequest.vtsi_project_name</code>).
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The FAILED scheduled caller to retry, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. When the retry fires, in UTC. Unset means now: the retry is due at once and starts at the
+	// scheduler&apos;s next check. A time in the past is treated like unset.
+	ScheduledTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=scheduled_time,json=scheduledTime,proto3" json:"scheduled_time,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned (new) <code>ScheduledCaller</code>,
+	// with the rules of <code>GetScheduledCallerRequest.field_mask</code>. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, before anything is created.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RetryScheduledCallerRequest) Reset() {
+	*x = RetryScheduledCallerRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RetryScheduledCallerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RetryScheduledCallerRequest) ProtoMessage() {}
+
+func (x *RetryScheduledCallerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RetryScheduledCallerRequest.ProtoReflect.Descriptor instead.
+func (*RetryScheduledCallerRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{58}
+}
+
+func (x *RetryScheduledCallerRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *RetryScheduledCallerRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RetryScheduledCallerRequest) GetScheduledTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ScheduledTime
+	}
+	return nil
+}
+
+func (x *RetryScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Request to stop a call: hang it up and stop (release) the listener or caller that serves it.
 type StopCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project parent with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the call, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Required. Redundant with the project segment of <code>call_name</code>, by the rule of
+	// <code>GetCallerRequest.vtsi_project_name</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// call name to stop
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
-	CallName      string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
+	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
+	// Optional. Partial response: the field paths of <code>StopCallResponse</code> to populate, i.e.
+	// <code>vtsi_project_name</code> and <code>error_message</code> (the response carries no
+	// <code>Call</code>). <code>call_name</code> is always populated. Unset or empty returns every field. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is stopped. It
+	// shapes only the response: the call is stopped regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopCallRequest) Reset() {
 	*x = StopCallRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[70]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5870,7 +5773,7 @@ func (x *StopCallRequest) String() string {
 func (*StopCallRequest) ProtoMessage() {}
 
 func (x *StopCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[70]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5883,7 +5786,7 @@ func (x *StopCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallRequest.ProtoReflect.Descriptor instead.
 func (*StopCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{70}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *StopCallRequest) GetVtsiProjectName() string {
@@ -5900,16 +5803,28 @@ func (x *StopCallRequest) GetCallName() string {
 	return ""
 }
 
-// Response to stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.
+func (x *StopCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response to stop a call, and one entry of <code>StopCallsResponse</code>.
 type StopCallResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name with which to stop the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the call, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// call name to stop
+	// The call the request named
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// error messages if you have any so if it's unhealthy
+	// Empty when the call&apos;s listener or caller was released. <code>Call ... was not released</code> when there
+	// was nothing left to release (e.g. it had already been stopped); the RPC still succeeds. Errors that are not
+	// about this outcome are gRPC status codes for <code>StopCall</code>; in an entry of
+	// <code>StopCallsResponse</code> / the response of <code>StopAllCalls</code> they are the error of that entry,
+	// prefixed with the name of the gRPC status code <code>StopCall</code> would have answered, e.g.
+	// <code>NOT_FOUND: call projects/.../calls/... does not exist</code>.
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -5917,7 +5832,7 @@ type StopCallResponse struct {
 
 func (x *StopCallResponse) Reset() {
 	*x = StopCallResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[71]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5929,7 +5844,7 @@ func (x *StopCallResponse) String() string {
 func (*StopCallResponse) ProtoMessage() {}
 
 func (x *StopCallResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[71]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5942,7 +5857,7 @@ func (x *StopCallResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallResponse.ProtoReflect.Descriptor instead.
 func (*StopCallResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{71}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *StopCallResponse) GetVtsiProjectName() string {
@@ -5966,22 +5881,31 @@ func (x *StopCallResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to stop/kill specific ondewo-sip listeners or callers instance for a specific vtsi-project.
+// Request to stop several calls, each like <code>StopCall</code>.
 type StopCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of every call of the request, of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// call names to stop
+	// The calls to stop, 1 to 1000 names (a name given twice is stopped and reported once)
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
-	CallNames     []string `protobuf:"bytes,2,rep,name=call_names,json=callNames,proto3" json:"call_names,omitempty"`
+	CallNames []string `protobuf:"bytes,2,rep,name=call_names,json=callNames,proto3" json:"call_names,omitempty"`
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>StopCallsResponse.stop_call_responses</code>, relative to the entry message
+	// <code>StopCallResponse</code>, i.e. <code>vtsi_project_name</code> and <code>error_message</code> (the
+	// entries carry no <code>Call</code>). <code>call_name</code> of each entry and
+	// <code>StopCallsResponse.error_message</code> are always populated. Unset or empty returns every field. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is stopped. It
+	// shapes only the response: the calls are stopped regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopCallsRequest) Reset() {
 	*x = StopCallsRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[72]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5993,7 +5917,7 @@ func (x *StopCallsRequest) String() string {
 func (*StopCallsRequest) ProtoMessage() {}
 
 func (x *StopCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[72]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6006,7 +5930,7 @@ func (x *StopCallsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallsRequest.ProtoReflect.Descriptor instead.
 func (*StopCallsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{72}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *StopCallsRequest) GetVtsiProjectName() string {
@@ -6023,12 +5947,22 @@ func (x *StopCallsRequest) GetCallNames() []string {
 	return nil
 }
 
-// Response to stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.
+func (x *StopCallsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Response of <code>StopCalls</code> and <code>StopAllCalls</code>.
 type StopCallsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// responses to stop/kill a ondewo-sip listener or caller instance for a specific vtsi-project.
+	// One entry per stopped call: for <code>StopCalls</code> one per distinct requested name, in request order;
+	// for <code>StopAllCalls</code> one per call it stopped, ordered by <code>call_name</code>, ascending (empty when
+	// there was nothing to stop).
 	StopCallResponses []*StopCallResponse `protobuf:"bytes,1,rep,name=stop_call_responses,json=stopCallResponses,proto3" json:"stop_call_responses,omitempty"`
-	// overall error message if you have any so if it's unhealthy
+	// Empty when no entry carries an <code>error_message</code>; otherwise the entries&apos; messages joined, so a
+	// client can log one string. Read the entries for the per-call outcome.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6036,7 +5970,7 @@ type StopCallsResponse struct {
 
 func (x *StopCallsResponse) Reset() {
 	*x = StopCallsResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[73]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6048,7 +5982,7 @@ func (x *StopCallsResponse) String() string {
 func (*StopCallsResponse) ProtoMessage() {}
 
 func (x *StopCallsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[73]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6061,7 +5995,7 @@ func (x *StopCallsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopCallsResponse.ProtoReflect.Descriptor instead.
 func (*StopCallsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{73}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *StopCallsResponse) GetStopCallResponses() []*StopCallResponse {
@@ -6078,18 +6012,36 @@ func (x *StopCallsResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to stop all calls of a VTSI project, so all listeners and callers
+// Request to stop all calls of a VTSI project (hang them up and release their listeners and callers), or, with
+// <code>call_filter</code>, those of them the filter matches.
 type StopAllCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project whose calls are stopped, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Optional. Partial response: the field paths to populate in EVERY entry of
+	// <code>StopCallsResponse.stop_call_responses</code>, relative to the entry message
+	// <code>StopCallResponse</code>, i.e. <code>vtsi_project_name</code> and <code>error_message</code> (the
+	// entries carry no <code>Call</code>). <code>call_name</code> of each entry and
+	// <code>StopCallsResponse.error_message</code> are always populated. Unset or empty returns every field. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is stopped. It
+	// shapes only the response: the calls are stopped regardless.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Narrows the calls that are stopped: of the calls <code>StopAllCalls</code> stops without a filter
+	// (the project&apos;s current calls, each with the listener or caller that serves it), only those this filter
+	// matches, with the semantics, validation and errors of <code>ListCallsRequest.call_filter</code> (the
+	// campaign selector included). An invalid filter is <code>INVALID_ARGUMENT</code> and nothing is stopped.
+	// Unset or empty stops every call, as before 9.1.0. The filter is evaluated once, when the request arrives: a
+	// call that starts while the request runs is not stopped.
+	// <p>Rolling updates: a 9.0.0 server ignores this field and stops EVERY call of the project. A client that must
+	// not stop more than the filter selects checks that the server is 9.1.0 or newer first.</p>
+	CallFilter    *CallFilter `protobuf:"bytes,3,opt,name=call_filter,json=callFilter,proto3" json:"call_filter,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopAllCallsRequest) Reset() {
 	*x = StopAllCallsRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[74]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6101,7 +6053,7 @@ func (x *StopAllCallsRequest) String() string {
 func (*StopAllCallsRequest) ProtoMessage() {}
 
 func (x *StopAllCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[74]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6114,7 +6066,7 @@ func (x *StopAllCallsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopAllCallsRequest.ProtoReflect.Descriptor instead.
 func (*StopAllCallsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{74}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *StopAllCallsRequest) GetVtsiProjectName() string {
@@ -6122,6 +6074,20 @@ func (x *StopAllCallsRequest) GetVtsiProjectName() string {
 		return x.VtsiProjectName
 	}
 	return ""
+}
+
+func (x *StopAllCallsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *StopAllCallsRequest) GetCallFilter() *CallFilter {
+	if x != nil {
+		return x.CallFilter
+	}
+	return nil
 }
 
 // Request to transfer calls
@@ -6148,14 +6114,24 @@ type TransferCallRequest struct {
 	Headers map[string]string `protobuf:"bytes,6,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// WARM only: how long the target may ring, in seconds, <code>5</code> to <code>120</code>. <code>0</code> means
 	// <code>30</code>
-	RingTimeoutS  int32 `protobuf:"varint,7,opt,name=ring_timeout_s,json=ringTimeoutS,proto3" json:"ring_timeout_s,omitempty"`
+	RingTimeoutS int32 `protobuf:"varint,7,opt,name=ring_timeout_s,json=ringTimeoutS,proto3" json:"ring_timeout_s,omitempty"`
+	// Optional idempotency key, with the semantics of <code>InviteToCallRequest.request_id</code>: 1 to 255 visible
+	// ASCII characters, scoped to <code>call_name</code>. A repeated request with the same <code>call_name</code>
+	// and <code>request_id</code> returns the <code>TransferCallResponse</code> of the first request instead of
+	// transferring again, for as long as the call record exists; the same key with a different target, mode,
+	// headers or ring timeout is refused with <code>INVALID_ARGUMENT</code> and <code>reason=request-id-conflict</code>.
+	// A first request that was refused with a gRPC status stored nothing, so its retry runs again; a first request
+	// that answered an outcome (also a telephony failure such as <code>TRANSFER_OUTCOME_TIMEOUT</code>) is replayed.
+	// A replay writes no second audit record and emits no event. Empty means no deduplication. In a
+	// <code>TransferCallsRequest</code> each entry carries its own key.
+	RequestId     string `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *TransferCallRequest) Reset() {
 	*x = TransferCallRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[75]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6167,7 +6143,7 @@ func (x *TransferCallRequest) String() string {
 func (*TransferCallRequest) ProtoMessage() {}
 
 func (x *TransferCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[75]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6180,7 +6156,7 @@ func (x *TransferCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferCallRequest.ProtoReflect.Descriptor instead.
 func (*TransferCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{75}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *TransferCallRequest) GetVtsiProjectName() string {
@@ -6232,6 +6208,13 @@ func (x *TransferCallRequest) GetRingTimeoutS() int32 {
 	return 0
 }
 
+func (x *TransferCallRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
 // <p>Target of a transfer</p>
 type CallTarget struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -6250,7 +6233,7 @@ type CallTarget struct {
 
 func (x *CallTarget) Reset() {
 	*x = CallTarget{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[76]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6262,7 +6245,7 @@ func (x *CallTarget) String() string {
 func (*CallTarget) ProtoMessage() {}
 
 func (x *CallTarget) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[76]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6275,7 +6258,7 @@ func (x *CallTarget) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallTarget.ProtoReflect.Descriptor instead.
 func (*CallTarget) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{76}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *CallTarget) GetTarget() isCallTarget_Target {
@@ -6366,7 +6349,7 @@ type ListenerQueueTarget struct {
 
 func (x *ListenerQueueTarget) Reset() {
 	*x = ListenerQueueTarget{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[77]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6378,7 +6361,7 @@ func (x *ListenerQueueTarget) String() string {
 func (*ListenerQueueTarget) ProtoMessage() {}
 
 func (x *ListenerQueueTarget) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[77]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6391,7 +6374,7 @@ func (x *ListenerQueueTarget) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenerQueueTarget.ProtoReflect.Descriptor instead.
 func (*ListenerQueueTarget) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{77}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{66}
 }
 
 // Response to transfer a call to a phone number or voip number
@@ -6403,9 +6386,14 @@ type TransferCallResponse struct {
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// transfer id to transfer the calls to, so the phone number or voip number you want to be transferred too
+	// The legacy raw target of the request (<code>TransferCallRequest.transfer_id</code>), echoed; empty for a
+	// typed <code>target</code> (see <code>resolved_target</code>)
 	TransferId string `protobuf:"bytes,3,opt,name=transfer_id,json=transferId,proto3" json:"transfer_id,omitempty"`
-	// error message if you have any so if it's unhealthy
+	// Empty unless the transfer failed. <code>TransferCall</code> reports a refusal before any side effect as a gRPC
+	// status and a telephony outcome in <code>outcome</code> / <code>error_reason</code>, so it is empty there. In an
+	// entry of <code>TransferCallsResponse</code> it is the error of an entry <code>TransferCall</code> would have
+	// refused with a gRPC status, prefixed with the name of that status code, e.g.
+	// <code>FAILED_PRECONDITION: reason=call-not-connected</code>.
 	ErrorMessage string `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	// Outcome of the transfer
 	Outcome TransferOutcome `protobuf:"varint,5,opt,name=outcome,proto3,enum=ondewo.vtsi.TransferOutcome" json:"outcome,omitempty"`
@@ -6424,7 +6412,7 @@ type TransferCallResponse struct {
 
 func (x *TransferCallResponse) Reset() {
 	*x = TransferCallResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[78]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6436,7 +6424,7 @@ func (x *TransferCallResponse) String() string {
 func (*TransferCallResponse) ProtoMessage() {}
 
 func (x *TransferCallResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[78]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6449,7 +6437,7 @@ func (x *TransferCallResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferCallResponse.ProtoReflect.Descriptor instead.
 func (*TransferCallResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{78}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *TransferCallResponse) GetVtsiProjectName() string {
@@ -6529,7 +6517,7 @@ type CallTransferRecord struct {
 
 func (x *CallTransferRecord) Reset() {
 	*x = CallTransferRecord{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[79]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6541,7 +6529,7 @@ func (x *CallTransferRecord) String() string {
 func (*CallTransferRecord) ProtoMessage() {}
 
 func (x *CallTransferRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[79]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6554,7 +6542,7 @@ func (x *CallTransferRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallTransferRecord.ProtoReflect.Descriptor instead.
 func (*CallTransferRecord) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{79}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *CallTransferRecord) GetTarget() *CallTarget {
@@ -6616,7 +6604,7 @@ type CallMediaControlState struct {
 
 func (x *CallMediaControlState) Reset() {
 	*x = CallMediaControlState{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[80]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6628,7 +6616,7 @@ func (x *CallMediaControlState) String() string {
 func (*CallMediaControlState) ProtoMessage() {}
 
 func (x *CallMediaControlState) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[80]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6641,7 +6629,7 @@ func (x *CallMediaControlState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallMediaControlState.ProtoReflect.Descriptor instead.
 func (*CallMediaControlState) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{80}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *CallMediaControlState) GetBotMuted() bool {
@@ -6692,19 +6680,25 @@ type CallParticipant struct {
 	LeftAt *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=left_at,json=leftAt,proto3" json:"left_at,omitempty"`
 	// Why the participant failed or left: <code>NOANSWER</code>, <code>BUSY</code>, <code>CHANUNAVAIL</code>,
 	// <code>CALL_ENDED</code>, <code>REMOVED</code>, <code>HANGUP</code>, <code>HANDED_OVER</code>,
-	// <code>JOIN_FAILED</code> or <code>TIMEOUT</code>
+	// <code>JOIN_FAILED</code> or <code>TIMEOUT</code>; empty while ringing or joined. Kept for clients built before
+	// <code>end_reason_type</code> existed; both are always set together.
 	EndReason string `protobuf:"bytes,8,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
 	// Identity of who invited the participant (audit)
 	InvitedBy string `protobuf:"bytes,9,opt,name=invited_by,json=invitedBy,proto3" json:"invited_by,omitempty"`
 	// Bot policy applied while this participant is ringing or joined
-	BotPolicy     BotPolicyOnJoin `protobuf:"varint,10,opt,name=bot_policy,json=botPolicy,proto3,enum=ondewo.vtsi.BotPolicyOnJoin" json:"bot_policy,omitempty"`
+	BotPolicy BotPolicyOnJoin `protobuf:"varint,10,opt,name=bot_policy,json=botPolicy,proto3,enum=ondewo.vtsi.BotPolicyOnJoin" json:"bot_policy,omitempty"`
+	// Output only. The typed form of <code>end_reason</code>: <code>PARTICIPANT_END_REASON_UNSPECIFIED</code> while
+	// ringing or joined, otherwise the value of the string in <code>end_reason</code> (e.g. <code>NOANSWER</code> is
+	// <code>PARTICIPANT_END_REASON_NO_ANSWER</code>). A 9.0.0 server leaves it unset; read <code>end_reason</code>
+	// then.
+	EndReasonType ParticipantEndReason `protobuf:"varint,11,opt,name=end_reason_type,json=endReasonType,proto3,enum=ondewo.vtsi.ParticipantEndReason" json:"end_reason_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CallParticipant) Reset() {
 	*x = CallParticipant{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[81]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6716,7 +6710,7 @@ func (x *CallParticipant) String() string {
 func (*CallParticipant) ProtoMessage() {}
 
 func (x *CallParticipant) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[81]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6729,7 +6723,7 @@ func (x *CallParticipant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallParticipant.ProtoReflect.Descriptor instead.
 func (*CallParticipant) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{81}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *CallParticipant) GetParticipantId() string {
@@ -6802,6 +6796,13 @@ func (x *CallParticipant) GetBotPolicy() BotPolicyOnJoin {
 	return BotPolicyOnJoin_BOT_POLICY_ON_JOIN_UNSPECIFIED
 }
 
+func (x *CallParticipant) GetEndReasonType() ParticipantEndReason {
+	if x != nil {
+		return x.EndReasonType
+	}
+	return ParticipantEndReason_PARTICIPANT_END_REASON_UNSPECIFIED
+}
+
 // <p>Request to invite a softphone account into a call</p>
 type InviteToCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -6824,8 +6825,12 @@ type InviteToCallRequest struct {
 	// Caller-ID display name shown on the softphone. Sanitized by the server; default
 	// <code>ONDEWO &lt;listener or caller name&gt;</code>
 	CallerIdDisplayName string `protobuf:"bytes,7,opt,name=caller_id_display_name,json=callerIdDisplayName,proto3" json:"caller_id_display_name,omitempty"`
-	// Optional idempotency key: a repeated request with the same <code>call_name</code> and <code>request_id</code>
-	// returns the participant of the first request instead of inviting again
+	// Optional idempotency key: 1 to 255 visible ASCII characters, scoped to <code>call_name</code>. A repeated
+	// request with the same <code>call_name</code> and <code>request_id</code> returns the participant of the first
+	// request (in its CURRENT state) instead of inviting again, for as long as the call record exists. The same key
+	// with a different <code>softphone_account_name</code> or <code>mode</code> is refused with
+	// <code>INVALID_ARGUMENT</code> and <code>reason=request-id-conflict</code>. Empty means no deduplication (the
+	// server generates a key of its own).
 	RequestId     string `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6833,7 +6838,7 @@ type InviteToCallRequest struct {
 
 func (x *InviteToCallRequest) Reset() {
 	*x = InviteToCallRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[82]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6845,7 +6850,7 @@ func (x *InviteToCallRequest) String() string {
 func (*InviteToCallRequest) ProtoMessage() {}
 
 func (x *InviteToCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[82]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6858,7 +6863,7 @@ func (x *InviteToCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InviteToCallRequest.ProtoReflect.Descriptor instead.
 func (*InviteToCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{82}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *InviteToCallRequest) GetVtsiProjectName() string {
@@ -6926,7 +6931,8 @@ type InviteToCallResponse struct {
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
 	// The invited participant
 	Participant *CallParticipant `protobuf:"bytes,3,opt,name=participant,proto3" json:"participant,omitempty"`
-	// error message if you have any
+	// Always empty: errors are reported as gRPC status codes with <code>reason=&lt;token&gt;</code> in the details.
+	// Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -6934,7 +6940,7 @@ type InviteToCallResponse struct {
 
 func (x *InviteToCallResponse) Reset() {
 	*x = InviteToCallResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[83]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6946,7 +6952,7 @@ func (x *InviteToCallResponse) String() string {
 func (*InviteToCallResponse) ProtoMessage() {}
 
 func (x *InviteToCallResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[83]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6959,7 +6965,7 @@ func (x *InviteToCallResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InviteToCallResponse.ProtoReflect.Descriptor instead.
 func (*InviteToCallResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{83}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *InviteToCallResponse) GetVtsiProjectName() string {
@@ -6997,7 +7003,9 @@ type RemoveCallParticipantRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Name of the call
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// Identifier of the participant (<code>CallParticipant.participant_id</code>)
+	// Identifier of the participant (<code>CallParticipant.participant_id</code>). It must be a participant of
+	// <code>call_name</code>: an unknown identifier, or one of another call, is <code>NOT_FOUND</code> with
+	// <code>reason=participant-not-found</code>.
 	ParticipantId string `protobuf:"bytes,3,opt,name=participant_id,json=participantId,proto3" json:"participant_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7005,7 +7013,7 @@ type RemoveCallParticipantRequest struct {
 
 func (x *RemoveCallParticipantRequest) Reset() {
 	*x = RemoveCallParticipantRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[84]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7017,7 +7025,7 @@ func (x *RemoveCallParticipantRequest) String() string {
 func (*RemoveCallParticipantRequest) ProtoMessage() {}
 
 func (x *RemoveCallParticipantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[84]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7030,7 +7038,7 @@ func (x *RemoveCallParticipantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveCallParticipantRequest.ProtoReflect.Descriptor instead.
 func (*RemoveCallParticipantRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{84}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *RemoveCallParticipantRequest) GetVtsiProjectName() string {
@@ -7063,7 +7071,8 @@ type RemoveCallParticipantResponse struct {
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
 	// The participant after the request
 	Participant *CallParticipant `protobuf:"bytes,3,opt,name=participant,proto3" json:"participant,omitempty"`
-	// error message if you have any
+	// Always empty: errors are reported as gRPC status codes with <code>reason=&lt;token&gt;</code> in the details.
+	// Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7071,7 +7080,7 @@ type RemoveCallParticipantResponse struct {
 
 func (x *RemoveCallParticipantResponse) Reset() {
 	*x = RemoveCallParticipantResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[85]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7083,7 +7092,7 @@ func (x *RemoveCallParticipantResponse) String() string {
 func (*RemoveCallParticipantResponse) ProtoMessage() {}
 
 func (x *RemoveCallParticipantResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[85]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7096,7 +7105,7 @@ func (x *RemoveCallParticipantResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveCallParticipantResponse.ProtoReflect.Descriptor instead.
 func (*RemoveCallParticipantResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{85}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *RemoveCallParticipantResponse) GetVtsiProjectName() string {
@@ -7134,9 +7143,17 @@ type SetCallMediaControlRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Name of the connected call
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// <code>CALL_MEDIA_SETTING_OFF</code> mutes the bot, <code>CALL_MEDIA_SETTING_ON</code> lets it speak again
+	// <code>CALL_MEDIA_SETTING_OFF</code> mutes the bot, <code>CALL_MEDIA_SETTING_ON</code> lets it speak again,
+	// <code>CALL_MEDIA_SETTING_UNCHANGED</code> (the zero value) leaves it as it is.
+	// <p>Both <code>bot_voice</code> and <code>bot_listening</code> <code>UNCHANGED</code> is a valid READ of the
+	// call&apos;s current media control state: nothing is sent to the call, the response carries the effective
+	// <code>state</code> with <code>changed = false</code>, and no audit record and no event are written. The
+	// call must still be connected and controllable (the same refusals as a change apply). A 9.0.0 server refuses
+	// it with <code>INVALID_ARGUMENT</code>; <code>Call.media_control</code> (<code>GetCall</code>) reads the same
+	// state from any server.</p>
 	BotVoice CallMediaSetting `protobuf:"varint,3,opt,name=bot_voice,json=botVoice,proto3,enum=ondewo.vtsi.CallMediaSetting" json:"bot_voice,omitempty"`
-	// <code>CALL_MEDIA_SETTING_OFF</code> stops the bot listening, <code>CALL_MEDIA_SETTING_ON</code> resumes it
+	// <code>CALL_MEDIA_SETTING_OFF</code> stops the bot listening, <code>CALL_MEDIA_SETTING_ON</code> resumes it,
+	// <code>CALL_MEDIA_SETTING_UNCHANGED</code> (the zero value) leaves it as it is.
 	BotListening  CallMediaSetting `protobuf:"varint,4,opt,name=bot_listening,json=botListening,proto3,enum=ondewo.vtsi.CallMediaSetting" json:"bot_listening,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7144,7 +7161,7 @@ type SetCallMediaControlRequest struct {
 
 func (x *SetCallMediaControlRequest) Reset() {
 	*x = SetCallMediaControlRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[86]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7156,7 +7173,7 @@ func (x *SetCallMediaControlRequest) String() string {
 func (*SetCallMediaControlRequest) ProtoMessage() {}
 
 func (x *SetCallMediaControlRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[86]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7169,7 +7186,7 @@ func (x *SetCallMediaControlRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetCallMediaControlRequest.ProtoReflect.Descriptor instead.
 func (*SetCallMediaControlRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{86}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *SetCallMediaControlRequest) GetVtsiProjectName() string {
@@ -7209,9 +7226,11 @@ type SetCallMediaControlResponse struct {
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
 	// Effective media control state after the request
 	State *CallMediaControlState `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
-	// <code>true</code> if the effective state changed
+	// <code>true</code> if the effective state changed; <code>false</code> for a repeat of the current level and for
+	// a read (both settings <code>UNCHANGED</code>)
 	Changed bool `protobuf:"varint,4,opt,name=changed,proto3" json:"changed,omitempty"`
-	// error message if you have any
+	// Always empty: errors are reported as gRPC status codes with <code>reason=&lt;token&gt;</code> in the details.
+	// Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7219,7 +7238,7 @@ type SetCallMediaControlResponse struct {
 
 func (x *SetCallMediaControlResponse) Reset() {
 	*x = SetCallMediaControlResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[87]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7231,7 +7250,7 @@ func (x *SetCallMediaControlResponse) String() string {
 func (*SetCallMediaControlResponse) ProtoMessage() {}
 
 func (x *SetCallMediaControlResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[87]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7244,7 +7263,7 @@ func (x *SetCallMediaControlResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetCallMediaControlResponse.ProtoReflect.Descriptor instead.
 func (*SetCallMediaControlResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{87}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *SetCallMediaControlResponse) GetVtsiProjectName() string {
@@ -7304,7 +7323,7 @@ type StreamCallAudioConfig struct {
 
 func (x *StreamCallAudioConfig) Reset() {
 	*x = StreamCallAudioConfig{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[88]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7316,7 +7335,7 @@ func (x *StreamCallAudioConfig) String() string {
 func (*StreamCallAudioConfig) ProtoMessage() {}
 
 func (x *StreamCallAudioConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[88]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7329,7 +7348,7 @@ func (x *StreamCallAudioConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamCallAudioConfig.ProtoReflect.Descriptor instead.
 func (*StreamCallAudioConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{88}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *StreamCallAudioConfig) GetVtsiProjectName() string {
@@ -7387,7 +7406,7 @@ type CallAudioFrame struct {
 
 func (x *CallAudioFrame) Reset() {
 	*x = CallAudioFrame{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[89]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7399,7 +7418,7 @@ func (x *CallAudioFrame) String() string {
 func (*CallAudioFrame) ProtoMessage() {}
 
 func (x *CallAudioFrame) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[89]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7412,7 +7431,7 @@ func (x *CallAudioFrame) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallAudioFrame.ProtoReflect.Descriptor instead.
 func (*CallAudioFrame) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{89}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *CallAudioFrame) GetPcmS16Le() []byte {
@@ -7446,7 +7465,7 @@ type StreamCallAudioRequest struct {
 
 func (x *StreamCallAudioRequest) Reset() {
 	*x = StreamCallAudioRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[90]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7458,7 +7477,7 @@ func (x *StreamCallAudioRequest) String() string {
 func (*StreamCallAudioRequest) ProtoMessage() {}
 
 func (x *StreamCallAudioRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[90]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7471,7 +7490,7 @@ func (x *StreamCallAudioRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamCallAudioRequest.ProtoReflect.Descriptor instead.
 func (*StreamCallAudioRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{90}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *StreamCallAudioRequest) GetRequest() isStreamCallAudioRequest_Request {
@@ -7550,7 +7569,7 @@ type CallAudioStarted struct {
 
 func (x *CallAudioStarted) Reset() {
 	*x = CallAudioStarted{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[91]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7562,7 +7581,7 @@ func (x *CallAudioStarted) String() string {
 func (*CallAudioStarted) ProtoMessage() {}
 
 func (x *CallAudioStarted) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[91]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7575,7 +7594,7 @@ func (x *CallAudioStarted) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallAudioStarted.ProtoReflect.Descriptor instead.
 func (*CallAudioStarted) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{91}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *CallAudioStarted) GetStreamId() string {
@@ -7625,7 +7644,7 @@ type CallAudioStats struct {
 
 func (x *CallAudioStats) Reset() {
 	*x = CallAudioStats{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[92]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7637,7 +7656,7 @@ func (x *CallAudioStats) String() string {
 func (*CallAudioStats) ProtoMessage() {}
 
 func (x *CallAudioStats) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[92]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7650,7 +7669,7 @@ func (x *CallAudioStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallAudioStats.ProtoReflect.Descriptor instead.
 func (*CallAudioStats) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{92}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *CallAudioStats) GetFramesSent() uint64 {
@@ -7701,7 +7720,7 @@ type CallAudioEnded struct {
 
 func (x *CallAudioEnded) Reset() {
 	*x = CallAudioEnded{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[93]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7713,7 +7732,7 @@ func (x *CallAudioEnded) String() string {
 func (*CallAudioEnded) ProtoMessage() {}
 
 func (x *CallAudioEnded) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[93]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7726,7 +7745,7 @@ func (x *CallAudioEnded) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallAudioEnded.ProtoReflect.Descriptor instead.
 func (*CallAudioEnded) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{93}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *CallAudioEnded) GetReason() CallAudioEndReason {
@@ -7761,7 +7780,7 @@ type StreamCallAudioResponse struct {
 
 func (x *StreamCallAudioResponse) Reset() {
 	*x = StreamCallAudioResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[94]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7773,7 +7792,7 @@ func (x *StreamCallAudioResponse) String() string {
 func (*StreamCallAudioResponse) ProtoMessage() {}
 
 func (x *StreamCallAudioResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[94]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7786,7 +7805,7 @@ func (x *StreamCallAudioResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamCallAudioResponse.ProtoReflect.Descriptor instead.
 func (*StreamCallAudioResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{94}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *StreamCallAudioResponse) GetResponse() isStreamCallAudioResponse_Response {
@@ -7875,7 +7894,7 @@ type ListenCallAudioRequest struct {
 
 func (x *ListenCallAudioRequest) Reset() {
 	*x = ListenCallAudioRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[95]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7887,7 +7906,7 @@ func (x *ListenCallAudioRequest) String() string {
 func (*ListenCallAudioRequest) ProtoMessage() {}
 
 func (x *ListenCallAudioRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[95]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7900,7 +7919,7 @@ func (x *ListenCallAudioRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListenCallAudioRequest.ProtoReflect.Descriptor instead.
 func (*ListenCallAudioRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{95}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *ListenCallAudioRequest) GetConfig() *StreamCallAudioConfig {
@@ -7915,7 +7934,10 @@ type TransferCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Responses to transfer multiple calls to a phone number or voip number
+	// The transfers, 1 to 1000, applied one by one and each like <code>TransferCall</code> (not atomic: a failed
+	// entry does not stop the others). An entry with an empty <code>vtsi_project_name</code> takes this
+	// request&apos;s; an entry naming another project, or a call of another project, fails on its own (its
+	// <code>error_message</code>). Each entry may carry its own <code>request_id</code>.
 	TransferCallRequests []*TransferCallRequest `protobuf:"bytes,2,rep,name=transfer_call_requests,json=transferCallRequests,proto3" json:"transfer_call_requests,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
@@ -7923,7 +7945,7 @@ type TransferCallsRequest struct {
 
 func (x *TransferCallsRequest) Reset() {
 	*x = TransferCallsRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[96]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7935,7 +7957,7 @@ func (x *TransferCallsRequest) String() string {
 func (*TransferCallsRequest) ProtoMessage() {}
 
 func (x *TransferCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[96]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7948,7 +7970,7 @@ func (x *TransferCallsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferCallsRequest.ProtoReflect.Descriptor instead.
 func (*TransferCallsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{96}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *TransferCallsRequest) GetVtsiProjectName() string {
@@ -7970,9 +7992,12 @@ type TransferCallsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The responses for each transfer call request
+	// One entry per entry of the request, in request order: the outcome of that transfer, or its
+	// <code>error_message</code>
 	TransferCallResponses []*TransferCallResponse `protobuf:"bytes,2,rep,name=transfer_call_responses,json=transferCallResponses,proto3" json:"transfer_call_responses,omitempty"`
-	// overall error message if you have any so if it's unhealthy
+	// A summary when at least one entry failed (e.g. <code>Errors occurred during the transfer of 2 out of 5
+	// calls.</code>), empty when no entry carries an <code>error_message</code>. Telephony outcomes are read from
+	// each entry&apos;s <code>outcome</code>.
 	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -7980,7 +8005,7 @@ type TransferCallsResponse struct {
 
 func (x *TransferCallsResponse) Reset() {
 	*x = TransferCallsResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[97]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7992,7 +8017,7 @@ func (x *TransferCallsResponse) String() string {
 func (*TransferCallsResponse) ProtoMessage() {}
 
 func (x *TransferCallsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[97]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8005,7 +8030,7 @@ func (x *TransferCallsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransferCallsResponse.ProtoReflect.Descriptor instead.
 func (*TransferCallsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{97}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *TransferCallsResponse) GetVtsiProjectName() string {
@@ -8029,24 +8054,35 @@ func (x *TransferCallsResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to get a call instance&apos;s call logs
+// Request to get a call
 type GetCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the call, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Required. Redundant with the project segment of <code>call_name</code>, by the rule of
+	// <code>GetCallerRequest.vtsi_project_name</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// call name
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// you can specify the view to be shallow or full .. see above for more info
-	CallView      *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. How much of the call to populate; see <code>CallView</code>. Unset means <code>SHALLOW</code>.
+	CallView *CallView `protobuf:"varint,3,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
+	// Optional. Partial response: the field paths to populate in the returned <code>Call</code>, relative to the
+	// <code>Call</code> message, e.g. <code>call_type</code>, <code>phone_number</code>, <code>labels</code>,
+	// <code>sip_status.status_type</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field the <code>call_view</code> populates. An unknown path is rejected with <code>INVALID_ARGUMENT</code>
+	// naming it. Applied after the <code>call_view</code> and the server&apos;s role-based redaction of
+	// <code>common_services_config</code>, so it can only narrow the response and never populates a field that
+	// was left empty.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCallRequest) Reset() {
 	*x = GetCallRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[98]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8058,7 +8094,7 @@ func (x *GetCallRequest) String() string {
 func (*GetCallRequest) ProtoMessage() {}
 
 func (x *GetCallRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[98]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8071,7 +8107,7 @@ func (x *GetCallRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCallRequest.ProtoReflect.Descriptor instead.
 func (*GetCallRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{98}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *GetCallRequest) GetVtsiProjectName() string {
@@ -8095,26 +8131,39 @@ func (x *GetCallRequest) GetCallView() CallView {
 	return CallView_MINIMUM
 }
 
-// Call
+func (x *GetCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// A call of a listener or caller: one record per call, kept after the call ended. Every field is output only
+// except <code>labels</code> (see <code>UpdateCall</code>). The WAITING record of a persistent listener or pooled
+// caller (status <code>NO_ONGOING_CALL</code>, not active, no start time) is a <code>Call</code> too.
 type Call struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// call name
 	// For listener this is <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// For callers this is <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// sip account used
+	// The SIP account (on the project&apos;s Asterisk) the call&apos;s container registered with, e.g.
+	// <code>ondewo0007</code>
 	SipAccount string `protobuf:"bytes,2,opt,name=sip_account,json=sipAccount,proto3" json:"sip_account,omitempty"`
-	// container name which you get from docker ps
+	// Name of the call&apos;s ondewo-sip container, as <code>docker ps</code> shows it
 	ContainerName string `protobuf:"bytes,3,opt,name=container_name,json=containerName,proto3" json:"container_name,omitempty"`
-	// Listener or caller enum .. if not specified
+	// <code>LISTENER</code>, <code>CALLER</code> or <code>SCHEDULED_CALLER</code>; never <code>BOTH</code> (see
+	// <code>CallType</code>)
 	CallType CallType `protobuf:"varint,4,opt,name=call_type,json=callType,proto3,enum=ondewo.vtsi.CallType" json:"call_type,omitempty"`
-	// callee voip id or callee phone number
+	// The callee (outbound call) or the calling party (inbound call): a phone number or a VoIP id, as dialled or
+	// as received
 	PhoneNumber string `protobuf:"bytes,5,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
-	// start time of log
+	// When the call started (the SIP call was set up); unset for the waiting record of a persistent listener or
+	// pooled caller
 	StartTime *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
-	// end time of log
+	// When the call ended; unset while the call is active
 	EndTime *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
-	// current sip status type
+	// The call&apos;s current SIP status type, or its last one once the call ended
 	SipStatusType sip.SipStatus_StatusType `protobuf:"varint,8,opt,name=sip_status_type,json=sipStatusType,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_type,omitempty"`
 	// current sip status
 	SipStatus *sip.SipStatus `protobuf:"bytes,9,opt,name=sip_status,json=sipStatus,proto3,oneof" json:"sip_status,omitempty"`
@@ -8122,15 +8171,15 @@ type Call struct {
 	SipStatusHistory *sip.SipStatusHistoryResponse `protobuf:"bytes,10,opt,name=sip_status_history,json=sipStatusHistory,proto3,oneof" json:"sip_status_history,omitempty"`
 	// All container health statuses
 	ServicesStatuses *AllServicesStatuses `protobuf:"bytes,11,opt,name=services_statuses,json=servicesStatuses,proto3,oneof" json:"services_statuses,omitempty"`
-	// Is a call active or not
+	// Whether the call is active, i.e. set up or connected
 	Active bool `protobuf:"varint,12,opt,name=active,proto3" json:"active,omitempty"`
-	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// VTSI project of the call, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,13,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Detailed configuration of the services used for the call such as S2T, T2S, NLU, SIP and CSI
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,14,opt,name=common_services_config,json=commonServicesConfig,proto3,oneof" json:"common_services_config,omitempty"`
-	// SIP port of the call
+	// Port (1 to 65535) of the gRPC server of the call&apos;s ondewo-sip container
 	SipPort *int32 `protobuf:"varint,15,opt,name=sip_port,json=sipPort,proto3,oneof" json:"sip_port,omitempty"`
-	// CSI port of the call
+	// Port (1 to 65535) of the gRPC server of the call&apos;s CSI (speech-to-speech) process
 	CsiPort *int32 `protobuf:"varint,16,opt,name=csi_port,json=csiPort,proto3,oneof" json:"csi_port,omitempty"`
 	// NLU session name
 	NluSessionName *string `protobuf:"bytes,17,opt,name=nlu_session_name,json=nluSessionName,proto3,oneof" json:"nlu_session_name,omitempty"`
@@ -8157,21 +8206,39 @@ type Call struct {
 	// Media control state of the call (bot muted, listening paused, connected audio streams, joined participants).
 	// Set in the SHALLOW and FULL views
 	MediaControl *CallMediaControlState `protobuf:"bytes,22,opt,name=media_control,json=mediaControl,proto3" json:"media_control,omitempty"`
-	// Participants invited into the call. FULL view: all of them; SHALLOW view: those still ringing or joined
+	// Participants invited into the call (<code>InviteToCall</code>), oldest invitation first. FULL view: all of
+	// them, including those that FAILED or LEFT; SHALLOW view: only those still RINGING or JOINED; MINIMUM view:
+	// none. So the complete participant history of a call is read with <code>GetCall</code>,
+	// <code>call_view = FULL</code> (and <code>field_mask = participants</code> to read nothing else). Participants
+	// are kept as long as the call record.
 	Participants []*CallParticipant `protobuf:"bytes,23,rep,name=participants,proto3" json:"participants,omitempty"`
 	// The last transfer attempt of the call; unset if there was none. Set in the SHALLOW and FULL views
 	LastTransfer *CallTransferRecord `protobuf:"bytes,24,opt,name=last_transfer,json=lastTransfer,proto3" json:"last_transfer,omitempty"`
 	// Identifier the call&apos;s SIP container minted for the call (<code>ondewo.sip.SipStatus.call_id</code>). Empty until
 	// the call was identified; call control requests are refused (<code>call-not-yet-identified</code>) until then.
 	// Set in the SHALLOW and FULL views
-	SipCallId     string `protobuf:"bytes,25,opt,name=sip_call_id,json=sipCallId,proto3" json:"sip_call_id,omitempty"`
+	SipCallId string `protobuf:"bytes,25,opt,name=sip_call_id,json=sipCallId,proto3" json:"sip_call_id,omitempty"`
+	// Client-defined descriptive labels of the call, e.g. <code>{"ticket": "4711", "outcome": "callback"}</code>.
+	// Empty until a client sets them; the server never sets or interprets them. Written ONLY by
+	// <code>UpdateCall</code> / <code>UpdateCalls</code> with the <code>update_mask</code> path
+	// <code>labels</code>, which REPLACES the whole map (an empty map clears it); a path below it (e.g.
+	// <code>labels.ticket</code>) is rejected. Bounds, each refused with <code>INVALID_ARGUMENT</code> naming
+	// the label: at most 64 entries; a key of 1 to 63 characters of <pre><code>[a-z0-9_.-]</code></pre>, starting
+	// with a letter; a value of at most 256 characters. These are exactly the bounds of
+	// <code>SoftphoneAccount.labels</code>.
+	// Stored with the call record, so they survive the end of the call and are kept as long as the record.
+	// The waiting call of a persistent listener or pooled caller (status <code>NO_ONGOING_CALL</code>, not
+	// active) cannot be labelled: <code>FAILED_PRECONDITION</code> with <code>reason=call-not-started</code>.
+	// This is the only mutable field of a <code>Call</code>: it exists so that a call can be annotated without
+	// anything about the live call being changed. Set in the SHALLOW and FULL views.
+	Labels        map[string]string `protobuf:"bytes,26,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Call) Reset() {
 	*x = Call{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[99]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8183,7 +8250,7 @@ func (x *Call) String() string {
 func (*Call) ProtoMessage() {}
 
 func (x *Call) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[99]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8196,7 +8263,7 @@ func (x *Call) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Call.ProtoReflect.Descriptor instead.
 func (*Call) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{99}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *Call) GetName() string {
@@ -8374,46 +8441,130 @@ func (x *Call) GetSipCallId() string {
 	return ""
 }
 
-// Definition of a CallFilter, representing filters for querying calls.
+func (x *Call) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+// Narrows a set of calls of one project: the calls <code>ListCalls</code> lists, <code>GetCallStatistics</code>
+// counts and <code>StopAllCalls</code> stops. Every field is optional; an unset field, or an empty repeated field
+// or map, does not filter. Fields are combined with AND, the values within one repeated field with OR (except
+// <code>caller_names</code> and <code>listener_names</code>, which are OR-ed with each other), and the entries
+// of <code>labels</code> with AND. The project is the enclosing request&apos;s <code>vtsi_project_name</code>.
+// An invalid value is rejected with <code>INVALID_ARGUMENT</code> naming the field, before anything is read or
+// stopped.
 type CallFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Filter by call names.
+	// Optional: Filter by call names (<code>Call.name</code>), exact match.
 	CallNames []string `protobuf:"bytes,1,rep,name=call_names,json=callNames,proto3" json:"call_names,omitempty"`
-	// Optional: Filter by NLU session names.
+	// Optional: Filter by NLU session names (<code>Call.nlu_session_name</code>), exact match.
 	NluSessionNames []string `protobuf:"bytes,2,rep,name=nlu_session_names,json=nluSessionNames,proto3" json:"nlu_session_names,omitempty"`
-	// Optional: Filter by SIP accounts.
+	// Optional: Filter by SIP accounts (<code>Call.sip_account</code>), exact match.
 	SipAccounts []string `protobuf:"bytes,3,rep,name=sip_accounts,json=sipAccounts,proto3" json:"sip_accounts,omitempty"`
-	// Optional: Filter by phone numbers.
+	// Optional: Filter by phone numbers (<code>Call.phone_number</code>), exact match as stored (no
+	// normalisation: <code>+43...</code> and <code>0043...</code> are different values).
 	PhoneNumbers []string `protobuf:"bytes,4,rep,name=phone_numbers,json=phoneNumbers,proto3" json:"phone_numbers,omitempty"`
-	// Optional: Filter by container names.
+	// Optional: Filter by container names (<code>Call.container_name</code>), exact match.
 	ContainerNames []string `protobuf:"bytes,5,rep,name=container_names,json=containerNames,proto3" json:"container_names,omitempty"`
-	// Optional: Filter by SIP ports.
+	// Deprecated: use <code>sip_port_numbers</code>. Filter by SIP ports given as decimal strings, e.g.
+	// <code>"5060"</code>; a value that is not a decimal integer is <code>INVALID_ARGUMENT</code>. Still honoured,
+	// OR-ed with <code>sip_port_numbers</code>.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/calls.proto.
 	SipPorts []string `protobuf:"bytes,6,rep,name=sip_ports,json=sipPorts,proto3" json:"sip_ports,omitempty"`
-	// Optional: Filter by CSI ports.
+	// Deprecated: use <code>csi_port_numbers</code>. Filter by CSI ports given as decimal strings, with the rules of
+	// <code>sip_ports</code>. Still honoured, OR-ed with <code>csi_port_numbers</code>.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/calls.proto.
 	CsiPorts []string `protobuf:"bytes,7,rep,name=csi_ports,json=csiPorts,proto3" json:"csi_ports,omitempty"`
-	// Optional: Filter by call types (both by default, or only listeners, or only callers).
+	// Optional: Filter by call types (<code>Call.call_type</code>). Empty, or a list containing <code>BOTH</code>,
+	// matches every type.
 	CallTypes []CallType `protobuf:"varint,8,rep,packed,name=call_types,json=callTypes,proto3,enum=ondewo.vtsi.CallType" json:"call_types,omitempty"`
-	// Optional: Filter based on SIP status types.
+	// Optional: Filter by the call&apos;s current or last SIP status type (<code>Call.sip_status_type</code>).
 	SipStatusTypes []sip.SipStatus_StatusType `protobuf:"varint,9,rep,packed,name=sip_status_types,json=sipStatusTypes,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_types,omitempty"`
-	// Optional: Filter based on active or inactive calls.
+	// Optional: Only active (<code>CALL_STATUS_ACTIVE</code>) or only inactive (<code>CALL_STATUS_INACTIVE</code>)
+	// calls. Unset or <code>CALL_STATUS_UNSPECIFIED</code> does not filter.
 	CallStatus *CallStatus `protobuf:"varint,10,opt,name=call_status,json=callStatus,proto3,enum=ondewo.vtsi.CallStatus,oneof" json:"call_status,omitempty"`
-	// Optional: Start time of the log.
+	// Optional: Only calls that STARTED at or after this instant: <code>Call.start_time &gt;= start_time</code>
+	// (inclusive). Calls without a start time (the waiting call of a persistent listener or pooled caller) never
+	// match while it is set. Unset, or the zero timestamp, does not filter.
+	// <p>The window is on two different instants, the start and the end of the call; it is NOT an overlap test.
+	// With both bounds set a call matches when it started at or after <code>start_time</code> AND ended at or
+	// before <code>end_time</code>, i.e. it lies entirely inside the window. To find the calls that were running
+	// at some instant, use <code>call_status</code> and the duration bounds instead.</p>
 	StartTime *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
-	// Optional: End time of the log.
+	// Optional: Only calls that ENDED at or before this instant: <code>Call.end_time &lt;= end_time</code>
+	// (inclusive). An active call has no end time and therefore never matches while it is set. Unset, or the zero
+	// timestamp, does not filter. See <code>start_time</code> for the window semantics.
 	EndTime *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=end_time,json=endTime,proto3,oneof" json:"end_time,omitempty"`
-	// Optional: Match only sessions for which the duration in seconds is larger or equal.
+	// Optional: Match only calls whose duration in seconds is larger than or equal to this value (inclusive). The
+	// duration is <code>end_time - start_time</code>, and for an active call the time since its start, so an active
+	// call can match. <code>0</code> does not filter, so the explicit value 0 is the same as unset.
 	DurationInSMin *float32 `protobuf:"fixed32,13,opt,name=duration_in_s_min,json=durationInSMin,proto3,oneof" json:"duration_in_s_min,omitempty"`
-	// Optional: Match only calls for which the duration in seconds is smaller or equal.
+	// Optional: Match only calls whose duration in seconds is smaller than or equal to this value (inclusive),
+	// computed as for <code>duration_in_s_min</code>. <code>0</code> does not filter.
 	DurationInSMax *float32 `protobuf:"fixed32,14,opt,name=duration_in_s_max,json=durationInSMax,proto3,oneof" json:"duration_in_s_max,omitempty"`
-	// Optional: Platform responses sent to the user. Default is text: <code>Platform.PLATFORM_UNSPECIFIED</code>
-	Platforms     []nlu.Intent_Message_Platform `protobuf:"varint,15,rep,packed,name=platforms,proto3,enum=ondewo.nlu.Intent_Message_Platform" json:"platforms,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Optional: Filter by the NLU message platform of the call (<code>Call.platforms</code>), e.g.
+	// <code>Platform.PLATFORM_UNSPECIFIED</code> (the default platform: text).
+	Platforms []nlu.Intent_Message_Platform `protobuf:"varint,15,rep,packed,name=platforms,proto3,enum=ondewo.nlu.Intent_Message_Platform" json:"platforms,omitempty"`
+	// Optional: Only the calls of one campaign, i.e. the calls placed by the attempts of its campaign calls
+	// (<code>CampaignCallAttempt.call_name</code>), whichever way the campaign call was added. An attempt
+	// whose start failed placed no call and contributes none. Combined with the other filters by AND (a
+	// campaign&apos;s calls are all <code>CALLER</code> calls). Neither set means any call, as before 9.1.0.
+	// Resolved within the request&apos;s <code>vtsi_project_name</code>. Like every field of the filter, it is part
+	// of the paging contract of <code>ListCalls</code>: a <code>page_token</code> sent with another selector (or
+	// none) is rejected with <code>INVALID_ARGUMENT</code>.
+	// <p>Errors: <code>INVALID_ARGUMENT</code> for a malformed <code>campaign_name</code>, a campaign of another
+	// project than the request&apos;s <code>vtsi_project_name</code>, or an empty
+	// <code>campaign_display_name</code> sent as the set member; <code>NOT_FOUND</code> for an unknown
+	// campaign.</p>
+	//
+	// Types that are valid to be assigned to Campaign:
+	//
+	//	*CallFilter_CampaignName
+	//	*CallFilter_CampaignDisplayName
+	Campaign isCallFilter_Campaign `protobuf_oneof:"campaign"`
+	// Optional: Only calls carrying every one of these labels (<code>Call.labels</code>). An entry with an empty
+	// value matches on the presence of the key alone; otherwise the value must match exactly (case-sensitive).
+	// Keys must satisfy the key bounds of <code>Call.labels</code> and at most 64 entries are accepted, otherwise
+	// <code>INVALID_ARGUMENT</code> naming the key. Same semantics as <code>SoftphoneAccountFilter.labels</code>.
+	Labels map[string]string `protobuf:"bytes,18,rep,name=labels,proto3" json:"labels,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Optional: Only calls placed by one of these callers (the calls whose <code>name</code> lies below one of
+	// them). Each entry is a caller resource name of the request&apos;s project,
+	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>; a malformed name or a
+	// caller of another project is <code>INVALID_ARGUMENT</code>, while a well-formed name that names no caller
+	// (also a deleted one) simply matches no call. Combined with <code>listener_names</code> by OR: a call matches
+	// when it belongs to one of the named callers or one of the named listeners. Both empty does not filter.
+	CallerNames []string `protobuf:"bytes,19,rep,name=caller_names,json=callerNames,proto3" json:"caller_names,omitempty"`
+	// Optional: Only calls taken by one of these listeners, with the rules of <code>caller_names</code> (OR-ed with
+	// it). Each entry is of the form
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>
+	ListenerNames []string `protobuf:"bytes,20,rep,name=listener_names,json=listenerNames,proto3" json:"listener_names,omitempty"`
+	// Optional: Only calls whose <code>Call.redial_recommended</code> equals this value. Unset does not filter.
+	// <code>false</code> matches only calls whose field is SET to false (AMD ended the call with a voice message
+	// left, or on a fax); calls on which AMD did not decide, i.e. whose field is unset, match neither value.
+	RedialRecommended *bool `protobuf:"varint,21,opt,name=redial_recommended,json=redialRecommended,proto3,oneof" json:"redial_recommended,omitempty"`
+	// Optional: Only calls whose last transfer attempt (<code>Call.last_transfer.outcome</code>) had one of these
+	// outcomes. <code>TRANSFER_OUTCOME_UNSPECIFIED</code> in the list matches the calls without any transfer
+	// attempt. Empty does not filter.
+	TransferOutcomes []TransferOutcome `protobuf:"varint,22,rep,packed,name=transfer_outcomes,json=transferOutcomes,proto3,enum=ondewo.vtsi.TransferOutcome" json:"transfer_outcomes,omitempty"`
+	// Optional: Filter by SIP ports (<code>Call.sip_port</code>), 1 to 65535 each, otherwise
+	// <code>INVALID_ARGUMENT</code>. Replaces the deprecated string field <code>sip_ports</code>; when both are set
+	// their values are combined (OR).
+	SipPortNumbers []int32 `protobuf:"varint,23,rep,packed,name=sip_port_numbers,json=sipPortNumbers,proto3" json:"sip_port_numbers,omitempty"`
+	// Optional: Filter by CSI ports (<code>Call.csi_port</code>), 1 to 65535 each, otherwise
+	// <code>INVALID_ARGUMENT</code>. Replaces the deprecated string field <code>csi_ports</code>; when both are set
+	// their values are combined (OR).
+	CsiPortNumbers []int32 `protobuf:"varint,24,rep,packed,name=csi_port_numbers,json=csiPortNumbers,proto3" json:"csi_port_numbers,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CallFilter) Reset() {
 	*x = CallFilter{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[100]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8425,7 +8576,7 @@ func (x *CallFilter) String() string {
 func (*CallFilter) ProtoMessage() {}
 
 func (x *CallFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[100]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8438,7 +8589,7 @@ func (x *CallFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallFilter.ProtoReflect.Descriptor instead.
 func (*CallFilter) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{100}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *CallFilter) GetCallNames() []string {
@@ -8476,6 +8627,7 @@ func (x *CallFilter) GetContainerNames() []string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/calls.proto.
 func (x *CallFilter) GetSipPorts() []string {
 	if x != nil {
 		return x.SipPorts
@@ -8483,6 +8635,7 @@ func (x *CallFilter) GetSipPorts() []string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/calls.proto.
 func (x *CallFilter) GetCsiPorts() []string {
 	if x != nil {
 		return x.CsiPorts
@@ -8546,25 +8699,196 @@ func (x *CallFilter) GetPlatforms() []nlu.Intent_Message_Platform {
 	return nil
 }
 
+func (x *CallFilter) GetCampaign() isCallFilter_Campaign {
+	if x != nil {
+		return x.Campaign
+	}
+	return nil
+}
+
+func (x *CallFilter) GetCampaignName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*CallFilter_CampaignName); ok {
+			return x.CampaignName
+		}
+	}
+	return ""
+}
+
+func (x *CallFilter) GetCampaignDisplayName() string {
+	if x != nil {
+		if x, ok := x.Campaign.(*CallFilter_CampaignDisplayName); ok {
+			return x.CampaignDisplayName
+		}
+	}
+	return ""
+}
+
+func (x *CallFilter) GetLabels() map[string]string {
+	if x != nil {
+		return x.Labels
+	}
+	return nil
+}
+
+func (x *CallFilter) GetCallerNames() []string {
+	if x != nil {
+		return x.CallerNames
+	}
+	return nil
+}
+
+func (x *CallFilter) GetListenerNames() []string {
+	if x != nil {
+		return x.ListenerNames
+	}
+	return nil
+}
+
+func (x *CallFilter) GetRedialRecommended() bool {
+	if x != nil && x.RedialRecommended != nil {
+		return *x.RedialRecommended
+	}
+	return false
+}
+
+func (x *CallFilter) GetTransferOutcomes() []TransferOutcome {
+	if x != nil {
+		return x.TransferOutcomes
+	}
+	return nil
+}
+
+func (x *CallFilter) GetSipPortNumbers() []int32 {
+	if x != nil {
+		return x.SipPortNumbers
+	}
+	return nil
+}
+
+func (x *CallFilter) GetCsiPortNumbers() []int32 {
+	if x != nil {
+		return x.CsiPortNumbers
+	}
+	return nil
+}
+
+type isCallFilter_Campaign interface {
+	isCallFilter_Campaign()
+}
+
+type CallFilter_CampaignName struct {
+	// Resource name of the campaign.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/campaigns/&lt;campaign_uuid&gt;</code></pre>
+	CampaignName string `protobuf:"bytes,16,opt,name=campaign_name,json=campaignName,proto3,oneof"`
+}
+
+type CallFilter_CampaignDisplayName struct {
+	// Exact, case-sensitive <code>display_name</code> of the campaign, resolved within
+	// the request&apos;s <code>vtsi_project_name</code>.
+	CampaignDisplayName string `protobuf:"bytes,17,opt,name=campaign_display_name,json=campaignDisplayName,proto3,oneof"`
+}
+
+func (*CallFilter_CampaignName) isCallFilter_Campaign() {}
+
+func (*CallFilter_CampaignDisplayName) isCallFilter_Campaign() {}
+
+// Sorting of a <code>ListCalls</code> listing.
+type CallSorting struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The sorting field. Unset means <code>NO_CALL_SORTING</code>.
+	SortingField CallSorting_CallSortingField `protobuf:"varint,1,opt,name=sorting_field,json=sortingField,proto3,enum=ondewo.vtsi.CallSorting_CallSortingField" json:"sorting_field,omitempty"`
+	// The sorting mode: <code>ASCENDING</code> (the zero value, oldest first) or <code>DESCENDING</code> (newest
+	// first). Calls with the same value are ordered by their uuid (the last segment of <code>name</code>),
+	// ascending, in either mode, so the order is stable across pages.
+	SortingMode   VtsiProjectSortingMode `protobuf:"varint,2,opt,name=sorting_mode,json=sortingMode,proto3,enum=ondewo.vtsi.VtsiProjectSortingMode" json:"sorting_mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CallSorting) Reset() {
+	*x = CallSorting{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[90]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CallSorting) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallSorting) ProtoMessage() {}
+
+func (x *CallSorting) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[90]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallSorting.ProtoReflect.Descriptor instead.
+func (*CallSorting) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{90}
+}
+
+func (x *CallSorting) GetSortingField() CallSorting_CallSortingField {
+	if x != nil {
+		return x.SortingField
+	}
+	return CallSorting_NO_CALL_SORTING
+}
+
+func (x *CallSorting) GetSortingMode() VtsiProjectSortingMode {
+	if x != nil {
+		return x.SortingMode
+	}
+	return VtsiProjectSortingMode_ASCENDING
+}
+
 // Request to list calls
 type ListCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// you can specify the view to be shallow or full .. see above for more info
+	// Optional. How much of each call to populate; see <code>CallView</code>. Unset means
+	// <code>SHALLOW</code>.
 	CallView *CallView `protobuf:"varint,2,opt,name=call_view,json=callView,proto3,enum=ondewo.vtsi.CallView,oneof" json:"call_view,omitempty"`
-	// Optional. A filter to narrow the response down to sessions of interest.
+	// Optional. A filter to narrow the response down to calls of interest; see <code>CallFilter</code>. Unset or
+	// empty lists every call of the project.
 	CallFilter *CallFilter `protobuf:"bytes,3,opt,name=call_filter,json=callFilter,proto3,oneof" json:"call_filter,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
-	PageToken     *string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. The <code>next_page_token</code> of a previous response. Opaque: its content is not part of the
+	// API. Valid only with the same <code>vtsi_project_name</code>, <code>call_filter</code> and
+	// <code>call_sorting</code>; a token issued for another listing is rejected with <code>INVALID_ARGUMENT</code>.
+	// <code>page_size</code>, <code>call_view</code> and <code>field_mask</code> may change between pages.
+	PageToken *string `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>Call</code>, relative
+	// to the <code>Call</code> message (no <code>calls.</code> prefix), e.g. <code>call_type</code>,
+	// <code>phone_number</code>, <code>start_time</code>. Nested paths through singular message fields are
+	// allowed; a path below a repeated or map field is not. <code>name</code> is always populated. Unset or
+	// empty returns every field the <code>call_view</code> populates. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Applied after the <code>call_view</code> and the
+	// server&apos;s role-based redaction of <code>common_services_config</code>, so it can only narrow the
+	// response and never populates a field that was left empty. Not part of the paging contract: a
+	// <code>page_token</code> stays valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Maximum number of calls per page. <code>0</code> keeps the page size the <code>page_token</code>
+	// was issued with, and means the server default of 25 on a first page; values above 1000 are clamped to 1000;
+	// negative values are rejected with <code>INVALID_ARGUMENT</code>. May differ between the pages of one listing.
+	PageSize int32 `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Sorting of the listing. Unset keeps the default order (see <code>ListCallsResponse.calls</code>).
+	CallSorting   *CallSorting `protobuf:"bytes,7,opt,name=call_sorting,json=callSorting,proto3" json:"call_sorting,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCallsRequest) Reset() {
 	*x = ListCallsRequest{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[101]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8576,7 +8900,7 @@ func (x *ListCallsRequest) String() string {
 func (*ListCallsRequest) ProtoMessage() {}
 
 func (x *ListCallsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[101]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8589,7 +8913,7 @@ func (x *ListCallsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCallsRequest.ProtoReflect.Descriptor instead.
 func (*ListCallsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{101}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *ListCallsRequest) GetVtsiProjectName() string {
@@ -8620,22 +8944,47 @@ func (x *ListCallsRequest) GetPageToken() string {
 	return ""
 }
 
-// Response to list all VoipInfos
+func (x *ListCallsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCallsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListCallsRequest) GetCallSorting() *CallSorting {
+	if x != nil {
+		return x.CallSorting
+	}
+	return nil
+}
+
+// Response to list the calls of a project
 type ListCallsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of calls returned in the response
+	// The calls of this page, in the order <code>call_sorting</code> asked for. The default order (no
+	// <code>call_sorting</code>, or <code>NO_CALL_SORTING</code>) is by <code>start_time</code>, oldest first,
+	// calls without a start time (the waiting call of a persistent listener or pooled caller) last, and calls with
+	// the same start time by their uuid (the last segment of <code>name</code>), ascending.
 	Calls []*Call `protobuf:"bytes,1,rep,name=calls,proto3" json:"calls,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque. Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
+	// The number of calls the request matches across all pages (its filter, not <code>page_size</code>), counted
+	// exactly when this page was read. It can change between the pages of one listing as calls are created.
+	TotalSize     int32 `protobuf:"varint,3,opt,name=total_size,json=totalSize,proto3" json:"total_size,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCallsResponse) Reset() {
 	*x = ListCallsResponse{}
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[102]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8647,7 +8996,7 @@ func (x *ListCallsResponse) String() string {
 func (*ListCallsResponse) ProtoMessage() {}
 
 func (x *ListCallsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_calls_proto_msgTypes[102]
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8660,7 +9009,7 @@ func (x *ListCallsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCallsResponse.ProtoReflect.Descriptor instead.
 func (*ListCallsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{102}
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *ListCallsResponse) GetCalls() []*Call {
@@ -8675,6 +9024,734 @@ func (x *ListCallsResponse) GetNextPageToken() string {
 		return x.NextPageToken
 	}
 	return ""
+}
+
+func (x *ListCallsResponse) GetTotalSize() int32 {
+	if x != nil {
+		return x.TotalSize
+	}
+	return 0
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCall">Calls.UpdateCall</a>.
+type UpdateCallRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The call to update, identified by <code>call.name</code>
+	// (<pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre> or
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>),
+	// carrying the new <code>labels</code>. Every other field is ignored.
+	Call *Call `protobuf:"bytes,1,opt,name=call,proto3" json:"call,omitempty"`
+	// Required. Paths relative to <code>Call</code>, WITHOUT a <code>call.</code> prefix. The only updatable
+	// path is <code>labels</code>, which replaces the whole map with <code>call.labels</code> (unset or empty
+	// clears it). An empty mask, any other path (every other field of a <code>Call</code> is output only) or a
+	// path below <code>labels</code> (e.g. <code>labels.ticket</code>) is rejected with
+	// <code>INVALID_ARGUMENT</code> naming the path, and nothing is written. Labels outside the bounds of
+	// <code>Call.labels</code> are rejected with <code>INVALID_ARGUMENT</code> naming the label.
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the field paths to populate in <code>UpdateCallResponse.call</code>, relative
+	// to the <code>Call</code> message (no <code>call.</code> prefix), e.g. <code>labels</code>,
+	// <code>active</code>. Nested paths through singular message fields are allowed; a path below a repeated or
+	// map field is not. <code>call.name</code> and the other fields of the response are always populated. Unset
+	// or empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it,
+	// before anything is written. The returned call is the one <code>GetCall</code> with
+	// <code>call_view = FULL</code> would return after the update, including the server&apos;s role-based
+	// redaction of <code>common_services_config</code>, and the mask is applied after that redaction. In an
+	// entry of <code>UpdateCallsRequest</code> it must be unset (use <code>UpdateCallsRequest.field_mask</code>).
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallRequest) Reset() {
+	*x = UpdateCallRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[93]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallRequest) ProtoMessage() {}
+
+func (x *UpdateCallRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[93]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCallRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{93}
+}
+
+func (x *UpdateCallRequest) GetCall() *Call {
+	if x != nil {
+		return x.Call
+	}
+	return nil
+}
+
+func (x *UpdateCallRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.UpdateMask
+	}
+	return nil
+}
+
+func (x *UpdateCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCall">Calls.UpdateCall</a>, and one entry
+// of <code>UpdateCallsResponse</code>.
+type UpdateCallResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the call the request named. Always populated, also for a failed entry of
+	// <code>UpdateCalls</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The call after the update, shaped by the request&apos;s <code>field_mask</code>. Unset for a failed entry.
+	Call *Call `protobuf:"bytes,2,opt,name=call,proto3" json:"call,omitempty"`
+	// Empty on success; as <code>UpdateCallerResponse.error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallResponse) Reset() {
+	*x = UpdateCallResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[94]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallResponse) ProtoMessage() {}
+
+func (x *UpdateCallResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[94]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallResponse.ProtoReflect.Descriptor instead.
+func (*UpdateCallResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{94}
+}
+
+func (x *UpdateCallResponse) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCallResponse) GetCall() *Call {
+	if x != nil {
+		return x.Call
+	}
+	return nil
+}
+
+func (x *UpdateCallResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCalls">Calls.UpdateCalls</a>.
+// <p>Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with calls instead of callers and
+// <code>UpdateCall</code> as the role reference (<code>INVALID_ARGUMENT</code> for a malformed
+// <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same call, an entry
+// whose <code>call.name</code> is malformed or whose project segment differs from
+// <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code>, an unknown
+// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project; <code>PERMISSION_DENIED</code>);
+// every other error is reported per entry, e.g. a well-formed name of the right project that names no call is
+// that entry&apos;s <code>NOT_FOUND</code>.</p>
+type UpdateCallsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of every call of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The updates, applied one by one and each like <code>UpdateCall</code>.
+	UpdateCallRequests []*UpdateCallRequest `protobuf:"bytes,2,rep,name=update_call_requests,json=updateCallRequests,proto3" json:"update_call_requests,omitempty"`
+	// Optional. Partial response: the field paths to populate in the <code>call</code> of EVERY entry of
+	// <code>UpdateCallsResponse.update_call_responses</code>, relative to the <code>Call</code> message (no
+	// prefix), as in <code>UpdateCallRequest.field_mask</code>. <code>call.name</code>, <code>name</code> and
+	// <code>error_message</code> of each entry and the response&apos;s own fields are always populated.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallsRequest) Reset() {
+	*x = UpdateCallsRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[95]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallsRequest) ProtoMessage() {}
+
+func (x *UpdateCallsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[95]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallsRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCallsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{95}
+}
+
+func (x *UpdateCallsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateCallsRequest) GetUpdateCallRequests() []*UpdateCallRequest {
+	if x != nil {
+		return x.UpdateCallRequests
+	}
+	return nil
+}
+
+func (x *UpdateCallsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCalls">Calls.UpdateCalls</a>.
+type UpdateCallsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// One entry per entry of the request, in request order.
+	UpdateCallResponses []*UpdateCallResponse `protobuf:"bytes,2,rep,name=update_call_responses,json=updateCallResponses,proto3" json:"update_call_responses,omitempty"`
+	// A summary when at least one entry failed, empty when every entry succeeded; as
+	// <code>UpdateCallersResponse.error_message</code>.
+	ErrorMessage  string `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCallsResponse) Reset() {
+	*x = UpdateCallsResponse{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[96]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCallsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCallsResponse) ProtoMessage() {}
+
+func (x *UpdateCallsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[96]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCallsResponse.ProtoReflect.Descriptor instead.
+func (*UpdateCallsResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{96}
+}
+
+func (x *UpdateCallsResponse) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *UpdateCallsResponse) GetUpdateCallResponses() []*UpdateCallResponse {
+	if x != nil {
+		return x.UpdateCallResponses
+	}
+	return nil
+}
+
+func (x *UpdateCallsResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+// The request message for <a href="index.html#ondewo.vtsi.Calls.GetCallStatistics">Calls.GetCallStatistics</a>.
+type GetCallStatisticsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project whose calls are counted.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Optional. Counts only the calls this filter matches, with exactly the semantics, validation and errors of
+	// <code>ListCallsRequest.call_filter</code> (the campaign selector included). Unset or empty counts every call
+	// of the project that <code>ListCalls</code> would list, the waiting call of a persistent listener or pooled
+	// caller included.
+	CallFilter    *CallFilter `protobuf:"bytes,2,opt,name=call_filter,json=callFilter,proto3" json:"call_filter,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCallStatisticsRequest) Reset() {
+	*x = GetCallStatisticsRequest{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[97]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCallStatisticsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCallStatisticsRequest) ProtoMessage() {}
+
+func (x *GetCallStatisticsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[97]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCallStatisticsRequest.ProtoReflect.Descriptor instead.
+func (*GetCallStatisticsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{97}
+}
+
+func (x *GetCallStatisticsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *GetCallStatisticsRequest) GetCallFilter() *CallFilter {
+	if x != nil {
+		return x.CallFilter
+	}
+	return nil
+}
+
+// Number of calls with one SIP status type, an entry of <code>CallStatistics.sip_status_type_counts</code>.
+type SipStatusTypeCount struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The SIP status type (<code>Call.sip_status_type</code>, the call&apos;s current or last status).
+	SipStatusType sip.SipStatus_StatusType `protobuf:"varint,1,opt,name=sip_status_type,json=sipStatusType,proto3,enum=ondewo.sip.SipStatus_StatusType" json:"sip_status_type,omitempty"`
+	// Number of matching calls whose <code>Call.sip_status_type</code> is <code>sip_status_type</code>.
+	Count         int32 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SipStatusTypeCount) Reset() {
+	*x = SipStatusTypeCount{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[98]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipStatusTypeCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipStatusTypeCount) ProtoMessage() {}
+
+func (x *SipStatusTypeCount) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[98]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipStatusTypeCount.ProtoReflect.Descriptor instead.
+func (*SipStatusTypeCount) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{98}
+}
+
+func (x *SipStatusTypeCount) GetSipStatusType() sip.SipStatus_StatusType {
+	if x != nil {
+		return x.SipStatusType
+	}
+	return sip.SipStatus_StatusType(0)
+}
+
+func (x *SipStatusTypeCount) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+// Number of calls of one type, an entry of <code>CallStatistics.call_type_counts</code>.
+type CallTypeCount struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// <code>LISTENER</code>, <code>CALLER</code> or <code>SCHEDULED_CALLER</code>; never <code>BOTH</code>, which
+	// is not the type of a stored call.
+	CallType CallType `protobuf:"varint,1,opt,name=call_type,json=callType,proto3,enum=ondewo.vtsi.CallType" json:"call_type,omitempty"`
+	// Number of matching calls of that type.
+	Count         int32 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CallTypeCount) Reset() {
+	*x = CallTypeCount{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[99]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CallTypeCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallTypeCount) ProtoMessage() {}
+
+func (x *CallTypeCount) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[99]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallTypeCount.ProtoReflect.Descriptor instead.
+func (*CallTypeCount) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{99}
+}
+
+func (x *CallTypeCount) GetCallType() CallType {
+	if x != nil {
+		return x.CallType
+	}
+	return CallType_BOTH
+}
+
+func (x *CallTypeCount) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+// Number of calls with one answering machine detection verdict, an entry of
+// <code>CallStatistics.amd_verdict_counts</code>.
+type AmdVerdictCount struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The verdict, read from <code>Call.sip_status.amd_result.verdict</code>.
+	Verdict sip.AnsweringMachineDetectionResult_Verdict `protobuf:"varint,1,opt,name=verdict,proto3,enum=ondewo.sip.AnsweringMachineDetectionResult_Verdict" json:"verdict,omitempty"`
+	// Number of matching calls with that verdict.
+	Count         int32 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AmdVerdictCount) Reset() {
+	*x = AmdVerdictCount{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[100]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AmdVerdictCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AmdVerdictCount) ProtoMessage() {}
+
+func (x *AmdVerdictCount) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[100]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AmdVerdictCount.ProtoReflect.Descriptor instead.
+func (*AmdVerdictCount) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{100}
+}
+
+func (x *AmdVerdictCount) GetVerdict() sip.AnsweringMachineDetectionResult_Verdict {
+	if x != nil {
+		return x.Verdict
+	}
+	return sip.AnsweringMachineDetectionResult_Verdict(0)
+}
+
+func (x *AmdVerdictCount) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+// Number of calls whose last transfer attempt had one outcome, an entry of
+// <code>CallStatistics.transfer_outcome_counts</code>.
+type TransferOutcomeCount struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The outcome of the call&apos;s last transfer attempt (<code>Call.last_transfer.outcome</code>).
+	Outcome TransferOutcome `protobuf:"varint,1,opt,name=outcome,proto3,enum=ondewo.vtsi.TransferOutcome" json:"outcome,omitempty"`
+	// Number of matching calls whose last transfer attempt had that outcome.
+	Count         int32 `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TransferOutcomeCount) Reset() {
+	*x = TransferOutcomeCount{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[101]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TransferOutcomeCount) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TransferOutcomeCount) ProtoMessage() {}
+
+func (x *TransferOutcomeCount) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[101]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TransferOutcomeCount.ProtoReflect.Descriptor instead.
+func (*TransferOutcomeCount) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{101}
+}
+
+func (x *TransferOutcomeCount) GetOutcome() TransferOutcome {
+	if x != nil {
+		return x.Outcome
+	}
+	return TransferOutcome_TRANSFER_OUTCOME_UNSPECIFIED
+}
+
+func (x *TransferOutcomeCount) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+// Aggregate figures over the calls of a project that a <code>CallFilter</code> matches, as returned by
+// <a href="index.html#ondewo.vtsi.Calls.GetCallStatistics">Calls.GetCallStatistics</a>.
+// <p>Every figure is computed in ONE read of the call records, so the figures are consistent with each other at
+// the moment of that read (e.g. the entries of <code>sip_status_type_counts</code> add up to <code>total</code>).
+// Every <code>*_counts</code> list holds one entry per value that occurs at least once (a value with count 0 is
+// left out), ordered by the enum number, ascending.</p>
+type CallStatistics struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project of the request.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// Number of matching calls: the <code>total_size</code> a <code>ListCalls</code> with the same filter would
+	// report at the same moment.
+	Total int32 `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	// Number of matching calls that are active (<code>Call.active</code>).
+	Active int32 `protobuf:"varint,3,opt,name=active,proto3" json:"active,omitempty"`
+	// Matching calls by their current or last SIP status type. The counts add up to <code>total</code>.
+	SipStatusTypeCounts []*SipStatusTypeCount `protobuf:"bytes,4,rep,name=sip_status_type_counts,json=sipStatusTypeCounts,proto3" json:"sip_status_type_counts,omitempty"`
+	// Matching calls by type (<code>LISTENER</code>, <code>CALLER</code>, <code>SCHEDULED_CALLER</code>). The
+	// counts add up to
+	// <code>total</code>.
+	CallTypeCounts []*CallTypeCount `protobuf:"bytes,5,rep,name=call_type_counts,json=callTypeCounts,proto3" json:"call_type_counts,omitempty"`
+	// Number of matching calls that have a duration, i.e. that started and ended (<code>start_time</code> and
+	// <code>end_time</code> both set). Active calls and the waiting call of a persistent listener or pooled caller
+	// have none. The denominator of <code>average_duration_s</code>.
+	EndedCalls int32 `protobuf:"varint,6,opt,name=ended_calls,json=endedCalls,proto3" json:"ended_calls,omitempty"`
+	// Sum of the durations (<code>end_time - start_time</code>) of the <code>ended_calls</code>, in seconds.
+	TotalDurationS float64 `protobuf:"fixed64,7,opt,name=total_duration_s,json=totalDurationS,proto3" json:"total_duration_s,omitempty"`
+	// <code>total_duration_s / ended_calls</code>, in seconds; <code>0</code> when <code>ended_calls</code> is 0.
+	AverageDurationS float64 `protobuf:"fixed64,8,opt,name=average_duration_s,json=averageDurationS,proto3" json:"average_duration_s,omitempty"`
+	// Number of matching calls with <code>Call.redial_recommended</code> = true.
+	RedialRecommended int32 `protobuf:"varint,9,opt,name=redial_recommended,json=redialRecommended,proto3" json:"redial_recommended,omitempty"`
+	// Matching calls by the verdict of their answering machine detection
+	// (<code>Call.sip_status.amd_result.verdict</code>). Calls without an AMD result are not counted here, so the
+	// counts add up to the number of calls that carry one.
+	AmdVerdictCounts []*AmdVerdictCount `protobuf:"bytes,10,rep,name=amd_verdict_counts,json=amdVerdictCounts,proto3" json:"amd_verdict_counts,omitempty"`
+	// Matching calls by the outcome of their last transfer attempt (<code>Call.last_transfer.outcome</code>).
+	// Calls without a transfer attempt are not counted here, so the counts add up to the number of calls that
+	// carry one.
+	TransferOutcomeCounts []*TransferOutcomeCount `protobuf:"bytes,11,rep,name=transfer_outcome_counts,json=transferOutcomeCounts,proto3" json:"transfer_outcome_counts,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *CallStatistics) Reset() {
+	*x = CallStatistics{}
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[102]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CallStatistics) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CallStatistics) ProtoMessage() {}
+
+func (x *CallStatistics) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_calls_proto_msgTypes[102]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CallStatistics.ProtoReflect.Descriptor instead.
+func (*CallStatistics) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{102}
+}
+
+func (x *CallStatistics) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *CallStatistics) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetActive() int32 {
+	if x != nil {
+		return x.Active
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetSipStatusTypeCounts() []*SipStatusTypeCount {
+	if x != nil {
+		return x.SipStatusTypeCounts
+	}
+	return nil
+}
+
+func (x *CallStatistics) GetCallTypeCounts() []*CallTypeCount {
+	if x != nil {
+		return x.CallTypeCounts
+	}
+	return nil
+}
+
+func (x *CallStatistics) GetEndedCalls() int32 {
+	if x != nil {
+		return x.EndedCalls
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetTotalDurationS() float64 {
+	if x != nil {
+		return x.TotalDurationS
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetAverageDurationS() float64 {
+	if x != nil {
+		return x.AverageDurationS
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetRedialRecommended() int32 {
+	if x != nil {
+		return x.RedialRecommended
+	}
+	return 0
+}
+
+func (x *CallStatistics) GetAmdVerdictCounts() []*AmdVerdictCount {
+	if x != nil {
+		return x.AmdVerdictCounts
+	}
+	return nil
+}
+
+func (x *CallStatistics) GetTransferOutcomeCounts() []*TransferOutcomeCount {
+	if x != nil {
+		return x.TransferOutcomeCounts
+	}
+	return nil
 }
 
 // Status of ondewo-sip instance
@@ -8762,9 +9839,9 @@ func (x *AllServicesStatuses) GetStatusTts() *ServiceStatus {
 // Status of service
 type ServiceStatus struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// health status
+	// Whether the service answered its health check
 	Healthy bool `protobuf:"varint,1,opt,name=healthy,proto3" json:"healthy,omitempty"`
-	// error messages if you have any so if it's unhealthy
+	// Why the service is unhealthy; empty when <code>healthy</code> is true
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -9255,338 +10332,248 @@ var File_ondewo_vtsi_calls_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\n" +
-	"\x17ondewo/vtsi/calls.proto\x12\vondewo.vtsi\x1a\x1cgoogle/api/annotations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18ondewo/nlu/context.proto\x1a\x17ondewo/nlu/intent.proto\x1a\x1fondewo/s2t/speech-to-text.proto\x1a\x1fondewo/t2s/text-to-speech.proto\x1a\x14ondewo/sip/sip.proto\x1a\x1bondewo/vtsi/campaigns.proto\"X\n" +
-	"\x11BaseServiceConfig\x12\x12\n" +
-	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
-	"\x04port\x18\x02 \x01(\x05R\x04port\x12\x1b\n" +
-	"\tgrpc_cert\x18\x03 \x01(\tR\bgrpcCert\"L\n" +
-	"\vCredentials\x12!\n" +
-	"\faccount_name\x18\x01 \x01(\tR\vaccountName\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xea\x03\n" +
-	"\rNluVtsiConfig\x12F\n" +
-	"\x0fnlu_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rnluBaseConfig\x12<\n" +
-	"\vcredentials\x18\x02 \x01(\v2\x18.ondewo.vtsi.CredentialsH\x00R\vcredentials\x12\x1f\n" +
-	"\n" +
-	"auth_token\x18\x03 \x01(\tH\x00R\tauthToken\x12\x1d\n" +
-	"\n" +
-	"agent_name\x18\x04 \x01(\tR\tagentName\x12#\n" +
-	"\rlanguage_code\x18\x05 \x01(\tR\flanguageCode\x12%\n" +
-	"\x0einitial_intent\x18\x06 \x01(\tR\rinitialIntent\x12/\n" +
-	"\bcontexts\x18\a \x03(\v2\x13.ondewo.nlu.ContextR\bcontexts\x121\n" +
-	"\x15http_basic_auth_token\x18\b \x01(\tR\x12httpBasicAuthToken\x12D\n" +
-	"\bplatform\x18\t \x01(\x0e2#.ondewo.nlu.Intent.Message.PlatformH\x01R\bplatform\x88\x01\x01B\x10\n" +
-	"\x0eauthenticationB\v\n" +
-	"\t_platform\"\xa0\x01\n" +
-	"\rT2sVtsiConfig\x12F\n" +
-	"\x0ft2s_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rt2sBaseConfig\x12G\n" +
-	"\x12t2s_request_config\x18\x02 \x01(\v2\x19.ondewo.t2s.RequestConfigR\x10t2sRequestConfig\"\xbf\x01\n" +
-	"\rS2tVtsiConfig\x12F\n" +
-	"\x0fs2t_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rs2tBaseConfig\x12f\n" +
-	"\x1ds2t_transcribe_request_config\x18\x02 \x01(\v2#.ondewo.s2t.TranscribeRequestConfigR\x1as2tTranscribeRequestConfig\"b\n" +
+	"\x17ondewo/vtsi/calls.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17ondewo/nlu/intent.proto\x1a\x14ondewo/sip/sip.proto\x1a\x1eondewo/vtsi/call_configs.proto\x1a\x1bondewo/vtsi/campaigns.proto\x1a\x1aondewo/vtsi/projects.proto\"b\n" +
 	"\x0eAsteriskConfig\x12P\n" +
-	"\x14asterisk_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\x12asteriskBaseConfig\"\x85\x03\n" +
-	"\x14CommonServicesConfig\x12B\n" +
-	"\x0fs2t_vtsi_config\x18\x01 \x01(\v2\x1a.ondewo.vtsi.S2tVtsiConfigR\rs2tVtsiConfig\x12B\n" +
-	"\x0fnlu_vtsi_config\x18\x02 \x01(\v2\x1a.ondewo.vtsi.NluVtsiConfigR\rnluVtsiConfig\x12B\n" +
-	"\x0ft2s_vtsi_config\x18\x03 \x01(\v2\x1a.ondewo.vtsi.T2sVtsiConfigR\rt2sVtsiConfig\x12B\n" +
-	"\x0fcsi_vtsi_config\x18\x04 \x01(\v2\x1a.ondewo.vtsi.CsiVtsiConfigR\rcsiVtsiConfig\x12]\n" +
-	"\x18voice_interaction_config\x18\x05 \x01(\v2#.ondewo.vtsi.VoiceInteractionConfigR\x16voiceInteractionConfig\"\xad\x03\n" +
-	"\x16VoiceInteractionConfig\x12T\n" +
-	"\x15turn_detection_config\x18\x01 \x01(\v2 .ondewo.vtsi.TurnDetectionConfigR\x13turnDetectionConfig\x12i\n" +
-	"\x1cinterruption_handling_config\x18\x02 \x01(\v2'.ondewo.vtsi.InterruptionHandlingConfigR\x1ainterruptionHandlingConfig\x12W\n" +
-	"\x16response_timing_config\x18\x03 \x01(\v2!.ondewo.vtsi.ResponseTimingConfigR\x14responseTimingConfig\x12y\n" +
-	"\"answering_machine_detection_config\x18\x04 \x01(\v2,.ondewo.vtsi.AnsweringMachineDetectionConfigR\x1fansweringMachineDetectionConfig\"\x8d\x06\n" +
-	"\x13TurnDetectionConfig\x12F\n" +
-	"\x04mode\x18\x01 \x01(\x0e22.ondewo.vtsi.TurnDetectionConfig.TurnDetectionModeR\x04mode\x12F\n" +
-	"\x1dmin_endpointing_delay_seconds\x18\x02 \x01(\x02H\x00R\x1aminEndpointingDelaySeconds\x88\x01\x01\x12F\n" +
-	"\x1dmax_endpointing_delay_seconds\x18\x03 \x01(\x02H\x01R\x1amaxEndpointingDelaySeconds\x88\x01\x01\x12U\n" +
-	"\x0eturn_eagerness\x18\x04 \x01(\x0e2..ondewo.vtsi.TurnDetectionConfig.TurnEagernessR\rturnEagerness\x12D\n" +
-	"\x1cturn_detection_system_prompt\x18\x05 \x01(\tH\x02R\x19turnDetectionSystemPrompt\x88\x01\x01\x12@\n" +
-	"\x1aturn_detection_user_prompt\x18\x06 \x01(\tH\x03R\x17turnDetectionUserPrompt\x88\x01\x01\"f\n" +
-	"\x11TurnDetectionMode\x12#\n" +
-	"\x1fTURN_DETECTION_MODE_UNSPECIFIED\x10\x00\x12\a\n" +
-	"\x03VAD\x10\x01\x12\x12\n" +
-	"\x0eSEMANTIC_MODEL\x10\x02\x12\x0f\n" +
-	"\vAUDIO_MODEL\x10\x03\"S\n" +
-	"\rTurnEagerness\x12\x1e\n" +
-	"\x1aTURN_EAGERNESS_UNSPECIFIED\x10\x00\x12\v\n" +
-	"\aPATIENT\x10\x01\x12\n" +
-	"\n" +
-	"\x06NORMAL\x10\x02\x12\t\n" +
-	"\x05EAGER\x10\x03B \n" +
-	"\x1e_min_endpointing_delay_secondsB \n" +
-	"\x1e_max_endpointing_delay_secondsB\x1f\n" +
-	"\x1d_turn_detection_system_promptB\x1d\n" +
-	"\x1b_turn_detection_user_prompt\"\xad\x06\n" +
-	"\x1aInterruptionHandlingConfig\x12\x1d\n" +
-	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12N\n" +
-	"!min_interruption_duration_seconds\x18\x02 \x01(\x02H\x01R\x1eminInterruptionDurationSeconds\x88\x01\x01\x129\n" +
-	"\x16min_interruption_words\x18\x03 \x01(\x05H\x02R\x14minInterruptionWords\x88\x01\x01\x12P\n" +
-	"\"false_interruption_timeout_seconds\x18\x04 \x01(\x02H\x03R\x1ffalseInterruptionTimeoutSeconds\x88\x01\x01\x12J\n" +
-	"\x1fresume_after_false_interruption\x18\x05 \x01(\bH\x04R\x1cresumeAfterFalseInterruption\x88\x01\x01\x12,\n" +
-	"\x0fbackoff_seconds\x18\x06 \x01(\x02H\x05R\x0ebackoffSeconds\x88\x01\x01\x12J\n" +
-	"\x1ffirst_message_protected_seconds\x18\a \x01(\x02H\x06R\x1cfirstMessageProtectedSeconds\x88\x01\x01\x12T\n" +
-	"$transcribe_on_disabled_interruptions\x18\b \x01(\bH\aR!transcribeOnDisabledInterruptions\x88\x01\x01B\n" +
-	"\n" +
-	"\b_enabledB$\n" +
-	"\"_min_interruption_duration_secondsB\x19\n" +
-	"\x17_min_interruption_wordsB%\n" +
-	"#_false_interruption_timeout_secondsB\"\n" +
-	" _resume_after_false_interruptionB\x12\n" +
-	"\x10_backoff_secondsB\"\n" +
-	" _first_message_protected_secondsB'\n" +
-	"%_transcribe_on_disabled_interruptions\"\xfd\x03\n" +
-	"\x14ResponseTimingConfig\x125\n" +
-	"\x14turn_timeout_seconds\x18\x01 \x01(\x02H\x00R\x12turnTimeoutSeconds\x88\x01\x01\x12K\n" +
-	" silence_end_call_timeout_seconds\x18\x02 \x01(\x02H\x01R\x1csilenceEndCallTimeoutSeconds\x88\x01\x01\x12N\n" +
-	"\x13soft_timeout_config\x18\x03 \x01(\v2\x1e.ondewo.vtsi.SoftTimeoutConfigR\x11softTimeoutConfig\x12G\n" +
-	"\x1dpreemptive_generation_enabled\x18\x04 \x01(\bH\x02R\x1bpreemptiveGenerationEnabled\x88\x01\x01\x12F\n" +
-	"\x1dt2s_chunked_streaming_enabled\x18\x05 \x01(\bH\x03R\x1at2sChunkedStreamingEnabled\x88\x01\x01B\x17\n" +
-	"\x15_turn_timeout_secondsB#\n" +
-	"!_silence_end_call_timeout_secondsB \n" +
-	"\x1e_preemptive_generation_enabledB \n" +
-	"\x1e_t2s_chunked_streaming_enabled\"\xbb\x01\n" +
-	"\x11SoftTimeoutConfig\x12,\n" +
-	"\x0ftimeout_seconds\x18\x01 \x01(\x02H\x00R\x0etimeoutSeconds\x88\x01\x01\x12\x1a\n" +
-	"\bmessages\x18\x02 \x03(\tR\bmessages\x121\n" +
-	"\x12max_per_generation\x18\x03 \x01(\x05H\x01R\x10maxPerGeneration\x88\x01\x01B\x12\n" +
-	"\x10_timeout_secondsB\x15\n" +
-	"\x13_max_per_generation\"\xa0\x0f\n" +
-	"\x1fAnsweringMachineDetectionConfig\x12\x1b\n" +
-	"\x06active\x18\x01 \x01(\bH\x00R\x06active\x88\x01\x01\x12S\n" +
-	"\x06action\x18\x02 \x01(\x0e26.ondewo.vtsi.AnsweringMachineDetectionConfig.AmdActionH\x01R\x06action\x88\x01\x01\x12b\n" +
-	"\vsensitivity\x18\x03 \x01(\x0e2;.ondewo.vtsi.AnsweringMachineDetectionConfig.AmdSensitivityH\x02R\vsensitivity\x88\x01\x01\x124\n" +
-	"\x14max_decision_time_ms\x18\x04 \x01(\x05H\x03R\x11maxDecisionTimeMs\x88\x01\x01\x122\n" +
-	"\x13max_machine_wait_ms\x18\x05 \x01(\x05H\x04R\x10maxMachineWaitMs\x88\x01\x01\x12A\n" +
-	"\x1bbeep_wait_after_greeting_ms\x18\x06 \x01(\x05H\x05R\x17beepWaitAfterGreetingMs\x88\x01\x01\x121\n" +
-	"\x12initial_silence_ms\x18\a \x01(\x05H\x06R\x10initialSilenceMs\x88\x01\x01\x126\n" +
-	"\x15max_human_greeting_ms\x18\b \x01(\x05H\aR\x12maxHumanGreetingMs\x88\x01\x01\x12:\n" +
-	"\x17greeting_end_silence_ms\x18\t \x01(\x05H\bR\x14greetingEndSilenceMs\x88\x01\x01\x127\n" +
-	"\x15beep_detection_active\x18\n" +
-	" \x01(\bH\tR\x13beepDetectionActive\x88\x01\x01\x12<\n" +
-	"\x1aadditional_machine_phrases\x18\v \x03(\tR\x18additionalMachinePhrases\x128\n" +
-	"\x18additional_human_phrases\x18\f \x03(\tR\x16additionalHumanPhrases\x12(\n" +
-	"\x0ehang_up_on_fax\x18\r \x01(\bH\n" +
-	"R\vhangUpOnFax\x88\x01\x01\x12I\n" +
-	"\x1fhang_up_on_network_announcement\x18\x0e \x01(\bH\vR\x1bhangUpOnNetworkAnnouncement\x88\x01\x01\x12(\n" +
-	"\x0ehang_up_on_ivr\x18\x0f \x01(\bH\fR\vhangUpOnIvr\x88\x01\x01\x12=\n" +
-	"\x19hang_up_on_call_screening\x18\x10 \x01(\bH\rR\x15hangUpOnCallScreening\x88\x01\x01\x125\n" +
-	"\x14voice_message_intent\x18\x11 \x01(\tH\x0eR\x12voiceMessageIntent\x88\x01\x01\x12F\n" +
-	"\x1evoice_message_max_beep_wait_ms\x18\x12 \x01(\x05H\x0fR\x19voiceMessageMaxBeepWaitMs\x88\x01\x01\x12<\n" +
-	"\x18voice_message_timeout_ms\x18\x13 \x01(\x05H\x10R\x15voiceMessageTimeoutMs\x88\x01\x01\x12=\n" +
-	"\x18keyword_detection_active\x18\x14 \x01(\bH\x11R\x16keywordDetectionActive\x88\x01\x01\x12=\n" +
-	"\x18cadence_detection_active\x18\x15 \x01(\bH\x12R\x16cadenceDetectionActive\x88\x01\x01\"^\n" +
-	"\tAmdAction\x12\x1a\n" +
-	"\x16AMD_ACTION_UNSPECIFIED\x10\x00\x12\v\n" +
-	"\aHANG_UP\x10\x01\x12\x0f\n" +
-	"\vDETECT_ONLY\x10\x02\x12\x17\n" +
-	"\x13LEAVE_VOICE_MESSAGE\x10\x03\"P\n" +
-	"\x0eAmdSensitivity\x12\x1f\n" +
-	"\x1bAMD_SENSITIVITY_UNSPECIFIED\x10\x00\x12\a\n" +
-	"\x03LOW\x10\x01\x12\n" +
-	"\n" +
-	"\x06MEDIUM\x10\x02\x12\b\n" +
-	"\x04HIGH\x10\x03B\t\n" +
-	"\a_activeB\t\n" +
-	"\a_actionB\x0e\n" +
-	"\f_sensitivityB\x17\n" +
-	"\x15_max_decision_time_msB\x16\n" +
-	"\x14_max_machine_wait_msB\x1e\n" +
-	"\x1c_beep_wait_after_greeting_msB\x15\n" +
-	"\x13_initial_silence_msB\x18\n" +
-	"\x16_max_human_greeting_msB\x1a\n" +
-	"\x18_greeting_end_silence_msB\x18\n" +
-	"\x16_beep_detection_activeB\x11\n" +
-	"\x0f_hang_up_on_faxB\"\n" +
-	" _hang_up_on_network_announcementB\x11\n" +
-	"\x0f_hang_up_on_ivrB\x1c\n" +
-	"\x1a_hang_up_on_call_screeningB\x17\n" +
-	"\x15_voice_message_intentB!\n" +
-	"\x1f_voice_message_max_beep_wait_msB\x1b\n" +
-	"\x19_voice_message_timeout_msB\x1b\n" +
-	"\x19_keyword_detection_activeB\x1b\n" +
-	"\x19_cadence_detection_active\"7\n" +
-	"\rSipBaseConfig\x12&\n" +
-	"\x0fsip_sim_version\x18\x01 \x01(\tR\rsipSimVersion\"\x80\x02\n" +
-	"\x0fSipCallerConfig\x12B\n" +
-	"\x0fsip_base_config\x18\x01 \x01(\v2\x1a.ondewo.vtsi.SipBaseConfigR\rsipBaseConfig\x12\x1b\n" +
-	"\tcallee_id\x18\x02 \x01(\tR\bcalleeId\x12M\n" +
-	"\vsip_headers\x18\x03 \x03(\v2,.ondewo.vtsi.SipCallerConfig.SipHeadersEntryR\n" +
-	"sipHeaders\x1a=\n" +
-	"\x0fSipHeadersEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x8d\x04\n" +
-	"\rCsiVtsiConfig\x12K\n" +
-	"\x12s2t_vtsi_callbacks\x18\x01 \x01(\v2\x1d.ondewo.vtsi.S2tVtsiCallbacksR\x10s2tVtsiCallbacks\x12K\n" +
-	"\x12nlu_vtsi_callbacks\x18\x02 \x01(\v2\x1d.ondewo.vtsi.NluVtsiCallbacksR\x10nluVtsiCallbacks\x12K\n" +
-	"\x12t2s_vtsi_callbacks\x18\x03 \x01(\v2\x1d.ondewo.vtsi.T2sVtsiCallbacksR\x10t2sVtsiCallbacks\x12`\n" +
-	"\x19audio_object_store_config\x18\x04 \x01(\v2%.ondewo.vtsi.AudioObjectStorageConfigR\x16audioObjectStoreConfig\x12T\n" +
-	"\x15message_broker_config\x18\x05 \x01(\v2 .ondewo.vtsi.MessageBrokerConfigR\x13messageBrokerConfig\x12?\n" +
-	"\x19activate_control_messages\x18\x06 \x01(\bH\x00R\x17activateControlMessages\x88\x01\x01B\x1c\n" +
-	"\x1a_activate_control_messages\"\xa3\x02\n" +
-	"\x18AudioObjectStorageConfig\x12F\n" +
-	"\x1dactivate_audio_object_storage\x18\x01 \x01(\bH\x00R\x1aactivateAudioObjectStorage\x88\x01\x01\x12\x9c\x01\n" +
-	"/audio_object_storage_services_activation_config\x18\x02 \x01(\v27.ondewo.vtsi.AudioObjectStorageServicesActivationConfigR*audioObjectStorageServicesActivationConfigB \n" +
-	"\x1e_activate_audio_object_storage\"\x9e\x01\n" +
-	"*AudioObjectStorageServicesActivationConfig\x12&\n" +
-	"\factivate_s2t\x18\x01 \x01(\bH\x00R\vactivateS2t\x88\x01\x01\x12&\n" +
-	"\factivate_t2s\x18\x02 \x01(\bH\x01R\vactivateT2s\x88\x01\x01B\x0f\n" +
-	"\r_activate_s2tB\x0f\n" +
-	"\r_activate_t2s\"\xdf\x02\n" +
-	"\x13MessageBrokerConfig\x12;\n" +
-	"\x17activate_message_broker\x18\x01 \x01(\bH\x01R\x15activateMessageBroker\x88\x01\x01\x12\x8c\x01\n" +
-	")message_broker_services_activation_config\x18\x02 \x01(\v22.ondewo.vtsi.MessageBrokerServicesActivationConfigR%messageBrokerServicesActivationConfig\x12G\n" +
-	"\x10rabbit_mq_config\x18\x03 \x01(\v2\x1b.ondewo.vtsi.RabbitMqConfigH\x00R\x0erabbitMqConfigB\x17\n" +
-	"\x15message_broker_configB\x1a\n" +
-	"\x18_activate_message_broker\"\x8b\x02\n" +
-	"%MessageBrokerServicesActivationConfig\x12&\n" +
-	"\factivate_s2t\x18\x01 \x01(\bH\x00R\vactivateS2t\x88\x01\x01\x12&\n" +
-	"\factivate_nlu\x18\x02 \x01(\bH\x01R\vactivateNlu\x88\x01\x01\x12&\n" +
-	"\factivate_t2s\x18\x03 \x01(\bH\x02R\vactivateT2s\x88\x01\x01\x12&\n" +
-	"\factivate_sip\x18\x04 \x01(\bH\x03R\vactivateSip\x88\x01\x01B\x0f\n" +
-	"\r_activate_s2tB\x0f\n" +
-	"\r_activate_nluB\x0f\n" +
-	"\r_activate_t2sB\x0f\n" +
-	"\r_activate_sip\"\x7f\n" +
-	"\x0eRabbitMqConfig\x12\x12\n" +
-	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
-	"\x04port\x18\x02 \x01(\x05R\x04port\x12\x15\n" +
-	"\x06port_2\x18\x03 \x01(\x05R\x05port2\x12\x12\n" +
-	"\x04user\x18\x04 \x01(\tR\x04user\x12\x1a\n" +
-	"\bpassword\x18\x05 \x01(\tR\bpassword\"l\n" +
-	"\x10S2tVtsiCallbacks\x12*\n" +
-	"\x11pre_s2t_callbacks\x18\x01 \x03(\tR\x0fpreS2tCallbacks\x12,\n" +
-	"\x12post_s2t_callbacks\x18\x02 \x03(\tR\x10postS2tCallbacks\"l\n" +
-	"\x10NluVtsiCallbacks\x12*\n" +
-	"\x11pre_nlu_callbacks\x18\x01 \x03(\tR\x0fpreNluCallbacks\x12,\n" +
-	"\x12post_nlu_callbacks\x18\x02 \x03(\tR\x10postNluCallbacks\"l\n" +
-	"\x10T2sVtsiCallbacks\x12*\n" +
-	"\x11pre_t2s_callbacks\x18\x01 \x03(\tR\x0fpreT2sCallbacks\x12,\n" +
-	"\x12post_t2s_callbacks\x18\x02 \x03(\tR\x10postT2sCallbacks\"\xd8\x01\n" +
+	"\x14asterisk_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\x12asteriskBaseConfig\"\xa1\x03\n" +
 	"\bListener\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x12B\n" +
 	"\x0fsip_base_config\x18\x03 \x01(\v2\x1a.ondewo.vtsi.SipBaseConfigR\rsipBaseConfig\x12W\n" +
-	"\x16common_services_config\x18\x04 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\"\xdc\x01\n" +
+	"\x16common_services_config\x18\x04 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\x12*\n" +
+	"\x11vtsi_project_name\x18\x05 \x01(\tR\x0fvtsiProjectName\x12\x16\n" +
+	"\x06active\x18\x06 \x01(\bR\x06active\x12H\n" +
+	"\x0fsip_status_type\x18\a \x01(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\rsipStatusType\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xe2\x03\n" +
 	"\x06Caller\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x12H\n" +
 	"\x11sip_caller_config\x18\x03 \x01(\v2\x1c.ondewo.vtsi.SipCallerConfigR\x0fsipCallerConfig\x12W\n" +
-	"\x16common_services_config\x18\x04 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\"\xdf\x01\n" +
+	"\x16common_services_config\x18\x04 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\x12*\n" +
+	"\x11vtsi_project_name\x18\x05 \x01(\tR\x0fvtsiProjectName\x12\x16\n" +
+	"\x06active\x18\x06 \x01(\bR\x06active\x12H\n" +
+	"\x0fsip_status_type\x18\a \x01(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\rsipStatusType\x129\n" +
+	"\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x16\n" +
+	"\x06pooled\x18\t \x01(\bR\x06pooled\x12#\n" +
+	"\rcampaign_name\x18\n" +
+	" \x01(\tR\fcampaignName\"\xbf\x02\n" +
 	"\x14StartListenerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12B\n" +
 	"\x0fsip_base_config\x18\x02 \x01(\v2\x1a.ondewo.vtsi.SipBaseConfigR\rsipBaseConfig\x12W\n" +
-	"\x16common_services_config\x18\x03 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\"\x9b\x01\n" +
+	"\x16common_services_config\x18\x03 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x05 \x01(\bR\fvalidateOnly\"\x9b\x01\n" +
 	"\x15StartListenerResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x121\n" +
 	"\blistener\x18\x02 \x01(\v2\x15.ondewo.vtsi.ListenerR\blistener\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xbc\x01\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x9c\x02\n" +
 	"\x15StartListenersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12N\n" +
 	"\x11listener_requests\x18\x02 \x03(\v2!.ondewo.vtsi.StartListenerRequestR\x10listenerRequests\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xbc\x01\n" +
+	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x05 \x01(\bR\fvalidateOnly\"\xbc\x01\n" +
 	"\x16StartListenersResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12Q\n" +
 	"\x12listener_responses\x18\x02 \x03(\v2\".ondewo.vtsi.StartListenerResponseR\x11listenerResponses\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xe3\x01\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xc3\x02\n" +
 	"\x12StartCallerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12H\n" +
 	"\x11sip_caller_config\x18\x02 \x01(\v2\x1c.ondewo.vtsi.SipCallerConfigR\x0fsipCallerConfig\x12W\n" +
-	"\x16common_services_config\x18\x03 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\"\x93\x01\n" +
+	"\x16common_services_config\x18\x03 \x01(\v2!.ondewo.vtsi.CommonServicesConfigR\x14commonServicesConfig\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x05 \x01(\bR\fvalidateOnly\"\x93\x01\n" +
 	"\x13StartCallerResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12+\n" +
 	"\x06caller\x18\x02 \x01(\v2\x13.ondewo.vtsi.CallerR\x06caller\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xcf\x01\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xaf\x02\n" +
 	"\x13StartCallersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12H\n" +
 	"\x0fcaller_requests\x18\x02 \x03(\v2\x1f.ondewo.vtsi.StartCallerRequestR\x0ecallerRequests\x12'\n" +
-	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKeyJ\x04\b\x03\x10\x04R\x13campaign_assignment\"\xdf\x01\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x06 \x01(\bR\fvalidateOnlyJ\x04\b\x03\x10\x04R\x13campaign_assignment\"\xdf\x01\n" +
 	"\x14StartCallersResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12K\n" +
 	"\x10caller_responses\x18\x02 \x03(\v2 .ondewo.vtsi.StartCallerResponseR\x0fcallerResponses\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessageJ\x04\b\x04\x10\x05J\x04\b\x05\x10\x06R\bcampaignR\x13campaign_call_names\"\xba\x01\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessageJ\x04\b\x04\x10\x05J\x04\b\x05\x10\x06R\bcampaignR\x13campaign_call_names\"\xe8\x03\n" +
 	"\x12ListCallersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\"\n" +
 	"\n" +
-	"page_token\x18\x02 \x01(\tH\x00R\tpageToken\x88\x01\x01\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x01R\bcallView\x88\x01\x01B\r\n" +
+	"page_token\x18\x02 \x01(\tH\x01R\tpageToken\x88\x01\x01\x127\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x02R\bcallView\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12%\n" +
+	"\rcampaign_name\x18\x05 \x01(\tH\x00R\fcampaignName\x124\n" +
+	"\x15campaign_display_name\x18\x06 \x01(\tH\x00R\x13campaignDisplayName\x12\x1b\n" +
+	"\tpage_size\x18\a \x01(\x05R\bpageSize\x12\x1f\n" +
+	"\vactive_only\x18\b \x01(\bR\n" +
+	"activeOnly\x12J\n" +
+	"\x10sip_status_types\x18\t \x03(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\x0esipStatusTypesB\n" +
+	"\n" +
+	"\bcampaignB\r\n" +
 	"\v_page_tokenB\f\n" +
 	"\n" +
-	"_call_view\"l\n" +
+	"_call_view\"\x8b\x01\n" +
 	"\x13ListCallersResponse\x12-\n" +
 	"\acallers\x18\x01 \x03(\v2\x13.ondewo.vtsi.CallerR\acallers\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x99\x01\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
+	"\n" +
+	"total_size\x18\x03 \x01(\x05R\ttotalSize\"\xd4\x01\n" +
 	"\x10GetCallerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01B\f\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01\x129\n" +
 	"\n" +
-	"_call_view\"\xbc\x01\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\f\n" +
+	"\n" +
+	"_call_view\"\x81\x03\n" +
 	"\x14ListListenersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\"\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tH\x00R\tpageToken\x88\x01\x01\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x01R\bcallView\x88\x01\x01B\r\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x01R\bcallView\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\x12\x1f\n" +
+	"\vactive_only\x18\x06 \x01(\bR\n" +
+	"activeOnly\x12J\n" +
+	"\x10sip_status_types\x18\a \x03(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\x0esipStatusTypesB\r\n" +
 	"\v_page_tokenB\f\n" +
 	"\n" +
-	"_call_view\"t\n" +
+	"_call_view\"\x93\x01\n" +
 	"\x15ListListenersResponse\x123\n" +
 	"\tlisteners\x18\x01 \x03(\v2\x15.ondewo.vtsi.ListenerR\tlisteners\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x9b\x01\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
+	"\n" +
+	"total_size\x18\x03 \x01(\x05R\ttotalSize\"\xd6\x01\n" +
 	"\x12GetListenerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01B\f\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01\x129\n" +
 	"\n" +
-	"_call_view\")\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\f\n" +
+	"\n" +
+	"_call_view\"d\n" +
 	"\x13StopListenerRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"O\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"O\n" +
 	"\x14StopListenerResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\",\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\x93\x01\n" +
 	"\x14StopListenersRequest\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\"\x97\x01\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\"\x97\x01\n" +
 	"\x15StopListenersResponse\x12Y\n" +
 	"\x17stop_listener_responses\x18\x01 \x03(\v2!.ondewo.vtsi.StopListenerResponseR\x15stopListenerResponses\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"'\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"b\n" +
 	"\x11StopCallerRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"M\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"M\n" +
 	"\x12StopCallerResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"*\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\x91\x01\n" +
 	"\x12StopCallersRequest\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\"\x8f\x01\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\"\x8f\x01\n" +
 	"\x13StopCallersResponse\x12S\n" +
 	"\x15stop_caller_responses\x18\x01 \x03(\v2\x1f.ondewo.vtsi.StopCallerResponseR\x13stopCallerResponses\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"+\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"f\n" +
 	"\x15DeleteListenerRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"Q\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"Q\n" +
 	"\x16DeleteListenerResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\".\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\x95\x01\n" +
 	"\x16DeleteListenersRequest\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\"\x9f\x01\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\"\x9f\x01\n" +
 	"\x17DeleteListenersResponse\x12_\n" +
 	"\x19delete_listener_responses\x18\x01 \x03(\v2#.ondewo.vtsi.DeleteListenerResponseR\x17deleteListenerResponses\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\")\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"d\n" +
 	"\x13DeleteCallerRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"O\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"O\n" +
 	"\x14DeleteCallerResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\",\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\x93\x01\n" +
 	"\x14DeleteCallersRequest\x12\x14\n" +
-	"\x05names\x18\x01 \x03(\tR\x05names\"\x97\x01\n" +
+	"\x05names\x18\x01 \x03(\tR\x05names\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12*\n" +
+	"\x11vtsi_project_name\x18\x03 \x01(\tR\x0fvtsiProjectName\"\x97\x01\n" +
 	"\x15DeleteCallersResponse\x12Y\n" +
 	"\x17delete_caller_responses\x18\x01 \x03(\v2!.ondewo.vtsi.DeleteCallerResponseR\x15deleteCallerResponses\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\xc7\x01\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\xdf\x01\n" +
+	"\x13UpdateCallerRequest\x12+\n" +
+	"\x06caller\x18\x01 \x01(\v2\x13.ondewo.vtsi.CallerR\x06caller\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x04 \x01(\bR\fvalidateOnly\"|\n" +
+	"\x14UpdateCallerResponse\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12+\n" +
+	"\x06caller\x18\x02 \x01(\v2\x13.ondewo.vtsi.CallerR\x06caller\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xfa\x01\n" +
+	"\x14UpdateCallersRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12V\n" +
+	"\x16update_caller_requests\x18\x02 \x03(\v2 .ondewo.vtsi.UpdateCallerRequestR\x14updateCallerRequests\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x04 \x01(\bR\fvalidateOnly\"\xc3\x01\n" +
+	"\x15UpdateCallersResponse\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12Y\n" +
+	"\x17update_caller_responses\x18\x02 \x03(\v2!.ondewo.vtsi.UpdateCallerResponseR\x15updateCallerResponses\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xe7\x01\n" +
+	"\x15UpdateListenerRequest\x121\n" +
+	"\blistener\x18\x01 \x01(\v2\x15.ondewo.vtsi.ListenerR\blistener\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x04 \x01(\bR\fvalidateOnly\"\x84\x01\n" +
+	"\x16UpdateListenerResponse\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x121\n" +
+	"\blistener\x18\x02 \x01(\v2\x15.ondewo.vtsi.ListenerR\blistener\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x82\x02\n" +
+	"\x16UpdateListenersRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\\\n" +
+	"\x18update_listener_requests\x18\x02 \x03(\v2\".ondewo.vtsi.UpdateListenerRequestR\x16updateListenerRequests\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x04 \x01(\bR\fvalidateOnly\"\xcb\x01\n" +
+	"\x17UpdateListenersResponse\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12_\n" +
+	"\x19update_listener_responses\x18\x02 \x03(\v2#.ondewo.vtsi.UpdateListenerResponseR\x17updateListenerResponses\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x82\x02\n" +
 	"\x1bStartScheduledCallerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x129\n" +
 	"\arequest\x18\x02 \x01(\v2\x1f.ondewo.vtsi.StartCallerRequestR\arequest\x12A\n" +
-	"\x0escheduled_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\rscheduledTime\"\xf4\x01\n" +
+	"\x0escheduled_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\rscheduledTime\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xaf\x02\n" +
 	"\x1cStartScheduledCallersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12d\n" +
 	"\x19scheduled_caller_requests\x18\x02 \x03(\v2(.ondewo.vtsi.StartScheduledCallerRequestR\x17scheduledCallerRequests\x12'\n" +
-	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKeyJ\x04\b\x03\x10\x04R\x13campaign_assignment\"\xdf\x01\n" +
+	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskJ\x04\b\x03\x10\x04R\x13campaign_assignment\"\xdf\x01\n" +
 	"\x1dStartScheduledCallersResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12g\n" +
 	"\x1ascheduled_caller_responses\x18\x02 \x03(\v2).ondewo.vtsi.StartScheduledCallerResponseR\x18scheduledCallerResponsesJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05R\bcampaignR\x13campaign_call_names\"\x8e\x02\n" +
@@ -9612,7 +10599,7 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x1cStartScheduledCallerResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12G\n" +
 	"\x10scheduled_caller\x18\x02 \x01(\v2\x1c.ondewo.vtsi.ScheduledCallerR\x0fscheduledCaller\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x87\x05\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x93\x06\n" +
 	"\x0fScheduledCaller\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x129\n" +
@@ -9628,49 +10615,92 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\bfired_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\afiredAt\x12#\n" +
 	"\rerror_message\x18\v \x01(\tR\ferrorMessage\x12#\n" +
-	"\rcampaign_name\x18\f \x01(\tR\fcampaignName\"\xa2\x01\n" +
+	"\rcampaign_name\x18\f \x01(\tR\fcampaignName\x12B\n" +
+	"\x1eretry_of_scheduled_caller_name\x18\r \x01(\tR\x1aretryOfScheduledCallerName\x12F\n" +
+	" retried_by_scheduled_caller_name\x18\x0e \x01(\tR\x1cretriedByScheduledCallerName\"\xdd\x01\n" +
 	"\x19GetScheduledCallerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01B\f\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01\x129\n" +
 	"\n" +
-	"_call_view\"\x83\x02\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\f\n" +
+	"\n" +
+	"_call_view\"\x8c\x04\n" +
 	"\x1bListScheduledCallersRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\"\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tH\x00R\tpageToken\x88\x01\x01\x127\n" +
 	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x01R\bcallView\x88\x01\x01\x12>\n" +
-	"\bstatuses\x18\x04 \x03(\x0e2\".ondewo.vtsi.ScheduledCallerStatusR\bstatusesB\r\n" +
+	"\bstatuses\x18\x04 \x03(\x0e2\".ondewo.vtsi.ScheduledCallerStatusR\bstatuses\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x1b\n" +
+	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\x12#\n" +
+	"\rcampaign_name\x18\a \x01(\tR\fcampaignName\x12C\n" +
+	"\x0fscheduled_after\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\x0escheduledAfter\x12E\n" +
+	"\x10scheduled_before\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\x0fscheduledBeforeB\r\n" +
 	"\v_page_tokenB\f\n" +
 	"\n" +
-	"_call_view\"\x91\x01\n" +
+	"_call_view\"\xb0\x01\n" +
 	"\x1cListScheduledCallersResponse\x12I\n" +
 	"\x11scheduled_callers\x18\x01 \x03(\v2\x1c.ondewo.vtsi.ScheduledCallerR\x10scheduledCallers\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"^\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
+	"\n" +
+	"total_size\x18\x03 \x01(\x05R\ttotalSize\"\x99\x01\n" +
 	"\x1cCancelScheduledCallerRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xb2\x01\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xb2\x01\n" +
 	"\x1dCancelScheduledCallerResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12:\n" +
 	"\x06status\x18\x02 \x01(\x0e2\".ondewo.vtsi.ScheduledCallerStatusR\x06status\x12\x1c\n" +
 	"\tcancelled\x18\x03 \x01(\bR\tcancelled\x12#\n" +
-	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\"Z\n" +
+	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\"\x9c\x01\n" +
+	"\x1dCancelScheduledCallersRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x14\n" +
+	"\x05names\x18\x02 \x03(\tR\x05names\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xe8\x01\n" +
+	"\x1eCancelScheduledCallersResponse\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12u\n" +
+	"!cancel_scheduled_caller_responses\x18\x02 \x03(\v2*.ondewo.vtsi.CancelScheduledCallerResponseR\x1ecancelScheduledCallerResponses\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xdf\x01\n" +
+	"\x1cUpdateScheduledCallerRequest\x12G\n" +
+	"\x10scheduled_caller\x18\x01 \x01(\v2\x1c.ondewo.vtsi.ScheduledCallerR\x0fscheduledCaller\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xdb\x01\n" +
+	"\x1bRetryScheduledCallerRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12A\n" +
+	"\x0escheduled_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\rscheduledTime\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\x95\x01\n" +
 	"\x0fStopCallRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
-	"\tcall_name\x18\x02 \x01(\tR\bcallName\"\x80\x01\n" +
+	"\tcall_name\x18\x02 \x01(\tR\bcallName\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\x80\x01\n" +
 	"\x10StopCallResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"]\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x98\x01\n" +
 	"\x10StopCallsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1d\n" +
 	"\n" +
-	"call_names\x18\x02 \x03(\tR\tcallNames\"\x87\x01\n" +
+	"call_names\x18\x02 \x03(\tR\tcallNames\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\x87\x01\n" +
 	"\x11StopCallsResponse\x12M\n" +
 	"\x13stop_call_responses\x18\x01 \x03(\v2\x1d.ondewo.vtsi.StopCallResponseR\x11stopCallResponses\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"A\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\xb6\x01\n" +
 	"\x13StopAllCallsRequest\x12*\n" +
-	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\"\x8a\x03\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x128\n" +
+	"\vcall_filter\x18\x03 \x01(\v2\x17.ondewo.vtsi.CallFilterR\n" +
+	"callFilter\"\xa9\x03\n" +
 	"\x13TransferCallRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x12\x1f\n" +
@@ -9679,7 +10709,9 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x06target\x18\x04 \x01(\v2\x17.ondewo.vtsi.CallTargetR\x06target\x12-\n" +
 	"\x04mode\x18\x05 \x01(\x0e2\x19.ondewo.vtsi.TransferModeR\x04mode\x12G\n" +
 	"\aheaders\x18\x06 \x03(\v2-.ondewo.vtsi.TransferCallRequest.HeadersEntryR\aheaders\x12$\n" +
-	"\x0ering_timeout_s\x18\a \x01(\x05R\fringTimeoutS\x1a:\n" +
+	"\x0ering_timeout_s\x18\a \x01(\x05R\fringTimeoutS\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\b \x01(\tR\trequestId\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe5\x01\n" +
@@ -9712,7 +10744,7 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\tbot_muted\x18\x01 \x01(\bR\bbotMuted\x12)\n" +
 	"\x10listening_paused\x18\x02 \x01(\bR\x0flisteningPaused\x126\n" +
 	"\x17connected_audio_streams\x18\x03 \x01(\x05R\x15connectedAudioStreams\x12/\n" +
-	"\x13joined_participants\x18\x04 \x01(\x05R\x12joinedParticipants\"\xf9\x03\n" +
+	"\x13joined_participants\x18\x04 \x01(\x05R\x12joinedParticipants\"\xc4\x04\n" +
 	"\x0fCallParticipant\x12%\n" +
 	"\x0eparticipant_id\x18\x01 \x01(\tR\rparticipantId\x124\n" +
 	"\x16softphone_account_name\x18\x02 \x01(\tR\x14softphoneAccountName\x120\n" +
@@ -9728,7 +10760,8 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"invited_by\x18\t \x01(\tR\tinvitedBy\x12;\n" +
 	"\n" +
 	"bot_policy\x18\n" +
-	" \x01(\x0e2\x1c.ondewo.vtsi.BotPolicyOnJoinR\tbotPolicy\"\xfd\x02\n" +
+	" \x01(\x0e2\x1c.ondewo.vtsi.BotPolicyOnJoinR\tbotPolicy\x12I\n" +
+	"\x0fend_reason_type\x18\v \x01(\x0e2!.ondewo.vtsi.ParticipantEndReasonR\rendReasonType\"\xfd\x02\n" +
 	"\x13InviteToCallRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x124\n" +
@@ -9811,13 +10844,15 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x15TransferCallsResponse\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12Y\n" +
 	"\x17transfer_call_responses\x18\x02 \x03(\v2!.ondewo.vtsi.TransferCallResponseR\x15transferCallResponses\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xa0\x01\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xdb\x01\n" +
 	"\x0eGetCallRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tcall_name\x18\x02 \x01(\tR\bcallName\x127\n" +
-	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01B\f\n" +
+	"\tcall_view\x18\x03 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01\x129\n" +
 	"\n" +
-	"_call_view\"\xd5\f\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\f\n" +
+	"\n" +
+	"_call_view\"\xc7\r\n" +
 	"\x04Call\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vsip_account\x18\x02 \x01(\tR\n" +
@@ -9848,7 +10883,11 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\rmedia_control\x18\x16 \x01(\v2\".ondewo.vtsi.CallMediaControlStateR\fmediaControl\x12@\n" +
 	"\fparticipants\x18\x17 \x03(\v2\x1c.ondewo.vtsi.CallParticipantR\fparticipants\x12D\n" +
 	"\rlast_transfer\x18\x18 \x01(\v2\x1f.ondewo.vtsi.CallTransferRecordR\flastTransfer\x12\x1e\n" +
-	"\vsip_call_id\x18\x19 \x01(\tR\tsipCallIdB\r\n" +
+	"\vsip_call_id\x18\x19 \x01(\tR\tsipCallId\x125\n" +
+	"\x06labels\x18\x1a \x03(\v2\x1d.ondewo.vtsi.Call.LabelsEntryR\x06labels\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +
 	"\v_sip_statusB\x15\n" +
 	"\x13_sip_status_historyB\x14\n" +
 	"\x12_services_statusesB\x19\n" +
@@ -9860,7 +10899,8 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"_platformsB\x15\n" +
 	"\x13_redial_recommendedB\x10\n" +
 	"\x0e_redial_reasonB.\n" +
-	",_answering_machine_detection_end_description\"\xba\x06\n" +
+	",_answering_machine_detection_end_description\"\xd7\n" +
+	"\n" +
 	"\n" +
 	"CallFilter\x12\x1d\n" +
 	"\n" +
@@ -9868,40 +10908,116 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x11nlu_session_names\x18\x02 \x03(\tR\x0fnluSessionNames\x12!\n" +
 	"\fsip_accounts\x18\x03 \x03(\tR\vsipAccounts\x12#\n" +
 	"\rphone_numbers\x18\x04 \x03(\tR\fphoneNumbers\x12'\n" +
-	"\x0fcontainer_names\x18\x05 \x03(\tR\x0econtainerNames\x12\x1b\n" +
-	"\tsip_ports\x18\x06 \x03(\tR\bsipPorts\x12\x1b\n" +
-	"\tcsi_ports\x18\a \x03(\tR\bcsiPorts\x124\n" +
+	"\x0fcontainer_names\x18\x05 \x03(\tR\x0econtainerNames\x12\x1f\n" +
+	"\tsip_ports\x18\x06 \x03(\tB\x02\x18\x01R\bsipPorts\x12\x1f\n" +
+	"\tcsi_ports\x18\a \x03(\tB\x02\x18\x01R\bcsiPorts\x124\n" +
 	"\n" +
 	"call_types\x18\b \x03(\x0e2\x15.ondewo.vtsi.CallTypeR\tcallTypes\x12J\n" +
 	"\x10sip_status_types\x18\t \x03(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\x0esipStatusTypes\x12=\n" +
 	"\vcall_status\x18\n" +
-	" \x01(\x0e2\x17.ondewo.vtsi.CallStatusH\x00R\n" +
+	" \x01(\x0e2\x17.ondewo.vtsi.CallStatusH\x01R\n" +
 	"callStatus\x88\x01\x01\x12>\n" +
 	"\n" +
-	"start_time\x18\v \x01(\v2\x1a.google.protobuf.TimestampH\x01R\tstartTime\x88\x01\x01\x12:\n" +
-	"\bend_time\x18\f \x01(\v2\x1a.google.protobuf.TimestampH\x02R\aendTime\x88\x01\x01\x12.\n" +
-	"\x11duration_in_s_min\x18\r \x01(\x02H\x03R\x0edurationInSMin\x88\x01\x01\x12.\n" +
-	"\x11duration_in_s_max\x18\x0e \x01(\x02H\x04R\x0edurationInSMax\x88\x01\x01\x12A\n" +
-	"\tplatforms\x18\x0f \x03(\x0e2#.ondewo.nlu.Intent.Message.PlatformR\tplatformsB\x0e\n" +
+	"start_time\x18\v \x01(\v2\x1a.google.protobuf.TimestampH\x02R\tstartTime\x88\x01\x01\x12:\n" +
+	"\bend_time\x18\f \x01(\v2\x1a.google.protobuf.TimestampH\x03R\aendTime\x88\x01\x01\x12.\n" +
+	"\x11duration_in_s_min\x18\r \x01(\x02H\x04R\x0edurationInSMin\x88\x01\x01\x12.\n" +
+	"\x11duration_in_s_max\x18\x0e \x01(\x02H\x05R\x0edurationInSMax\x88\x01\x01\x12A\n" +
+	"\tplatforms\x18\x0f \x03(\x0e2#.ondewo.nlu.Intent.Message.PlatformR\tplatforms\x12%\n" +
+	"\rcampaign_name\x18\x10 \x01(\tH\x00R\fcampaignName\x124\n" +
+	"\x15campaign_display_name\x18\x11 \x01(\tH\x00R\x13campaignDisplayName\x12;\n" +
+	"\x06labels\x18\x12 \x03(\v2#.ondewo.vtsi.CallFilter.LabelsEntryR\x06labels\x12!\n" +
+	"\fcaller_names\x18\x13 \x03(\tR\vcallerNames\x12%\n" +
+	"\x0elistener_names\x18\x14 \x03(\tR\rlistenerNames\x122\n" +
+	"\x12redial_recommended\x18\x15 \x01(\bH\x06R\x11redialRecommended\x88\x01\x01\x12I\n" +
+	"\x11transfer_outcomes\x18\x16 \x03(\x0e2\x1c.ondewo.vtsi.TransferOutcomeR\x10transferOutcomes\x12(\n" +
+	"\x10sip_port_numbers\x18\x17 \x03(\x05R\x0esipPortNumbers\x12(\n" +
+	"\x10csi_port_numbers\x18\x18 \x03(\x05R\x0ecsiPortNumbers\x1a9\n" +
+	"\vLabelsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
+	"\n" +
+	"\bcampaignB\x0e\n" +
 	"\f_call_statusB\r\n" +
 	"\v_start_timeB\v\n" +
 	"\t_end_timeB\x14\n" +
 	"\x12_duration_in_s_minB\x14\n" +
-	"\x12_duration_in_s_max\"\x87\x02\n" +
+	"\x12_duration_in_s_maxB\x15\n" +
+	"\x13_redial_recommended\"\xeb\x01\n" +
+	"\vCallSorting\x12N\n" +
+	"\rsorting_field\x18\x01 \x01(\x0e2).ondewo.vtsi.CallSorting.CallSortingFieldR\fsortingField\x12F\n" +
+	"\fsorting_mode\x18\x02 \x01(\x0e2#.ondewo.vtsi.VtsiProjectSortingModeR\vsortingMode\"D\n" +
+	"\x10CallSortingField\x12\x13\n" +
+	"\x0fNO_CALL_SORTING\x10\x00\x12\x1b\n" +
+	"\x17SORT_CALL_BY_START_TIME\x10\x01\"\x9c\x03\n" +
 	"\x10ListCallsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x127\n" +
 	"\tcall_view\x18\x02 \x01(\x0e2\x15.ondewo.vtsi.CallViewH\x00R\bcallView\x88\x01\x01\x12=\n" +
 	"\vcall_filter\x18\x03 \x01(\v2\x17.ondewo.vtsi.CallFilterH\x01R\n" +
 	"callFilter\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"page_token\x18\x04 \x01(\tH\x02R\tpageToken\x88\x01\x01B\f\n" +
+	"page_token\x18\x04 \x01(\tH\x02R\tpageToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x1b\n" +
+	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\x12;\n" +
+	"\fcall_sorting\x18\a \x01(\v2\x18.ondewo.vtsi.CallSortingR\vcallSortingB\f\n" +
 	"\n" +
 	"_call_viewB\x0e\n" +
 	"\f_call_filterB\r\n" +
-	"\v_page_token\"d\n" +
+	"\v_page_token\"\x83\x01\n" +
 	"\x11ListCallsResponse\x12'\n" +
 	"\x05calls\x18\x01 \x03(\v2\x11.ondewo.vtsi.CallR\x05calls\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xc6\x02\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1d\n" +
+	"\n" +
+	"total_size\x18\x03 \x01(\x05R\ttotalSize\"\xb2\x01\n" +
+	"\x11UpdateCallRequest\x12%\n" +
+	"\x04call\x18\x01 \x01(\v2\x11.ondewo.vtsi.CallR\x04call\x12;\n" +
+	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"t\n" +
+	"\x12UpdateCallResponse\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
+	"\x04call\x18\x02 \x01(\v2\x11.ondewo.vtsi.CallR\x04call\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\xcd\x01\n" +
+	"\x12UpdateCallsRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12P\n" +
+	"\x14update_call_requests\x18\x02 \x03(\v2\x1e.ondewo.vtsi.UpdateCallRequestR\x12updateCallRequests\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xbb\x01\n" +
+	"\x13UpdateCallsResponse\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12S\n" +
+	"\x15update_call_responses\x18\x02 \x03(\v2\x1f.ondewo.vtsi.UpdateCallResponseR\x13updateCallResponses\x12#\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"\x80\x01\n" +
+	"\x18GetCallStatisticsRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x128\n" +
+	"\vcall_filter\x18\x02 \x01(\v2\x17.ondewo.vtsi.CallFilterR\n" +
+	"callFilter\"t\n" +
+	"\x12SipStatusTypeCount\x12H\n" +
+	"\x0fsip_status_type\x18\x01 \x01(\x0e2 .ondewo.sip.SipStatus.StatusTypeR\rsipStatusType\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\"Y\n" +
+	"\rCallTypeCount\x122\n" +
+	"\tcall_type\x18\x01 \x01(\x0e2\x15.ondewo.vtsi.CallTypeR\bcallType\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\"v\n" +
+	"\x0fAmdVerdictCount\x12M\n" +
+	"\averdict\x18\x01 \x01(\x0e23.ondewo.sip.AnsweringMachineDetectionResult.VerdictR\averdict\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\"d\n" +
+	"\x14TransferOutcomeCount\x126\n" +
+	"\aoutcome\x18\x01 \x01(\x0e2\x1c.ondewo.vtsi.TransferOutcomeR\aoutcome\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\"\xd5\x04\n" +
+	"\x0eCallStatistics\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x16\n" +
+	"\x06active\x18\x03 \x01(\x05R\x06active\x12T\n" +
+	"\x16sip_status_type_counts\x18\x04 \x03(\v2\x1f.ondewo.vtsi.SipStatusTypeCountR\x13sipStatusTypeCounts\x12D\n" +
+	"\x10call_type_counts\x18\x05 \x03(\v2\x1a.ondewo.vtsi.CallTypeCountR\x0ecallTypeCounts\x12\x1f\n" +
+	"\vended_calls\x18\x06 \x01(\x05R\n" +
+	"endedCalls\x12(\n" +
+	"\x10total_duration_s\x18\a \x01(\x01R\x0etotalDurationS\x12,\n" +
+	"\x12average_duration_s\x18\b \x01(\x01R\x10averageDurationS\x12-\n" +
+	"\x12redial_recommended\x18\t \x01(\x05R\x11redialRecommended\x12J\n" +
+	"\x12amd_verdict_counts\x18\n" +
+	" \x03(\v2\x1c.ondewo.vtsi.AmdVerdictCountR\x10amdVerdictCounts\x12Y\n" +
+	"\x17transfer_outcome_counts\x18\v \x03(\v2!.ondewo.vtsi.TransferOutcomeCountR\x15transferOutcomeCounts\"\xc6\x02\n" +
 	"\x13AllServicesStatuses\x129\n" +
 	"\n" +
 	"status_sip\x18\x01 \x01(\v2\x1a.ondewo.vtsi.ServiceStatusR\tstatusSip\x12C\n" +
@@ -9992,7 +11108,18 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x19PARTICIPANT_STATE_RINGING\x10\x01\x12\x1c\n" +
 	"\x18PARTICIPANT_STATE_JOINED\x10\x02\x12\x1c\n" +
 	"\x18PARTICIPANT_STATE_FAILED\x10\x03\x12\x1a\n" +
-	"\x16PARTICIPANT_STATE_LEFT\x10\x04*f\n" +
+	"\x16PARTICIPANT_STATE_LEFT\x10\x04*\x97\x03\n" +
+	"\x14ParticipantEndReason\x12&\n" +
+	"\"PARTICIPANT_END_REASON_UNSPECIFIED\x10\x00\x12$\n" +
+	" PARTICIPANT_END_REASON_NO_ANSWER\x10\x01\x12\x1f\n" +
+	"\x1bPARTICIPANT_END_REASON_BUSY\x10\x02\x12.\n" +
+	"*PARTICIPANT_END_REASON_CHANNEL_UNAVAILABLE\x10\x03\x12%\n" +
+	"!PARTICIPANT_END_REASON_CALL_ENDED\x10\x04\x12\"\n" +
+	"\x1ePARTICIPANT_END_REASON_REMOVED\x10\x05\x12!\n" +
+	"\x1dPARTICIPANT_END_REASON_HANGUP\x10\x06\x12&\n" +
+	"\"PARTICIPANT_END_REASON_HANDED_OVER\x10\a\x12&\n" +
+	"\"PARTICIPANT_END_REASON_JOIN_FAILED\x10\b\x12\"\n" +
+	"\x1ePARTICIPANT_END_REASON_TIMEOUT\x10\t*f\n" +
 	"\rCallAudioMode\x12\x1f\n" +
 	"\x1bCALL_AUDIO_MODE_UNSPECIFIED\x10\x00\x12\x1a\n" +
 	"\x16CALL_AUDIO_MODE_LISTEN\x10\x01\x12\x18\n" +
@@ -10019,12 +11146,14 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\bLISTENER\x10\x01\x12\n" +
 	"\n" +
 	"\x06CALLER\x10\x02\x12\x14\n" +
-	"\x10SCHEDULED_CALLER\x10\x032\xc2\x1b\n" +
+	"\x10SCHEDULED_CALLER\x10\x032\xd7\"\n" +
 	"\x05Calls\x12P\n" +
 	"\vStartCaller\x12\x1f.ondewo.vtsi.StartCallerRequest\x1a .ondewo.vtsi.StartCallerResponse\x12S\n" +
 	"\fStartCallers\x12 .ondewo.vtsi.StartCallersRequest\x1a!.ondewo.vtsi.StartCallersResponse\x12P\n" +
 	"\vListCallers\x12\x1f.ondewo.vtsi.ListCallersRequest\x1a .ondewo.vtsi.ListCallersResponse\x12?\n" +
 	"\tGetCaller\x12\x1d.ondewo.vtsi.GetCallerRequest\x1a\x13.ondewo.vtsi.Caller\x12S\n" +
+	"\fUpdateCaller\x12 .ondewo.vtsi.UpdateCallerRequest\x1a!.ondewo.vtsi.UpdateCallerResponse\x12V\n" +
+	"\rUpdateCallers\x12!.ondewo.vtsi.UpdateCallersRequest\x1a\".ondewo.vtsi.UpdateCallersResponse\x12S\n" +
 	"\fDeleteCaller\x12 .ondewo.vtsi.DeleteCallerRequest\x1a!.ondewo.vtsi.DeleteCallerResponse\x12V\n" +
 	"\rDeleteCallers\x12!.ondewo.vtsi.DeleteCallersRequest\x1a\".ondewo.vtsi.DeleteCallersResponse\x12M\n" +
 	"\n" +
@@ -10036,6 +11165,8 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\rStopListeners\x12!.ondewo.vtsi.StopListenersRequest\x1a\".ondewo.vtsi.StopListenersResponse\x12V\n" +
 	"\rListListeners\x12!.ondewo.vtsi.ListListenersRequest\x1a\".ondewo.vtsi.ListListenersResponse\x12E\n" +
 	"\vGetListener\x12\x1f.ondewo.vtsi.GetListenerRequest\x1a\x15.ondewo.vtsi.Listener\x12Y\n" +
+	"\x0eUpdateListener\x12\".ondewo.vtsi.UpdateListenerRequest\x1a#.ondewo.vtsi.UpdateListenerResponse\x12\\\n" +
+	"\x0fUpdateListeners\x12#.ondewo.vtsi.UpdateListenersRequest\x1a$.ondewo.vtsi.UpdateListenersResponse\x12Y\n" +
 	"\x0eDeleteListener\x12\".ondewo.vtsi.DeleteListenerRequest\x1a#.ondewo.vtsi.DeleteListenerResponse\x12\\\n" +
 	"\x0fDeleteListeners\x12#.ondewo.vtsi.DeleteListenersRequest\x1a$.ondewo.vtsi.DeleteListenersResponse\x12k\n" +
 	"\x14StartScheduledCaller\x12(.ondewo.vtsi.StartScheduledCallerRequest\x1a).ondewo.vtsi.StartScheduledCallerResponse\x12n\n" +
@@ -10043,15 +11174,22 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x14AddCallersToCampaign\x12(.ondewo.vtsi.AddCallersToCampaignRequest\x1a).ondewo.vtsi.AddCallersToCampaignResponse\x12\x86\x01\n" +
 	"\x1dAddScheduledCallersToCampaign\x121.ondewo.vtsi.AddScheduledCallersToCampaignRequest\x1a2.ondewo.vtsi.AddScheduledCallersToCampaignResponse\x12Z\n" +
 	"\x12GetScheduledCaller\x12&.ondewo.vtsi.GetScheduledCallerRequest\x1a\x1c.ondewo.vtsi.ScheduledCaller\x12k\n" +
-	"\x14ListScheduledCallers\x12(.ondewo.vtsi.ListScheduledCallersRequest\x1a).ondewo.vtsi.ListScheduledCallersResponse\x12n\n" +
-	"\x15CancelScheduledCaller\x12).ondewo.vtsi.CancelScheduledCallerRequest\x1a*.ondewo.vtsi.CancelScheduledCallerResponse\x12G\n" +
+	"\x14ListScheduledCallers\x12(.ondewo.vtsi.ListScheduledCallersRequest\x1a).ondewo.vtsi.ListScheduledCallersResponse\x12`\n" +
+	"\x15UpdateScheduledCaller\x12).ondewo.vtsi.UpdateScheduledCallerRequest\x1a\x1c.ondewo.vtsi.ScheduledCaller\x12n\n" +
+	"\x15CancelScheduledCaller\x12).ondewo.vtsi.CancelScheduledCallerRequest\x1a*.ondewo.vtsi.CancelScheduledCallerResponse\x12q\n" +
+	"\x16CancelScheduledCallers\x12*.ondewo.vtsi.CancelScheduledCallersRequest\x1a+.ondewo.vtsi.CancelScheduledCallersResponse\x12^\n" +
+	"\x14RetryScheduledCaller\x12(.ondewo.vtsi.RetryScheduledCallerRequest\x1a\x1c.ondewo.vtsi.ScheduledCaller\x12G\n" +
 	"\bStopCall\x12\x1c.ondewo.vtsi.StopCallRequest\x1a\x1d.ondewo.vtsi.StopCallResponse\x12J\n" +
 	"\tStopCalls\x12\x1d.ondewo.vtsi.StopCallsRequest\x1a\x1e.ondewo.vtsi.StopCallsResponse\x12P\n" +
 	"\fStopAllCalls\x12 .ondewo.vtsi.StopAllCallsRequest\x1a\x1e.ondewo.vtsi.StopCallsResponse\x12S\n" +
 	"\fTransferCall\x12 .ondewo.vtsi.TransferCallRequest\x1a!.ondewo.vtsi.TransferCallResponse\x12V\n" +
 	"\rTransferCalls\x12!.ondewo.vtsi.TransferCallsRequest\x1a\".ondewo.vtsi.TransferCallsResponse\x129\n" +
 	"\aGetCall\x12\x1b.ondewo.vtsi.GetCallRequest\x1a\x11.ondewo.vtsi.Call\x12J\n" +
-	"\tListCalls\x12\x1d.ondewo.vtsi.ListCallsRequest\x1a\x1e.ondewo.vtsi.ListCallsResponse\x12m\n" +
+	"\tListCalls\x12\x1d.ondewo.vtsi.ListCallsRequest\x1a\x1e.ondewo.vtsi.ListCallsResponse\x12W\n" +
+	"\x11GetCallStatistics\x12%.ondewo.vtsi.GetCallStatisticsRequest\x1a\x1b.ondewo.vtsi.CallStatistics\x12M\n" +
+	"\n" +
+	"UpdateCall\x12\x1e.ondewo.vtsi.UpdateCallRequest\x1a\x1f.ondewo.vtsi.UpdateCallResponse\x12P\n" +
+	"\vUpdateCalls\x12\x1f.ondewo.vtsi.UpdateCallsRequest\x1a .ondewo.vtsi.UpdateCallsResponse\x12m\n" +
 	"\x12StreamCallerStatus\x12&.ondewo.vtsi.StreamCallerStatusRequest\x1a-.ondewo.vtsi.StreamCallResourceStatusResponse0\x01\x12q\n" +
 	"\x14StreamListenerStatus\x12(.ondewo.vtsi.StreamListenerStatusRequest\x1a-.ondewo.vtsi.StreamCallResourceStatusResponse0\x01\x12\x7f\n" +
 	"\x1bStreamScheduledCallerStatus\x12/.ondewo.vtsi.StreamScheduledCallerStatusRequest\x1a-.ondewo.vtsi.StreamCallResourceStatusResponse0\x01\x12S\n" +
@@ -10059,7 +11197,7 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x15RemoveCallParticipant\x12).ondewo.vtsi.RemoveCallParticipantRequest\x1a*.ondewo.vtsi.RemoveCallParticipantResponse\x12h\n" +
 	"\x13SetCallMediaControl\x12'.ondewo.vtsi.SetCallMediaControlRequest\x1a(.ondewo.vtsi.SetCallMediaControlResponse\x12`\n" +
 	"\x0fStreamCallAudio\x12#.ondewo.vtsi.StreamCallAudioRequest\x1a$.ondewo.vtsi.StreamCallAudioResponse(\x010\x01\x12^\n" +
-	"\x0fListenCallAudio\x12#.ondewo.vtsi.ListenCallAudioRequest\x1a$.ondewo.vtsi.StreamCallAudioResponse0\x01b\x06proto3"
+	"\x0fListenCallAudio\x12#.ondewo.vtsi.ListenCallAudioRequest\x1a$.ondewo.vtsi.StreamCallAudioResponse0\x01P\x04b\x06proto3"
 
 var (
 	file_ondewo_vtsi_calls_proto_rawDescOnce sync.Once
@@ -10073,381 +11211,451 @@ func file_ondewo_vtsi_calls_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_calls_proto_rawDescData
 }
 
-var file_ondewo_vtsi_calls_proto_enumTypes = make([]protoimpl.EnumInfo, 16)
-var file_ondewo_vtsi_calls_proto_msgTypes = make([]protoimpl.MessageInfo, 112)
+var file_ondewo_vtsi_calls_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
+var file_ondewo_vtsi_calls_proto_msgTypes = make([]protoimpl.MessageInfo, 113)
 var file_ondewo_vtsi_calls_proto_goTypes = []any{
-	(ScheduledCallerStatus)(0),                          // 0: ondewo.vtsi.ScheduledCallerStatus
-	(TransferMode)(0),                                   // 1: ondewo.vtsi.TransferMode
-	(TransferOutcome)(0),                                // 2: ondewo.vtsi.TransferOutcome
-	(CallMediaSetting)(0),                               // 3: ondewo.vtsi.CallMediaSetting
-	(ParticipantMode)(0),                                // 4: ondewo.vtsi.ParticipantMode
-	(BotPolicyOnJoin)(0),                                // 5: ondewo.vtsi.BotPolicyOnJoin
-	(ParticipantState)(0),                               // 6: ondewo.vtsi.ParticipantState
-	(CallAudioMode)(0),                                  // 7: ondewo.vtsi.CallAudioMode
-	(CallAudioEndReason)(0),                             // 8: ondewo.vtsi.CallAudioEndReason
-	(CallView)(0),                                       // 9: ondewo.vtsi.CallView
-	(CallStatus)(0),                                     // 10: ondewo.vtsi.CallStatus
-	(CallType)(0),                                       // 11: ondewo.vtsi.CallType
-	(TurnDetectionConfig_TurnDetectionMode)(0),          // 12: ondewo.vtsi.TurnDetectionConfig.TurnDetectionMode
-	(TurnDetectionConfig_TurnEagerness)(0),              // 13: ondewo.vtsi.TurnDetectionConfig.TurnEagerness
-	(AnsweringMachineDetectionConfig_AmdAction)(0),      // 14: ondewo.vtsi.AnsweringMachineDetectionConfig.AmdAction
-	(AnsweringMachineDetectionConfig_AmdSensitivity)(0), // 15: ondewo.vtsi.AnsweringMachineDetectionConfig.AmdSensitivity
-	(*BaseServiceConfig)(nil),                           // 16: ondewo.vtsi.BaseServiceConfig
-	(*Credentials)(nil),                                 // 17: ondewo.vtsi.Credentials
-	(*NluVtsiConfig)(nil),                               // 18: ondewo.vtsi.NluVtsiConfig
-	(*T2SVtsiConfig)(nil),                               // 19: ondewo.vtsi.T2sVtsiConfig
-	(*S2TVtsiConfig)(nil),                               // 20: ondewo.vtsi.S2tVtsiConfig
-	(*AsteriskConfig)(nil),                              // 21: ondewo.vtsi.AsteriskConfig
-	(*CommonServicesConfig)(nil),                        // 22: ondewo.vtsi.CommonServicesConfig
-	(*VoiceInteractionConfig)(nil),                      // 23: ondewo.vtsi.VoiceInteractionConfig
-	(*TurnDetectionConfig)(nil),                         // 24: ondewo.vtsi.TurnDetectionConfig
-	(*InterruptionHandlingConfig)(nil),                  // 25: ondewo.vtsi.InterruptionHandlingConfig
-	(*ResponseTimingConfig)(nil),                        // 26: ondewo.vtsi.ResponseTimingConfig
-	(*SoftTimeoutConfig)(nil),                           // 27: ondewo.vtsi.SoftTimeoutConfig
-	(*AnsweringMachineDetectionConfig)(nil),             // 28: ondewo.vtsi.AnsweringMachineDetectionConfig
-	(*SipBaseConfig)(nil),                               // 29: ondewo.vtsi.SipBaseConfig
-	(*SipCallerConfig)(nil),                             // 30: ondewo.vtsi.SipCallerConfig
-	(*CsiVtsiConfig)(nil),                               // 31: ondewo.vtsi.CsiVtsiConfig
-	(*AudioObjectStorageConfig)(nil),                    // 32: ondewo.vtsi.AudioObjectStorageConfig
-	(*AudioObjectStorageServicesActivationConfig)(nil),  // 33: ondewo.vtsi.AudioObjectStorageServicesActivationConfig
-	(*MessageBrokerConfig)(nil),                         // 34: ondewo.vtsi.MessageBrokerConfig
-	(*MessageBrokerServicesActivationConfig)(nil),       // 35: ondewo.vtsi.MessageBrokerServicesActivationConfig
-	(*RabbitMqConfig)(nil),                              // 36: ondewo.vtsi.RabbitMqConfig
-	(*S2TVtsiCallbacks)(nil),                            // 37: ondewo.vtsi.S2tVtsiCallbacks
-	(*NluVtsiCallbacks)(nil),                            // 38: ondewo.vtsi.NluVtsiCallbacks
-	(*T2SVtsiCallbacks)(nil),                            // 39: ondewo.vtsi.T2sVtsiCallbacks
-	(*Listener)(nil),                                    // 40: ondewo.vtsi.Listener
-	(*Caller)(nil),                                      // 41: ondewo.vtsi.Caller
-	(*StartListenerRequest)(nil),                        // 42: ondewo.vtsi.StartListenerRequest
-	(*StartListenerResponse)(nil),                       // 43: ondewo.vtsi.StartListenerResponse
-	(*StartListenersRequest)(nil),                       // 44: ondewo.vtsi.StartListenersRequest
-	(*StartListenersResponse)(nil),                      // 45: ondewo.vtsi.StartListenersResponse
-	(*StartCallerRequest)(nil),                          // 46: ondewo.vtsi.StartCallerRequest
-	(*StartCallerResponse)(nil),                         // 47: ondewo.vtsi.StartCallerResponse
-	(*StartCallersRequest)(nil),                         // 48: ondewo.vtsi.StartCallersRequest
-	(*StartCallersResponse)(nil),                        // 49: ondewo.vtsi.StartCallersResponse
-	(*ListCallersRequest)(nil),                          // 50: ondewo.vtsi.ListCallersRequest
-	(*ListCallersResponse)(nil),                         // 51: ondewo.vtsi.ListCallersResponse
-	(*GetCallerRequest)(nil),                            // 52: ondewo.vtsi.GetCallerRequest
-	(*ListListenersRequest)(nil),                        // 53: ondewo.vtsi.ListListenersRequest
-	(*ListListenersResponse)(nil),                       // 54: ondewo.vtsi.ListListenersResponse
-	(*GetListenerRequest)(nil),                          // 55: ondewo.vtsi.GetListenerRequest
-	(*StopListenerRequest)(nil),                         // 56: ondewo.vtsi.StopListenerRequest
-	(*StopListenerResponse)(nil),                        // 57: ondewo.vtsi.StopListenerResponse
-	(*StopListenersRequest)(nil),                        // 58: ondewo.vtsi.StopListenersRequest
-	(*StopListenersResponse)(nil),                       // 59: ondewo.vtsi.StopListenersResponse
-	(*StopCallerRequest)(nil),                           // 60: ondewo.vtsi.StopCallerRequest
-	(*StopCallerResponse)(nil),                          // 61: ondewo.vtsi.StopCallerResponse
-	(*StopCallersRequest)(nil),                          // 62: ondewo.vtsi.StopCallersRequest
-	(*StopCallersResponse)(nil),                         // 63: ondewo.vtsi.StopCallersResponse
-	(*DeleteListenerRequest)(nil),                       // 64: ondewo.vtsi.DeleteListenerRequest
-	(*DeleteListenerResponse)(nil),                      // 65: ondewo.vtsi.DeleteListenerResponse
-	(*DeleteListenersRequest)(nil),                      // 66: ondewo.vtsi.DeleteListenersRequest
-	(*DeleteListenersResponse)(nil),                     // 67: ondewo.vtsi.DeleteListenersResponse
-	(*DeleteCallerRequest)(nil),                         // 68: ondewo.vtsi.DeleteCallerRequest
-	(*DeleteCallerResponse)(nil),                        // 69: ondewo.vtsi.DeleteCallerResponse
-	(*DeleteCallersRequest)(nil),                        // 70: ondewo.vtsi.DeleteCallersRequest
-	(*DeleteCallersResponse)(nil),                       // 71: ondewo.vtsi.DeleteCallersResponse
-	(*StartScheduledCallerRequest)(nil),                 // 72: ondewo.vtsi.StartScheduledCallerRequest
-	(*StartScheduledCallersRequest)(nil),                // 73: ondewo.vtsi.StartScheduledCallersRequest
-	(*StartScheduledCallersResponse)(nil),               // 74: ondewo.vtsi.StartScheduledCallersResponse
-	(*AddCallersToCampaignRequest)(nil),                 // 75: ondewo.vtsi.AddCallersToCampaignRequest
-	(*AddCallersToCampaignResponse)(nil),                // 76: ondewo.vtsi.AddCallersToCampaignResponse
-	(*AddScheduledCallersToCampaignRequest)(nil),        // 77: ondewo.vtsi.AddScheduledCallersToCampaignRequest
-	(*AddScheduledCallersToCampaignResponse)(nil),       // 78: ondewo.vtsi.AddScheduledCallersToCampaignResponse
-	(*StartScheduledCallerResponse)(nil),                // 79: ondewo.vtsi.StartScheduledCallerResponse
-	(*ScheduledCaller)(nil),                             // 80: ondewo.vtsi.ScheduledCaller
-	(*GetScheduledCallerRequest)(nil),                   // 81: ondewo.vtsi.GetScheduledCallerRequest
-	(*ListScheduledCallersRequest)(nil),                 // 82: ondewo.vtsi.ListScheduledCallersRequest
-	(*ListScheduledCallersResponse)(nil),                // 83: ondewo.vtsi.ListScheduledCallersResponse
-	(*CancelScheduledCallerRequest)(nil),                // 84: ondewo.vtsi.CancelScheduledCallerRequest
-	(*CancelScheduledCallerResponse)(nil),               // 85: ondewo.vtsi.CancelScheduledCallerResponse
-	(*StopCallRequest)(nil),                             // 86: ondewo.vtsi.StopCallRequest
-	(*StopCallResponse)(nil),                            // 87: ondewo.vtsi.StopCallResponse
-	(*StopCallsRequest)(nil),                            // 88: ondewo.vtsi.StopCallsRequest
-	(*StopCallsResponse)(nil),                           // 89: ondewo.vtsi.StopCallsResponse
-	(*StopAllCallsRequest)(nil),                         // 90: ondewo.vtsi.StopAllCallsRequest
-	(*TransferCallRequest)(nil),                         // 91: ondewo.vtsi.TransferCallRequest
-	(*CallTarget)(nil),                                  // 92: ondewo.vtsi.CallTarget
-	(*ListenerQueueTarget)(nil),                         // 93: ondewo.vtsi.ListenerQueueTarget
-	(*TransferCallResponse)(nil),                        // 94: ondewo.vtsi.TransferCallResponse
-	(*CallTransferRecord)(nil),                          // 95: ondewo.vtsi.CallTransferRecord
-	(*CallMediaControlState)(nil),                       // 96: ondewo.vtsi.CallMediaControlState
-	(*CallParticipant)(nil),                             // 97: ondewo.vtsi.CallParticipant
-	(*InviteToCallRequest)(nil),                         // 98: ondewo.vtsi.InviteToCallRequest
-	(*InviteToCallResponse)(nil),                        // 99: ondewo.vtsi.InviteToCallResponse
-	(*RemoveCallParticipantRequest)(nil),                // 100: ondewo.vtsi.RemoveCallParticipantRequest
-	(*RemoveCallParticipantResponse)(nil),               // 101: ondewo.vtsi.RemoveCallParticipantResponse
-	(*SetCallMediaControlRequest)(nil),                  // 102: ondewo.vtsi.SetCallMediaControlRequest
-	(*SetCallMediaControlResponse)(nil),                 // 103: ondewo.vtsi.SetCallMediaControlResponse
-	(*StreamCallAudioConfig)(nil),                       // 104: ondewo.vtsi.StreamCallAudioConfig
-	(*CallAudioFrame)(nil),                              // 105: ondewo.vtsi.CallAudioFrame
-	(*StreamCallAudioRequest)(nil),                      // 106: ondewo.vtsi.StreamCallAudioRequest
-	(*CallAudioStarted)(nil),                            // 107: ondewo.vtsi.CallAudioStarted
-	(*CallAudioStats)(nil),                              // 108: ondewo.vtsi.CallAudioStats
-	(*CallAudioEnded)(nil),                              // 109: ondewo.vtsi.CallAudioEnded
-	(*StreamCallAudioResponse)(nil),                     // 110: ondewo.vtsi.StreamCallAudioResponse
-	(*ListenCallAudioRequest)(nil),                      // 111: ondewo.vtsi.ListenCallAudioRequest
-	(*TransferCallsRequest)(nil),                        // 112: ondewo.vtsi.TransferCallsRequest
-	(*TransferCallsResponse)(nil),                       // 113: ondewo.vtsi.TransferCallsResponse
-	(*GetCallRequest)(nil),                              // 114: ondewo.vtsi.GetCallRequest
-	(*Call)(nil),                                        // 115: ondewo.vtsi.Call
-	(*CallFilter)(nil),                                  // 116: ondewo.vtsi.CallFilter
-	(*ListCallsRequest)(nil),                            // 117: ondewo.vtsi.ListCallsRequest
-	(*ListCallsResponse)(nil),                           // 118: ondewo.vtsi.ListCallsResponse
-	(*AllServicesStatuses)(nil),                         // 119: ondewo.vtsi.AllServicesStatuses
-	(*ServiceStatus)(nil),                               // 120: ondewo.vtsi.ServiceStatus
-	(*CallResourceStatus)(nil),                          // 121: ondewo.vtsi.CallResourceStatus
-	(*StreamCallerStatusRequest)(nil),                   // 122: ondewo.vtsi.StreamCallerStatusRequest
-	(*StreamListenerStatusRequest)(nil),                 // 123: ondewo.vtsi.StreamListenerStatusRequest
-	(*StreamScheduledCallerStatusRequest)(nil),          // 124: ondewo.vtsi.StreamScheduledCallerStatusRequest
-	(*StreamCallResourceStatusResponse)(nil),            // 125: ondewo.vtsi.StreamCallResourceStatusResponse
-	nil,                                                 // 126: ondewo.vtsi.SipCallerConfig.SipHeadersEntry
-	nil,                                                 // 127: ondewo.vtsi.TransferCallRequest.HeadersEntry
-	(*nlu.Context)(nil),                                 // 128: ondewo.nlu.Context
-	(nlu.Intent_Message_Platform)(0),                    // 129: ondewo.nlu.Intent.Message.Platform
-	(*t2s.RequestConfig)(nil),                           // 130: ondewo.t2s.RequestConfig
-	(*s2t.TranscribeRequestConfig)(nil),                 // 131: ondewo.s2t.TranscribeRequestConfig
-	(*timestamppb.Timestamp)(nil),                       // 132: google.protobuf.Timestamp
-	(*CampaignAssignment)(nil),                          // 133: ondewo.vtsi.CampaignAssignment
-	(*Campaign)(nil),                                    // 134: ondewo.vtsi.Campaign
-	(sip.SipStatus_StatusType)(0),                       // 135: ondewo.sip.SipStatus.StatusType
-	(*sip.SipStatus)(nil),                               // 136: ondewo.sip.SipStatus
-	(*sip.SipStatusHistoryResponse)(nil),                // 137: ondewo.sip.SipStatusHistoryResponse
+	(ScheduledCallerStatus)(0),                       // 0: ondewo.vtsi.ScheduledCallerStatus
+	(TransferMode)(0),                                // 1: ondewo.vtsi.TransferMode
+	(TransferOutcome)(0),                             // 2: ondewo.vtsi.TransferOutcome
+	(CallMediaSetting)(0),                            // 3: ondewo.vtsi.CallMediaSetting
+	(ParticipantMode)(0),                             // 4: ondewo.vtsi.ParticipantMode
+	(BotPolicyOnJoin)(0),                             // 5: ondewo.vtsi.BotPolicyOnJoin
+	(ParticipantState)(0),                            // 6: ondewo.vtsi.ParticipantState
+	(ParticipantEndReason)(0),                        // 7: ondewo.vtsi.ParticipantEndReason
+	(CallAudioMode)(0),                               // 8: ondewo.vtsi.CallAudioMode
+	(CallAudioEndReason)(0),                          // 9: ondewo.vtsi.CallAudioEndReason
+	(CallView)(0),                                    // 10: ondewo.vtsi.CallView
+	(CallStatus)(0),                                  // 11: ondewo.vtsi.CallStatus
+	(CallType)(0),                                    // 12: ondewo.vtsi.CallType
+	(CallSorting_CallSortingField)(0),                // 13: ondewo.vtsi.CallSorting.CallSortingField
+	(*AsteriskConfig)(nil),                           // 14: ondewo.vtsi.AsteriskConfig
+	(*Listener)(nil),                                 // 15: ondewo.vtsi.Listener
+	(*Caller)(nil),                                   // 16: ondewo.vtsi.Caller
+	(*StartListenerRequest)(nil),                     // 17: ondewo.vtsi.StartListenerRequest
+	(*StartListenerResponse)(nil),                    // 18: ondewo.vtsi.StartListenerResponse
+	(*StartListenersRequest)(nil),                    // 19: ondewo.vtsi.StartListenersRequest
+	(*StartListenersResponse)(nil),                   // 20: ondewo.vtsi.StartListenersResponse
+	(*StartCallerRequest)(nil),                       // 21: ondewo.vtsi.StartCallerRequest
+	(*StartCallerResponse)(nil),                      // 22: ondewo.vtsi.StartCallerResponse
+	(*StartCallersRequest)(nil),                      // 23: ondewo.vtsi.StartCallersRequest
+	(*StartCallersResponse)(nil),                     // 24: ondewo.vtsi.StartCallersResponse
+	(*ListCallersRequest)(nil),                       // 25: ondewo.vtsi.ListCallersRequest
+	(*ListCallersResponse)(nil),                      // 26: ondewo.vtsi.ListCallersResponse
+	(*GetCallerRequest)(nil),                         // 27: ondewo.vtsi.GetCallerRequest
+	(*ListListenersRequest)(nil),                     // 28: ondewo.vtsi.ListListenersRequest
+	(*ListListenersResponse)(nil),                    // 29: ondewo.vtsi.ListListenersResponse
+	(*GetListenerRequest)(nil),                       // 30: ondewo.vtsi.GetListenerRequest
+	(*StopListenerRequest)(nil),                      // 31: ondewo.vtsi.StopListenerRequest
+	(*StopListenerResponse)(nil),                     // 32: ondewo.vtsi.StopListenerResponse
+	(*StopListenersRequest)(nil),                     // 33: ondewo.vtsi.StopListenersRequest
+	(*StopListenersResponse)(nil),                    // 34: ondewo.vtsi.StopListenersResponse
+	(*StopCallerRequest)(nil),                        // 35: ondewo.vtsi.StopCallerRequest
+	(*StopCallerResponse)(nil),                       // 36: ondewo.vtsi.StopCallerResponse
+	(*StopCallersRequest)(nil),                       // 37: ondewo.vtsi.StopCallersRequest
+	(*StopCallersResponse)(nil),                      // 38: ondewo.vtsi.StopCallersResponse
+	(*DeleteListenerRequest)(nil),                    // 39: ondewo.vtsi.DeleteListenerRequest
+	(*DeleteListenerResponse)(nil),                   // 40: ondewo.vtsi.DeleteListenerResponse
+	(*DeleteListenersRequest)(nil),                   // 41: ondewo.vtsi.DeleteListenersRequest
+	(*DeleteListenersResponse)(nil),                  // 42: ondewo.vtsi.DeleteListenersResponse
+	(*DeleteCallerRequest)(nil),                      // 43: ondewo.vtsi.DeleteCallerRequest
+	(*DeleteCallerResponse)(nil),                     // 44: ondewo.vtsi.DeleteCallerResponse
+	(*DeleteCallersRequest)(nil),                     // 45: ondewo.vtsi.DeleteCallersRequest
+	(*DeleteCallersResponse)(nil),                    // 46: ondewo.vtsi.DeleteCallersResponse
+	(*UpdateCallerRequest)(nil),                      // 47: ondewo.vtsi.UpdateCallerRequest
+	(*UpdateCallerResponse)(nil),                     // 48: ondewo.vtsi.UpdateCallerResponse
+	(*UpdateCallersRequest)(nil),                     // 49: ondewo.vtsi.UpdateCallersRequest
+	(*UpdateCallersResponse)(nil),                    // 50: ondewo.vtsi.UpdateCallersResponse
+	(*UpdateListenerRequest)(nil),                    // 51: ondewo.vtsi.UpdateListenerRequest
+	(*UpdateListenerResponse)(nil),                   // 52: ondewo.vtsi.UpdateListenerResponse
+	(*UpdateListenersRequest)(nil),                   // 53: ondewo.vtsi.UpdateListenersRequest
+	(*UpdateListenersResponse)(nil),                  // 54: ondewo.vtsi.UpdateListenersResponse
+	(*StartScheduledCallerRequest)(nil),              // 55: ondewo.vtsi.StartScheduledCallerRequest
+	(*StartScheduledCallersRequest)(nil),             // 56: ondewo.vtsi.StartScheduledCallersRequest
+	(*StartScheduledCallersResponse)(nil),            // 57: ondewo.vtsi.StartScheduledCallersResponse
+	(*AddCallersToCampaignRequest)(nil),              // 58: ondewo.vtsi.AddCallersToCampaignRequest
+	(*AddCallersToCampaignResponse)(nil),             // 59: ondewo.vtsi.AddCallersToCampaignResponse
+	(*AddScheduledCallersToCampaignRequest)(nil),     // 60: ondewo.vtsi.AddScheduledCallersToCampaignRequest
+	(*AddScheduledCallersToCampaignResponse)(nil),    // 61: ondewo.vtsi.AddScheduledCallersToCampaignResponse
+	(*StartScheduledCallerResponse)(nil),             // 62: ondewo.vtsi.StartScheduledCallerResponse
+	(*ScheduledCaller)(nil),                          // 63: ondewo.vtsi.ScheduledCaller
+	(*GetScheduledCallerRequest)(nil),                // 64: ondewo.vtsi.GetScheduledCallerRequest
+	(*ListScheduledCallersRequest)(nil),              // 65: ondewo.vtsi.ListScheduledCallersRequest
+	(*ListScheduledCallersResponse)(nil),             // 66: ondewo.vtsi.ListScheduledCallersResponse
+	(*CancelScheduledCallerRequest)(nil),             // 67: ondewo.vtsi.CancelScheduledCallerRequest
+	(*CancelScheduledCallerResponse)(nil),            // 68: ondewo.vtsi.CancelScheduledCallerResponse
+	(*CancelScheduledCallersRequest)(nil),            // 69: ondewo.vtsi.CancelScheduledCallersRequest
+	(*CancelScheduledCallersResponse)(nil),           // 70: ondewo.vtsi.CancelScheduledCallersResponse
+	(*UpdateScheduledCallerRequest)(nil),             // 71: ondewo.vtsi.UpdateScheduledCallerRequest
+	(*RetryScheduledCallerRequest)(nil),              // 72: ondewo.vtsi.RetryScheduledCallerRequest
+	(*StopCallRequest)(nil),                          // 73: ondewo.vtsi.StopCallRequest
+	(*StopCallResponse)(nil),                         // 74: ondewo.vtsi.StopCallResponse
+	(*StopCallsRequest)(nil),                         // 75: ondewo.vtsi.StopCallsRequest
+	(*StopCallsResponse)(nil),                        // 76: ondewo.vtsi.StopCallsResponse
+	(*StopAllCallsRequest)(nil),                      // 77: ondewo.vtsi.StopAllCallsRequest
+	(*TransferCallRequest)(nil),                      // 78: ondewo.vtsi.TransferCallRequest
+	(*CallTarget)(nil),                               // 79: ondewo.vtsi.CallTarget
+	(*ListenerQueueTarget)(nil),                      // 80: ondewo.vtsi.ListenerQueueTarget
+	(*TransferCallResponse)(nil),                     // 81: ondewo.vtsi.TransferCallResponse
+	(*CallTransferRecord)(nil),                       // 82: ondewo.vtsi.CallTransferRecord
+	(*CallMediaControlState)(nil),                    // 83: ondewo.vtsi.CallMediaControlState
+	(*CallParticipant)(nil),                          // 84: ondewo.vtsi.CallParticipant
+	(*InviteToCallRequest)(nil),                      // 85: ondewo.vtsi.InviteToCallRequest
+	(*InviteToCallResponse)(nil),                     // 86: ondewo.vtsi.InviteToCallResponse
+	(*RemoveCallParticipantRequest)(nil),             // 87: ondewo.vtsi.RemoveCallParticipantRequest
+	(*RemoveCallParticipantResponse)(nil),            // 88: ondewo.vtsi.RemoveCallParticipantResponse
+	(*SetCallMediaControlRequest)(nil),               // 89: ondewo.vtsi.SetCallMediaControlRequest
+	(*SetCallMediaControlResponse)(nil),              // 90: ondewo.vtsi.SetCallMediaControlResponse
+	(*StreamCallAudioConfig)(nil),                    // 91: ondewo.vtsi.StreamCallAudioConfig
+	(*CallAudioFrame)(nil),                           // 92: ondewo.vtsi.CallAudioFrame
+	(*StreamCallAudioRequest)(nil),                   // 93: ondewo.vtsi.StreamCallAudioRequest
+	(*CallAudioStarted)(nil),                         // 94: ondewo.vtsi.CallAudioStarted
+	(*CallAudioStats)(nil),                           // 95: ondewo.vtsi.CallAudioStats
+	(*CallAudioEnded)(nil),                           // 96: ondewo.vtsi.CallAudioEnded
+	(*StreamCallAudioResponse)(nil),                  // 97: ondewo.vtsi.StreamCallAudioResponse
+	(*ListenCallAudioRequest)(nil),                   // 98: ondewo.vtsi.ListenCallAudioRequest
+	(*TransferCallsRequest)(nil),                     // 99: ondewo.vtsi.TransferCallsRequest
+	(*TransferCallsResponse)(nil),                    // 100: ondewo.vtsi.TransferCallsResponse
+	(*GetCallRequest)(nil),                           // 101: ondewo.vtsi.GetCallRequest
+	(*Call)(nil),                                     // 102: ondewo.vtsi.Call
+	(*CallFilter)(nil),                               // 103: ondewo.vtsi.CallFilter
+	(*CallSorting)(nil),                              // 104: ondewo.vtsi.CallSorting
+	(*ListCallsRequest)(nil),                         // 105: ondewo.vtsi.ListCallsRequest
+	(*ListCallsResponse)(nil),                        // 106: ondewo.vtsi.ListCallsResponse
+	(*UpdateCallRequest)(nil),                        // 107: ondewo.vtsi.UpdateCallRequest
+	(*UpdateCallResponse)(nil),                       // 108: ondewo.vtsi.UpdateCallResponse
+	(*UpdateCallsRequest)(nil),                       // 109: ondewo.vtsi.UpdateCallsRequest
+	(*UpdateCallsResponse)(nil),                      // 110: ondewo.vtsi.UpdateCallsResponse
+	(*GetCallStatisticsRequest)(nil),                 // 111: ondewo.vtsi.GetCallStatisticsRequest
+	(*SipStatusTypeCount)(nil),                       // 112: ondewo.vtsi.SipStatusTypeCount
+	(*CallTypeCount)(nil),                            // 113: ondewo.vtsi.CallTypeCount
+	(*AmdVerdictCount)(nil),                          // 114: ondewo.vtsi.AmdVerdictCount
+	(*TransferOutcomeCount)(nil),                     // 115: ondewo.vtsi.TransferOutcomeCount
+	(*CallStatistics)(nil),                           // 116: ondewo.vtsi.CallStatistics
+	(*AllServicesStatuses)(nil),                      // 117: ondewo.vtsi.AllServicesStatuses
+	(*ServiceStatus)(nil),                            // 118: ondewo.vtsi.ServiceStatus
+	(*CallResourceStatus)(nil),                       // 119: ondewo.vtsi.CallResourceStatus
+	(*StreamCallerStatusRequest)(nil),                // 120: ondewo.vtsi.StreamCallerStatusRequest
+	(*StreamListenerStatusRequest)(nil),              // 121: ondewo.vtsi.StreamListenerStatusRequest
+	(*StreamScheduledCallerStatusRequest)(nil),       // 122: ondewo.vtsi.StreamScheduledCallerStatusRequest
+	(*StreamCallResourceStatusResponse)(nil),         // 123: ondewo.vtsi.StreamCallResourceStatusResponse
+	nil,                                              // 124: ondewo.vtsi.TransferCallRequest.HeadersEntry
+	nil,                                              // 125: ondewo.vtsi.Call.LabelsEntry
+	nil,                                              // 126: ondewo.vtsi.CallFilter.LabelsEntry
+	(*BaseServiceConfig)(nil),                        // 127: ondewo.vtsi.BaseServiceConfig
+	(*SipBaseConfig)(nil),                            // 128: ondewo.vtsi.SipBaseConfig
+	(*CommonServicesConfig)(nil),                     // 129: ondewo.vtsi.CommonServicesConfig
+	(sip.SipStatus_StatusType)(0),                    // 130: ondewo.sip.SipStatus.StatusType
+	(*timestamppb.Timestamp)(nil),                    // 131: google.protobuf.Timestamp
+	(*SipCallerConfig)(nil),                          // 132: ondewo.vtsi.SipCallerConfig
+	(*fieldmaskpb.FieldMask)(nil),                    // 133: google.protobuf.FieldMask
+	(*CampaignAssignment)(nil),                       // 134: ondewo.vtsi.CampaignAssignment
+	(*Campaign)(nil),                                 // 135: ondewo.vtsi.Campaign
+	(*sip.SipStatus)(nil),                            // 136: ondewo.sip.SipStatus
+	(*sip.SipStatusHistoryResponse)(nil),             // 137: ondewo.sip.SipStatusHistoryResponse
+	(nlu.Intent_Message_Platform)(0),                 // 138: ondewo.nlu.Intent.Message.Platform
+	(VtsiProjectSortingMode)(0),                      // 139: ondewo.vtsi.VtsiProjectSortingMode
+	(sip.AnsweringMachineDetectionResult_Verdict)(0), // 140: ondewo.sip.AnsweringMachineDetectionResult.Verdict
 }
 var file_ondewo_vtsi_calls_proto_depIdxs = []int32{
-	16,  // 0: ondewo.vtsi.NluVtsiConfig.nlu_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	17,  // 1: ondewo.vtsi.NluVtsiConfig.credentials:type_name -> ondewo.vtsi.Credentials
-	128, // 2: ondewo.vtsi.NluVtsiConfig.contexts:type_name -> ondewo.nlu.Context
-	129, // 3: ondewo.vtsi.NluVtsiConfig.platform:type_name -> ondewo.nlu.Intent.Message.Platform
-	16,  // 4: ondewo.vtsi.T2sVtsiConfig.t2s_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	130, // 5: ondewo.vtsi.T2sVtsiConfig.t2s_request_config:type_name -> ondewo.t2s.RequestConfig
-	16,  // 6: ondewo.vtsi.S2tVtsiConfig.s2t_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	131, // 7: ondewo.vtsi.S2tVtsiConfig.s2t_transcribe_request_config:type_name -> ondewo.s2t.TranscribeRequestConfig
-	16,  // 8: ondewo.vtsi.AsteriskConfig.asterisk_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	20,  // 9: ondewo.vtsi.CommonServicesConfig.s2t_vtsi_config:type_name -> ondewo.vtsi.S2tVtsiConfig
-	18,  // 10: ondewo.vtsi.CommonServicesConfig.nlu_vtsi_config:type_name -> ondewo.vtsi.NluVtsiConfig
-	19,  // 11: ondewo.vtsi.CommonServicesConfig.t2s_vtsi_config:type_name -> ondewo.vtsi.T2sVtsiConfig
-	31,  // 12: ondewo.vtsi.CommonServicesConfig.csi_vtsi_config:type_name -> ondewo.vtsi.CsiVtsiConfig
-	23,  // 13: ondewo.vtsi.CommonServicesConfig.voice_interaction_config:type_name -> ondewo.vtsi.VoiceInteractionConfig
-	24,  // 14: ondewo.vtsi.VoiceInteractionConfig.turn_detection_config:type_name -> ondewo.vtsi.TurnDetectionConfig
-	25,  // 15: ondewo.vtsi.VoiceInteractionConfig.interruption_handling_config:type_name -> ondewo.vtsi.InterruptionHandlingConfig
-	26,  // 16: ondewo.vtsi.VoiceInteractionConfig.response_timing_config:type_name -> ondewo.vtsi.ResponseTimingConfig
-	28,  // 17: ondewo.vtsi.VoiceInteractionConfig.answering_machine_detection_config:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig
-	12,  // 18: ondewo.vtsi.TurnDetectionConfig.mode:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnDetectionMode
-	13,  // 19: ondewo.vtsi.TurnDetectionConfig.turn_eagerness:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnEagerness
-	27,  // 20: ondewo.vtsi.ResponseTimingConfig.soft_timeout_config:type_name -> ondewo.vtsi.SoftTimeoutConfig
-	14,  // 21: ondewo.vtsi.AnsweringMachineDetectionConfig.action:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdAction
-	15,  // 22: ondewo.vtsi.AnsweringMachineDetectionConfig.sensitivity:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdSensitivity
-	29,  // 23: ondewo.vtsi.SipCallerConfig.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
-	126, // 24: ondewo.vtsi.SipCallerConfig.sip_headers:type_name -> ondewo.vtsi.SipCallerConfig.SipHeadersEntry
-	37,  // 25: ondewo.vtsi.CsiVtsiConfig.s2t_vtsi_callbacks:type_name -> ondewo.vtsi.S2tVtsiCallbacks
-	38,  // 26: ondewo.vtsi.CsiVtsiConfig.nlu_vtsi_callbacks:type_name -> ondewo.vtsi.NluVtsiCallbacks
-	39,  // 27: ondewo.vtsi.CsiVtsiConfig.t2s_vtsi_callbacks:type_name -> ondewo.vtsi.T2sVtsiCallbacks
-	32,  // 28: ondewo.vtsi.CsiVtsiConfig.audio_object_store_config:type_name -> ondewo.vtsi.AudioObjectStorageConfig
-	34,  // 29: ondewo.vtsi.CsiVtsiConfig.message_broker_config:type_name -> ondewo.vtsi.MessageBrokerConfig
-	33,  // 30: ondewo.vtsi.AudioObjectStorageConfig.audio_object_storage_services_activation_config:type_name -> ondewo.vtsi.AudioObjectStorageServicesActivationConfig
-	35,  // 31: ondewo.vtsi.MessageBrokerConfig.message_broker_services_activation_config:type_name -> ondewo.vtsi.MessageBrokerServicesActivationConfig
-	36,  // 32: ondewo.vtsi.MessageBrokerConfig.rabbit_mq_config:type_name -> ondewo.vtsi.RabbitMqConfig
-	29,  // 33: ondewo.vtsi.Listener.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
-	22,  // 34: ondewo.vtsi.Listener.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	30,  // 35: ondewo.vtsi.Caller.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
-	22,  // 36: ondewo.vtsi.Caller.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	29,  // 37: ondewo.vtsi.StartListenerRequest.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
-	22,  // 38: ondewo.vtsi.StartListenerRequest.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	40,  // 39: ondewo.vtsi.StartListenerResponse.listener:type_name -> ondewo.vtsi.Listener
-	42,  // 40: ondewo.vtsi.StartListenersRequest.listener_requests:type_name -> ondewo.vtsi.StartListenerRequest
-	43,  // 41: ondewo.vtsi.StartListenersResponse.listener_responses:type_name -> ondewo.vtsi.StartListenerResponse
-	30,  // 42: ondewo.vtsi.StartCallerRequest.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
-	22,  // 43: ondewo.vtsi.StartCallerRequest.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	41,  // 44: ondewo.vtsi.StartCallerResponse.caller:type_name -> ondewo.vtsi.Caller
-	46,  // 45: ondewo.vtsi.StartCallersRequest.caller_requests:type_name -> ondewo.vtsi.StartCallerRequest
-	47,  // 46: ondewo.vtsi.StartCallersResponse.caller_responses:type_name -> ondewo.vtsi.StartCallerResponse
-	9,   // 47: ondewo.vtsi.ListCallersRequest.call_view:type_name -> ondewo.vtsi.CallView
-	41,  // 48: ondewo.vtsi.ListCallersResponse.callers:type_name -> ondewo.vtsi.Caller
-	9,   // 49: ondewo.vtsi.GetCallerRequest.call_view:type_name -> ondewo.vtsi.CallView
-	9,   // 50: ondewo.vtsi.ListListenersRequest.call_view:type_name -> ondewo.vtsi.CallView
-	40,  // 51: ondewo.vtsi.ListListenersResponse.listeners:type_name -> ondewo.vtsi.Listener
-	9,   // 52: ondewo.vtsi.GetListenerRequest.call_view:type_name -> ondewo.vtsi.CallView
-	57,  // 53: ondewo.vtsi.StopListenersResponse.stop_listener_responses:type_name -> ondewo.vtsi.StopListenerResponse
-	61,  // 54: ondewo.vtsi.StopCallersResponse.stop_caller_responses:type_name -> ondewo.vtsi.StopCallerResponse
-	65,  // 55: ondewo.vtsi.DeleteListenersResponse.delete_listener_responses:type_name -> ondewo.vtsi.DeleteListenerResponse
-	69,  // 56: ondewo.vtsi.DeleteCallersResponse.delete_caller_responses:type_name -> ondewo.vtsi.DeleteCallerResponse
-	46,  // 57: ondewo.vtsi.StartScheduledCallerRequest.request:type_name -> ondewo.vtsi.StartCallerRequest
-	132, // 58: ondewo.vtsi.StartScheduledCallerRequest.scheduled_time:type_name -> google.protobuf.Timestamp
-	72,  // 59: ondewo.vtsi.StartScheduledCallersRequest.scheduled_caller_requests:type_name -> ondewo.vtsi.StartScheduledCallerRequest
-	79,  // 60: ondewo.vtsi.StartScheduledCallersResponse.scheduled_caller_responses:type_name -> ondewo.vtsi.StartScheduledCallerResponse
-	46,  // 61: ondewo.vtsi.AddCallersToCampaignRequest.caller_requests:type_name -> ondewo.vtsi.StartCallerRequest
-	133, // 62: ondewo.vtsi.AddCallersToCampaignRequest.campaign_assignment:type_name -> ondewo.vtsi.CampaignAssignment
-	134, // 63: ondewo.vtsi.AddCallersToCampaignResponse.campaign:type_name -> ondewo.vtsi.Campaign
-	72,  // 64: ondewo.vtsi.AddScheduledCallersToCampaignRequest.scheduled_caller_requests:type_name -> ondewo.vtsi.StartScheduledCallerRequest
-	133, // 65: ondewo.vtsi.AddScheduledCallersToCampaignRequest.campaign_assignment:type_name -> ondewo.vtsi.CampaignAssignment
-	79,  // 66: ondewo.vtsi.AddScheduledCallersToCampaignResponse.scheduled_caller_responses:type_name -> ondewo.vtsi.StartScheduledCallerResponse
-	134, // 67: ondewo.vtsi.AddScheduledCallersToCampaignResponse.campaign:type_name -> ondewo.vtsi.Campaign
-	80,  // 68: ondewo.vtsi.StartScheduledCallerResponse.scheduled_caller:type_name -> ondewo.vtsi.ScheduledCaller
-	29,  // 69: ondewo.vtsi.ScheduledCaller.sip_config:type_name -> ondewo.vtsi.SipBaseConfig
-	22,  // 70: ondewo.vtsi.ScheduledCaller.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	132, // 71: ondewo.vtsi.ScheduledCaller.scheduled_time:type_name -> google.protobuf.Timestamp
-	30,  // 72: ondewo.vtsi.ScheduledCaller.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
-	0,   // 73: ondewo.vtsi.ScheduledCaller.status:type_name -> ondewo.vtsi.ScheduledCallerStatus
-	132, // 74: ondewo.vtsi.ScheduledCaller.created_at:type_name -> google.protobuf.Timestamp
-	132, // 75: ondewo.vtsi.ScheduledCaller.fired_at:type_name -> google.protobuf.Timestamp
-	9,   // 76: ondewo.vtsi.GetScheduledCallerRequest.call_view:type_name -> ondewo.vtsi.CallView
-	9,   // 77: ondewo.vtsi.ListScheduledCallersRequest.call_view:type_name -> ondewo.vtsi.CallView
-	0,   // 78: ondewo.vtsi.ListScheduledCallersRequest.statuses:type_name -> ondewo.vtsi.ScheduledCallerStatus
-	80,  // 79: ondewo.vtsi.ListScheduledCallersResponse.scheduled_callers:type_name -> ondewo.vtsi.ScheduledCaller
-	0,   // 80: ondewo.vtsi.CancelScheduledCallerResponse.status:type_name -> ondewo.vtsi.ScheduledCallerStatus
-	87,  // 81: ondewo.vtsi.StopCallsResponse.stop_call_responses:type_name -> ondewo.vtsi.StopCallResponse
-	92,  // 82: ondewo.vtsi.TransferCallRequest.target:type_name -> ondewo.vtsi.CallTarget
-	1,   // 83: ondewo.vtsi.TransferCallRequest.mode:type_name -> ondewo.vtsi.TransferMode
-	127, // 84: ondewo.vtsi.TransferCallRequest.headers:type_name -> ondewo.vtsi.TransferCallRequest.HeadersEntry
-	93,  // 85: ondewo.vtsi.CallTarget.listener_queue:type_name -> ondewo.vtsi.ListenerQueueTarget
-	2,   // 86: ondewo.vtsi.TransferCallResponse.outcome:type_name -> ondewo.vtsi.TransferOutcome
-	92,  // 87: ondewo.vtsi.CallTransferRecord.target:type_name -> ondewo.vtsi.CallTarget
-	1,   // 88: ondewo.vtsi.CallTransferRecord.mode:type_name -> ondewo.vtsi.TransferMode
-	2,   // 89: ondewo.vtsi.CallTransferRecord.outcome:type_name -> ondewo.vtsi.TransferOutcome
-	132, // 90: ondewo.vtsi.CallTransferRecord.time:type_name -> google.protobuf.Timestamp
-	4,   // 91: ondewo.vtsi.CallParticipant.mode:type_name -> ondewo.vtsi.ParticipantMode
-	6,   // 92: ondewo.vtsi.CallParticipant.state:type_name -> ondewo.vtsi.ParticipantState
-	132, // 93: ondewo.vtsi.CallParticipant.invited_at:type_name -> google.protobuf.Timestamp
-	132, // 94: ondewo.vtsi.CallParticipant.joined_at:type_name -> google.protobuf.Timestamp
-	132, // 95: ondewo.vtsi.CallParticipant.left_at:type_name -> google.protobuf.Timestamp
-	5,   // 96: ondewo.vtsi.CallParticipant.bot_policy:type_name -> ondewo.vtsi.BotPolicyOnJoin
-	4,   // 97: ondewo.vtsi.InviteToCallRequest.mode:type_name -> ondewo.vtsi.ParticipantMode
-	5,   // 98: ondewo.vtsi.InviteToCallRequest.bot_policy:type_name -> ondewo.vtsi.BotPolicyOnJoin
-	97,  // 99: ondewo.vtsi.InviteToCallResponse.participant:type_name -> ondewo.vtsi.CallParticipant
-	97,  // 100: ondewo.vtsi.RemoveCallParticipantResponse.participant:type_name -> ondewo.vtsi.CallParticipant
-	3,   // 101: ondewo.vtsi.SetCallMediaControlRequest.bot_voice:type_name -> ondewo.vtsi.CallMediaSetting
-	3,   // 102: ondewo.vtsi.SetCallMediaControlRequest.bot_listening:type_name -> ondewo.vtsi.CallMediaSetting
-	96,  // 103: ondewo.vtsi.SetCallMediaControlResponse.state:type_name -> ondewo.vtsi.CallMediaControlState
-	7,   // 104: ondewo.vtsi.StreamCallAudioConfig.mode:type_name -> ondewo.vtsi.CallAudioMode
-	104, // 105: ondewo.vtsi.StreamCallAudioRequest.config:type_name -> ondewo.vtsi.StreamCallAudioConfig
-	105, // 106: ondewo.vtsi.StreamCallAudioRequest.audio:type_name -> ondewo.vtsi.CallAudioFrame
-	7,   // 107: ondewo.vtsi.CallAudioStarted.mode:type_name -> ondewo.vtsi.CallAudioMode
-	8,   // 108: ondewo.vtsi.CallAudioEnded.reason:type_name -> ondewo.vtsi.CallAudioEndReason
-	107, // 109: ondewo.vtsi.StreamCallAudioResponse.started:type_name -> ondewo.vtsi.CallAudioStarted
-	105, // 110: ondewo.vtsi.StreamCallAudioResponse.audio:type_name -> ondewo.vtsi.CallAudioFrame
-	108, // 111: ondewo.vtsi.StreamCallAudioResponse.stats:type_name -> ondewo.vtsi.CallAudioStats
-	109, // 112: ondewo.vtsi.StreamCallAudioResponse.ended:type_name -> ondewo.vtsi.CallAudioEnded
-	104, // 113: ondewo.vtsi.ListenCallAudioRequest.config:type_name -> ondewo.vtsi.StreamCallAudioConfig
-	91,  // 114: ondewo.vtsi.TransferCallsRequest.transfer_call_requests:type_name -> ondewo.vtsi.TransferCallRequest
-	94,  // 115: ondewo.vtsi.TransferCallsResponse.transfer_call_responses:type_name -> ondewo.vtsi.TransferCallResponse
-	9,   // 116: ondewo.vtsi.GetCallRequest.call_view:type_name -> ondewo.vtsi.CallView
-	11,  // 117: ondewo.vtsi.Call.call_type:type_name -> ondewo.vtsi.CallType
-	132, // 118: ondewo.vtsi.Call.start_time:type_name -> google.protobuf.Timestamp
-	132, // 119: ondewo.vtsi.Call.end_time:type_name -> google.protobuf.Timestamp
-	135, // 120: ondewo.vtsi.Call.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	136, // 121: ondewo.vtsi.Call.sip_status:type_name -> ondewo.sip.SipStatus
-	137, // 122: ondewo.vtsi.Call.sip_status_history:type_name -> ondewo.sip.SipStatusHistoryResponse
-	119, // 123: ondewo.vtsi.Call.services_statuses:type_name -> ondewo.vtsi.AllServicesStatuses
-	22,  // 124: ondewo.vtsi.Call.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
-	129, // 125: ondewo.vtsi.Call.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	96,  // 126: ondewo.vtsi.Call.media_control:type_name -> ondewo.vtsi.CallMediaControlState
-	97,  // 127: ondewo.vtsi.Call.participants:type_name -> ondewo.vtsi.CallParticipant
-	95,  // 128: ondewo.vtsi.Call.last_transfer:type_name -> ondewo.vtsi.CallTransferRecord
-	11,  // 129: ondewo.vtsi.CallFilter.call_types:type_name -> ondewo.vtsi.CallType
-	135, // 130: ondewo.vtsi.CallFilter.sip_status_types:type_name -> ondewo.sip.SipStatus.StatusType
-	10,  // 131: ondewo.vtsi.CallFilter.call_status:type_name -> ondewo.vtsi.CallStatus
-	132, // 132: ondewo.vtsi.CallFilter.start_time:type_name -> google.protobuf.Timestamp
-	132, // 133: ondewo.vtsi.CallFilter.end_time:type_name -> google.protobuf.Timestamp
-	129, // 134: ondewo.vtsi.CallFilter.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	9,   // 135: ondewo.vtsi.ListCallsRequest.call_view:type_name -> ondewo.vtsi.CallView
-	116, // 136: ondewo.vtsi.ListCallsRequest.call_filter:type_name -> ondewo.vtsi.CallFilter
-	115, // 137: ondewo.vtsi.ListCallsResponse.calls:type_name -> ondewo.vtsi.Call
-	120, // 138: ondewo.vtsi.AllServicesStatuses.status_sip:type_name -> ondewo.vtsi.ServiceStatus
-	120, // 139: ondewo.vtsi.AllServicesStatuses.status_asterisk:type_name -> ondewo.vtsi.ServiceStatus
-	120, // 140: ondewo.vtsi.AllServicesStatuses.status_nlu:type_name -> ondewo.vtsi.ServiceStatus
-	120, // 141: ondewo.vtsi.AllServicesStatuses.status_stt:type_name -> ondewo.vtsi.ServiceStatus
-	120, // 142: ondewo.vtsi.AllServicesStatuses.status_tts:type_name -> ondewo.vtsi.ServiceStatus
-	11,  // 143: ondewo.vtsi.CallResourceStatus.call_type:type_name -> ondewo.vtsi.CallType
-	135, // 144: ondewo.vtsi.CallResourceStatus.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	132, // 145: ondewo.vtsi.CallResourceStatus.start_time:type_name -> google.protobuf.Timestamp
-	132, // 146: ondewo.vtsi.CallResourceStatus.end_time:type_name -> google.protobuf.Timestamp
-	0,   // 147: ondewo.vtsi.CallResourceStatus.scheduled_caller_status:type_name -> ondewo.vtsi.ScheduledCallerStatus
-	132, // 148: ondewo.vtsi.CallResourceStatus.scheduled_time:type_name -> google.protobuf.Timestamp
-	0,   // 149: ondewo.vtsi.StreamScheduledCallerStatusRequest.statuses:type_name -> ondewo.vtsi.ScheduledCallerStatus
-	121, // 150: ondewo.vtsi.StreamCallResourceStatusResponse.statuses:type_name -> ondewo.vtsi.CallResourceStatus
-	46,  // 151: ondewo.vtsi.Calls.StartCaller:input_type -> ondewo.vtsi.StartCallerRequest
-	48,  // 152: ondewo.vtsi.Calls.StartCallers:input_type -> ondewo.vtsi.StartCallersRequest
-	50,  // 153: ondewo.vtsi.Calls.ListCallers:input_type -> ondewo.vtsi.ListCallersRequest
-	52,  // 154: ondewo.vtsi.Calls.GetCaller:input_type -> ondewo.vtsi.GetCallerRequest
-	68,  // 155: ondewo.vtsi.Calls.DeleteCaller:input_type -> ondewo.vtsi.DeleteCallerRequest
-	70,  // 156: ondewo.vtsi.Calls.DeleteCallers:input_type -> ondewo.vtsi.DeleteCallersRequest
-	60,  // 157: ondewo.vtsi.Calls.StopCaller:input_type -> ondewo.vtsi.StopCallerRequest
-	62,  // 158: ondewo.vtsi.Calls.StopCallers:input_type -> ondewo.vtsi.StopCallersRequest
-	42,  // 159: ondewo.vtsi.Calls.StartListener:input_type -> ondewo.vtsi.StartListenerRequest
-	44,  // 160: ondewo.vtsi.Calls.StartListeners:input_type -> ondewo.vtsi.StartListenersRequest
-	56,  // 161: ondewo.vtsi.Calls.StopListener:input_type -> ondewo.vtsi.StopListenerRequest
-	58,  // 162: ondewo.vtsi.Calls.StopListeners:input_type -> ondewo.vtsi.StopListenersRequest
-	53,  // 163: ondewo.vtsi.Calls.ListListeners:input_type -> ondewo.vtsi.ListListenersRequest
-	55,  // 164: ondewo.vtsi.Calls.GetListener:input_type -> ondewo.vtsi.GetListenerRequest
-	64,  // 165: ondewo.vtsi.Calls.DeleteListener:input_type -> ondewo.vtsi.DeleteListenerRequest
-	66,  // 166: ondewo.vtsi.Calls.DeleteListeners:input_type -> ondewo.vtsi.DeleteListenersRequest
-	72,  // 167: ondewo.vtsi.Calls.StartScheduledCaller:input_type -> ondewo.vtsi.StartScheduledCallerRequest
-	73,  // 168: ondewo.vtsi.Calls.StartScheduledCallers:input_type -> ondewo.vtsi.StartScheduledCallersRequest
-	75,  // 169: ondewo.vtsi.Calls.AddCallersToCampaign:input_type -> ondewo.vtsi.AddCallersToCampaignRequest
-	77,  // 170: ondewo.vtsi.Calls.AddScheduledCallersToCampaign:input_type -> ondewo.vtsi.AddScheduledCallersToCampaignRequest
-	81,  // 171: ondewo.vtsi.Calls.GetScheduledCaller:input_type -> ondewo.vtsi.GetScheduledCallerRequest
-	82,  // 172: ondewo.vtsi.Calls.ListScheduledCallers:input_type -> ondewo.vtsi.ListScheduledCallersRequest
-	84,  // 173: ondewo.vtsi.Calls.CancelScheduledCaller:input_type -> ondewo.vtsi.CancelScheduledCallerRequest
-	86,  // 174: ondewo.vtsi.Calls.StopCall:input_type -> ondewo.vtsi.StopCallRequest
-	88,  // 175: ondewo.vtsi.Calls.StopCalls:input_type -> ondewo.vtsi.StopCallsRequest
-	90,  // 176: ondewo.vtsi.Calls.StopAllCalls:input_type -> ondewo.vtsi.StopAllCallsRequest
-	91,  // 177: ondewo.vtsi.Calls.TransferCall:input_type -> ondewo.vtsi.TransferCallRequest
-	112, // 178: ondewo.vtsi.Calls.TransferCalls:input_type -> ondewo.vtsi.TransferCallsRequest
-	114, // 179: ondewo.vtsi.Calls.GetCall:input_type -> ondewo.vtsi.GetCallRequest
-	117, // 180: ondewo.vtsi.Calls.ListCalls:input_type -> ondewo.vtsi.ListCallsRequest
-	122, // 181: ondewo.vtsi.Calls.StreamCallerStatus:input_type -> ondewo.vtsi.StreamCallerStatusRequest
-	123, // 182: ondewo.vtsi.Calls.StreamListenerStatus:input_type -> ondewo.vtsi.StreamListenerStatusRequest
-	124, // 183: ondewo.vtsi.Calls.StreamScheduledCallerStatus:input_type -> ondewo.vtsi.StreamScheduledCallerStatusRequest
-	98,  // 184: ondewo.vtsi.Calls.InviteToCall:input_type -> ondewo.vtsi.InviteToCallRequest
-	100, // 185: ondewo.vtsi.Calls.RemoveCallParticipant:input_type -> ondewo.vtsi.RemoveCallParticipantRequest
-	102, // 186: ondewo.vtsi.Calls.SetCallMediaControl:input_type -> ondewo.vtsi.SetCallMediaControlRequest
-	106, // 187: ondewo.vtsi.Calls.StreamCallAudio:input_type -> ondewo.vtsi.StreamCallAudioRequest
-	111, // 188: ondewo.vtsi.Calls.ListenCallAudio:input_type -> ondewo.vtsi.ListenCallAudioRequest
-	47,  // 189: ondewo.vtsi.Calls.StartCaller:output_type -> ondewo.vtsi.StartCallerResponse
-	49,  // 190: ondewo.vtsi.Calls.StartCallers:output_type -> ondewo.vtsi.StartCallersResponse
-	51,  // 191: ondewo.vtsi.Calls.ListCallers:output_type -> ondewo.vtsi.ListCallersResponse
-	41,  // 192: ondewo.vtsi.Calls.GetCaller:output_type -> ondewo.vtsi.Caller
-	69,  // 193: ondewo.vtsi.Calls.DeleteCaller:output_type -> ondewo.vtsi.DeleteCallerResponse
-	71,  // 194: ondewo.vtsi.Calls.DeleteCallers:output_type -> ondewo.vtsi.DeleteCallersResponse
-	61,  // 195: ondewo.vtsi.Calls.StopCaller:output_type -> ondewo.vtsi.StopCallerResponse
-	63,  // 196: ondewo.vtsi.Calls.StopCallers:output_type -> ondewo.vtsi.StopCallersResponse
-	43,  // 197: ondewo.vtsi.Calls.StartListener:output_type -> ondewo.vtsi.StartListenerResponse
-	45,  // 198: ondewo.vtsi.Calls.StartListeners:output_type -> ondewo.vtsi.StartListenersResponse
-	57,  // 199: ondewo.vtsi.Calls.StopListener:output_type -> ondewo.vtsi.StopListenerResponse
-	59,  // 200: ondewo.vtsi.Calls.StopListeners:output_type -> ondewo.vtsi.StopListenersResponse
-	54,  // 201: ondewo.vtsi.Calls.ListListeners:output_type -> ondewo.vtsi.ListListenersResponse
-	40,  // 202: ondewo.vtsi.Calls.GetListener:output_type -> ondewo.vtsi.Listener
-	65,  // 203: ondewo.vtsi.Calls.DeleteListener:output_type -> ondewo.vtsi.DeleteListenerResponse
-	67,  // 204: ondewo.vtsi.Calls.DeleteListeners:output_type -> ondewo.vtsi.DeleteListenersResponse
-	79,  // 205: ondewo.vtsi.Calls.StartScheduledCaller:output_type -> ondewo.vtsi.StartScheduledCallerResponse
-	74,  // 206: ondewo.vtsi.Calls.StartScheduledCallers:output_type -> ondewo.vtsi.StartScheduledCallersResponse
-	76,  // 207: ondewo.vtsi.Calls.AddCallersToCampaign:output_type -> ondewo.vtsi.AddCallersToCampaignResponse
-	78,  // 208: ondewo.vtsi.Calls.AddScheduledCallersToCampaign:output_type -> ondewo.vtsi.AddScheduledCallersToCampaignResponse
-	80,  // 209: ondewo.vtsi.Calls.GetScheduledCaller:output_type -> ondewo.vtsi.ScheduledCaller
-	83,  // 210: ondewo.vtsi.Calls.ListScheduledCallers:output_type -> ondewo.vtsi.ListScheduledCallersResponse
-	85,  // 211: ondewo.vtsi.Calls.CancelScheduledCaller:output_type -> ondewo.vtsi.CancelScheduledCallerResponse
-	87,  // 212: ondewo.vtsi.Calls.StopCall:output_type -> ondewo.vtsi.StopCallResponse
-	89,  // 213: ondewo.vtsi.Calls.StopCalls:output_type -> ondewo.vtsi.StopCallsResponse
-	89,  // 214: ondewo.vtsi.Calls.StopAllCalls:output_type -> ondewo.vtsi.StopCallsResponse
-	94,  // 215: ondewo.vtsi.Calls.TransferCall:output_type -> ondewo.vtsi.TransferCallResponse
-	113, // 216: ondewo.vtsi.Calls.TransferCalls:output_type -> ondewo.vtsi.TransferCallsResponse
-	115, // 217: ondewo.vtsi.Calls.GetCall:output_type -> ondewo.vtsi.Call
-	118, // 218: ondewo.vtsi.Calls.ListCalls:output_type -> ondewo.vtsi.ListCallsResponse
-	125, // 219: ondewo.vtsi.Calls.StreamCallerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
-	125, // 220: ondewo.vtsi.Calls.StreamListenerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
-	125, // 221: ondewo.vtsi.Calls.StreamScheduledCallerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
-	99,  // 222: ondewo.vtsi.Calls.InviteToCall:output_type -> ondewo.vtsi.InviteToCallResponse
-	101, // 223: ondewo.vtsi.Calls.RemoveCallParticipant:output_type -> ondewo.vtsi.RemoveCallParticipantResponse
-	103, // 224: ondewo.vtsi.Calls.SetCallMediaControl:output_type -> ondewo.vtsi.SetCallMediaControlResponse
-	110, // 225: ondewo.vtsi.Calls.StreamCallAudio:output_type -> ondewo.vtsi.StreamCallAudioResponse
-	110, // 226: ondewo.vtsi.Calls.ListenCallAudio:output_type -> ondewo.vtsi.StreamCallAudioResponse
-	189, // [189:227] is the sub-list for method output_type
-	151, // [151:189] is the sub-list for method input_type
-	151, // [151:151] is the sub-list for extension type_name
-	151, // [151:151] is the sub-list for extension extendee
-	0,   // [0:151] is the sub-list for field type_name
+	127, // 0: ondewo.vtsi.AsteriskConfig.asterisk_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
+	128, // 1: ondewo.vtsi.Listener.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
+	129, // 2: ondewo.vtsi.Listener.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	130, // 3: ondewo.vtsi.Listener.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	131, // 4: ondewo.vtsi.Listener.created_at:type_name -> google.protobuf.Timestamp
+	132, // 5: ondewo.vtsi.Caller.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
+	129, // 6: ondewo.vtsi.Caller.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	130, // 7: ondewo.vtsi.Caller.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	131, // 8: ondewo.vtsi.Caller.created_at:type_name -> google.protobuf.Timestamp
+	128, // 9: ondewo.vtsi.StartListenerRequest.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
+	129, // 10: ondewo.vtsi.StartListenerRequest.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	133, // 11: ondewo.vtsi.StartListenerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	15,  // 12: ondewo.vtsi.StartListenerResponse.listener:type_name -> ondewo.vtsi.Listener
+	17,  // 13: ondewo.vtsi.StartListenersRequest.listener_requests:type_name -> ondewo.vtsi.StartListenerRequest
+	133, // 14: ondewo.vtsi.StartListenersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	18,  // 15: ondewo.vtsi.StartListenersResponse.listener_responses:type_name -> ondewo.vtsi.StartListenerResponse
+	132, // 16: ondewo.vtsi.StartCallerRequest.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
+	129, // 17: ondewo.vtsi.StartCallerRequest.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	133, // 18: ondewo.vtsi.StartCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	16,  // 19: ondewo.vtsi.StartCallerResponse.caller:type_name -> ondewo.vtsi.Caller
+	21,  // 20: ondewo.vtsi.StartCallersRequest.caller_requests:type_name -> ondewo.vtsi.StartCallerRequest
+	133, // 21: ondewo.vtsi.StartCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	22,  // 22: ondewo.vtsi.StartCallersResponse.caller_responses:type_name -> ondewo.vtsi.StartCallerResponse
+	10,  // 23: ondewo.vtsi.ListCallersRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 24: ondewo.vtsi.ListCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	130, // 25: ondewo.vtsi.ListCallersRequest.sip_status_types:type_name -> ondewo.sip.SipStatus.StatusType
+	16,  // 26: ondewo.vtsi.ListCallersResponse.callers:type_name -> ondewo.vtsi.Caller
+	10,  // 27: ondewo.vtsi.GetCallerRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 28: ondewo.vtsi.GetCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	10,  // 29: ondewo.vtsi.ListListenersRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 30: ondewo.vtsi.ListListenersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	130, // 31: ondewo.vtsi.ListListenersRequest.sip_status_types:type_name -> ondewo.sip.SipStatus.StatusType
+	15,  // 32: ondewo.vtsi.ListListenersResponse.listeners:type_name -> ondewo.vtsi.Listener
+	10,  // 33: ondewo.vtsi.GetListenerRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 34: ondewo.vtsi.GetListenerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 35: ondewo.vtsi.StopListenerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 36: ondewo.vtsi.StopListenersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	32,  // 37: ondewo.vtsi.StopListenersResponse.stop_listener_responses:type_name -> ondewo.vtsi.StopListenerResponse
+	133, // 38: ondewo.vtsi.StopCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 39: ondewo.vtsi.StopCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	36,  // 40: ondewo.vtsi.StopCallersResponse.stop_caller_responses:type_name -> ondewo.vtsi.StopCallerResponse
+	133, // 41: ondewo.vtsi.DeleteListenerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 42: ondewo.vtsi.DeleteListenersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	40,  // 43: ondewo.vtsi.DeleteListenersResponse.delete_listener_responses:type_name -> ondewo.vtsi.DeleteListenerResponse
+	133, // 44: ondewo.vtsi.DeleteCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 45: ondewo.vtsi.DeleteCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	44,  // 46: ondewo.vtsi.DeleteCallersResponse.delete_caller_responses:type_name -> ondewo.vtsi.DeleteCallerResponse
+	16,  // 47: ondewo.vtsi.UpdateCallerRequest.caller:type_name -> ondewo.vtsi.Caller
+	133, // 48: ondewo.vtsi.UpdateCallerRequest.update_mask:type_name -> google.protobuf.FieldMask
+	133, // 49: ondewo.vtsi.UpdateCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	16,  // 50: ondewo.vtsi.UpdateCallerResponse.caller:type_name -> ondewo.vtsi.Caller
+	47,  // 51: ondewo.vtsi.UpdateCallersRequest.update_caller_requests:type_name -> ondewo.vtsi.UpdateCallerRequest
+	133, // 52: ondewo.vtsi.UpdateCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	48,  // 53: ondewo.vtsi.UpdateCallersResponse.update_caller_responses:type_name -> ondewo.vtsi.UpdateCallerResponse
+	15,  // 54: ondewo.vtsi.UpdateListenerRequest.listener:type_name -> ondewo.vtsi.Listener
+	133, // 55: ondewo.vtsi.UpdateListenerRequest.update_mask:type_name -> google.protobuf.FieldMask
+	133, // 56: ondewo.vtsi.UpdateListenerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	15,  // 57: ondewo.vtsi.UpdateListenerResponse.listener:type_name -> ondewo.vtsi.Listener
+	51,  // 58: ondewo.vtsi.UpdateListenersRequest.update_listener_requests:type_name -> ondewo.vtsi.UpdateListenerRequest
+	133, // 59: ondewo.vtsi.UpdateListenersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	52,  // 60: ondewo.vtsi.UpdateListenersResponse.update_listener_responses:type_name -> ondewo.vtsi.UpdateListenerResponse
+	21,  // 61: ondewo.vtsi.StartScheduledCallerRequest.request:type_name -> ondewo.vtsi.StartCallerRequest
+	131, // 62: ondewo.vtsi.StartScheduledCallerRequest.scheduled_time:type_name -> google.protobuf.Timestamp
+	133, // 63: ondewo.vtsi.StartScheduledCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	55,  // 64: ondewo.vtsi.StartScheduledCallersRequest.scheduled_caller_requests:type_name -> ondewo.vtsi.StartScheduledCallerRequest
+	133, // 65: ondewo.vtsi.StartScheduledCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	62,  // 66: ondewo.vtsi.StartScheduledCallersResponse.scheduled_caller_responses:type_name -> ondewo.vtsi.StartScheduledCallerResponse
+	21,  // 67: ondewo.vtsi.AddCallersToCampaignRequest.caller_requests:type_name -> ondewo.vtsi.StartCallerRequest
+	134, // 68: ondewo.vtsi.AddCallersToCampaignRequest.campaign_assignment:type_name -> ondewo.vtsi.CampaignAssignment
+	135, // 69: ondewo.vtsi.AddCallersToCampaignResponse.campaign:type_name -> ondewo.vtsi.Campaign
+	55,  // 70: ondewo.vtsi.AddScheduledCallersToCampaignRequest.scheduled_caller_requests:type_name -> ondewo.vtsi.StartScheduledCallerRequest
+	134, // 71: ondewo.vtsi.AddScheduledCallersToCampaignRequest.campaign_assignment:type_name -> ondewo.vtsi.CampaignAssignment
+	62,  // 72: ondewo.vtsi.AddScheduledCallersToCampaignResponse.scheduled_caller_responses:type_name -> ondewo.vtsi.StartScheduledCallerResponse
+	135, // 73: ondewo.vtsi.AddScheduledCallersToCampaignResponse.campaign:type_name -> ondewo.vtsi.Campaign
+	63,  // 74: ondewo.vtsi.StartScheduledCallerResponse.scheduled_caller:type_name -> ondewo.vtsi.ScheduledCaller
+	128, // 75: ondewo.vtsi.ScheduledCaller.sip_config:type_name -> ondewo.vtsi.SipBaseConfig
+	129, // 76: ondewo.vtsi.ScheduledCaller.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	131, // 77: ondewo.vtsi.ScheduledCaller.scheduled_time:type_name -> google.protobuf.Timestamp
+	132, // 78: ondewo.vtsi.ScheduledCaller.sip_caller_config:type_name -> ondewo.vtsi.SipCallerConfig
+	0,   // 79: ondewo.vtsi.ScheduledCaller.status:type_name -> ondewo.vtsi.ScheduledCallerStatus
+	131, // 80: ondewo.vtsi.ScheduledCaller.created_at:type_name -> google.protobuf.Timestamp
+	131, // 81: ondewo.vtsi.ScheduledCaller.fired_at:type_name -> google.protobuf.Timestamp
+	10,  // 82: ondewo.vtsi.GetScheduledCallerRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 83: ondewo.vtsi.GetScheduledCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	10,  // 84: ondewo.vtsi.ListScheduledCallersRequest.call_view:type_name -> ondewo.vtsi.CallView
+	0,   // 85: ondewo.vtsi.ListScheduledCallersRequest.statuses:type_name -> ondewo.vtsi.ScheduledCallerStatus
+	133, // 86: ondewo.vtsi.ListScheduledCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	131, // 87: ondewo.vtsi.ListScheduledCallersRequest.scheduled_after:type_name -> google.protobuf.Timestamp
+	131, // 88: ondewo.vtsi.ListScheduledCallersRequest.scheduled_before:type_name -> google.protobuf.Timestamp
+	63,  // 89: ondewo.vtsi.ListScheduledCallersResponse.scheduled_callers:type_name -> ondewo.vtsi.ScheduledCaller
+	133, // 90: ondewo.vtsi.CancelScheduledCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	0,   // 91: ondewo.vtsi.CancelScheduledCallerResponse.status:type_name -> ondewo.vtsi.ScheduledCallerStatus
+	133, // 92: ondewo.vtsi.CancelScheduledCallersRequest.field_mask:type_name -> google.protobuf.FieldMask
+	68,  // 93: ondewo.vtsi.CancelScheduledCallersResponse.cancel_scheduled_caller_responses:type_name -> ondewo.vtsi.CancelScheduledCallerResponse
+	63,  // 94: ondewo.vtsi.UpdateScheduledCallerRequest.scheduled_caller:type_name -> ondewo.vtsi.ScheduledCaller
+	133, // 95: ondewo.vtsi.UpdateScheduledCallerRequest.update_mask:type_name -> google.protobuf.FieldMask
+	133, // 96: ondewo.vtsi.UpdateScheduledCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	131, // 97: ondewo.vtsi.RetryScheduledCallerRequest.scheduled_time:type_name -> google.protobuf.Timestamp
+	133, // 98: ondewo.vtsi.RetryScheduledCallerRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 99: ondewo.vtsi.StopCallRequest.field_mask:type_name -> google.protobuf.FieldMask
+	133, // 100: ondewo.vtsi.StopCallsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	74,  // 101: ondewo.vtsi.StopCallsResponse.stop_call_responses:type_name -> ondewo.vtsi.StopCallResponse
+	133, // 102: ondewo.vtsi.StopAllCallsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	103, // 103: ondewo.vtsi.StopAllCallsRequest.call_filter:type_name -> ondewo.vtsi.CallFilter
+	79,  // 104: ondewo.vtsi.TransferCallRequest.target:type_name -> ondewo.vtsi.CallTarget
+	1,   // 105: ondewo.vtsi.TransferCallRequest.mode:type_name -> ondewo.vtsi.TransferMode
+	124, // 106: ondewo.vtsi.TransferCallRequest.headers:type_name -> ondewo.vtsi.TransferCallRequest.HeadersEntry
+	80,  // 107: ondewo.vtsi.CallTarget.listener_queue:type_name -> ondewo.vtsi.ListenerQueueTarget
+	2,   // 108: ondewo.vtsi.TransferCallResponse.outcome:type_name -> ondewo.vtsi.TransferOutcome
+	79,  // 109: ondewo.vtsi.CallTransferRecord.target:type_name -> ondewo.vtsi.CallTarget
+	1,   // 110: ondewo.vtsi.CallTransferRecord.mode:type_name -> ondewo.vtsi.TransferMode
+	2,   // 111: ondewo.vtsi.CallTransferRecord.outcome:type_name -> ondewo.vtsi.TransferOutcome
+	131, // 112: ondewo.vtsi.CallTransferRecord.time:type_name -> google.protobuf.Timestamp
+	4,   // 113: ondewo.vtsi.CallParticipant.mode:type_name -> ondewo.vtsi.ParticipantMode
+	6,   // 114: ondewo.vtsi.CallParticipant.state:type_name -> ondewo.vtsi.ParticipantState
+	131, // 115: ondewo.vtsi.CallParticipant.invited_at:type_name -> google.protobuf.Timestamp
+	131, // 116: ondewo.vtsi.CallParticipant.joined_at:type_name -> google.protobuf.Timestamp
+	131, // 117: ondewo.vtsi.CallParticipant.left_at:type_name -> google.protobuf.Timestamp
+	5,   // 118: ondewo.vtsi.CallParticipant.bot_policy:type_name -> ondewo.vtsi.BotPolicyOnJoin
+	7,   // 119: ondewo.vtsi.CallParticipant.end_reason_type:type_name -> ondewo.vtsi.ParticipantEndReason
+	4,   // 120: ondewo.vtsi.InviteToCallRequest.mode:type_name -> ondewo.vtsi.ParticipantMode
+	5,   // 121: ondewo.vtsi.InviteToCallRequest.bot_policy:type_name -> ondewo.vtsi.BotPolicyOnJoin
+	84,  // 122: ondewo.vtsi.InviteToCallResponse.participant:type_name -> ondewo.vtsi.CallParticipant
+	84,  // 123: ondewo.vtsi.RemoveCallParticipantResponse.participant:type_name -> ondewo.vtsi.CallParticipant
+	3,   // 124: ondewo.vtsi.SetCallMediaControlRequest.bot_voice:type_name -> ondewo.vtsi.CallMediaSetting
+	3,   // 125: ondewo.vtsi.SetCallMediaControlRequest.bot_listening:type_name -> ondewo.vtsi.CallMediaSetting
+	83,  // 126: ondewo.vtsi.SetCallMediaControlResponse.state:type_name -> ondewo.vtsi.CallMediaControlState
+	8,   // 127: ondewo.vtsi.StreamCallAudioConfig.mode:type_name -> ondewo.vtsi.CallAudioMode
+	91,  // 128: ondewo.vtsi.StreamCallAudioRequest.config:type_name -> ondewo.vtsi.StreamCallAudioConfig
+	92,  // 129: ondewo.vtsi.StreamCallAudioRequest.audio:type_name -> ondewo.vtsi.CallAudioFrame
+	8,   // 130: ondewo.vtsi.CallAudioStarted.mode:type_name -> ondewo.vtsi.CallAudioMode
+	9,   // 131: ondewo.vtsi.CallAudioEnded.reason:type_name -> ondewo.vtsi.CallAudioEndReason
+	94,  // 132: ondewo.vtsi.StreamCallAudioResponse.started:type_name -> ondewo.vtsi.CallAudioStarted
+	92,  // 133: ondewo.vtsi.StreamCallAudioResponse.audio:type_name -> ondewo.vtsi.CallAudioFrame
+	95,  // 134: ondewo.vtsi.StreamCallAudioResponse.stats:type_name -> ondewo.vtsi.CallAudioStats
+	96,  // 135: ondewo.vtsi.StreamCallAudioResponse.ended:type_name -> ondewo.vtsi.CallAudioEnded
+	91,  // 136: ondewo.vtsi.ListenCallAudioRequest.config:type_name -> ondewo.vtsi.StreamCallAudioConfig
+	78,  // 137: ondewo.vtsi.TransferCallsRequest.transfer_call_requests:type_name -> ondewo.vtsi.TransferCallRequest
+	81,  // 138: ondewo.vtsi.TransferCallsResponse.transfer_call_responses:type_name -> ondewo.vtsi.TransferCallResponse
+	10,  // 139: ondewo.vtsi.GetCallRequest.call_view:type_name -> ondewo.vtsi.CallView
+	133, // 140: ondewo.vtsi.GetCallRequest.field_mask:type_name -> google.protobuf.FieldMask
+	12,  // 141: ondewo.vtsi.Call.call_type:type_name -> ondewo.vtsi.CallType
+	131, // 142: ondewo.vtsi.Call.start_time:type_name -> google.protobuf.Timestamp
+	131, // 143: ondewo.vtsi.Call.end_time:type_name -> google.protobuf.Timestamp
+	130, // 144: ondewo.vtsi.Call.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	136, // 145: ondewo.vtsi.Call.sip_status:type_name -> ondewo.sip.SipStatus
+	137, // 146: ondewo.vtsi.Call.sip_status_history:type_name -> ondewo.sip.SipStatusHistoryResponse
+	117, // 147: ondewo.vtsi.Call.services_statuses:type_name -> ondewo.vtsi.AllServicesStatuses
+	129, // 148: ondewo.vtsi.Call.common_services_config:type_name -> ondewo.vtsi.CommonServicesConfig
+	138, // 149: ondewo.vtsi.Call.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	83,  // 150: ondewo.vtsi.Call.media_control:type_name -> ondewo.vtsi.CallMediaControlState
+	84,  // 151: ondewo.vtsi.Call.participants:type_name -> ondewo.vtsi.CallParticipant
+	82,  // 152: ondewo.vtsi.Call.last_transfer:type_name -> ondewo.vtsi.CallTransferRecord
+	125, // 153: ondewo.vtsi.Call.labels:type_name -> ondewo.vtsi.Call.LabelsEntry
+	12,  // 154: ondewo.vtsi.CallFilter.call_types:type_name -> ondewo.vtsi.CallType
+	130, // 155: ondewo.vtsi.CallFilter.sip_status_types:type_name -> ondewo.sip.SipStatus.StatusType
+	11,  // 156: ondewo.vtsi.CallFilter.call_status:type_name -> ondewo.vtsi.CallStatus
+	131, // 157: ondewo.vtsi.CallFilter.start_time:type_name -> google.protobuf.Timestamp
+	131, // 158: ondewo.vtsi.CallFilter.end_time:type_name -> google.protobuf.Timestamp
+	138, // 159: ondewo.vtsi.CallFilter.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	126, // 160: ondewo.vtsi.CallFilter.labels:type_name -> ondewo.vtsi.CallFilter.LabelsEntry
+	2,   // 161: ondewo.vtsi.CallFilter.transfer_outcomes:type_name -> ondewo.vtsi.TransferOutcome
+	13,  // 162: ondewo.vtsi.CallSorting.sorting_field:type_name -> ondewo.vtsi.CallSorting.CallSortingField
+	139, // 163: ondewo.vtsi.CallSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
+	10,  // 164: ondewo.vtsi.ListCallsRequest.call_view:type_name -> ondewo.vtsi.CallView
+	103, // 165: ondewo.vtsi.ListCallsRequest.call_filter:type_name -> ondewo.vtsi.CallFilter
+	133, // 166: ondewo.vtsi.ListCallsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	104, // 167: ondewo.vtsi.ListCallsRequest.call_sorting:type_name -> ondewo.vtsi.CallSorting
+	102, // 168: ondewo.vtsi.ListCallsResponse.calls:type_name -> ondewo.vtsi.Call
+	102, // 169: ondewo.vtsi.UpdateCallRequest.call:type_name -> ondewo.vtsi.Call
+	133, // 170: ondewo.vtsi.UpdateCallRequest.update_mask:type_name -> google.protobuf.FieldMask
+	133, // 171: ondewo.vtsi.UpdateCallRequest.field_mask:type_name -> google.protobuf.FieldMask
+	102, // 172: ondewo.vtsi.UpdateCallResponse.call:type_name -> ondewo.vtsi.Call
+	107, // 173: ondewo.vtsi.UpdateCallsRequest.update_call_requests:type_name -> ondewo.vtsi.UpdateCallRequest
+	133, // 174: ondewo.vtsi.UpdateCallsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	108, // 175: ondewo.vtsi.UpdateCallsResponse.update_call_responses:type_name -> ondewo.vtsi.UpdateCallResponse
+	103, // 176: ondewo.vtsi.GetCallStatisticsRequest.call_filter:type_name -> ondewo.vtsi.CallFilter
+	130, // 177: ondewo.vtsi.SipStatusTypeCount.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	12,  // 178: ondewo.vtsi.CallTypeCount.call_type:type_name -> ondewo.vtsi.CallType
+	140, // 179: ondewo.vtsi.AmdVerdictCount.verdict:type_name -> ondewo.sip.AnsweringMachineDetectionResult.Verdict
+	2,   // 180: ondewo.vtsi.TransferOutcomeCount.outcome:type_name -> ondewo.vtsi.TransferOutcome
+	112, // 181: ondewo.vtsi.CallStatistics.sip_status_type_counts:type_name -> ondewo.vtsi.SipStatusTypeCount
+	113, // 182: ondewo.vtsi.CallStatistics.call_type_counts:type_name -> ondewo.vtsi.CallTypeCount
+	114, // 183: ondewo.vtsi.CallStatistics.amd_verdict_counts:type_name -> ondewo.vtsi.AmdVerdictCount
+	115, // 184: ondewo.vtsi.CallStatistics.transfer_outcome_counts:type_name -> ondewo.vtsi.TransferOutcomeCount
+	118, // 185: ondewo.vtsi.AllServicesStatuses.status_sip:type_name -> ondewo.vtsi.ServiceStatus
+	118, // 186: ondewo.vtsi.AllServicesStatuses.status_asterisk:type_name -> ondewo.vtsi.ServiceStatus
+	118, // 187: ondewo.vtsi.AllServicesStatuses.status_nlu:type_name -> ondewo.vtsi.ServiceStatus
+	118, // 188: ondewo.vtsi.AllServicesStatuses.status_stt:type_name -> ondewo.vtsi.ServiceStatus
+	118, // 189: ondewo.vtsi.AllServicesStatuses.status_tts:type_name -> ondewo.vtsi.ServiceStatus
+	12,  // 190: ondewo.vtsi.CallResourceStatus.call_type:type_name -> ondewo.vtsi.CallType
+	130, // 191: ondewo.vtsi.CallResourceStatus.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	131, // 192: ondewo.vtsi.CallResourceStatus.start_time:type_name -> google.protobuf.Timestamp
+	131, // 193: ondewo.vtsi.CallResourceStatus.end_time:type_name -> google.protobuf.Timestamp
+	0,   // 194: ondewo.vtsi.CallResourceStatus.scheduled_caller_status:type_name -> ondewo.vtsi.ScheduledCallerStatus
+	131, // 195: ondewo.vtsi.CallResourceStatus.scheduled_time:type_name -> google.protobuf.Timestamp
+	0,   // 196: ondewo.vtsi.StreamScheduledCallerStatusRequest.statuses:type_name -> ondewo.vtsi.ScheduledCallerStatus
+	119, // 197: ondewo.vtsi.StreamCallResourceStatusResponse.statuses:type_name -> ondewo.vtsi.CallResourceStatus
+	21,  // 198: ondewo.vtsi.Calls.StartCaller:input_type -> ondewo.vtsi.StartCallerRequest
+	23,  // 199: ondewo.vtsi.Calls.StartCallers:input_type -> ondewo.vtsi.StartCallersRequest
+	25,  // 200: ondewo.vtsi.Calls.ListCallers:input_type -> ondewo.vtsi.ListCallersRequest
+	27,  // 201: ondewo.vtsi.Calls.GetCaller:input_type -> ondewo.vtsi.GetCallerRequest
+	47,  // 202: ondewo.vtsi.Calls.UpdateCaller:input_type -> ondewo.vtsi.UpdateCallerRequest
+	49,  // 203: ondewo.vtsi.Calls.UpdateCallers:input_type -> ondewo.vtsi.UpdateCallersRequest
+	43,  // 204: ondewo.vtsi.Calls.DeleteCaller:input_type -> ondewo.vtsi.DeleteCallerRequest
+	45,  // 205: ondewo.vtsi.Calls.DeleteCallers:input_type -> ondewo.vtsi.DeleteCallersRequest
+	35,  // 206: ondewo.vtsi.Calls.StopCaller:input_type -> ondewo.vtsi.StopCallerRequest
+	37,  // 207: ondewo.vtsi.Calls.StopCallers:input_type -> ondewo.vtsi.StopCallersRequest
+	17,  // 208: ondewo.vtsi.Calls.StartListener:input_type -> ondewo.vtsi.StartListenerRequest
+	19,  // 209: ondewo.vtsi.Calls.StartListeners:input_type -> ondewo.vtsi.StartListenersRequest
+	31,  // 210: ondewo.vtsi.Calls.StopListener:input_type -> ondewo.vtsi.StopListenerRequest
+	33,  // 211: ondewo.vtsi.Calls.StopListeners:input_type -> ondewo.vtsi.StopListenersRequest
+	28,  // 212: ondewo.vtsi.Calls.ListListeners:input_type -> ondewo.vtsi.ListListenersRequest
+	30,  // 213: ondewo.vtsi.Calls.GetListener:input_type -> ondewo.vtsi.GetListenerRequest
+	51,  // 214: ondewo.vtsi.Calls.UpdateListener:input_type -> ondewo.vtsi.UpdateListenerRequest
+	53,  // 215: ondewo.vtsi.Calls.UpdateListeners:input_type -> ondewo.vtsi.UpdateListenersRequest
+	39,  // 216: ondewo.vtsi.Calls.DeleteListener:input_type -> ondewo.vtsi.DeleteListenerRequest
+	41,  // 217: ondewo.vtsi.Calls.DeleteListeners:input_type -> ondewo.vtsi.DeleteListenersRequest
+	55,  // 218: ondewo.vtsi.Calls.StartScheduledCaller:input_type -> ondewo.vtsi.StartScheduledCallerRequest
+	56,  // 219: ondewo.vtsi.Calls.StartScheduledCallers:input_type -> ondewo.vtsi.StartScheduledCallersRequest
+	58,  // 220: ondewo.vtsi.Calls.AddCallersToCampaign:input_type -> ondewo.vtsi.AddCallersToCampaignRequest
+	60,  // 221: ondewo.vtsi.Calls.AddScheduledCallersToCampaign:input_type -> ondewo.vtsi.AddScheduledCallersToCampaignRequest
+	64,  // 222: ondewo.vtsi.Calls.GetScheduledCaller:input_type -> ondewo.vtsi.GetScheduledCallerRequest
+	65,  // 223: ondewo.vtsi.Calls.ListScheduledCallers:input_type -> ondewo.vtsi.ListScheduledCallersRequest
+	71,  // 224: ondewo.vtsi.Calls.UpdateScheduledCaller:input_type -> ondewo.vtsi.UpdateScheduledCallerRequest
+	67,  // 225: ondewo.vtsi.Calls.CancelScheduledCaller:input_type -> ondewo.vtsi.CancelScheduledCallerRequest
+	69,  // 226: ondewo.vtsi.Calls.CancelScheduledCallers:input_type -> ondewo.vtsi.CancelScheduledCallersRequest
+	72,  // 227: ondewo.vtsi.Calls.RetryScheduledCaller:input_type -> ondewo.vtsi.RetryScheduledCallerRequest
+	73,  // 228: ondewo.vtsi.Calls.StopCall:input_type -> ondewo.vtsi.StopCallRequest
+	75,  // 229: ondewo.vtsi.Calls.StopCalls:input_type -> ondewo.vtsi.StopCallsRequest
+	77,  // 230: ondewo.vtsi.Calls.StopAllCalls:input_type -> ondewo.vtsi.StopAllCallsRequest
+	78,  // 231: ondewo.vtsi.Calls.TransferCall:input_type -> ondewo.vtsi.TransferCallRequest
+	99,  // 232: ondewo.vtsi.Calls.TransferCalls:input_type -> ondewo.vtsi.TransferCallsRequest
+	101, // 233: ondewo.vtsi.Calls.GetCall:input_type -> ondewo.vtsi.GetCallRequest
+	105, // 234: ondewo.vtsi.Calls.ListCalls:input_type -> ondewo.vtsi.ListCallsRequest
+	111, // 235: ondewo.vtsi.Calls.GetCallStatistics:input_type -> ondewo.vtsi.GetCallStatisticsRequest
+	107, // 236: ondewo.vtsi.Calls.UpdateCall:input_type -> ondewo.vtsi.UpdateCallRequest
+	109, // 237: ondewo.vtsi.Calls.UpdateCalls:input_type -> ondewo.vtsi.UpdateCallsRequest
+	120, // 238: ondewo.vtsi.Calls.StreamCallerStatus:input_type -> ondewo.vtsi.StreamCallerStatusRequest
+	121, // 239: ondewo.vtsi.Calls.StreamListenerStatus:input_type -> ondewo.vtsi.StreamListenerStatusRequest
+	122, // 240: ondewo.vtsi.Calls.StreamScheduledCallerStatus:input_type -> ondewo.vtsi.StreamScheduledCallerStatusRequest
+	85,  // 241: ondewo.vtsi.Calls.InviteToCall:input_type -> ondewo.vtsi.InviteToCallRequest
+	87,  // 242: ondewo.vtsi.Calls.RemoveCallParticipant:input_type -> ondewo.vtsi.RemoveCallParticipantRequest
+	89,  // 243: ondewo.vtsi.Calls.SetCallMediaControl:input_type -> ondewo.vtsi.SetCallMediaControlRequest
+	93,  // 244: ondewo.vtsi.Calls.StreamCallAudio:input_type -> ondewo.vtsi.StreamCallAudioRequest
+	98,  // 245: ondewo.vtsi.Calls.ListenCallAudio:input_type -> ondewo.vtsi.ListenCallAudioRequest
+	22,  // 246: ondewo.vtsi.Calls.StartCaller:output_type -> ondewo.vtsi.StartCallerResponse
+	24,  // 247: ondewo.vtsi.Calls.StartCallers:output_type -> ondewo.vtsi.StartCallersResponse
+	26,  // 248: ondewo.vtsi.Calls.ListCallers:output_type -> ondewo.vtsi.ListCallersResponse
+	16,  // 249: ondewo.vtsi.Calls.GetCaller:output_type -> ondewo.vtsi.Caller
+	48,  // 250: ondewo.vtsi.Calls.UpdateCaller:output_type -> ondewo.vtsi.UpdateCallerResponse
+	50,  // 251: ondewo.vtsi.Calls.UpdateCallers:output_type -> ondewo.vtsi.UpdateCallersResponse
+	44,  // 252: ondewo.vtsi.Calls.DeleteCaller:output_type -> ondewo.vtsi.DeleteCallerResponse
+	46,  // 253: ondewo.vtsi.Calls.DeleteCallers:output_type -> ondewo.vtsi.DeleteCallersResponse
+	36,  // 254: ondewo.vtsi.Calls.StopCaller:output_type -> ondewo.vtsi.StopCallerResponse
+	38,  // 255: ondewo.vtsi.Calls.StopCallers:output_type -> ondewo.vtsi.StopCallersResponse
+	18,  // 256: ondewo.vtsi.Calls.StartListener:output_type -> ondewo.vtsi.StartListenerResponse
+	20,  // 257: ondewo.vtsi.Calls.StartListeners:output_type -> ondewo.vtsi.StartListenersResponse
+	32,  // 258: ondewo.vtsi.Calls.StopListener:output_type -> ondewo.vtsi.StopListenerResponse
+	34,  // 259: ondewo.vtsi.Calls.StopListeners:output_type -> ondewo.vtsi.StopListenersResponse
+	29,  // 260: ondewo.vtsi.Calls.ListListeners:output_type -> ondewo.vtsi.ListListenersResponse
+	15,  // 261: ondewo.vtsi.Calls.GetListener:output_type -> ondewo.vtsi.Listener
+	52,  // 262: ondewo.vtsi.Calls.UpdateListener:output_type -> ondewo.vtsi.UpdateListenerResponse
+	54,  // 263: ondewo.vtsi.Calls.UpdateListeners:output_type -> ondewo.vtsi.UpdateListenersResponse
+	40,  // 264: ondewo.vtsi.Calls.DeleteListener:output_type -> ondewo.vtsi.DeleteListenerResponse
+	42,  // 265: ondewo.vtsi.Calls.DeleteListeners:output_type -> ondewo.vtsi.DeleteListenersResponse
+	62,  // 266: ondewo.vtsi.Calls.StartScheduledCaller:output_type -> ondewo.vtsi.StartScheduledCallerResponse
+	57,  // 267: ondewo.vtsi.Calls.StartScheduledCallers:output_type -> ondewo.vtsi.StartScheduledCallersResponse
+	59,  // 268: ondewo.vtsi.Calls.AddCallersToCampaign:output_type -> ondewo.vtsi.AddCallersToCampaignResponse
+	61,  // 269: ondewo.vtsi.Calls.AddScheduledCallersToCampaign:output_type -> ondewo.vtsi.AddScheduledCallersToCampaignResponse
+	63,  // 270: ondewo.vtsi.Calls.GetScheduledCaller:output_type -> ondewo.vtsi.ScheduledCaller
+	66,  // 271: ondewo.vtsi.Calls.ListScheduledCallers:output_type -> ondewo.vtsi.ListScheduledCallersResponse
+	63,  // 272: ondewo.vtsi.Calls.UpdateScheduledCaller:output_type -> ondewo.vtsi.ScheduledCaller
+	68,  // 273: ondewo.vtsi.Calls.CancelScheduledCaller:output_type -> ondewo.vtsi.CancelScheduledCallerResponse
+	70,  // 274: ondewo.vtsi.Calls.CancelScheduledCallers:output_type -> ondewo.vtsi.CancelScheduledCallersResponse
+	63,  // 275: ondewo.vtsi.Calls.RetryScheduledCaller:output_type -> ondewo.vtsi.ScheduledCaller
+	74,  // 276: ondewo.vtsi.Calls.StopCall:output_type -> ondewo.vtsi.StopCallResponse
+	76,  // 277: ondewo.vtsi.Calls.StopCalls:output_type -> ondewo.vtsi.StopCallsResponse
+	76,  // 278: ondewo.vtsi.Calls.StopAllCalls:output_type -> ondewo.vtsi.StopCallsResponse
+	81,  // 279: ondewo.vtsi.Calls.TransferCall:output_type -> ondewo.vtsi.TransferCallResponse
+	100, // 280: ondewo.vtsi.Calls.TransferCalls:output_type -> ondewo.vtsi.TransferCallsResponse
+	102, // 281: ondewo.vtsi.Calls.GetCall:output_type -> ondewo.vtsi.Call
+	106, // 282: ondewo.vtsi.Calls.ListCalls:output_type -> ondewo.vtsi.ListCallsResponse
+	116, // 283: ondewo.vtsi.Calls.GetCallStatistics:output_type -> ondewo.vtsi.CallStatistics
+	108, // 284: ondewo.vtsi.Calls.UpdateCall:output_type -> ondewo.vtsi.UpdateCallResponse
+	110, // 285: ondewo.vtsi.Calls.UpdateCalls:output_type -> ondewo.vtsi.UpdateCallsResponse
+	123, // 286: ondewo.vtsi.Calls.StreamCallerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
+	123, // 287: ondewo.vtsi.Calls.StreamListenerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
+	123, // 288: ondewo.vtsi.Calls.StreamScheduledCallerStatus:output_type -> ondewo.vtsi.StreamCallResourceStatusResponse
+	86,  // 289: ondewo.vtsi.Calls.InviteToCall:output_type -> ondewo.vtsi.InviteToCallResponse
+	88,  // 290: ondewo.vtsi.Calls.RemoveCallParticipant:output_type -> ondewo.vtsi.RemoveCallParticipantResponse
+	90,  // 291: ondewo.vtsi.Calls.SetCallMediaControl:output_type -> ondewo.vtsi.SetCallMediaControlResponse
+	97,  // 292: ondewo.vtsi.Calls.StreamCallAudio:output_type -> ondewo.vtsi.StreamCallAudioResponse
+	97,  // 293: ondewo.vtsi.Calls.ListenCallAudio:output_type -> ondewo.vtsi.StreamCallAudioResponse
+	246, // [246:294] is the sub-list for method output_type
+	198, // [198:246] is the sub-list for method input_type
+	198, // [198:198] is the sub-list for extension type_name
+	198, // [198:198] is the sub-list for extension extendee
+	0,   // [0:198] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_calls_proto_init() }
@@ -10455,57 +11663,49 @@ func file_ondewo_vtsi_calls_proto_init() {
 	if File_ondewo_vtsi_calls_proto != nil {
 		return
 	}
+	file_ondewo_vtsi_call_configs_proto_init()
 	file_ondewo_vtsi_campaigns_proto_init()
-	file_ondewo_vtsi_calls_proto_msgTypes[2].OneofWrappers = []any{
-		(*NluVtsiConfig_Credentials)(nil),
-		(*NluVtsiConfig_AuthToken)(nil),
+	file_ondewo_vtsi_projects_proto_init()
+	file_ondewo_vtsi_calls_proto_msgTypes[11].OneofWrappers = []any{
+		(*ListCallersRequest_CampaignName)(nil),
+		(*ListCallersRequest_CampaignDisplayName)(nil),
 	}
-	file_ondewo_vtsi_calls_proto_msgTypes[8].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[9].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[10].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[11].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[12].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[15].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[13].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[14].OneofWrappers = []any{}
 	file_ondewo_vtsi_calls_proto_msgTypes[16].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[17].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[18].OneofWrappers = []any{
-		(*MessageBrokerConfig_RabbitMqConfig)(nil),
-	}
-	file_ondewo_vtsi_calls_proto_msgTypes[19].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[34].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[36].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[37].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[39].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[65].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[66].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[76].OneofWrappers = []any{
+	file_ondewo_vtsi_calls_proto_msgTypes[50].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[51].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[65].OneofWrappers = []any{
 		(*CallTarget_PhoneNumber)(nil),
 		(*CallTarget_SoftphoneAccountName)(nil),
 		(*CallTarget_ListenerName)(nil),
 		(*CallTarget_ListenerQueue)(nil),
 	}
-	file_ondewo_vtsi_calls_proto_msgTypes[90].OneofWrappers = []any{
+	file_ondewo_vtsi_calls_proto_msgTypes[79].OneofWrappers = []any{
 		(*StreamCallAudioRequest_Config)(nil),
 		(*StreamCallAudioRequest_Audio)(nil),
 		(*StreamCallAudioRequest_AgentMuted)(nil),
 	}
-	file_ondewo_vtsi_calls_proto_msgTypes[94].OneofWrappers = []any{
+	file_ondewo_vtsi_calls_proto_msgTypes[83].OneofWrappers = []any{
 		(*StreamCallAudioResponse_Started)(nil),
 		(*StreamCallAudioResponse_Audio)(nil),
 		(*StreamCallAudioResponse_Stats)(nil),
 		(*StreamCallAudioResponse_Ended)(nil),
 	}
-	file_ondewo_vtsi_calls_proto_msgTypes[98].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[99].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[100].OneofWrappers = []any{}
-	file_ondewo_vtsi_calls_proto_msgTypes[101].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[87].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[88].OneofWrappers = []any{}
+	file_ondewo_vtsi_calls_proto_msgTypes[89].OneofWrappers = []any{
+		(*CallFilter_CampaignName)(nil),
+		(*CallFilter_CampaignDisplayName)(nil),
+	}
+	file_ondewo_vtsi_calls_proto_msgTypes[91].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_calls_proto_rawDesc), len(file_ondewo_vtsi_calls_proto_rawDesc)),
-			NumEnums:      16,
-			NumMessages:   112,
+			NumEnums:      14,
+			NumMessages:   113,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

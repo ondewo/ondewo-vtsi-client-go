@@ -24,6 +24,7 @@ import (
 	nlu "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/nlu"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -296,6 +297,149 @@ func (CallLogFilterField) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{3}
 }
 
+// Why the SERVER ended a <code>StreamCallLogs</code> stream. Carried by the final
+// <a href="index.html#ondewo.vtsi.StreamCallLogsResponse">StreamCallLogsResponse</a> beside the
+// human-readable <code>end_reason</code>. A stream ended by the client has no final message.
+type LogStreamEndReason int32
+
+const (
+	// Not ended by the server: every message except the final one, and the final message of a 9.0.0
+	// server (read <code>end_reason</code> there).
+	LogStreamEndReason_LOG_STREAM_END_REASON_UNSPECIFIED LogStreamEndReason = 0
+	// The capture of every followed log stream has terminated (<code>STOPPED</code> or
+	// <code>FAILED</code>) and every stored entry was sent. Nothing more will arrive for this filter.
+	LogStreamEndReason_LOG_STREAM_END_REASON_ALL_CAPTURES_TERMINATED LogStreamEndReason = 1
+	// The server-side maximum stream duration (<code>ONDEWO_VTSI_LOG_STREAM_MAX_DURATION_S</code>) was
+	// reached. Reconnect with the <code>resume_token</code> of the final message to continue seamlessly.
+	LogStreamEndReason_LOG_STREAM_END_REASON_MAX_DURATION LogStreamEndReason = 2
+	// The VTSI server is shutting down. Reconnect, to another replica if there is one, with the
+	// <code>resume_token</code>.
+	LogStreamEndReason_LOG_STREAM_END_REASON_SERVER_SHUTDOWN LogStreamEndReason = 3
+	// The caller lost the role the stream requires. The stream then ends with
+	// <code>PERMISSION_DENIED</code>.
+	LogStreamEndReason_LOG_STREAM_END_REASON_PERMISSION_REVOKED LogStreamEndReason = 4
+	// The caller&apos;s credential expired. The stream then ends with <code>UNAUTHENTICATED</code>;
+	// reconnect with a fresh credential and the <code>resume_token</code>.
+	LogStreamEndReason_LOG_STREAM_END_REASON_CREDENTIALS_EXPIRED LogStreamEndReason = 5
+)
+
+// Enum value maps for LogStreamEndReason.
+var (
+	LogStreamEndReason_name = map[int32]string{
+		0: "LOG_STREAM_END_REASON_UNSPECIFIED",
+		1: "LOG_STREAM_END_REASON_ALL_CAPTURES_TERMINATED",
+		2: "LOG_STREAM_END_REASON_MAX_DURATION",
+		3: "LOG_STREAM_END_REASON_SERVER_SHUTDOWN",
+		4: "LOG_STREAM_END_REASON_PERMISSION_REVOKED",
+		5: "LOG_STREAM_END_REASON_CREDENTIALS_EXPIRED",
+	}
+	LogStreamEndReason_value = map[string]int32{
+		"LOG_STREAM_END_REASON_UNSPECIFIED":             0,
+		"LOG_STREAM_END_REASON_ALL_CAPTURES_TERMINATED": 1,
+		"LOG_STREAM_END_REASON_MAX_DURATION":            2,
+		"LOG_STREAM_END_REASON_SERVER_SHUTDOWN":         3,
+		"LOG_STREAM_END_REASON_PERMISSION_REVOKED":      4,
+		"LOG_STREAM_END_REASON_CREDENTIALS_EXPIRED":     5,
+	}
+)
+
+func (x LogStreamEndReason) Enum() *LogStreamEndReason {
+	p := new(LogStreamEndReason)
+	*p = x
+	return p
+}
+
+func (x LogStreamEndReason) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LogStreamEndReason) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_logs_proto_enumTypes[4].Descriptor()
+}
+
+func (LogStreamEndReason) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_logs_proto_enumTypes[4]
+}
+
+func (x LogStreamEndReason) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LogStreamEndReason.Descriptor instead.
+func (LogStreamEndReason) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{4}
+}
+
+// File format of an <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">ExportCallLogs</a> export. Every
+// format is UTF-8 with <code>\n</code> line endings and one entry per record; a multi-line entry stays one
+// record.
+type LogExportFormat int32
+
+const (
+	// Unspecified: identical to <code>LOG_EXPORT_FORMAT_TEXT</code>.
+	LogExportFormat_LOG_EXPORT_FORMAT_UNSPECIFIED LogExportFormat = 0
+	// Plain text in the manner of <code>docker logs --timestamps</code>: one line per entry,
+	// <code>&lt;RFC 3339 UTC timestamp&gt; &lt;message&gt;</code>; continuation lines of a multi-line entry
+	// are indented by one tab. With <code>include_metadata</code> the timestamp is followed by the
+	// severity, the container name and the call resource name (<code>-</code> when none), separated by
+	// single spaces.
+	LogExportFormat_LOG_EXPORT_FORMAT_TEXT LogExportFormat = 1
+	// Newline-delimited JSON: one JSON object per line, the proto3 JSON form of a
+	// <a href="index.html#ondewo.vtsi.CallLogEntry">CallLogEntry</a> (lowerCamelCase keys). Without
+	// <code>include_metadata</code> only <code>seq</code>, <code>logStream</code>, <code>timestamp</code>,
+	// <code>level</code> and <code>message</code> are written; with it every field.
+	LogExportFormat_LOG_EXPORT_FORMAT_NDJSON LogExportFormat = 2
+	// Comma-separated values (RFC 4180, every field quoted, embedded quotes doubled, embedded line breaks
+	// kept inside the quotes), with a header row. Columns without <code>include_metadata</code>:
+	// <code>timestamp,level,message</code>; with it: <code>seq,timestamp,timestamp_is_exact,level,
+	// log_source,channel,container_name,container_id,emitter,thread_name,log_stream,call,
+	// nlu_session_name,physical_line_count,message</code>.
+	LogExportFormat_LOG_EXPORT_FORMAT_CSV LogExportFormat = 3
+)
+
+// Enum value maps for LogExportFormat.
+var (
+	LogExportFormat_name = map[int32]string{
+		0: "LOG_EXPORT_FORMAT_UNSPECIFIED",
+		1: "LOG_EXPORT_FORMAT_TEXT",
+		2: "LOG_EXPORT_FORMAT_NDJSON",
+		3: "LOG_EXPORT_FORMAT_CSV",
+	}
+	LogExportFormat_value = map[string]int32{
+		"LOG_EXPORT_FORMAT_UNSPECIFIED": 0,
+		"LOG_EXPORT_FORMAT_TEXT":        1,
+		"LOG_EXPORT_FORMAT_NDJSON":      2,
+		"LOG_EXPORT_FORMAT_CSV":         3,
+	}
+)
+
+func (x LogExportFormat) Enum() *LogExportFormat {
+	p := new(LogExportFormat)
+	*p = x
+	return p
+}
+
+func (x LogExportFormat) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LogExportFormat) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_logs_proto_enumTypes[5].Descriptor()
+}
+
+func (LogExportFormat) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_logs_proto_enumTypes[5]
+}
+
+func (x LogExportFormat) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LogExportFormat.Descriptor instead.
+func (LogExportFormat) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{5}
+}
+
 // A single captured container log record. One record may span several physical docker log lines: a
 // Python traceback, a protobuf <code>str()</code> dump and a multi-line configuration banner are all
 // one record, and are stored and returned as one entry.
@@ -340,7 +484,10 @@ type CallLogEntry struct {
 	// Resource name of the call this entry was attributed to. Empty when the entry falls outside any
 	// call, which is normal and useful: a persistent listener&apos;s container start-up and its idle
 	// time between calls belong to no call.
-	// The format is: <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
+	// The format is the <code>Call.name</code> of the call, for a listener&apos;s call
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
+	// and for a caller&apos;s call
+	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	Call string `protobuf:"bytes,13,opt,name=call,proto3" json:"call,omitempty"`
 	// The NLU session the entry was attributed to.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/agent/sessions/&lt;session_uuid&gt;</code></pre>
@@ -572,11 +719,21 @@ type CallLogFilter struct {
 	LogStreamNames []string `protobuf:"bytes,9,rep,name=log_stream_names,json=logStreamNames,proto3" json:"log_stream_names,omitempty"`
 	// Asterisk SIP account names, for example <code>sut@asterisk.local</code>.
 	SipAccounts []string `protobuf:"bytes,10,rep,name=sip_accounts,json=sipAccounts,proto3" json:"sip_accounts,omitempty"`
-	// SIP ports of the per-call container.
+	// Deprecated: use <code>sip_port_numbers</code>. SIP ports of the per-call container, as decimal
+	// strings. A value that is not a decimal integer is ignored (logged by the server); when no value
+	// parses the filter matches nothing. Combined with <code>sip_port_numbers</code> by OR.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 	SipPorts []string `protobuf:"bytes,11,rep,name=sip_ports,json=sipPorts,proto3" json:"sip_ports,omitempty"`
-	// ONDEWO CSI ports of the per-call container.
+	// Deprecated: use <code>csi_port_numbers</code>. ONDEWO CSI ports of the per-call container, as
+	// decimal strings, parsed like <code>sip_ports</code>.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 	CsiPorts []string `protobuf:"bytes,12,rep,name=csi_ports,json=csiPorts,proto3" json:"csi_ports,omitempty"`
-	// Asterisk ports of the project.
+	// Deprecated: use <code>asterisk_port_numbers</code>. Asterisk ports of the project, as decimal
+	// strings, parsed like <code>sip_ports</code>.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 	AsteriskPorts []string `protobuf:"bytes,13,rep,name=asterisk_ports,json=asteriskPorts,proto3" json:"asterisk_ports,omitempty"`
 	// Phone numbers of the calls of interest.
 	PhoneNumbers []string `protobuf:"bytes,14,rep,name=phone_numbers,json=phoneNumbers,proto3" json:"phone_numbers,omitempty"`
@@ -618,12 +775,24 @@ type CallLogFilter struct {
 	EmitterPrefixes []string `protobuf:"bytes,28,rep,name=emitter_prefixes,json=emitterPrefixes,proto3" json:"emitter_prefixes,omitempty"`
 	// Restrict to entries emitted by these threads.
 	ThreadNames []string `protobuf:"bytes,29,rep,name=thread_names,json=threadNames,proto3" json:"thread_names,omitempty"`
-	// Only return entries at or after this instant.
+	// Only return entries at or after this instant. A zero timestamp counts as unset.
 	StartTime *timestamppb.Timestamp `protobuf:"bytes,30,opt,name=start_time,json=startTime,proto3,oneof" json:"start_time,omitempty"`
-	// Only return entries at or before this instant.
-	EndTime       *timestamppb.Timestamp `protobuf:"bytes,31,opt,name=end_time,json=endTime,proto3,oneof" json:"end_time,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Only return entries at or before this instant. A zero timestamp counts as unset. A
+	// <code>start_time</code> after <code>end_time</code> is rejected with <code>INVALID_ARGUMENT</code>
+	// (equal instants select the entries of exactly that instant).
+	EndTime *timestamppb.Timestamp `protobuf:"bytes,31,opt,name=end_time,json=endTime,proto3,oneof" json:"end_time,omitempty"`
+	// SIP ports of the per-call container (1..65535). Identity filter; replaces the deprecated string
+	// <code>sip_ports</code>, with which it is combined by OR. A value outside 1..65535 is rejected with
+	// <code>INVALID_ARGUMENT</code>.
+	SipPortNumbers []int32 `protobuf:"varint,32,rep,packed,name=sip_port_numbers,json=sipPortNumbers,proto3" json:"sip_port_numbers,omitempty"`
+	// ONDEWO CSI ports of the per-call container (1..65535). Identity filter, like
+	// <code>sip_port_numbers</code>; combined with the deprecated <code>csi_ports</code> by OR.
+	CsiPortNumbers []int32 `protobuf:"varint,33,rep,packed,name=csi_port_numbers,json=csiPortNumbers,proto3" json:"csi_port_numbers,omitempty"`
+	// Asterisk ports of the project (1..65535). Identity filter, like <code>sip_port_numbers</code>;
+	// combined with the deprecated <code>asterisk_ports</code> by OR.
+	AsteriskPortNumbers []int32 `protobuf:"varint,34,rep,packed,name=asterisk_port_numbers,json=asteriskPortNumbers,proto3" json:"asterisk_port_numbers,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
 }
 
 func (x *CallLogFilter) Reset() {
@@ -726,6 +895,7 @@ func (x *CallLogFilter) GetSipAccounts() []string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 func (x *CallLogFilter) GetSipPorts() []string {
 	if x != nil {
 		return x.SipPorts
@@ -733,6 +903,7 @@ func (x *CallLogFilter) GetSipPorts() []string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 func (x *CallLogFilter) GetCsiPorts() []string {
 	if x != nil {
 		return x.CsiPorts
@@ -740,6 +911,7 @@ func (x *CallLogFilter) GetCsiPorts() []string {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/logs.proto.
 func (x *CallLogFilter) GetAsteriskPorts() []string {
 	if x != nil {
 		return x.AsteriskPorts
@@ -873,6 +1045,27 @@ func (x *CallLogFilter) GetEndTime() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *CallLogFilter) GetSipPortNumbers() []int32 {
+	if x != nil {
+		return x.SipPortNumbers
+	}
+	return nil
+}
+
+func (x *CallLogFilter) GetCsiPortNumbers() []int32 {
+	if x != nil {
+		return x.CsiPortNumbers
+	}
+	return nil
+}
+
+func (x *CallLogFilter) GetAsteriskPortNumbers() []int32 {
+	if x != nil {
+		return x.AsteriskPortNumbers
+	}
+	return nil
+}
+
 // One capture generation of one container on one docker channel. A container that is recreated
 // yields a NEW log stream, because a recreated container is a different docker container and the
 // previous container&apos;s logs no longer exist anywhere except here.
@@ -887,9 +1080,13 @@ type CallLogStream struct {
 	ContainerId string `protobuf:"bytes,3,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
 	// The docker channel this stream captures.
 	Channel LogStreamChannel `protobuf:"varint,4,opt,name=channel,proto3,enum=ondewo.vtsi.LogStreamChannel" json:"channel,omitempty"`
-	// Uuid of the VTSI project owning the container.
+	// Uuid of the VTSI project owning the container. See also <code>vtsi_project_name</code>.
 	ProjectId string `protobuf:"bytes,5,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	// Resource name of the caller or listener the container serves.
+	// Resource name of the caller, listener or scheduled caller the container serves:
+	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>,
+	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre> or
+	// <pre><code>projects/&lt;project_uuid&gt;/scheduled_callers/&lt;scheduled_caller_uuid&gt;</code></pre>.
+	// Empty for a container that serves none (e.g. the project&apos;s Asterisk).
 	VoipCallName string `protobuf:"bytes,6,opt,name=voip_call_name,json=voipCallName,proto3" json:"voip_call_name,omitempty"`
 	// Whether the container serves a caller or a listener.
 	CallType CallType `protobuf:"varint,7,opt,name=call_type,json=callType,proto3,enum=ondewo.vtsi.CallType" json:"call_type,omitempty"`
@@ -926,8 +1123,12 @@ type CallLogStream struct {
 	// severity floor, the emitter denylist, the conversation-content denylist, an oversized line, and
 	// retention. A non-zero value is why a stream can be thinner than the container&apos;s own log.
 	DroppedLineCount int64 `protobuf:"varint,21,opt,name=dropped_line_count,json=droppedLineCount,proto3" json:"dropped_line_count,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Resource name of the VTSI project owning the container, the resource-name form of
+	// <code>project_id</code>.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,22,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *CallLogStream) Reset() {
@@ -1107,6 +1308,13 @@ func (x *CallLogStream) GetDroppedLineCount() int64 {
 	return 0
 }
 
+func (x *CallLogStream) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>.
 type StreamCallLogsRequest struct {
@@ -1119,7 +1327,9 @@ type StreamCallLogsRequest struct {
 	// with <code>INVALID_ARGUMENT</code> rather than silently ignored.
 	Filter *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3,oneof" json:"filter,omitempty"`
 	// Replay at most this many of the most recent stored entries before switching to live follow.
-	// <code>0</code> (the default) starts the follow with no historical replay. Applied to the
+	// <code>0</code> (the default) starts the follow with no historical replay; a negative value is
+	// treated as <code>0</code>; values above the server hard cap
+	// (<code>ONDEWO_VTSI_LOG_HARD_MAX_LINES</code>, default 50000) are clamped to it. Applied to the
 	// FILTERED result, so <code>tail_lines = 100</code> with a severity floor returns up to 100
 	// matching entries rather than the matches within the last 100 entries.
 	TailLines *int32 `protobuf:"varint,3,opt,name=tail_lines,json=tailLines,proto3,oneof" json:"tail_lines,omitempty"`
@@ -1207,7 +1417,9 @@ func (x *StreamCallLogsRequest) GetAfterSeq() int64 {
 // capture that has died.
 type StreamCallLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The entries in this batch, oldest first. May be empty on a keep-alive message.
+	// The entries in this batch, oldest first. May be empty, e.g. on the final message that carries
+	// <code>end_reason</code>. (No keep-alive messages are sent; see
+	// <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>.)
 	LogEntries []*CallLogEntry `protobuf:"bytes,1,rep,name=log_entries,json=logEntries,proto3" json:"log_entries,omitempty"`
 	// The capture state of the log streams being followed, aggregated: <code>FAILED</code> if any
 	// has failed, else <code>DETACHED</code> if any is detached, else <code>CAPTURING</code> if any
@@ -1222,8 +1434,12 @@ type StreamCallLogsResponse struct {
 	// <code>StreamCallLogsRequest.resume_token</code> after a disconnect.
 	ResumeToken string `protobuf:"bytes,5,opt,name=resume_token,json=resumeToken,proto3" json:"resume_token,omitempty"`
 	// Set on the final message when the stream was ended by the server rather than by the client,
-	// for example because the maximum stream duration was reached. Empty otherwise.
-	EndReason     string `protobuf:"bytes,6,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// for example because the maximum stream duration was reached. Empty otherwise. Human-readable
+	// text, not a contract: match on <code>end_reason_code</code>.
+	EndReason string `protobuf:"bytes,6,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// Set on the final message when the stream was ended by the server, together with
+	// <code>end_reason</code>; <code>LOG_STREAM_END_REASON_UNSPECIFIED</code> on every other message.
+	EndReasonCode LogStreamEndReason `protobuf:"varint,7,opt,name=end_reason_code,json=endReasonCode,proto3,enum=ondewo.vtsi.LogStreamEndReason" json:"end_reason_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1300,6 +1516,13 @@ func (x *StreamCallLogsResponse) GetEndReason() string {
 	return ""
 }
 
+func (x *StreamCallLogsResponse) GetEndReasonCode() LogStreamEndReason {
+	if x != nil {
+		return x.EndReasonCode
+	}
+	return LogStreamEndReason_LOG_STREAM_END_REASON_UNSPECIFIED
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
 type ListCallLogsRequest struct {
@@ -1309,8 +1532,9 @@ type ListCallLogsRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Optional. A filter to narrow the response down to the entries of interest.
 	Filter *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3,oneof" json:"filter,omitempty"`
-	// Return at most this many entries. <code>0</code> (the default) applies the server default;
-	// values above the server hard cap are clamped to it.
+	// Return at most this many entries. <code>0</code> (the default) and negative values apply the
+	// server default (<code>ONDEWO_VTSI_LOG_DEFAULT_MAX_LINES</code>, default 5000); values above the
+	// server hard cap (<code>ONDEWO_VTSI_LOG_HARD_MAX_LINES</code>, default 50000) are clamped to it.
 	MaxLines *int32 `protobuf:"varint,3,opt,name=max_lines,json=maxLines,proto3,oneof" json:"max_lines,omitempty"`
 	// Optional cursor for infinite-scroll UP: return the newest entries with <code>seq</code> less
 	// than this value. Valid only when the filter resolves to exactly one log stream.
@@ -1324,7 +1548,23 @@ type ListCallLogsRequest struct {
 	// Walk forward from the cursor oldest-first instead of returning the most recent window. A
 	// client paging through a whole backlog must set this: the default window silently skips
 	// everything between the cursor and the newest entries.
-	OldestFirst   *bool `protobuf:"varint,7,opt,name=oldest_first,json=oldestFirst,proto3,oneof" json:"oldest_first,omitempty"`
+	OldestFirst *bool `protobuf:"varint,7,opt,name=oldest_first,json=oldestFirst,proto3,oneof" json:"oldest_first,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>CallLogEntry</code>,
+	// relative to the <code>CallLogEntry</code> message (no <code>log_entries.</code> prefix), e.g.
+	// <code>timestamp</code>, <code>level</code>, <code>message</code>. Nested paths through singular
+	// message fields are allowed; a path below a repeated or map field is not. <code>log_stream</code> and
+	// <code>seq</code>, which together identify an entry, are always populated. Unset or empty returns
+	// every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it. Applied after
+	// the server&apos;s secret redaction of the log text, so it can only narrow the response and never
+	// populates a field that was left empty. It shapes only the entries: the window and cursor fields of
+	// the response (<code>truncated</code>, the <code>seq</code> bounds, <code>next_resume_token</code>)
+	// are computed exactly as without a mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,8,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Also count the matching entries: fills <code>ListCallLogsResponse.total_matching_count</code>
+	// and <code>count_by_level</code> over the WHOLE filtered history (not only the returned window, and
+	// ignoring the cursors). Counting reads every matching entry and can be slow on a large project, so it
+	// is off by default; set it on the first page only.
+	IncludeCounts bool `protobuf:"varint,9,opt,name=include_counts,json=includeCounts,proto3" json:"include_counts,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1408,6 +1648,20 @@ func (x *ListCallLogsRequest) GetOldestFirst() bool {
 	return false
 }
 
+func (x *ListCallLogsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCallLogsRequest) GetIncludeCounts() bool {
+	if x != nil {
+		return x.IncludeCounts
+	}
+	return false
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
 type ListCallLogsResponse struct {
@@ -1432,8 +1686,19 @@ type ListCallLogsResponse struct {
 	// history, because they are not indexed. A client displaying a match count must qualify it when
 	// this is non-empty.
 	ScopeLimitedFilters []CallLogFilterField `protobuf:"varint,8,rep,packed,name=scope_limited_filters,json=scopeLimitedFilters,proto3,enum=ondewo.vtsi.CallLogFilterField" json:"scope_limited_filters,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	// The number of entries matching the filter over the whole stored history, regardless of the window
+	// and the cursors. Set only when <code>include_counts</code> was requested (unset otherwise, and by a
+	// 9.0.0 server). APPROXIMATE when <code>scope_limited_filters</code> is non-empty: the filters listed
+	// there are not applied to the count, so it is then an UPPER BOUND.
+	TotalMatchingCount *int64 `protobuf:"varint,9,opt,name=total_matching_count,json=totalMatchingCount,proto3,oneof" json:"total_matching_count,omitempty"`
+	// The matching entries counted per severity, keyed by the <code>ondewo.nlu.LogSeverity</code> value
+	// NAME (e.g. <code>LOG_SEVERITY_ERROR</code>; entries without a recognised severity under
+	// <code>LOG_SEVERITY_UNSPECIFIED</code>). Severities with no entry are omitted; the values sum to
+	// <code>total_matching_count</code>. Filled only with <code>include_counts</code>; approximate (upper
+	// bounds) under the same condition as <code>total_matching_count</code>.
+	CountByLevel  map[string]int64 `protobuf:"bytes,10,rep,name=count_by_level,json=countByLevel,proto3" json:"count_by_level,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListCallLogsResponse) Reset() {
@@ -1522,6 +1787,20 @@ func (x *ListCallLogsResponse) GetScopeLimitedFilters() []CallLogFilterField {
 	return nil
 }
 
+func (x *ListCallLogsResponse) GetTotalMatchingCount() int64 {
+	if x != nil && x.TotalMatchingCount != nil {
+		return *x.TotalMatchingCount
+	}
+	return 0
+}
+
+func (x *ListCallLogsResponse) GetCountByLevel() map[string]int64 {
+	if x != nil {
+		return x.CountByLevel
+	}
+	return nil
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Logs.GetCallLogStream">Logs.GetCallLogStream</a>.
 type GetCallLogStreamRequest struct {
@@ -1530,7 +1809,15 @@ type GetCallLogStreamRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// The name of the log stream to retrieve of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/logStreams/&lt;log_stream_uuid&gt;</code></pre>
-	Name          string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Its project must be the one of <code>vtsi_project_name</code>: a log stream of another project is
+	// refused with <code>INVALID_ARGUMENT</code>, also when it exists.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>CallLogStream</code> field paths to populate, e.g.
+	// <code>capture_state</code>, <code>line_count</code>. Same convention as
+	// <a href="index.html#ondewo.vtsi.ListCallLogStreamsRequest">ListCallLogStreamsRequest.field_mask</a>:
+	// <code>name</code> is always populated, unset or empty returns every field, an unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1579,6 +1866,13 @@ func (x *GetCallLogStreamRequest) GetName() string {
 	return ""
 }
 
+func (x *GetCallLogStreamRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for
 // <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
 type ListCallLogStreamsRequest struct {
@@ -1587,11 +1881,32 @@ type ListCallLogStreamsRequest struct {
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Optional. A filter to narrow the response down to the log streams of interest. Only the
-	// identity fields of the filter apply here; content fields are ignored.
+	// identity fields of the filter apply here; content fields and the time window are ignored. A filter
+	// on calls, NLU sessions or other per-call identities lists the streams holding at least one entry of
+	// them, and an empty list when none does.
 	Filter *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3,oneof" json:"filter,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
-	PageToken     *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. The <code>next_page_token</code> of a previous response. OPAQUE: never construct or parse
+	// it (its format is internal and may change). Keep every other request field unchanged while paging:
+	// a token sent with another filter is not guaranteed to be rejected and then returns that position of
+	// the other listing.
+	PageToken *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>CallLogStream</code>,
+	// relative to the <code>CallLogStream</code> message (no <code>log_streams.</code> prefix), e.g.
+	// <code>container_name</code>, <code>capture_state</code>. Nested paths through singular message fields are
+	// allowed; a path below a repeated or map field is not. <code>name</code> is always populated. Unset or
+	// empty returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it.
+	// Applied after the server&apos;s redaction, so it can only narrow the response and never populates a
+	// field that was left empty. Not part of the paging contract: a <code>page_token</code> stays valid
+	// with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Maximum number of log streams per page. <code>0</code> means the server default of 25;
+	// values above 1000 are clamped to 1000; negative values are rejected with
+	// <code>INVALID_ARGUMENT</code>.
+	PageSize int32 `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Only log streams in one of these capture states, e.g.
+	// <code>LOG_CAPTURE_STATE_CAPTURING</code> for the containers being captured now. Empty matches every
+	// state. <code>LOG_CAPTURE_STATE_UNSPECIFIED</code> is rejected with <code>INVALID_ARGUMENT</code>.
+	CaptureStates []LogCaptureState `protobuf:"varint,6,rep,packed,name=capture_states,json=captureStates,proto3,enum=ondewo.vtsi.LogCaptureState" json:"capture_states,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1647,15 +1962,35 @@ func (x *ListCallLogStreamsRequest) GetPageToken() string {
 	return ""
 }
 
+func (x *ListCallLogStreamsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListCallLogStreamsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListCallLogStreamsRequest) GetCaptureStates() []LogCaptureState {
+	if x != nil {
+		return x.CaptureStates
+	}
+	return nil
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
 type ListCallLogStreamsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of log streams returned in the response.
+	// The log streams of this page, newest <code>capture_started_at</code> first.
 	LogStreams []*CallLogStream `protobuf:"bytes,1,rep,name=log_streams,json=logStreams,proto3" json:"log_streams,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque (see
+	// <code>ListCallLogStreamsRequest.page_token</code>). Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1715,8 +2050,12 @@ type DeleteCallLogsRequest struct {
 	// The entries to delete. Only the identity fields and the time window apply; content filters are
 	// rejected, because deleting by message content is not an auditable operation. At least one
 	// field must be set: an empty filter is rejected rather than treated as &quot;delete
-	// everything&quot;.
-	Filter        *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
+	// everything&quot;. The time window alone counts as a set field.
+	Filter *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
+	// Optional. Validate only: run every check of a real deletion and report in the response how many
+	// entries and log streams WOULD be deleted now, but delete nothing. The counts are a snapshot; a later
+	// deletion may count differently (live capture, retention). Default <code>false</code>.
+	ValidateOnly  bool `protobuf:"varint,3,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1765,13 +2104,21 @@ func (x *DeleteCallLogsRequest) GetFilter() *CallLogFilter {
 	return nil
 }
 
+func (x *DeleteCallLogsRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
 // The response message for
 // <a href="index.html#ondewo.vtsi.Logs.DeleteCallLogs">Logs.DeleteCallLogs</a>.
 type DeleteCallLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// How many log entries were deleted.
+	// How many log entries were deleted (with <code>validate_only</code>: would be deleted).
 	DeletedLogEntryCount int64 `protobuf:"varint,1,opt,name=deleted_log_entry_count,json=deletedLogEntryCount,proto3" json:"deleted_log_entry_count,omitempty"`
-	// How many log streams were deleted because no entries remained.
+	// How many log streams were deleted because no entries remained (with <code>validate_only</code>:
+	// would be deleted).
 	DeletedLogStreamCount int64 `protobuf:"varint,2,opt,name=deleted_log_stream_count,json=deletedLogStreamCount,proto3" json:"deleted_log_stream_count,omitempty"`
 	unknownFields         protoimpl.UnknownFields
 	sizeCache             protoimpl.SizeCache
@@ -1821,11 +2168,171 @@ func (x *DeleteCallLogsResponse) GetDeletedLogStreamCount() int64 {
 	return 0
 }
 
+// The request message for
+// <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">Logs.ExportCallLogs</a>.
+type ExportCallLogsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// VTSI project whose logs to export.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
+	// The entries to export. Every field of
+	// <a href="index.html#ondewo.vtsi.CallLogFilter">CallLogFilter</a> applies, identity and content
+	// filters alike, with the semantics of <code>ListCallLogs</code>. REQUIRED, with both
+	// <code>start_time</code> and <code>end_time</code> set and <code>start_time</code> before
+	// <code>end_time</code>; otherwise <code>INVALID_ARGUMENT</code>.
+	Filter *CallLogFilter `protobuf:"bytes,2,opt,name=filter,proto3" json:"filter,omitempty"`
+	// The file format. Unset means <code>LOG_EXPORT_FORMAT_TEXT</code>.
+	Format LogExportFormat `protobuf:"varint,3,opt,name=format,proto3,enum=ondewo.vtsi.LogExportFormat" json:"format,omitempty"`
+	// Include every field of each entry rather than only the timestamp, the severity and the message
+	// (see <a href="index.html#ondewo.vtsi.LogExportFormat">LogExportFormat</a> for what each format
+	// adds). Default <code>false</code>.
+	IncludeMetadata bool `protobuf:"varint,4,opt,name=include_metadata,json=includeMetadata,proto3" json:"include_metadata,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ExportCallLogsRequest) Reset() {
+	*x = ExportCallLogsRequest{}
+	mi := &file_ondewo_vtsi_logs_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportCallLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportCallLogsRequest) ProtoMessage() {}
+
+func (x *ExportCallLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_logs_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportCallLogsRequest.ProtoReflect.Descriptor instead.
+func (*ExportCallLogsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ExportCallLogsRequest) GetVtsiProjectName() string {
+	if x != nil {
+		return x.VtsiProjectName
+	}
+	return ""
+}
+
+func (x *ExportCallLogsRequest) GetFilter() *CallLogFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
+func (x *ExportCallLogsRequest) GetFormat() LogExportFormat {
+	if x != nil {
+		return x.Format
+	}
+	return LogExportFormat_LOG_EXPORT_FORMAT_UNSPECIFIED
+}
+
+func (x *ExportCallLogsRequest) GetIncludeMetadata() bool {
+	if x != nil {
+		return x.IncludeMetadata
+	}
+	return false
+}
+
+// One message of an <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">ExportCallLogs</a> stream.
+type ExportCallLogsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The next bytes of the exported file, at most 1 MiB. Chunk boundaries carry no meaning: an entry,
+	// a line or a multi-byte UTF-8 character may span two chunks. The last message may carry an empty
+	// chunk.
+	Chunk []byte `protobuf:"bytes,1,opt,name=chunk,proto3" json:"chunk,omitempty"`
+	// The number of entries exported so far, including those of this chunk (an entry that spans two
+	// chunks is counted in the chunk where it ends).
+	EntryCount int64 `protobuf:"varint,2,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`
+	// True on the last message of a complete export. A stream that ends without a message carrying
+	// <code>last = true</code> was cut off (error status, disconnect) and its file is incomplete.
+	Last bool `protobuf:"varint,3,opt,name=last,proto3" json:"last,omitempty"`
+	// True on the last message when the export stopped early because it reached
+	// <code>ONDEWO_VTSI_LOG_EXPORT_MAX_ENTRIES</code> or <code>ONDEWO_VTSI_LOG_EXPORT_MAX_BYTES</code>:
+	// matching entries after the last exported one were left out.
+	Truncated     bool `protobuf:"varint,4,opt,name=truncated,proto3" json:"truncated,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExportCallLogsResponse) Reset() {
+	*x = ExportCallLogsResponse{}
+	mi := &file_ondewo_vtsi_logs_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExportCallLogsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExportCallLogsResponse) ProtoMessage() {}
+
+func (x *ExportCallLogsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_logs_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExportCallLogsResponse.ProtoReflect.Descriptor instead.
+func (*ExportCallLogsResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ExportCallLogsResponse) GetChunk() []byte {
+	if x != nil {
+		return x.Chunk
+	}
+	return nil
+}
+
+func (x *ExportCallLogsResponse) GetEntryCount() int64 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *ExportCallLogsResponse) GetLast() bool {
+	if x != nil {
+		return x.Last
+	}
+	return false
+}
+
+func (x *ExportCallLogsResponse) GetTruncated() bool {
+	if x != nil {
+		return x.Truncated
+	}
+	return false
+}
+
 var File_ondewo_vtsi_logs_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\n" +
-	"\x16ondewo/vtsi/logs.proto\x12\vondewo.vtsi\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17ondewo/nlu/common.proto\x1a\x17ondewo/vtsi/calls.proto\"\xd3\x04\n" +
+	"\x16ondewo/vtsi/logs.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17ondewo/nlu/common.proto\x1a\x17ondewo/vtsi/calls.proto\"\xd3\x04\n" +
 	"\fCallLogEntry\x12\x10\n" +
 	"\x03seq\x18\x01 \x01(\x03R\x03seq\x128\n" +
 	"\ttimestamp\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12,\n" +
@@ -1848,8 +2355,7 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\x13physical_line_count\x18\x0f \x01(\x05R\x11physicalLineCount\"9\n" +
 	"\x0fSipHeaderFilter\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value\"\xfd\n" +
-	"\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\"\x91\f\n" +
 	"\rCallLogFilter\x12\x1d\n" +
 	"\n" +
 	"call_names\x18\x01 \x03(\tR\tcallNames\x12!\n" +
@@ -1863,10 +2369,10 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\rcontainer_ids\x18\b \x03(\tR\fcontainerIds\x12(\n" +
 	"\x10log_stream_names\x18\t \x03(\tR\x0elogStreamNames\x12!\n" +
 	"\fsip_accounts\x18\n" +
-	" \x03(\tR\vsipAccounts\x12\x1b\n" +
-	"\tsip_ports\x18\v \x03(\tR\bsipPorts\x12\x1b\n" +
-	"\tcsi_ports\x18\f \x03(\tR\bcsiPorts\x12%\n" +
-	"\x0easterisk_ports\x18\r \x03(\tR\rasteriskPorts\x12#\n" +
+	" \x03(\tR\vsipAccounts\x12\x1f\n" +
+	"\tsip_ports\x18\v \x03(\tB\x02\x18\x01R\bsipPorts\x12\x1f\n" +
+	"\tcsi_ports\x18\f \x03(\tB\x02\x18\x01R\bcsiPorts\x12)\n" +
+	"\x0easterisk_ports\x18\r \x03(\tB\x02\x18\x01R\rasteriskPorts\x12#\n" +
 	"\rphone_numbers\x18\x0e \x03(\tR\fphoneNumbers\x12\x1d\n" +
 	"\n" +
 	"callee_ids\x18\x0f \x03(\tR\tcalleeIds\x12*\n" +
@@ -1890,12 +2396,15 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\fthread_names\x18\x1d \x03(\tR\vthreadNames\x12>\n" +
 	"\n" +
 	"start_time\x18\x1e \x01(\v2\x1a.google.protobuf.TimestampH\x03R\tstartTime\x88\x01\x01\x12:\n" +
-	"\bend_time\x18\x1f \x01(\v2\x1a.google.protobuf.TimestampH\x04R\aendTime\x88\x01\x01B\x1a\n" +
+	"\bend_time\x18\x1f \x01(\v2\x1a.google.protobuf.TimestampH\x04R\aendTime\x88\x01\x01\x12(\n" +
+	"\x10sip_port_numbers\x18  \x03(\x05R\x0esipPortNumbers\x12(\n" +
+	"\x10csi_port_numbers\x18! \x03(\x05R\x0ecsiPortNumbers\x122\n" +
+	"\x15asterisk_port_numbers\x18\" \x03(\x05R\x13asteriskPortNumbersB\x1a\n" +
 	"\x18_include_unleveled_linesB\a\n" +
 	"\x05_textB\b\n" +
 	"\x06_regexB\r\n" +
 	"\v_start_timeB\v\n" +
-	"\t_end_time\"\xfd\x06\n" +
+	"\t_end_time\"\xa9\a\n" +
 	"\rCallLogStream\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12%\n" +
 	"\x0econtainer_name\x18\x02 \x01(\tR\rcontainerName\x12!\n" +
@@ -1921,7 +2430,8 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\x11max_available_seq\x18\x13 \x01(\x03R\x0fmaxAvailableSeq\x12\x1d\n" +
 	"\n" +
 	"line_count\x18\x14 \x01(\x03R\tlineCount\x12,\n" +
-	"\x12dropped_line_count\x18\x15 \x01(\x03R\x10droppedLineCount\"\xa3\x02\n" +
+	"\x12dropped_line_count\x18\x15 \x01(\x03R\x10droppedLineCount\x12*\n" +
+	"\x11vtsi_project_name\x18\x16 \x01(\tR\x0fvtsiProjectName\"\xa3\x02\n" +
 	"\x15StreamCallLogsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x127\n" +
 	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterH\x00R\x06filter\x88\x01\x01\x12\"\n" +
@@ -1933,7 +2443,7 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\v_tail_linesB\x0f\n" +
 	"\r_resume_tokenB\f\n" +
 	"\n" +
-	"_after_seq\"\xac\x02\n" +
+	"_after_seq\"\xf5\x02\n" +
 	"\x16StreamCallLogsResponse\x12:\n" +
 	"\vlog_entries\x18\x01 \x03(\v2\x19.ondewo.vtsi.CallLogEntryR\n" +
 	"logEntries\x12A\n" +
@@ -1942,7 +2452,8 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\x12dropped_line_count\x18\x04 \x01(\x03R\x10droppedLineCount\x12!\n" +
 	"\fresume_token\x18\x05 \x01(\tR\vresumeToken\x12\x1d\n" +
 	"\n" +
-	"end_reason\x18\x06 \x01(\tR\tendReason\"\x8a\x03\n" +
+	"end_reason\x18\x06 \x01(\tR\tendReason\x12G\n" +
+	"\x0fend_reason_code\x18\a \x01(\x0e2\x1f.ondewo.vtsi.LogStreamEndReasonR\rendReasonCode\"\xec\x03\n" +
 	"\x13ListCallLogsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x127\n" +
 	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterH\x00R\x06filter\x88\x01\x01\x12 \n" +
@@ -1951,7 +2462,10 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"before_seq\x18\x04 \x01(\x03H\x02R\tbeforeSeq\x88\x01\x01\x12 \n" +
 	"\tafter_seq\x18\x05 \x01(\x03H\x03R\bafterSeq\x88\x01\x01\x12&\n" +
 	"\fresume_token\x18\x06 \x01(\tH\x04R\vresumeToken\x88\x01\x01\x12&\n" +
-	"\foldest_first\x18\a \x01(\bH\x05R\voldestFirst\x88\x01\x01B\t\n" +
+	"\foldest_first\x18\a \x01(\bH\x05R\voldestFirst\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\b \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12%\n" +
+	"\x0einclude_counts\x18\t \x01(\bR\rincludeCountsB\t\n" +
 	"\a_filterB\f\n" +
 	"\n" +
 	"_max_linesB\r\n" +
@@ -1959,7 +2473,7 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\n" +
 	"_after_seqB\x0f\n" +
 	"\r_resume_tokenB\x0f\n" +
-	"\r_oldest_first\"\x95\x03\n" +
+	"\r_oldest_first\"\x81\x05\n" +
 	"\x14ListCallLogsResponse\x12:\n" +
 	"\vlog_entries\x18\x01 \x03(\v2\x19.ondewo.vtsi.CallLogEntryR\n" +
 	"logEntries\x12\x1c\n" +
@@ -1969,27 +2483,52 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\x0ehas_more_older\x18\x05 \x01(\bR\fhasMoreOlder\x12$\n" +
 	"\x0ehas_more_newer\x18\x06 \x01(\bR\fhasMoreNewer\x12*\n" +
 	"\x11next_resume_token\x18\a \x01(\tR\x0fnextResumeToken\x12S\n" +
-	"\x15scope_limited_filters\x18\b \x03(\x0e2\x1f.ondewo.vtsi.CallLogFilterFieldR\x13scopeLimitedFilters\"Y\n" +
+	"\x15scope_limited_filters\x18\b \x03(\x0e2\x1f.ondewo.vtsi.CallLogFilterFieldR\x13scopeLimitedFilters\x125\n" +
+	"\x14total_matching_count\x18\t \x01(\x03H\x00R\x12totalMatchingCount\x88\x01\x01\x12Y\n" +
+	"\x0ecount_by_level\x18\n" +
+	" \x03(\v23.ondewo.vtsi.ListCallLogsResponse.CountByLevelEntryR\fcountByLevel\x1a?\n" +
+	"\x11CountByLevelEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01B\x17\n" +
+	"\x15_total_matching_count\"\x94\x01\n" +
 	"\x17GetCallLogStreamRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xbe\x01\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xdb\x02\n" +
 	"\x19ListCallLogStreamsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x127\n" +
 	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterH\x00R\x06filter\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tH\x01R\tpageToken\x88\x01\x01B\t\n" +
+	"page_token\x18\x03 \x01(\tH\x01R\tpageToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\x12C\n" +
+	"\x0ecapture_states\x18\x06 \x03(\x0e2\x1c.ondewo.vtsi.LogCaptureStateR\rcaptureStatesB\t\n" +
 	"\a_filterB\r\n" +
 	"\v_page_token\"\x81\x01\n" +
 	"\x1aListCallLogStreamsResponse\x12;\n" +
 	"\vlog_streams\x18\x01 \x03(\v2\x1a.ondewo.vtsi.CallLogStreamR\n" +
 	"logStreams\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"w\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\x9c\x01\n" +
 	"\x15DeleteCallLogsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x122\n" +
-	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterR\x06filter\"\x88\x01\n" +
+	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterR\x06filter\x12#\n" +
+	"\rvalidate_only\x18\x03 \x01(\bR\fvalidateOnly\"\x88\x01\n" +
 	"\x16DeleteCallLogsResponse\x125\n" +
 	"\x17deleted_log_entry_count\x18\x01 \x01(\x03R\x14deletedLogEntryCount\x127\n" +
-	"\x18deleted_log_stream_count\x18\x02 \x01(\x03R\x15deletedLogStreamCount*\x9a\x01\n" +
+	"\x18deleted_log_stream_count\x18\x02 \x01(\x03R\x15deletedLogStreamCount\"\xd8\x01\n" +
+	"\x15ExportCallLogsRequest\x12*\n" +
+	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x122\n" +
+	"\x06filter\x18\x02 \x01(\v2\x1a.ondewo.vtsi.CallLogFilterR\x06filter\x124\n" +
+	"\x06format\x18\x03 \x01(\x0e2\x1c.ondewo.vtsi.LogExportFormatR\x06format\x12)\n" +
+	"\x10include_metadata\x18\x04 \x01(\bR\x0fincludeMetadata\"\x81\x01\n" +
+	"\x16ExportCallLogsResponse\x12\x14\n" +
+	"\x05chunk\x18\x01 \x01(\fR\x05chunk\x12\x1f\n" +
+	"\ventry_count\x18\x02 \x01(\x03R\n" +
+	"entryCount\x12\x12\n" +
+	"\x04last\x18\x03 \x01(\bR\x04last\x12\x1c\n" +
+	"\ttruncated\x18\x04 \x01(\bR\ttruncated*\x9a\x01\n" +
 	"\tLogSource\x12\x1a\n" +
 	"\x16LOG_SOURCE_UNSPECIFIED\x10\x00\x12\x12\n" +
 	"\x0eLOG_SOURCE_SIP\x10\x01\x12\x12\n" +
@@ -2015,13 +2554,26 @@ const file_ondewo_vtsi_logs_proto_rawDesc = "" +
 	"\x1eCALL_LOG_FILTER_FIELD_CHANNELS\x10\x04\x12*\n" +
 	"&CALL_LOG_FILTER_FIELD_EMITTER_PREFIXES\x10\x05\x12&\n" +
 	"\"CALL_LOG_FILTER_FIELD_THREAD_NAMES\x10\x06\x12%\n" +
-	"!CALL_LOG_FILTER_FIELD_SIP_HEADERS\x10\a2\xd0\x03\n" +
+	"!CALL_LOG_FILTER_FIELD_SIP_HEADERS\x10\a*\x9e\x02\n" +
+	"\x12LogStreamEndReason\x12%\n" +
+	"!LOG_STREAM_END_REASON_UNSPECIFIED\x10\x00\x121\n" +
+	"-LOG_STREAM_END_REASON_ALL_CAPTURES_TERMINATED\x10\x01\x12&\n" +
+	"\"LOG_STREAM_END_REASON_MAX_DURATION\x10\x02\x12)\n" +
+	"%LOG_STREAM_END_REASON_SERVER_SHUTDOWN\x10\x03\x12,\n" +
+	"(LOG_STREAM_END_REASON_PERMISSION_REVOKED\x10\x04\x12-\n" +
+	")LOG_STREAM_END_REASON_CREDENTIALS_EXPIRED\x10\x05*\x89\x01\n" +
+	"\x0fLogExportFormat\x12!\n" +
+	"\x1dLOG_EXPORT_FORMAT_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16LOG_EXPORT_FORMAT_TEXT\x10\x01\x12\x1c\n" +
+	"\x18LOG_EXPORT_FORMAT_NDJSON\x10\x02\x12\x19\n" +
+	"\x15LOG_EXPORT_FORMAT_CSV\x10\x032\xad\x04\n" +
 	"\x04Logs\x12[\n" +
 	"\x0eStreamCallLogs\x12\".ondewo.vtsi.StreamCallLogsRequest\x1a#.ondewo.vtsi.StreamCallLogsResponse0\x01\x12S\n" +
 	"\fListCallLogs\x12 .ondewo.vtsi.ListCallLogsRequest\x1a!.ondewo.vtsi.ListCallLogsResponse\x12T\n" +
 	"\x10GetCallLogStream\x12$.ondewo.vtsi.GetCallLogStreamRequest\x1a\x1a.ondewo.vtsi.CallLogStream\x12e\n" +
 	"\x12ListCallLogStreams\x12&.ondewo.vtsi.ListCallLogStreamsRequest\x1a'.ondewo.vtsi.ListCallLogStreamsResponse\x12Y\n" +
-	"\x0eDeleteCallLogs\x12\".ondewo.vtsi.DeleteCallLogsRequest\x1a#.ondewo.vtsi.DeleteCallLogsResponseb\x06proto3"
+	"\x0eDeleteCallLogs\x12\".ondewo.vtsi.DeleteCallLogsRequest\x1a#.ondewo.vtsi.DeleteCallLogsResponse\x12[\n" +
+	"\x0eExportCallLogs\x12\".ondewo.vtsi.ExportCallLogsRequest\x1a#.ondewo.vtsi.ExportCallLogsResponse0\x01b\x06proto3"
 
 var (
 	file_ondewo_vtsi_logs_proto_rawDescOnce sync.Once
@@ -2035,72 +2587,88 @@ func file_ondewo_vtsi_logs_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_logs_proto_rawDescData
 }
 
-var file_ondewo_vtsi_logs_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_ondewo_vtsi_logs_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_ondewo_vtsi_logs_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_ondewo_vtsi_logs_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_ondewo_vtsi_logs_proto_goTypes = []any{
 	(LogSource)(0),                     // 0: ondewo.vtsi.LogSource
 	(LogStreamChannel)(0),              // 1: ondewo.vtsi.LogStreamChannel
 	(LogCaptureState)(0),               // 2: ondewo.vtsi.LogCaptureState
 	(CallLogFilterField)(0),            // 3: ondewo.vtsi.CallLogFilterField
-	(*CallLogEntry)(nil),               // 4: ondewo.vtsi.CallLogEntry
-	(*SipHeaderFilter)(nil),            // 5: ondewo.vtsi.SipHeaderFilter
-	(*CallLogFilter)(nil),              // 6: ondewo.vtsi.CallLogFilter
-	(*CallLogStream)(nil),              // 7: ondewo.vtsi.CallLogStream
-	(*StreamCallLogsRequest)(nil),      // 8: ondewo.vtsi.StreamCallLogsRequest
-	(*StreamCallLogsResponse)(nil),     // 9: ondewo.vtsi.StreamCallLogsResponse
-	(*ListCallLogsRequest)(nil),        // 10: ondewo.vtsi.ListCallLogsRequest
-	(*ListCallLogsResponse)(nil),       // 11: ondewo.vtsi.ListCallLogsResponse
-	(*GetCallLogStreamRequest)(nil),    // 12: ondewo.vtsi.GetCallLogStreamRequest
-	(*ListCallLogStreamsRequest)(nil),  // 13: ondewo.vtsi.ListCallLogStreamsRequest
-	(*ListCallLogStreamsResponse)(nil), // 14: ondewo.vtsi.ListCallLogStreamsResponse
-	(*DeleteCallLogsRequest)(nil),      // 15: ondewo.vtsi.DeleteCallLogsRequest
-	(*DeleteCallLogsResponse)(nil),     // 16: ondewo.vtsi.DeleteCallLogsResponse
-	(*timestamppb.Timestamp)(nil),      // 17: google.protobuf.Timestamp
-	(nlu.LogSeverity)(0),               // 18: ondewo.nlu.LogSeverity
-	(CallType)(0),                      // 19: ondewo.vtsi.CallType
+	(LogStreamEndReason)(0),            // 4: ondewo.vtsi.LogStreamEndReason
+	(LogExportFormat)(0),               // 5: ondewo.vtsi.LogExportFormat
+	(*CallLogEntry)(nil),               // 6: ondewo.vtsi.CallLogEntry
+	(*SipHeaderFilter)(nil),            // 7: ondewo.vtsi.SipHeaderFilter
+	(*CallLogFilter)(nil),              // 8: ondewo.vtsi.CallLogFilter
+	(*CallLogStream)(nil),              // 9: ondewo.vtsi.CallLogStream
+	(*StreamCallLogsRequest)(nil),      // 10: ondewo.vtsi.StreamCallLogsRequest
+	(*StreamCallLogsResponse)(nil),     // 11: ondewo.vtsi.StreamCallLogsResponse
+	(*ListCallLogsRequest)(nil),        // 12: ondewo.vtsi.ListCallLogsRequest
+	(*ListCallLogsResponse)(nil),       // 13: ondewo.vtsi.ListCallLogsResponse
+	(*GetCallLogStreamRequest)(nil),    // 14: ondewo.vtsi.GetCallLogStreamRequest
+	(*ListCallLogStreamsRequest)(nil),  // 15: ondewo.vtsi.ListCallLogStreamsRequest
+	(*ListCallLogStreamsResponse)(nil), // 16: ondewo.vtsi.ListCallLogStreamsResponse
+	(*DeleteCallLogsRequest)(nil),      // 17: ondewo.vtsi.DeleteCallLogsRequest
+	(*DeleteCallLogsResponse)(nil),     // 18: ondewo.vtsi.DeleteCallLogsResponse
+	(*ExportCallLogsRequest)(nil),      // 19: ondewo.vtsi.ExportCallLogsRequest
+	(*ExportCallLogsResponse)(nil),     // 20: ondewo.vtsi.ExportCallLogsResponse
+	nil,                                // 21: ondewo.vtsi.ListCallLogsResponse.CountByLevelEntry
+	(*timestamppb.Timestamp)(nil),      // 22: google.protobuf.Timestamp
+	(nlu.LogSeverity)(0),               // 23: ondewo.nlu.LogSeverity
+	(CallType)(0),                      // 24: ondewo.vtsi.CallType
+	(*fieldmaskpb.FieldMask)(nil),      // 25: google.protobuf.FieldMask
 }
 var file_ondewo_vtsi_logs_proto_depIdxs = []int32{
-	17, // 0: ondewo.vtsi.CallLogEntry.timestamp:type_name -> google.protobuf.Timestamp
-	18, // 1: ondewo.vtsi.CallLogEntry.level:type_name -> ondewo.nlu.LogSeverity
+	22, // 0: ondewo.vtsi.CallLogEntry.timestamp:type_name -> google.protobuf.Timestamp
+	23, // 1: ondewo.vtsi.CallLogEntry.level:type_name -> ondewo.nlu.LogSeverity
 	0,  // 2: ondewo.vtsi.CallLogEntry.log_source:type_name -> ondewo.vtsi.LogSource
 	1,  // 3: ondewo.vtsi.CallLogEntry.channel:type_name -> ondewo.vtsi.LogStreamChannel
-	19, // 4: ondewo.vtsi.CallLogFilter.call_types:type_name -> ondewo.vtsi.CallType
-	5,  // 5: ondewo.vtsi.CallLogFilter.sip_headers:type_name -> ondewo.vtsi.SipHeaderFilter
+	24, // 4: ondewo.vtsi.CallLogFilter.call_types:type_name -> ondewo.vtsi.CallType
+	7,  // 5: ondewo.vtsi.CallLogFilter.sip_headers:type_name -> ondewo.vtsi.SipHeaderFilter
 	0,  // 6: ondewo.vtsi.CallLogFilter.log_sources:type_name -> ondewo.vtsi.LogSource
 	1,  // 7: ondewo.vtsi.CallLogFilter.channels:type_name -> ondewo.vtsi.LogStreamChannel
-	18, // 8: ondewo.vtsi.CallLogFilter.min_log_level:type_name -> ondewo.nlu.LogSeverity
-	18, // 9: ondewo.vtsi.CallLogFilter.log_levels:type_name -> ondewo.nlu.LogSeverity
-	17, // 10: ondewo.vtsi.CallLogFilter.start_time:type_name -> google.protobuf.Timestamp
-	17, // 11: ondewo.vtsi.CallLogFilter.end_time:type_name -> google.protobuf.Timestamp
+	23, // 8: ondewo.vtsi.CallLogFilter.min_log_level:type_name -> ondewo.nlu.LogSeverity
+	23, // 9: ondewo.vtsi.CallLogFilter.log_levels:type_name -> ondewo.nlu.LogSeverity
+	22, // 10: ondewo.vtsi.CallLogFilter.start_time:type_name -> google.protobuf.Timestamp
+	22, // 11: ondewo.vtsi.CallLogFilter.end_time:type_name -> google.protobuf.Timestamp
 	1,  // 12: ondewo.vtsi.CallLogStream.channel:type_name -> ondewo.vtsi.LogStreamChannel
-	19, // 13: ondewo.vtsi.CallLogStream.call_type:type_name -> ondewo.vtsi.CallType
+	24, // 13: ondewo.vtsi.CallLogStream.call_type:type_name -> ondewo.vtsi.CallType
 	2,  // 14: ondewo.vtsi.CallLogStream.capture_state:type_name -> ondewo.vtsi.LogCaptureState
-	17, // 15: ondewo.vtsi.CallLogStream.capture_started_at:type_name -> google.protobuf.Timestamp
-	17, // 16: ondewo.vtsi.CallLogStream.capture_finished_at:type_name -> google.protobuf.Timestamp
-	6,  // 17: ondewo.vtsi.StreamCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
-	4,  // 18: ondewo.vtsi.StreamCallLogsResponse.log_entries:type_name -> ondewo.vtsi.CallLogEntry
+	22, // 15: ondewo.vtsi.CallLogStream.capture_started_at:type_name -> google.protobuf.Timestamp
+	22, // 16: ondewo.vtsi.CallLogStream.capture_finished_at:type_name -> google.protobuf.Timestamp
+	8,  // 17: ondewo.vtsi.StreamCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
+	6,  // 18: ondewo.vtsi.StreamCallLogsResponse.log_entries:type_name -> ondewo.vtsi.CallLogEntry
 	2,  // 19: ondewo.vtsi.StreamCallLogsResponse.capture_state:type_name -> ondewo.vtsi.LogCaptureState
-	6,  // 20: ondewo.vtsi.ListCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
-	4,  // 21: ondewo.vtsi.ListCallLogsResponse.log_entries:type_name -> ondewo.vtsi.CallLogEntry
-	3,  // 22: ondewo.vtsi.ListCallLogsResponse.scope_limited_filters:type_name -> ondewo.vtsi.CallLogFilterField
-	6,  // 23: ondewo.vtsi.ListCallLogStreamsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
-	7,  // 24: ondewo.vtsi.ListCallLogStreamsResponse.log_streams:type_name -> ondewo.vtsi.CallLogStream
-	6,  // 25: ondewo.vtsi.DeleteCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
-	8,  // 26: ondewo.vtsi.Logs.StreamCallLogs:input_type -> ondewo.vtsi.StreamCallLogsRequest
-	10, // 27: ondewo.vtsi.Logs.ListCallLogs:input_type -> ondewo.vtsi.ListCallLogsRequest
-	12, // 28: ondewo.vtsi.Logs.GetCallLogStream:input_type -> ondewo.vtsi.GetCallLogStreamRequest
-	13, // 29: ondewo.vtsi.Logs.ListCallLogStreams:input_type -> ondewo.vtsi.ListCallLogStreamsRequest
-	15, // 30: ondewo.vtsi.Logs.DeleteCallLogs:input_type -> ondewo.vtsi.DeleteCallLogsRequest
-	9,  // 31: ondewo.vtsi.Logs.StreamCallLogs:output_type -> ondewo.vtsi.StreamCallLogsResponse
-	11, // 32: ondewo.vtsi.Logs.ListCallLogs:output_type -> ondewo.vtsi.ListCallLogsResponse
-	7,  // 33: ondewo.vtsi.Logs.GetCallLogStream:output_type -> ondewo.vtsi.CallLogStream
-	14, // 34: ondewo.vtsi.Logs.ListCallLogStreams:output_type -> ondewo.vtsi.ListCallLogStreamsResponse
-	16, // 35: ondewo.vtsi.Logs.DeleteCallLogs:output_type -> ondewo.vtsi.DeleteCallLogsResponse
-	31, // [31:36] is the sub-list for method output_type
-	26, // [26:31] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	4,  // 20: ondewo.vtsi.StreamCallLogsResponse.end_reason_code:type_name -> ondewo.vtsi.LogStreamEndReason
+	8,  // 21: ondewo.vtsi.ListCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
+	25, // 22: ondewo.vtsi.ListCallLogsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	6,  // 23: ondewo.vtsi.ListCallLogsResponse.log_entries:type_name -> ondewo.vtsi.CallLogEntry
+	3,  // 24: ondewo.vtsi.ListCallLogsResponse.scope_limited_filters:type_name -> ondewo.vtsi.CallLogFilterField
+	21, // 25: ondewo.vtsi.ListCallLogsResponse.count_by_level:type_name -> ondewo.vtsi.ListCallLogsResponse.CountByLevelEntry
+	25, // 26: ondewo.vtsi.GetCallLogStreamRequest.field_mask:type_name -> google.protobuf.FieldMask
+	8,  // 27: ondewo.vtsi.ListCallLogStreamsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
+	25, // 28: ondewo.vtsi.ListCallLogStreamsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	2,  // 29: ondewo.vtsi.ListCallLogStreamsRequest.capture_states:type_name -> ondewo.vtsi.LogCaptureState
+	9,  // 30: ondewo.vtsi.ListCallLogStreamsResponse.log_streams:type_name -> ondewo.vtsi.CallLogStream
+	8,  // 31: ondewo.vtsi.DeleteCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
+	8,  // 32: ondewo.vtsi.ExportCallLogsRequest.filter:type_name -> ondewo.vtsi.CallLogFilter
+	5,  // 33: ondewo.vtsi.ExportCallLogsRequest.format:type_name -> ondewo.vtsi.LogExportFormat
+	10, // 34: ondewo.vtsi.Logs.StreamCallLogs:input_type -> ondewo.vtsi.StreamCallLogsRequest
+	12, // 35: ondewo.vtsi.Logs.ListCallLogs:input_type -> ondewo.vtsi.ListCallLogsRequest
+	14, // 36: ondewo.vtsi.Logs.GetCallLogStream:input_type -> ondewo.vtsi.GetCallLogStreamRequest
+	15, // 37: ondewo.vtsi.Logs.ListCallLogStreams:input_type -> ondewo.vtsi.ListCallLogStreamsRequest
+	17, // 38: ondewo.vtsi.Logs.DeleteCallLogs:input_type -> ondewo.vtsi.DeleteCallLogsRequest
+	19, // 39: ondewo.vtsi.Logs.ExportCallLogs:input_type -> ondewo.vtsi.ExportCallLogsRequest
+	11, // 40: ondewo.vtsi.Logs.StreamCallLogs:output_type -> ondewo.vtsi.StreamCallLogsResponse
+	13, // 41: ondewo.vtsi.Logs.ListCallLogs:output_type -> ondewo.vtsi.ListCallLogsResponse
+	9,  // 42: ondewo.vtsi.Logs.GetCallLogStream:output_type -> ondewo.vtsi.CallLogStream
+	16, // 43: ondewo.vtsi.Logs.ListCallLogStreams:output_type -> ondewo.vtsi.ListCallLogStreamsResponse
+	18, // 44: ondewo.vtsi.Logs.DeleteCallLogs:output_type -> ondewo.vtsi.DeleteCallLogsResponse
+	20, // 45: ondewo.vtsi.Logs.ExportCallLogs:output_type -> ondewo.vtsi.ExportCallLogsResponse
+	40, // [40:46] is the sub-list for method output_type
+	34, // [34:40] is the sub-list for method input_type
+	34, // [34:34] is the sub-list for extension type_name
+	34, // [34:34] is the sub-list for extension extendee
+	0,  // [0:34] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_logs_proto_init() }
@@ -2112,14 +2680,15 @@ func file_ondewo_vtsi_logs_proto_init() {
 	file_ondewo_vtsi_logs_proto_msgTypes[2].OneofWrappers = []any{}
 	file_ondewo_vtsi_logs_proto_msgTypes[4].OneofWrappers = []any{}
 	file_ondewo_vtsi_logs_proto_msgTypes[6].OneofWrappers = []any{}
+	file_ondewo_vtsi_logs_proto_msgTypes[7].OneofWrappers = []any{}
 	file_ondewo_vtsi_logs_proto_msgTypes[9].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_logs_proto_rawDesc), len(file_ondewo_vtsi_logs_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   13,
+			NumEnums:      6,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

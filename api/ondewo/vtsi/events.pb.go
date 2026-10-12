@@ -40,215 +40,367 @@ const (
 )
 
 // Every event VTSI reports. Values are grouped by resource in blocks of 100; numbers are stable.
+// <p><b>Attributes.</b> <code>VtsiEventMessage.attributes</code> carries the event-specific values listed at
+// each value below; a key whose value is unknown is left out, and keys not listed are never sent. Formats:
+// counts and numbers are base-10 integers without separators (<code>3</code>); booleans are
+// <code>true</code> / <code>false</code>; times are RFC 3339 in UTC with a numeric offset
+// (<code>2026-10-11T12:00:00+00:00</code>, fractional seconds possible); resource names are complete
+// (<code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code>); <code>updated_fields</code> is a
+// comma-separated list of <code>update_mask</code> paths without spaces (<code>display_name,url</code>);
+// a campaign <code>state</code> / <code>previous_state</code> is the <code>CampaignState</code> name WITHOUT
+// its <code>CAMPAIGN_STATE_</code> prefix (<code>RUNNING</code>). An event carries at most 20 attributes and
+// a value at most 256 characters (longer values are cut); <code>description</code> and
+// <code>sip_status_description</code> at most 1024 characters.</p>
+// <p><b>Call status attributes</b>, on every event derived from a change of a call&apos;s SIP status (marked
+// "call status attributes" below): <code>caller_name</code>, <code>listener_name</code> or
+// <code>scheduled_caller_name</code> (the resource that owns the call, the one that applies) and
+// <code>phone_number</code> (the callee or caller number in clear, where recorded; treat it as personal
+// data). Such an event also sets <code>call_name</code>, <code>sip_status_type</code>,
+// <code>previous_sip_status_type</code> (unset for a new call record), <code>sip_status_description</code>
+// and <code>resource_sequence</code> (the call&apos;s status change number), and has a deterministic
+// <code>event_id</code>, so replicas observing the same change report one event.</p>
+// <p><b>Campaign call attributes</b>, on the <code>VTSI_EVENT_CAMPAIGN_CALL_*</code> events:
+// <code>attempt_number</code> (attempts started so far), <code>phone_number</code> (the callee in clear) and
+// <code>caller_name</code> (caller of the current or last attempt). They also set <code>call_name</code>,
+// <code>campaign_name</code>, <code>sip_status_type</code>, <code>sip_status_description</code> and
+// <code>resource_sequence</code>; never <code>campaign_statistics</code>.</p>
 type VtsiEvent int32
 
 const (
 	// Unspecified. Never emitted; refused in a subscription.
 	VtsiEvent_VTSI_EVENT_UNSPECIFIED VtsiEvent = 0
-	// A call record was created: an outbound call was placed, or a listener received a call.
+	// A call record was created: an outbound call was placed, or a listener received a call. Call status
+	// attributes.
 	VtsiEvent_VTSI_EVENT_CALL_CREATED VtsiEvent = 100
-	// The call is ringing: <code>INCOMING_CALL_INITIATED</code> / <code>OUTGOING_CALL_INITIATED</code>.
+	// The call is ringing: <code>INCOMING_CALL_INITIATED</code> / <code>OUTGOING_CALL_INITIATED</code>. Call
+	// status attributes.
 	VtsiEvent_VTSI_EVENT_CALL_INITIATED VtsiEvent = 101
-	// The call was answered: <code>INCOMING_CALL_CONNECTED</code> / <code>OUTGOING_CALL_CONNECTED</code>.
+	// The call was answered: <code>INCOMING_CALL_CONNECTED</code> / <code>OUTGOING_CALL_CONNECTED</code>. Call
+	// status attributes.
 	VtsiEvent_VTSI_EVENT_CALL_CONNECTED VtsiEvent = 102
-	// The call ended normally: <code>INCOMING_CALL_FINISHED</code> / <code>OUTGOING_CALL_FINISHED</code>.
+	// The call ended normally: <code>INCOMING_CALL_FINISHED</code> / <code>OUTGOING_CALL_FINISHED</code>. Call
+	// status attributes.
 	VtsiEvent_VTSI_EVENT_CALL_FINISHED VtsiEvent = 103
-	// The call failed: <code>INCOMING_CALL_FAILED</code> / <code>OUTGOING_CALL_FAILED</code>.
+	// The call failed: <code>INCOMING_CALL_FAILED</code> / <code>OUTGOING_CALL_FAILED</code>. Call status
+	// attributes.
 	VtsiEvent_VTSI_EVENT_CALL_FAILED VtsiEvent = 104
 	// A transfer of the call started: <code>TRANSFER_CALL_INITIATED</code>. Emitted when a BLIND transfer was
 	// accepted, or when the target of a WARM transfer starts ringing.
+	// <p>Attributes: <code>transfer_id</code> (the target, a phone number masked to its last 3 digits, e.g.
+	// <code>***678</code>, or an extension), <code>target_type</code> (<code>phone_number</code>,
+	// <code>softphone</code>, <code>listener</code>, <code>listener_queue</code>, <code>legacy</code>,
+	// <code>unknown</code>), <code>mode</code> (<code>blind</code> / <code>warm</code>; <code>WARM</code>, upper
+	// case, when reported for the ringing WARM leg), <code>outcome</code> (<code>accepted</code>,
+	// <code>pending</code>, ...), <code>sip_response_code</code> (SIP code, <code>0</code> when unknown),
+	// <code>error_reason</code> (kebab-case token, may be empty), <code>participant_id</code> (WARM leg),
+	// <code>source</code> (<code>call_monitor</code> when observed by the call monitor). Sets
+	// <code>call_name</code>.</p>
 	VtsiEvent_VTSI_EVENT_CALL_TRANSFER_INITIATED VtsiEvent = 105
 	// <code>TransferCall</code> transferred the call. Emitted at the call&apos;s terminal edge: a
 	// <code>*_CALL_FINISHED</code> status whose description is <code>Call transferred</code>.
+	// <p>Attributes: <code>transfer_id</code> (masked as above), <code>mode</code> (<code>blind</code> /
+	// <code>warm</code>), <code>outcome</code> (<code>accepted</code>), <code>sip_response_code</code>,
+	// <code>source</code> (<code>call_monitor</code>), and the call status attributes
+	// (<code>caller_name</code> / <code>listener_name</code> / <code>scheduled_caller_name</code>,
+	// <code>phone_number</code>). Sets the call status fields.</p>
 	VtsiEvent_VTSI_EVENT_CALL_TRANSFERRED VtsiEvent = 106
 	// A transfer failed and the call was KEPT with the bot: <code>TRANSFER_CALL_FAILED</code>, a refused or unanswered
 	// REFER, or a WARM target that was busy or did not answer.
+	// <p>Attributes: as <code>VTSI_EVENT_CALL_TRANSFER_INITIATED</code>, with <code>outcome</code> naming the
+	// failure (<code>target_invalid</code>, <code>refer_rejected</code>, <code>timeout</code>,
+	// <code>call_ended</code>, <code>call_scope_mismatch</code>, <code>sip_unreachable</code>,
+	// <code>refused</code>, or the SIP reason in snake case), <code>error_reason</code> and, for a WARM leg,
+	// <code>participant_id</code> and <code>end_reason</code> (as on
+	// <code>VTSI_EVENT_CALL_PARTICIPANT_FAILED</code>). <code>description</code> says why.</p>
 	VtsiEvent_VTSI_EVENT_CALL_TRANSFER_FAILED VtsiEvent = 107
-	// A hang-up started: <code>SOFT_HANGUP_INITIATED</code> / <code>HARD_HANGUP_INITIATED</code>.
+	// A hang-up started: <code>SOFT_HANGUP_INITIATED</code> / <code>HARD_HANGUP_INITIATED</code>. Call status
+	// attributes.
 	VtsiEvent_VTSI_EVENT_CALL_HANGUP_INITIATED VtsiEvent = 108
-	// An answering machine was detected: <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code>.
+	// An answering machine was detected: <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code>. Call status
+	// attributes.
 	VtsiEvent_VTSI_EVENT_CALL_ANSWERING_MACHINE_DETECTED VtsiEvent = 109
 	// The call was ended by <code>StopCall</code>, <code>StopCalls</code>, <code>StopAllCalls</code>
-	// or a campaign hard stop.
+	// or a campaign hard stop. No attributes; <code>call_name</code> is not set (the call is the
+	// <code>resource_name</code>).
 	VtsiEvent_VTSI_EVENT_CALL_STOPPED VtsiEvent = 110
 	// The SIP status of the call changed (emitted for EVERY change, in addition to the specific
-	// events above). <code>previous_sip_status_type</code> holds the status before.
+	// events above). <code>previous_sip_status_type</code> holds the status before. Call status
+	// attributes.
 	VtsiEvent_VTSI_EVENT_CALL_SIP_STATUS_CHANGED VtsiEvent = 111
-	// A participant was invited into the call (<code>InviteToCall</code>). <code>attributes</code> carry
-	// <code>participant_id</code>, <code>mode</code> and <code>actor</code> (who invited).
+	// A participant was invited into the call (<code>InviteToCall</code>).
+	// <p>Attributes (the participant attributes, also on 113 to 115): <code>participant_id</code>,
+	// <code>mode</code> (<code>CONFERENCE</code> / <code>MONITOR</code>), <code>purpose</code>
+	// (<code>invite</code> / <code>warm_transfer</code>), <code>state</code> (<code>ParticipantState</code> name,
+	// e.g. <code>PARTICIPANT_STATE_RINGING</code>), <code>softphone_account_name</code> (when a softphone
+	// account was invited), <code>end_reason</code> (on 114 and 115: <code>NOANSWER</code>, <code>BUSY</code>,
+	// <code>CHANUNAVAIL</code>, <code>CALL_ENDED</code>, <code>REMOVED</code>, <code>HANGUP</code>,
+	// <code>HANDED_OVER</code>, <code>JOIN_FAILED</code>, <code>TIMEOUT</code>), <code>actor</code> (who caused
+	// it: the authenticated user, or <code>system:call-control</code>), <code>source</code>. Sets
+	// <code>call_name</code> and <code>description</code>.</p>
 	VtsiEvent_VTSI_EVENT_CALL_PARTICIPANT_INVITED VtsiEvent = 112
-	// An invited participant answered and joined the call. <code>attributes</code> carry <code>participant_id</code>.
+	// An invited participant answered and joined the call. The participant attributes (see 112);
+	// <code>actor</code> is who invited it.
 	VtsiEvent_VTSI_EVENT_CALL_PARTICIPANT_JOINED VtsiEvent = 113
-	// An invited participant never joined (busy, no answer, unavailable, the call ended, ...).
-	// <code>attributes</code> carry <code>participant_id</code> and <code>end_reason</code>.
+	// An invited participant never joined (busy, no answer, unavailable, the call ended, ...). The
+	// participant attributes (see 112), with <code>end_reason</code>.
 	VtsiEvent_VTSI_EVENT_CALL_PARTICIPANT_FAILED VtsiEvent = 114
-	// A joined participant left the call. <code>attributes</code> carry <code>participant_id</code> and
+	// A joined participant left the call. The participant attributes (see 112), with
 	// <code>end_reason</code>.
 	VtsiEvent_VTSI_EVENT_CALL_PARTICIPANT_LEFT VtsiEvent = 115
-	// The bot of the call was muted. <code>attributes</code> carry <code>actor</code> where a person caused it.
+	// The bot of the call was muted. Attributes: <code>source</code> (<code>operator</code> for
+	// <code>SetCallMediaControl</code>, <code>call_monitor</code> when the server observed it) and
+	// <code>actor</code> (the authenticated user where a person caused it, <code>system</code> for the call
+	// monitor). Sets <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_CALL_BOT_MUTED VtsiEvent = 116
-	// The bot of the call was unmuted. <code>attributes</code> carry <code>actor</code> where a person caused it.
+	// The bot of the call was unmuted. Attributes as <code>VTSI_EVENT_CALL_BOT_MUTED</code>.
 	VtsiEvent_VTSI_EVENT_CALL_BOT_UNMUTED VtsiEvent = 117
-	// The bot of the call stopped listening to the caller. <code>attributes</code> carry <code>actor</code> where a
-	// person caused it.
+	// The bot of the call stopped listening to the caller. Attributes as
+	// <code>VTSI_EVENT_CALL_BOT_MUTED</code>.
 	VtsiEvent_VTSI_EVENT_CALL_LISTENING_PAUSED VtsiEvent = 118
-	// The bot of the call listens to the caller again. <code>attributes</code> carry <code>actor</code> where a person
-	// caused it.
+	// The bot of the call listens to the caller again. Attributes as
+	// <code>VTSI_EVENT_CALL_BOT_MUTED</code>.
 	VtsiEvent_VTSI_EVENT_CALL_LISTENING_RESUMED VtsiEvent = 119
 	// A live call audio stream (<code>StreamCallAudio</code> / <code>ListenCallAudio</code>) connected.
-	// <code>attributes</code> carry <code>stream_id</code>, <code>mode</code> and <code>actor</code>.
+	// Attributes: <code>stream_id</code> (uuid), <code>mode</code> (<code>LISTEN</code> / <code>TALK</code>),
+	// <code>rpc</code> (<code>ListenCallAudio</code> / <code>StreamCallAudio</code>), <code>actor</code> (the
+	// authenticated user, when known). Sets <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_CALL_AUDIO_STREAM_CONNECTED VtsiEvent = 120
-	// A live call audio stream disconnected. <code>attributes</code> carry <code>stream_id</code>, <code>mode</code>,
-	// <code>actor</code> and <code>end_reason</code>.
+	// A live call audio stream disconnected. Attributes as
+	// <code>VTSI_EVENT_CALL_AUDIO_STREAM_CONNECTED</code>, plus <code>end_reason</code> (the
+	// <code>CallAudioEndReason</code> name without prefix: <code>CLIENT_CLOSED</code>, <code>CALL_ENDED</code>,
+	// <code>CALL_TRANSFERRED</code>, <code>MAX_DURATION</code>, <code>STALLED</code>, <code>INTERNAL</code>,
+	// <code>UNSPECIFIED</code>).
 	VtsiEvent_VTSI_EVENT_CALL_AUDIO_STREAM_DISCONNECTED VtsiEvent = 121
-	// A caller started and placed its call.
+	// The stored record of the call was updated (<code>UpdateCall</code>, <code>UpdateCalls</code>); the call
+	// itself is unchanged. Attribute <code>updated_fields</code> (the <code>update_mask</code> paths, e.g.
+	// <code>labels</code>). Never carries a label value. Sets <code>call_name</code>. Not emitted for an entry
+	// of a batch that failed, nor when the update changed nothing.
+	VtsiEvent_VTSI_EVENT_CALL_UPDATED VtsiEvent = 122
+	// A caller started and placed its call. No attributes; sets <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_CALLER_STARTED VtsiEvent = 200
-	// A caller could not be started; <code>description</code> says why.
+	// A caller could not be started; <code>description</code> says why. No attributes.
 	VtsiEvent_VTSI_EVENT_CALLER_START_FAILED VtsiEvent = 201
-	// A caller was stopped (<code>StopCaller</code>, <code>StopCallers</code>).
+	// A caller was stopped (<code>StopCaller</code>, <code>StopCallers</code>). No attributes.
 	VtsiEvent_VTSI_EVENT_CALLER_STOPPED VtsiEvent = 202
-	// A caller was deleted.
+	// A caller was deleted. No attributes.
 	VtsiEvent_VTSI_EVENT_CALLER_DELETED VtsiEvent = 203
-	// A caller&apos;s container was restarted by the server.
+	// A caller&apos;s container was restarted by the server. Attributes: <code>container_name</code>,
+	// <code>reason</code> (free text, at most 64 characters, e.g. <code>end-call-marker-expired</code>).
 	VtsiEvent_VTSI_EVENT_CALLER_RESTARTED VtsiEvent = 204
-	// A caller&apos;s container was found not running or unhealthy.
+	// A caller&apos;s container was found not running or unhealthy. Attribute <code>container_name</code>;
+	// <code>description</code> is <code>container not running</code> or <code>container unhealthy</code>; sets
+	// <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_CALLER_UNHEALTHY VtsiEvent = 205
 	// A caller reported unhealthy is healthy again (its container answers its health check, or its
-	// restart succeeded). Best effort: reported by the replica that reported it unhealthy.
+	// restart succeeded). Best effort: reported by the replica that reported it unhealthy. No
+	// attributes; sets <code>call_name</code> where known.
 	VtsiEvent_VTSI_EVENT_CALLER_HEALTHY VtsiEvent = 206
-	// A listener started and is waiting for calls.
+	// The stored configuration of a caller was updated (<code>UpdateCaller</code>, <code>UpdateCallers</code>);
+	// its running container is unchanged. Attribute <code>updated_fields</code> (the <code>update_mask</code>
+	// paths). Never carries a configuration value.
+	VtsiEvent_VTSI_EVENT_CALLER_UPDATED VtsiEvent = 207
+	// A listener started and is waiting for calls. No attributes; sets <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_LISTENER_STARTED VtsiEvent = 300
-	// A listener could not be started; <code>description</code> says why.
+	// A listener could not be started; <code>description</code> says why. No attributes.
 	VtsiEvent_VTSI_EVENT_LISTENER_START_FAILED VtsiEvent = 301
-	// A listener was stopped (<code>StopListener</code>, <code>StopListeners</code>).
+	// A listener was stopped (<code>StopListener</code>, <code>StopListeners</code>). No attributes.
 	VtsiEvent_VTSI_EVENT_LISTENER_STOPPED VtsiEvent = 302
-	// A listener was deleted.
+	// A listener was deleted. No attributes.
 	VtsiEvent_VTSI_EVENT_LISTENER_DELETED VtsiEvent = 303
-	// A listener&apos;s container was restarted by the server.
+	// A listener&apos;s container was restarted by the server. Attribute <code>container_name</code>; sets
+	// <code>call_name</code>.
 	VtsiEvent_VTSI_EVENT_LISTENER_RESTARTED VtsiEvent = 304
-	// A listener&apos;s container was found not running or unhealthy.
+	// A listener&apos;s container was found not running or unhealthy. Attribute <code>container_name</code>;
+	// <code>description</code> as for <code>VTSI_EVENT_CALLER_UNHEALTHY</code>.
 	VtsiEvent_VTSI_EVENT_LISTENER_UNHEALTHY VtsiEvent = 305
 	// A listener reported unhealthy is healthy again (its container answers its health check, or
-	// its restart succeeded). Best effort: reported by the replica that reported it unhealthy.
+	// its restart succeeded). Best effort: reported by the replica that reported it unhealthy. No
+	// attributes.
 	VtsiEvent_VTSI_EVENT_LISTENER_HEALTHY VtsiEvent = 306
-	// A scheduled caller was created.
+	// The stored configuration of a listener was updated (<code>UpdateListener</code>,
+	// <code>UpdateListeners</code>); its running container is unchanged. Attribute
+	// <code>updated_fields</code>. Never carries a configuration value.
+	VtsiEvent_VTSI_EVENT_LISTENER_UPDATED VtsiEvent = 307
+	// A scheduled caller was created. Attribute <code>scheduled_time</code> (RFC 3339). Sets
+	// <code>campaign_name</code> for a scheduled call of a campaign.
 	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_CREATED VtsiEvent = 400
-	// A scheduled caller fired: its call was started (<code>call_name</code> set).
+	// A scheduled caller fired: its call was started (<code>call_name</code> set). Attributes: outside a
+	// campaign <code>attempt</code> (the attempt number); in a campaign <code>attempt_number</code> and
+	// <code>campaign_call_name</code> (and <code>campaign_name</code> is set).
 	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_FIRED VtsiEvent = 401
-	// A scheduled caller failed for good; <code>description</code> says why.
+	// A scheduled caller failed for good; <code>description</code> says why. Attributes: outside a campaign
+	// <code>attempt</code> and <code>reason</code> (a classification token, e.g.
+	// <code>transient_grpc:unavailable</code>, <code>configuration_error</code>, optionally suffixed
+	// <code>:attempt_budget_exhausted</code>); in a campaign <code>attempt_number</code> and
+	// <code>campaign_call_name</code>.
 	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_FAILED VtsiEvent = 402
-	// A scheduled caller was cancelled.
+	// A scheduled caller was cancelled. No attributes.
 	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_CANCELLED VtsiEvent = 403
-	// A scheduled caller failed and will be retried.
+	// A scheduled caller failed and will be retried. Attributes: outside a campaign <code>attempt</code>,
+	// <code>reason</code> and <code>retry_not_before</code> (RFC 3339); in a campaign
+	// <code>attempt_number</code> and <code>campaign_call_name</code>.
 	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED VtsiEvent = 404
-	// A campaign was created.
+	// A scheduled caller was updated: its stored configuration (an update RPC of scheduled callers, where
+	// the server offers one) or, for a scheduled call of a campaign requeued by
+	// <code>RetryCampaignCalls</code>, its status and scheduled time. Attribute <code>updated_fields</code>
+	// (e.g. <code>status,scheduled_time</code>) and, when it changed, <code>scheduled_time</code> (RFC 3339);
+	// in a campaign also <code>campaign_call_name</code> (and <code>campaign_name</code> is set). Never carries
+	// a configuration value.
+	VtsiEvent_VTSI_EVENT_SCHEDULED_CALLER_UPDATED VtsiEvent = 405
+	// A campaign was created (<code>CreateCampaign</code>, a <code>CampaignAssignment.new_campaign</code>,
+	// <code>CloneCampaign</code>). No attributes, except for a clone: <code>cloned_from</code> (the source
+	// campaign&apos;s resource name) and <code>copied_call_count</code>. An idempotent replay emits nothing.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CREATED VtsiEvent = 500
-	// A campaign&apos;s settings were updated.
+	// A campaign&apos;s settings were updated. Attribute <code>updated_fields</code> (the
+	// <code>update_mask</code> paths). Never carries a call-default value.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_UPDATED VtsiEvent = 501
-	// A campaign was deleted.
+	// A campaign was deleted. Attributes: <code>deleted_campaign_call_count</code>,
+	// <code>cancelled_scheduled_caller_count</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_DELETED VtsiEvent = 502
-	// A campaign was started.
+	// A campaign was started. Attributes: <code>previous_state</code>, <code>state</code>; none when the
+	// campaign was created running by a <code>CampaignAssignment</code>. <code>description</code> is
+	// <code>calls were added</code> when adding calls started it.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_STARTED VtsiEvent = 503
-	// <code>StopCampaign</code> was requested; running calls continue.
+	// <code>StopCampaign</code> was requested; running calls continue. Attributes: <code>previous_state</code>,
+	// <code>state</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_STOP_REQUESTED VtsiEvent = 504
 	// A campaign is stopped: it reached <code>STOPPED</code> (after a stop request or an automatic
-	// stop) once no call of it was running.
+	// stop) once no call of it was running. Attributes: <code>state</code> and <code>display_name</code>
+	// when the engine observed it; none (with <code>description</code> <code>no call of the campaign was in
+	// flight</code>) when the stop request stopped it at once.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_STOPPED VtsiEvent = 505
-	// <code>HardStopCampaign</code> was requested.
+	// <code>HardStopCampaign</code> (or a forced <code>DeleteCampaign</code>) was requested. Attributes:
+	// <code>previous_state</code>, <code>state</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_HARD_STOP_REQUESTED VtsiEvent = 506
-	// A campaign is hard stopped.
+	// A campaign is hard stopped. Attributes as <code>VTSI_EVENT_CAMPAIGN_STOPPED</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_HARD_STOPPED VtsiEvent = 507
-	// A campaign was resumed.
+	// A campaign was resumed (<code>ResumeCampaign</code>, or a <code>COMPLETED</code> campaign that got calls
+	// back from a <code>CampaignAssignment</code> or <code>RetryCampaignCalls</code>). Attributes:
+	// <code>previous_state</code>, <code>state</code>; <code>description</code> says what resumed it when it
+	// was not <code>ResumeCampaign</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_RESUMED VtsiEvent = 508
-	// Every call of a campaign is finished.
+	// Every call of a campaign is finished. Attributes: <code>state</code>, <code>display_name</code>;
+	// <code>description</code> is the <code>state_reason</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_COMPLETED VtsiEvent = 509
-	// The statistics of a running campaign changed (throttled, at most every few seconds per
-	// campaign). <code>campaign_statistics</code> is set.
+	// The statistics of a running campaign changed (throttled, at most once per
+	// <code>ONDEWO_VTSI_CAMPAIGN_PROGRESS_EVENT_MIN_INTERVAL_S</code>, 5 s by default, per campaign).
+	// <code>campaign_statistics</code> is set. Attributes: <code>state</code>, <code>display_name</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_PROGRESS VtsiEvent = 510
 	// <code>max_parallel_calls</code> changed; attributes <code>previous_max_parallel_calls</code>
 	// and <code>max_parallel_calls</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_MAX_PARALLEL_CALLS_CHANGED VtsiEvent = 511
-	// Calls were added to a campaign; attribute <code>added_call_count</code>.
+	// Calls were added to a campaign (an <code>Add*ToCampaign</code> request, or <code>CloneCampaign</code>
+	// with <code>include_calls</code>); attribute <code>added_call_count</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALLS_ADDED VtsiEvent = 512
-	// An attempt of a campaign call was started (<code>call_name</code> set).
+	// An attempt of a campaign call was started (<code>call_name</code> set). Campaign call attributes.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_DISPATCHED VtsiEvent = 513
-	// A campaign call completed.
+	// A campaign call completed. Campaign call attributes.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_COMPLETED VtsiEvent = 514
-	// A campaign call failed after its last attempt.
+	// A campaign call failed after its last attempt. Campaign call attributes; <code>description</code> is
+	// the error.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_FAILED VtsiEvent = 515
-	// An attempt of a campaign call failed and the call will be retried.
+	// An attempt of a campaign call failed and the call will be retried. Campaign call attributes;
+	// <code>description</code> is the error.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_RETRY_SCHEDULED VtsiEvent = 516
-	// A campaign call was cancelled.
+	// A campaign call was cancelled (hard stop, cancelled scheduled caller, or
+	// <code>CancelCampaignCalls</code>). Campaign call attributes; <code>description</code> says what cancelled
+	// it.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_CANCELLED VtsiEvent = 517
 	// The SERVER stopped a campaign (it is now <code>STOPPING</code>) after repeated failures that
 	// cannot succeed by repetition, e.g. a rejected credential; <code>description</code> holds the
 	// <code>state_reason</code>. <code>VTSI_EVENT_CAMPAIGN_STOPPED</code> follows once no call runs.
+	// Attributes: <code>state</code> (<code>STOPPING</code>), <code>display_name</code>.
 	VtsiEvent_VTSI_EVENT_CAMPAIGN_AUTO_STOPPED VtsiEvent = 518
-	// A VTSI project was updated.
+	// A FAILED or CANCELLED campaign call was put back into the queue by <code>RetryCampaignCalls</code>.
+	// Campaign call attributes, plus <code>attempt_limit</code> (the call&apos;s new attempt limit) and, for a
+	// call now <code>RETRY_PENDING</code>, <code>next_attempt_time</code> (RFC 3339).
+	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALL_REQUEUED VtsiEvent = 519
+	// A RUNNING campaign with a <code>calling_window</code> entered a slot and may start calls again (also when
+	// it is started or resumed inside a slot after having been outside one, and when an update of the window
+	// opens it). Attributes: <code>state</code>, <code>display_name</code>, <code>window_end</code> (RFC 3339,
+	// when the current run of slots ends). Best effort, at most one per edge, reported by the replica whose
+	// engine ticked the campaign.
+	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_OPENED VtsiEvent = 520
+	// A RUNNING campaign with a <code>calling_window</code> left its last slot and starts no call until the next
+	// one (also when it is started, or its window updated, outside every slot). Running calls continue.
+	// Attributes: <code>state</code>, <code>display_name</code>, <code>next_window_start</code> (RFC 3339).
+	// Best effort, at most one per edge.
+	VtsiEvent_VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_CLOSED VtsiEvent = 521
+	// A VTSI project was updated. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_UPDATED VtsiEvent = 601
 	// A VTSI project was deleted. Delivered to the webhooks subscribed to it at the moment of the
 	// deletion (their configuration is captured before it is deleted with the project) and to the
-	// project&apos;s open streams, which then end. It is the last event of the project.
+	// project&apos;s open streams, which then end. It is the last event of the project. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_DELETED VtsiEvent = 602
-	// A VTSI project was deployed.
+	// A VTSI project was deployed. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_DEPLOYED VtsiEvent = 603
-	// Deploying a VTSI project failed; <code>description</code> says why.
+	// Deploying a VTSI project failed; <code>description</code> says why. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_DEPLOY_FAILED VtsiEvent = 604
-	// A VTSI project was undeployed.
+	// A VTSI project was undeployed. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_UNDEPLOYED VtsiEvent = 605
 	// The <code>VtsiProjectStatus</code> of a project changed; attributes
-	// <code>previous_status</code> and <code>status</code>.
+	// <code>previous_status</code> and <code>status</code>, each a <code>VtsiProjectStatus</code> name
+	// (<code>DEPLOYED</code>, <code>UPDATING</code>, ...).
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_STATUS_CHANGED VtsiEvent = 606
-	// Undeploying a VTSI project failed; <code>description</code> says why.
+	// Undeploying a VTSI project failed; <code>description</code> says why. No attributes.
 	VtsiEvent_VTSI_EVENT_VTSI_PROJECT_UNDEPLOY_FAILED VtsiEvent = 607
-	// The project&apos;s Asterisk container was deployed.
+	// The project&apos;s Asterisk container was deployed. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_DEPLOYED VtsiEvent = 700
-	// The project&apos;s Asterisk container was removed.
+	// The project&apos;s Asterisk container was removed. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_REMOVED VtsiEvent = 701
-	// The project&apos;s Asterisk was restarted.
+	// The project&apos;s Asterisk was restarted. Attribute <code>restart_reason</code> (<code>plan</code> or
+	// <code>escalation</code>).
 	VtsiEvent_VTSI_EVENT_ASTERISK_RESTARTED VtsiEvent = 702
-	// The project&apos;s Asterisk configuration was reloaded in place.
+	// The project&apos;s Asterisk configuration was reloaded in place. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_CONFIG_RELOADED VtsiEvent = 703
-	// The project&apos;s Asterisk container is not running or unhealthy.
+	// The project&apos;s Asterisk container is not running or unhealthy. Attribute
+	// <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_UNHEALTHY VtsiEvent = 704
-	// The project&apos;s Asterisk container is healthy again.
+	// The project&apos;s Asterisk container is healthy again. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_HEALTHY VtsiEvent = 705
-	// The SIP trunk registered with the carrier.
+	// The SIP trunk registered with the carrier. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_TRUNK_REGISTERED VtsiEvent = 706
-	// The SIP trunk is no longer registered (rejected, unregistered or failed); attribute
-	// <code>registration_status</code>.
+	// The SIP trunk is no longer registered (rejected, unregistered or failed); attributes
+	// <code>container_name</code> and <code>registration_status</code> (Asterisk&apos;s own token, e.g.
+	// <code>Rejected</code>, <code>Unregistered</code>, <code>Unknown</code>).
 	VtsiEvent_VTSI_EVENT_ASTERISK_TRUNK_UNREGISTERED VtsiEvent = 707
-	// Deploying the project&apos;s Asterisk container failed; <code>description</code> says why.
+	// Deploying the project&apos;s Asterisk container failed; <code>description</code> says why. Attribute
+	// <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_DEPLOY_FAILED VtsiEvent = 708
-	// Restarting the project&apos;s Asterisk failed; <code>description</code> says why.
+	// Restarting the project&apos;s Asterisk failed; <code>description</code> says why. Attribute
+	// <code>restart_reason</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_RESTART_FAILED VtsiEvent = 709
 	// Reloading the project&apos;s Asterisk configuration in place failed; <code>description</code>
-	// says why.
+	// says why. Attribute <code>container_name</code>.
 	VtsiEvent_VTSI_EVENT_ASTERISK_CONFIG_RELOAD_FAILED VtsiEvent = 710
-	// A softphone account was created.
+	// A softphone account was created. No attributes.
 	VtsiEvent_VTSI_EVENT_SOFTPHONE_ACCOUNT_CREATED VtsiEvent = 800
-	// A softphone account was updated.
+	// A softphone account was updated. Attribute <code>updated_fields</code>.
 	VtsiEvent_VTSI_EVENT_SOFTPHONE_ACCOUNT_UPDATED VtsiEvent = 801
-	// A softphone account was deleted.
+	// A softphone account was deleted. Attribute <code>revoked_certificate_count</code>.
 	VtsiEvent_VTSI_EVENT_SOFTPHONE_ACCOUNT_DELETED VtsiEvent = 802
-	// The credentials of a softphone account were rotated.
+	// The credentials of a softphone account were rotated. Attribute <code>certificate_rotated</code>
+	// (boolean).
 	VtsiEvent_VTSI_EVENT_SOFTPHONE_CREDENTIALS_ROTATED VtsiEvent = 803
-	// A softphone certificate was revoked.
+	// A softphone certificate was revoked (resource_name: the certificate). Attribute
+	// <code>account_locked</code> (boolean).
 	VtsiEvent_VTSI_EVENT_SOFTPHONE_CERTIFICATE_REVOKED VtsiEvent = 804
-	// Sent by <code>TestWebhook</code> only.
+	// Sent by <code>TestWebhook</code> only (when it names no <code>sample_event</code>). No attributes;
+	// <code>description</code> is <code>webhook test</code>.
 	VtsiEvent_VTSI_EVENT_WEBHOOK_TEST VtsiEvent = 900
-	// A webhook was created (resource_name: the webhook). Never carries a header value.
+	// A webhook was created (resource_name: the webhook). Never carries a header value or the signing
+	// secret. No attributes.
 	VtsiEvent_VTSI_EVENT_WEBHOOK_CREATED VtsiEvent = 901
 	// A webhook was updated; attribute <code>updated_fields</code> (the mask paths). Never carries
-	// a header value.
+	// a header value or the signing secret.
 	VtsiEvent_VTSI_EVENT_WEBHOOK_UPDATED VtsiEvent = 902
-	// A webhook was deleted.
+	// A webhook was deleted. No attributes.
 	VtsiEvent_VTSI_EVENT_WEBHOOK_DELETED VtsiEvent = 903
-	// An event subscription was created (resource_name: the subscription).
+	// An event subscription was created (resource_name: the subscription). No attributes.
 	VtsiEvent_VTSI_EVENT_EVENT_SUBSCRIPTION_CREATED VtsiEvent = 904
 	// An event subscription was updated; attribute <code>updated_fields</code>.
 	VtsiEvent_VTSI_EVENT_EVENT_SUBSCRIPTION_UPDATED VtsiEvent = 905
-	// An event subscription was deleted.
+	// An event subscription was deleted. No attributes.
 	VtsiEvent_VTSI_EVENT_EVENT_SUBSCRIPTION_DELETED VtsiEvent = 906
 )
 
@@ -278,6 +430,7 @@ var (
 		119: "VTSI_EVENT_CALL_LISTENING_RESUMED",
 		120: "VTSI_EVENT_CALL_AUDIO_STREAM_CONNECTED",
 		121: "VTSI_EVENT_CALL_AUDIO_STREAM_DISCONNECTED",
+		122: "VTSI_EVENT_CALL_UPDATED",
 		200: "VTSI_EVENT_CALLER_STARTED",
 		201: "VTSI_EVENT_CALLER_START_FAILED",
 		202: "VTSI_EVENT_CALLER_STOPPED",
@@ -285,6 +438,7 @@ var (
 		204: "VTSI_EVENT_CALLER_RESTARTED",
 		205: "VTSI_EVENT_CALLER_UNHEALTHY",
 		206: "VTSI_EVENT_CALLER_HEALTHY",
+		207: "VTSI_EVENT_CALLER_UPDATED",
 		300: "VTSI_EVENT_LISTENER_STARTED",
 		301: "VTSI_EVENT_LISTENER_START_FAILED",
 		302: "VTSI_EVENT_LISTENER_STOPPED",
@@ -292,11 +446,13 @@ var (
 		304: "VTSI_EVENT_LISTENER_RESTARTED",
 		305: "VTSI_EVENT_LISTENER_UNHEALTHY",
 		306: "VTSI_EVENT_LISTENER_HEALTHY",
+		307: "VTSI_EVENT_LISTENER_UPDATED",
 		400: "VTSI_EVENT_SCHEDULED_CALLER_CREATED",
 		401: "VTSI_EVENT_SCHEDULED_CALLER_FIRED",
 		402: "VTSI_EVENT_SCHEDULED_CALLER_FAILED",
 		403: "VTSI_EVENT_SCHEDULED_CALLER_CANCELLED",
 		404: "VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED",
+		405: "VTSI_EVENT_SCHEDULED_CALLER_UPDATED",
 		500: "VTSI_EVENT_CAMPAIGN_CREATED",
 		501: "VTSI_EVENT_CAMPAIGN_UPDATED",
 		502: "VTSI_EVENT_CAMPAIGN_DELETED",
@@ -316,6 +472,9 @@ var (
 		516: "VTSI_EVENT_CAMPAIGN_CALL_RETRY_SCHEDULED",
 		517: "VTSI_EVENT_CAMPAIGN_CALL_CANCELLED",
 		518: "VTSI_EVENT_CAMPAIGN_AUTO_STOPPED",
+		519: "VTSI_EVENT_CAMPAIGN_CALL_REQUEUED",
+		520: "VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_OPENED",
+		521: "VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_CLOSED",
 		601: "VTSI_EVENT_VTSI_PROJECT_UPDATED",
 		602: "VTSI_EVENT_VTSI_PROJECT_DELETED",
 		603: "VTSI_EVENT_VTSI_PROJECT_DEPLOYED",
@@ -371,6 +530,7 @@ var (
 		"VTSI_EVENT_CALL_LISTENING_RESUMED":              119,
 		"VTSI_EVENT_CALL_AUDIO_STREAM_CONNECTED":         120,
 		"VTSI_EVENT_CALL_AUDIO_STREAM_DISCONNECTED":      121,
+		"VTSI_EVENT_CALL_UPDATED":                        122,
 		"VTSI_EVENT_CALLER_STARTED":                      200,
 		"VTSI_EVENT_CALLER_START_FAILED":                 201,
 		"VTSI_EVENT_CALLER_STOPPED":                      202,
@@ -378,6 +538,7 @@ var (
 		"VTSI_EVENT_CALLER_RESTARTED":                    204,
 		"VTSI_EVENT_CALLER_UNHEALTHY":                    205,
 		"VTSI_EVENT_CALLER_HEALTHY":                      206,
+		"VTSI_EVENT_CALLER_UPDATED":                      207,
 		"VTSI_EVENT_LISTENER_STARTED":                    300,
 		"VTSI_EVENT_LISTENER_START_FAILED":               301,
 		"VTSI_EVENT_LISTENER_STOPPED":                    302,
@@ -385,11 +546,13 @@ var (
 		"VTSI_EVENT_LISTENER_RESTARTED":                  304,
 		"VTSI_EVENT_LISTENER_UNHEALTHY":                  305,
 		"VTSI_EVENT_LISTENER_HEALTHY":                    306,
+		"VTSI_EVENT_LISTENER_UPDATED":                    307,
 		"VTSI_EVENT_SCHEDULED_CALLER_CREATED":            400,
 		"VTSI_EVENT_SCHEDULED_CALLER_FIRED":              401,
 		"VTSI_EVENT_SCHEDULED_CALLER_FAILED":             402,
 		"VTSI_EVENT_SCHEDULED_CALLER_CANCELLED":          403,
 		"VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED":    404,
+		"VTSI_EVENT_SCHEDULED_CALLER_UPDATED":            405,
 		"VTSI_EVENT_CAMPAIGN_CREATED":                    500,
 		"VTSI_EVENT_CAMPAIGN_UPDATED":                    501,
 		"VTSI_EVENT_CAMPAIGN_DELETED":                    502,
@@ -409,6 +572,9 @@ var (
 		"VTSI_EVENT_CAMPAIGN_CALL_RETRY_SCHEDULED":       516,
 		"VTSI_EVENT_CAMPAIGN_CALL_CANCELLED":             517,
 		"VTSI_EVENT_CAMPAIGN_AUTO_STOPPED":               518,
+		"VTSI_EVENT_CAMPAIGN_CALL_REQUEUED":              519,
+		"VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_OPENED":      520,
+		"VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_CLOSED":      521,
 		"VTSI_EVENT_VTSI_PROJECT_UPDATED":                601,
 		"VTSI_EVENT_VTSI_PROJECT_DELETED":                602,
 		"VTSI_EVENT_VTSI_PROJECT_DEPLOYED":               603,
@@ -470,6 +636,10 @@ func (VtsiEvent) EnumDescriptor() ([]byte, []int) {
 }
 
 // HTTP method of a webhook request.
+// <p>Note: the zero value <code>WEBHOOK_HTTP_METHOD_UNSPECIFIED</code> is not "no method" but means
+// <code>POST</code>, the default. It keeps its released name for wire and source compatibility; a webhook
+// written with it is stored and sent as POST, and <code>Webhook.http_method</code> then reads back
+// <code>WEBHOOK_HTTP_METHOD_POST</code>.</p>
 type WebhookHttpMethod int32
 
 const (
@@ -554,7 +724,9 @@ type VtsiEventMessage struct {
 	Description string `protobuf:"bytes,11,opt,name=description,proto3" json:"description,omitempty"`
 	// Further event-specific values, e.g. <code>caller_name</code>, <code>listener_name</code>,
 	// <code>phone_number</code>, <code>container_name</code>, <code>attempt_number</code>,
-	// <code>previous_status</code>. Keys are documented per event in the VTSI documentation.
+	// <code>previous_status</code>. The keys and value formats of each event are documented at its
+	// <a href="index.html#ondewo.vtsi.VtsiEvent">VtsiEvent</a> value; at most 20 entries, each value at most
+	// 256 characters. Receivers must ignore keys they do not know: later versions may add keys.
 	Attributes map[string]string `protobuf:"bytes,12,rep,name=attributes,proto3" json:"attributes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Statistics of the campaign, on campaign events.
 	CampaignStatistics *CampaignStatistics `protobuf:"bytes,13,opt,name=campaign_statistics,json=campaignStatistics,proto3" json:"campaign_statistics,omitempty"`
@@ -703,13 +875,16 @@ type VtsiEventSubscription struct {
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Output only. VTSI project of the subscription.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,2,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Human-readable name, at most 128 characters. Updatable.
+	// Human-readable name, at most 128 characters. NOT unique within the project; may be empty, and an
+	// empty display name stays empty (no default is generated). Updatable.
 	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	// The events to deliver. Required unless <code>all_events</code> is set; must be empty when it
-	// is. Updatable.
+	// is. At most one entry per value (duplicates are ignored). Updatable.
 	Events []VtsiEvent `protobuf:"varint,4,rep,packed,name=events,proto3,enum=ondewo.vtsi.VtsiEvent" json:"events,omitempty"`
-	// Deliver every event, including events added in later versions. Updatable.
+	// Deliver every event, including events added in later versions, except
+	// <code>excluded_events</code>. Updatable.
 	AllEvents bool `protobuf:"varint,5,opt,name=all_events,json=allEvents,proto3" json:"all_events,omitempty"`
 	// Deliver only events whose <code>resource_name</code> starts with one of these prefixes, e.g.
 	// a caller name (<code>projects/&lt;p&gt;/callers/&lt;c&gt;</code> also selects that
@@ -740,8 +915,15 @@ type VtsiEventSubscription struct {
 	// <code>campaign_name</code> and <code>call_name</code>. Empty means no constraint. Combined with
 	// <code>resource_name_prefixes</code> by AND. At most 50. Updatable.
 	CampaignNames []string `protobuf:"bytes,13,rep,name=campaign_names,json=campaignNames,proto3" json:"campaign_names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Events NOT to deliver, subtracted from the selection of <code>events</code> / <code>all_events</code>,
+	// e.g. <code>all_events</code> with <code>VTSI_EVENT_CALL_SIP_STATUS_CHANGED</code> and
+	// <code>VTSI_EVENT_CAMPAIGN_PROGRESS</code> excluded. Empty means nothing is excluded.
+	// <code>VTSI_EVENT_UNSPECIFIED</code>, a reserved value, or a value that is also in <code>events</code>
+	// is rejected with <code>INVALID_ARGUMENT</code>. At most 100 entries. Updatable (path
+	// <code>excluded_events</code>, replaced whole).
+	ExcludedEvents []VtsiEvent `protobuf:"varint,14,rep,packed,name=excluded_events,json=excludedEvents,proto3,enum=ondewo.vtsi.VtsiEvent" json:"excluded_events,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *VtsiEventSubscription) Reset() {
@@ -865,6 +1047,13 @@ func (x *VtsiEventSubscription) GetCampaignNames() []string {
 	return nil
 }
 
+func (x *VtsiEventSubscription) GetExcludedEvents() []VtsiEvent {
+	if x != nil {
+		return x.ExcludedEvents
+	}
+	return nil
+}
+
 // Delivery counters of a webhook. Approximate: summed over every server replica and flushed every
 // few seconds.
 type WebhookDeliveryStatistics struct {
@@ -975,8 +1164,10 @@ type Webhook struct {
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Output only. VTSI project of the webhook.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,2,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Human-readable name, at most 128 characters. Updatable.
+	// Human-readable name, at most 128 characters. NOT unique within the project; may be empty, and an
+	// empty display name stays empty (no default is generated). Updatable.
 	DisplayName string `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	// Required. http:// or https:// URL, at most 2048 characters, without user information. Any
 	// host is allowed. Updatable.
@@ -1005,7 +1196,33 @@ type Webhook struct {
 	// Output only. The user who last modified the webhook.
 	ModifiedBy string `protobuf:"bytes,12,opt,name=modified_by,json=modifiedBy,proto3" json:"modified_by,omitempty"`
 	// Output only. Last modification time.
-	ModifiedAt    *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=modified_at,json=modifiedAt,proto3" json:"modified_at,omitempty"`
+	ModifiedAt *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=modified_at,json=modifiedAt,proto3" json:"modified_at,omitempty"`
+	// Optional. Secret with which the server SIGNS every request to this webhook, so the receiver can verify
+	// that a request comes from this VTSI server and was not changed. WRITE-ONLY: every RPC returns
+	// <code>********</code> when a secret is stored and an empty string when none is; it is never logged and
+	// never put on an event. 32 to 256 printable ASCII characters without whitespace (generate at least
+	// 32 random characters); anything else, and the mask value itself on create, is rejected with
+	// <code>INVALID_ARGUMENT</code>. Empty (the default) means requests are not signed.
+	// <p>Signature: each request carries the header</p>
+	// <pre><code>X-Ondewo-Vtsi-Signature: t=&lt;unix seconds&gt;,v1=&lt;signature&gt;</code></pre>
+	// <p>where <code>t</code> is the time the request was sent (base-10 seconds since the Unix epoch, a new
+	// value for every attempt) and the signature is the lowercase hex HMAC-SHA256, keyed with the secret&apos;s
+	// bytes, of the ASCII string <code>&lt;t&gt;.</code> followed by the exact bytes of the request body:</p>
+	// <pre><code>v1 = hex(HMAC_SHA256(key = signing_secret, message = t + "." + body))</code></pre>
+	// <p>To verify: recompute it over the raw body as received (before any JSON parsing), compare in constant
+	// time with each <code>v1</code> value of the header (there can be two, see rotation), and reject the
+	// request when none matches or when <code>t</code> is more than 5 minutes away from the receiver&apos;s
+	// clock (replay protection; de-duplicate by <code>event_id</code> as well). Further signature schemes may
+	// be added later as additional comma-separated <code>v&lt;n&gt;=</code> entries: ignore entries you do not
+	// know.</p>
+	// <p>Rotation: <code>UpdateWebhook</code> with <code>update_mask</code> path <code>signing_secret</code>
+	// and the new value. For <code>ONDEWO_VTSI_WEBHOOK_SIGNING_ROTATION_GRACE_S</code> (24 h by default) after
+	// a rotation every request carries two signatures, <code>t=...,v1=&lt;new&gt;,v1=&lt;previous&gt;</code>,
+	// so the receiver can switch to the new secret at any time within that window; afterwards only the new
+	// one. Writing an empty string removes signing at once (no grace); writing <code>********</code> keeps the
+	// stored secret, so a Get-modify-Update round trip does not change it. <code>TestWebhook</code> signs like
+	// a real delivery and is the way to check a receiver&apos;s verification before relying on it.</p>
+	SigningSecret string `protobuf:"bytes,14,opt,name=signing_secret,json=signingSecret,proto3" json:"signing_secret,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1131,10 +1348,22 @@ func (x *Webhook) GetModifiedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-// Selects events for <code>SubscribeVtsiEvents</code> without a stored subscription.
+func (x *Webhook) GetSigningSecret() string {
+	if x != nil {
+		return x.SigningSecret
+	}
+	return ""
+}
+
+// Selects events for <code>SubscribeVtsiEvents</code> without a stored subscription, and narrows a
+// <code>RedeliverWebhookEvents</code> window. Every set field narrows the selection (AND); the entries of one
+// list are alternatives (OR).
 type VtsiEventFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Only these events. Empty means every event.
+	// Only these events. Empty means every event (unlike <code>VtsiEventSubscription.events</code>, where
+	// empty is refused unless <code>all_events</code> is set: a filter is a one-off request, so "no
+	// constraint" is its natural empty value). <code>VTSI_EVENT_UNSPECIFIED</code> or a reserved value is
+	// rejected with <code>INVALID_ARGUMENT</code>.
 	Events []VtsiEvent `protobuf:"varint,1,rep,packed,name=events,proto3,enum=ondewo.vtsi.VtsiEvent" json:"events,omitempty"`
 	// Only events whose <code>resource_name</code> starts with one of these prefixes. Empty means
 	// every resource of the project. Same semantics as
@@ -1143,8 +1372,15 @@ type VtsiEventFilter struct {
 	// Only events of these campaigns. Same semantics as
 	// <code>VtsiEventSubscription.campaign_names</code>.
 	CampaignNames []string `protobuf:"bytes,3,rep,name=campaign_names,json=campaignNames,proto3" json:"campaign_names,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Every event, explicitly; equivalent to an empty <code>events</code> and present for symmetry with
+	// <code>VtsiEventSubscription.all_events</code>. Set together with a non-empty <code>events</code> is
+	// rejected with <code>INVALID_ARGUMENT</code>.
+	AllEvents bool `protobuf:"varint,4,opt,name=all_events,json=allEvents,proto3" json:"all_events,omitempty"`
+	// Events NOT to select, subtracted from the selection of <code>events</code> / <code>all_events</code>.
+	// Same semantics and limits as <code>VtsiEventSubscription.excluded_events</code>.
+	ExcludedEvents []VtsiEvent `protobuf:"varint,5,rep,packed,name=excluded_events,json=excludedEvents,proto3,enum=ondewo.vtsi.VtsiEvent" json:"excluded_events,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *VtsiEventFilter) Reset() {
@@ -1198,15 +1434,38 @@ func (x *VtsiEventFilter) GetCampaignNames() []string {
 	return nil
 }
 
+func (x *VtsiEventFilter) GetAllEvents() bool {
+	if x != nil {
+		return x.AllEvents
+	}
+	return false
+}
+
+func (x *VtsiEventFilter) GetExcludedEvents() []VtsiEvent {
+	if x != nil {
+		return x.ExcludedEvents
+	}
+	return nil
+}
+
 // The request message for <code>Events.CreateVtsiEventSubscription</code>.
 type CreateVtsiEventSubscriptionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project. The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>, an unknown project with
+	// <code>NOT_FOUND</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The subscription to create.
+	// The subscription to create. Output-only fields (<code>name</code>, <code>vtsi_project_name</code>,
+	// <code>created_*</code>, <code>modified_*</code>) must be unset.
 	EventSubscription *VtsiEventSubscription `protobuf:"bytes,2,opt,name=event_subscription,json=eventSubscription,proto3" json:"event_subscription,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Optional. Partial response: the <code>VtsiEventSubscription</code> field paths to populate, relative to the returned
+	// <code>VtsiEventSubscription</code> (no prefix), e.g. <code>name</code>, <code>events</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateVtsiEventSubscriptionRequest) Reset() {
@@ -1253,11 +1512,26 @@ func (x *CreateVtsiEventSubscriptionRequest) GetEventSubscription() *VtsiEventSu
 	return nil
 }
 
+func (x *CreateVtsiEventSubscriptionRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.GetVtsiEventSubscription</code>.
 type GetVtsiEventSubscriptionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the subscription.
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>VtsiEventSubscription</code> field paths to populate, relative to the returned
+	// <code>VtsiEventSubscription</code> (no prefix), e.g. <code>events</code>, <code>webhook_names</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1299,17 +1573,32 @@ func (x *GetVtsiEventSubscriptionRequest) GetName() string {
 	return ""
 }
 
+func (x *GetVtsiEventSubscriptionRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.UpdateVtsiEventSubscription</code>.
 type UpdateVtsiEventSubscriptionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The subscription, identified by <code>event_subscription.name</code>.
+	// The subscription, identified by <code>event_subscription.name</code>
+	// (<code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code>; malformed is
+	// <code>INVALID_ARGUMENT</code>), carrying the new values of the fields named in <code>update_mask</code>.
 	EventSubscription *VtsiEventSubscription `protobuf:"bytes,1,opt,name=event_subscription,json=eventSubscription,proto3" json:"event_subscription,omitempty"`
 	// Required. Paths without prefix: <code>display_name</code>, <code>events</code>,
 	// <code>all_events</code>, <code>resource_name_prefixes</code>, <code>campaign_names</code>,
 	// <code>webhook_names</code>, <code>disabled</code>. An empty mask or another path is rejected
 	// with <code>INVALID_ARGUMENT</code>. A path in the mask writes the sent value, including
-	// <code>false</code> and empty lists.
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// <code>false</code> and empty lists. <code>excluded_events</code> is updatable too.
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the <code>VtsiEventSubscription</code> field paths to populate, relative to the returned
+	// <code>VtsiEventSubscription</code> (no prefix). Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1358,11 +1647,25 @@ func (x *UpdateVtsiEventSubscriptionRequest) GetUpdateMask() *fieldmaskpb.FieldM
 	return nil
 }
 
+func (x *UpdateVtsiEventSubscriptionRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.DeleteVtsiEventSubscription</code>.
 type DeleteVtsiEventSubscriptionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the subscription.
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>DeleteVtsiEventSubscriptionResponse</code> field paths to populate
+	// (as <code>DeleteCampaignRequest.field_mask</code>). <code>name</code> is always populated. Unset or empty
+	// returns every field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before
+	// anything is deleted. It shapes only the response: the subscription is deleted regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1402,6 +1705,13 @@ func (x *DeleteVtsiEventSubscriptionRequest) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *DeleteVtsiEventSubscriptionRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
 }
 
 // The response message for <code>Events.DeleteVtsiEventSubscription</code>.
@@ -1454,11 +1764,22 @@ func (x *DeleteVtsiEventSubscriptionResponse) GetName() string {
 type ListVtsiEventSubscriptionsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project. The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>, an unknown project with
+	// <code>NOT_FOUND</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Optional. <code>0</code> means 20; above 1000 clamped; negative rejected.
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Optional. The <code>next_page_token</code> of a previous response.
-	PageToken     *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	PageToken *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned
+	// <code>VtsiEventSubscription</code>, relative to the <code>VtsiEventSubscription</code> message (no
+	// <code>event_subscriptions.</code> prefix), e.g. <code>display_name</code>, <code>events</code>.
+	// Nested paths through singular message fields are allowed; a path below a repeated or map field is
+	// not. <code>name</code> is always populated. Unset or empty returns every field. An unknown path is
+	// rejected with <code>INVALID_ARGUMENT</code> naming it. Applied after the server&apos;s redaction, so
+	// it can only narrow the response and never populates a field that was left empty. Not part of the
+	// paging contract: a <code>page_token</code> stays valid with another mask.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1512,6 +1833,13 @@ func (x *ListVtsiEventSubscriptionsRequest) GetPageToken() string {
 		return *x.PageToken
 	}
 	return ""
+}
+
+func (x *ListVtsiEventSubscriptionsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
 }
 
 // The response message for <code>Events.ListVtsiEventSubscriptions</code>.
@@ -1573,9 +1901,18 @@ func (x *ListVtsiEventSubscriptionsResponse) GetNextPageToken() string {
 type CreateWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project. The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>, an unknown project with
+	// <code>NOT_FOUND</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The webhook to create.
-	Webhook       *Webhook `protobuf:"bytes,2,opt,name=webhook,proto3" json:"webhook,omitempty"`
+	// The webhook to create. Output-only fields (<code>name</code>, <code>vtsi_project_name</code>,
+	// <code>delivery_statistics</code>, <code>created_*</code>, <code>modified_*</code>) must be unset.
+	Webhook *Webhook `protobuf:"bytes,2,opt,name=webhook,proto3" json:"webhook,omitempty"`
+	// Optional. Partial response: the <code>Webhook</code> field paths to populate, relative to the returned
+	// <code>Webhook</code> (no prefix), e.g. <code>name</code>, <code>url</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1624,11 +1961,26 @@ func (x *CreateWebhookRequest) GetWebhook() *Webhook {
 	return nil
 }
 
+func (x *CreateWebhookRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.GetWebhook</code>.
 type GetWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the webhook.
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>Webhook</code> field paths to populate, relative to the returned
+	// <code>Webhook</code> (no prefix), e.g. <code>url</code>, <code>delivery_statistics</code>. Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1670,10 +2022,19 @@ func (x *GetWebhookRequest) GetName() string {
 	return ""
 }
 
+func (x *GetWebhookRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.UpdateWebhook</code>.
 type UpdateWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The webhook, identified by <code>webhook.name</code>.
+	// The webhook, identified by <code>webhook.name</code>
+	// (<code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code>; malformed is
+	// <code>INVALID_ARGUMENT</code>), carrying the new values of the fields named in <code>update_mask</code>.
 	Webhook *Webhook `protobuf:"bytes,1,opt,name=webhook,proto3" json:"webhook,omitempty"`
 	// Required. Paths without prefix: <code>display_name</code>, <code>url</code>,
 	// <code>http_method</code>, <code>custom_headers</code>, <code>disabled</code>,
@@ -1682,8 +2043,15 @@ type UpdateWebhookRequest struct {
 	// <code>false</code>; an unset <code>timeout</code> writes the server default. When
 	// <code>url</code> moves to another origin and the webhook has stored headers,
 	// <code>custom_headers</code> must be in the mask with real values (see
-	// <code>UpdateWebhook</code>).
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// <code>UpdateWebhook</code>). <code>signing_secret</code> is updatable too: a new value rotates it, an
+	// empty one removes it, <code>********</code> keeps it (see <code>Webhook.signing_secret</code>).
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the <code>Webhook</code> field paths to populate, relative to the returned
+	// <code>Webhook</code> (no prefix). Nested paths through singular message fields are allowed; a path
+	// below a repeated or map field is not. <code>name</code> is always populated. Unset or empty returns every
+	// field. An unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it, before anything is
+	// written. Applied after the masking of secrets, so it never reveals one. It shapes only the response.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1732,11 +2100,26 @@ func (x *UpdateWebhookRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
+func (x *UpdateWebhookRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
 // The request message for <code>Events.DeleteWebhook</code>.
 type DeleteWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the webhook.
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Partial response: the <code>DeleteWebhookResponse</code> field paths to populate, e.g.
+	// <code>detached_subscription_count</code> (as <code>DeleteCampaignRequest.field_mask</code>).
+	// <code>name</code> is always populated. Unset or empty returns every field. An unknown path is rejected
+	// with <code>INVALID_ARGUMENT</code> naming it, before anything is deleted. It shapes only the response:
+	// the webhook is deleted regardless.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1776,6 +2159,13 @@ func (x *DeleteWebhookRequest) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *DeleteWebhookRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
 }
 
 // The response message for <code>Events.DeleteWebhook</code>.
@@ -1837,11 +2227,23 @@ func (x *DeleteWebhookResponse) GetDetachedSubscriptionCount() int32 {
 type ListWebhooksRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project. The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>, an unknown project with
+	// <code>NOT_FOUND</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Optional. <code>0</code> means 20; above 1000 clamped; negative rejected.
 	PageSize int32 `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	// Optional. The <code>next_page_token</code> of a previous response.
-	PageToken     *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	PageToken *string `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>Webhook</code>,
+	// relative to the <code>Webhook</code> message (no <code>webhooks.</code> prefix), e.g.
+	// <code>display_name</code>, <code>url</code>, <code>delivery_statistics</code>. Nested paths through
+	// singular message fields are allowed; a path below a repeated or map field is not. <code>name</code>
+	// is always populated. Unset or empty returns every field. An unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it. Applied after the masking of the custom header values (a
+	// returned value stays <code>********</code>), so it can only narrow the response and never populates a
+	// field that was left empty. Not part of the paging contract: a <code>page_token</code> stays valid
+	// with another mask.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,4,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1895,6 +2297,13 @@ func (x *ListWebhooksRequest) GetPageToken() string {
 		return *x.PageToken
 	}
 	return ""
+}
+
+func (x *ListWebhooksRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
 }
 
 // The response message for <code>Events.ListWebhooks</code>.
@@ -1956,7 +2365,24 @@ func (x *ListWebhooksResponse) GetNextPageToken() string {
 type TestWebhookRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the webhook.
-	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Optional. Send an event shaped like this real event instead of <code>VTSI_EVENT_WEBHOOK_TEST</code>, so
+	// a receiver can be tested against the payload it will get: <code>event</code> is this value, the header
+	// <code>X-Ondewo-Vtsi-Event</code> its name, <code>event_id</code> a fresh uuid,
+	// <code>vtsi_project_name</code> the webhook&apos;s project, <code>event_time</code> now, and every field and
+	// attribute key the event carries (see its <code>VtsiEvent</code> value) is filled with a placeholder of the
+	// documented format: resource names use the all-zero uuid
+	// <code>00000000-0000-0000-0000-000000000000</code> (e.g.
+	// <code>projects/&lt;project_uuid&gt;/callers/00000000-0000-0000-0000-000000000000/calls/00000000-0000-0000-0000-000000000000</code>),
+	// a phone number is <code>+10000000000</code>, counts are <code>0</code>, times are now. It always carries
+	// the attribute <code>test</code> = <code>true</code>, <code>description</code> <code>webhook test</code>
+	// and the header <code>X-Ondewo-Vtsi-Test: true</code>, so a receiver can tell it from a real event and
+	// must not act on it. No resource is read or changed. <code>VTSI_EVENT_UNSPECIFIED</code> (the default)
+	// sends <code>VTSI_EVENT_WEBHOOK_TEST</code> as before; a reserved value or one the server does not know is
+	// rejected with <code>INVALID_ARGUMENT</code>.
+	SampleEvent   VtsiEvent `protobuf:"varint,2,opt,name=sample_event,json=sampleEvent,proto3,enum=ondewo.vtsi.VtsiEvent" json:"sample_event,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1996,6 +2422,13 @@ func (x *TestWebhookRequest) GetName() string {
 		return x.Name
 	}
 	return ""
+}
+
+func (x *TestWebhookRequest) GetSampleEvent() VtsiEvent {
+	if x != nil {
+		return x.SampleEvent
+	}
+	return VtsiEvent_VTSI_EVENT_UNSPECIFIED
 }
 
 // The response message for <code>Events.TestWebhook</code>.
@@ -2084,6 +2517,8 @@ func (x *TestWebhookResponse) GetEventId() string {
 type SubscribeVtsiEventsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project. The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
+	// Empty or malformed is rejected with <code>INVALID_ARGUMENT</code>, an unknown project with
+	// <code>NOT_FOUND</code>.
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Which events. Neither set means every event of the project.
 	//
@@ -2093,8 +2528,19 @@ type SubscribeVtsiEventsRequest struct {
 	//	*SubscribeVtsiEventsRequest_Filter
 	Selector isSubscribeVtsiEventsRequest_Selector `protobuf_oneof:"selector"`
 	// Optional. The <code>resume_token</code> of a previous response: continue after it.
-	// Unset starts with events that happen from now on.
-	ResumeToken   *string `protobuf:"bytes,4,opt,name=resume_token,json=resumeToken,proto3,oneof" json:"resume_token,omitempty"`
+	// Unset starts with events that happen from now on (or at <code>start_time</code>). Mutually exclusive
+	// with <code>start_time</code> (both set is <code>INVALID_ARGUMENT</code>).
+	ResumeToken *string `protobuf:"bytes,4,opt,name=resume_token,json=resumeToken,proto3,oneof" json:"resume_token,omitempty"`
+	// Optional. Replay from the server&apos;s event journal: the stream first delivers the journaled events of
+	// the project that occurred at or after this time and match the selector, oldest first (journal order),
+	// then continues live without a gap or a duplicate at the seam. Mutually exclusive with
+	// <code>resume_token</code>: use <code>start_time</code> for a first connection or after losing the token,
+	// the token for every reconnect. Older than the journal retention
+	// (<code>ONDEWO_VTSI_EVENT_JOURNAL_RETENTION_S</code>, 24 h by default) is <code>OUT_OF_RANGE</code>; later
+	// than the server&apos;s clock is <code>INVALID_ARGUMENT</code>. The journal holds only events of periods in
+	// which the project had an open stream or an enabled subscription, so the replay can have gaps it cannot
+	// report; reconcile with the status RPCs when completeness matters. Unset (the default) starts live.
+	StartTime     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2168,13 +2614,25 @@ func (x *SubscribeVtsiEventsRequest) GetResumeToken() string {
 	return ""
 }
 
+func (x *SubscribeVtsiEventsRequest) GetStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartTime
+	}
+	return nil
+}
+
 type isSubscribeVtsiEventsRequest_Selector interface {
 	isSubscribeVtsiEventsRequest_Selector()
 }
 
 type SubscribeVtsiEventsRequest_EventSubscriptionName struct {
-	// Use the events and resource prefixes of this subscription (its webhooks are irrelevant
-	// here). The format is:
+	// Select events exactly as this subscription does: its <code>events</code> or
+	// <code>all_events</code>, minus its <code>excluded_events</code>, narrowed by its
+	// <code>resource_name_prefixes</code> and <code>campaign_names</code> (its <code>webhook_names</code>
+	// are irrelevant here). Read when the stream opens and re-read within a few seconds of an update, so an
+	// update applies to the open stream; disabling or deleting the subscription ends the stream. It must
+	// be a subscription of <code>vtsi_project_name</code> (<code>INVALID_ARGUMENT</code> otherwise) and
+	// enabled (<code>FAILED_PRECONDITION</code> otherwise). The format is:
 	// <pre><code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code></pre>
 	EventSubscriptionName string `protobuf:"bytes,2,opt,name=event_subscription_name,json=eventSubscriptionName,proto3,oneof"`
 }
@@ -2200,8 +2658,16 @@ type SubscribeVtsiEventsResponse struct {
 	ResumeToken string `protobuf:"bytes,2,opt,name=resume_token,json=resumeToken,proto3" json:"resume_token,omitempty"`
 	// Events this stream skipped because the client read too slowly (the server buffer was full).
 	DroppedEventCount int64 `protobuf:"varint,3,opt,name=dropped_event_count,json=droppedEventCount,proto3" json:"dropped_event_count,omitempty"`
-	// Set on the last message when the server ended the stream. Empty otherwise.
-	EndReason     string `protobuf:"bytes,4,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// Set on the last message when the server ended the stream. Empty otherwise. Human-readable; branch on
+	// <code>end_reason_type</code> instead.
+	EndReason string `protobuf:"bytes,4,opt,name=end_reason,json=endReason,proto3" json:"end_reason,omitempty"`
+	// Set on the last message when the server ended the stream, next to <code>end_reason</code>: one of
+	// <code>STREAM_END_REASON_MAX_DURATION</code>, <code>STREAM_END_REASON_CLIENT_TOO_SLOW</code>,
+	// <code>STREAM_END_REASON_SUBSCRIPTION_DELETED</code>, <code>STREAM_END_REASON_SUBSCRIPTION_DISABLED</code>,
+	// <code>STREAM_END_REASON_PROJECT_DELETED</code>, <code>STREAM_END_REASON_SERVER_SHUTDOWN</code>.
+	// <code>STREAM_END_REASON_UNSPECIFIED</code> on every other message (and on the last message of a server
+	// that predates this field).
+	EndReasonType StreamEndReason `protobuf:"varint,5,opt,name=end_reason_type,json=endReasonType,proto3,enum=ondewo.vtsi.StreamEndReason" json:"end_reason_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2264,6 +2730,185 @@ func (x *SubscribeVtsiEventsResponse) GetEndReason() string {
 	return ""
 }
 
+func (x *SubscribeVtsiEventsResponse) GetEndReasonType() StreamEndReason {
+	if x != nil {
+		return x.EndReasonType
+	}
+	return StreamEndReason_STREAM_END_REASON_UNSPECIFIED
+}
+
+// The request message for <code>Events.RedeliverWebhookEvents</code>.
+type RedeliverWebhookEventsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required. Resource name of the webhook to send the events to; it must be enabled.
+	// The format is: <pre><code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code></pre>
+	WebhookName string `protobuf:"bytes,1,opt,name=webhook_name,json=webhookName,proto3" json:"webhook_name,omitempty"`
+	// The events to send again, by <code>event_id</code> (uuid), at most 1000, duplicates ignored. Sent in
+	// journal order (oldest first), whatever the webhook&apos;s subscriptions select (naming an event is the
+	// selection) but only events of the webhook&apos;s project: an id that the journal does not hold for this
+	// project, whether expired, never journaled, unknown or of another project, is counted in
+	// <code>not_in_journal_count</code> and sent nowhere. Exactly one of <code>event_ids</code> and
+	// <code>start_time</code> must be set.
+	EventIds []string `protobuf:"bytes,2,rep,name=event_ids,json=eventIds,proto3" json:"event_ids,omitempty"`
+	// Start of a time window, inclusive, on the event&apos;s <code>event_time</code>: send the journaled events of
+	// the project in the window that the webhook&apos;s ENABLED event subscriptions select now (as for a live
+	// event), narrowed by <code>filter</code>, oldest first. Older than the journal retention is
+	// <code>OUT_OF_RANGE</code>.
+	StartTime *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	// End of the window, exclusive. Unset means now. Must be after <code>start_time</code> and is only valid
+	// with it.
+	EndTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	// Optional. Narrows the selection further (AND), with the semantics of the inline filter of
+	// <code>SubscribeVtsiEventsRequest</code>; applied to <code>event_ids</code> too.
+	Filter        *VtsiEventFilter `protobuf:"bytes,5,opt,name=filter,proto3" json:"filter,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RedeliverWebhookEventsRequest) Reset() {
+	*x = RedeliverWebhookEventsRequest{}
+	mi := &file_ondewo_vtsi_events_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RedeliverWebhookEventsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RedeliverWebhookEventsRequest) ProtoMessage() {}
+
+func (x *RedeliverWebhookEventsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_events_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RedeliverWebhookEventsRequest.ProtoReflect.Descriptor instead.
+func (*RedeliverWebhookEventsRequest) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_events_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *RedeliverWebhookEventsRequest) GetWebhookName() string {
+	if x != nil {
+		return x.WebhookName
+	}
+	return ""
+}
+
+func (x *RedeliverWebhookEventsRequest) GetEventIds() []string {
+	if x != nil {
+		return x.EventIds
+	}
+	return nil
+}
+
+func (x *RedeliverWebhookEventsRequest) GetStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StartTime
+	}
+	return nil
+}
+
+func (x *RedeliverWebhookEventsRequest) GetEndTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.EndTime
+	}
+	return nil
+}
+
+func (x *RedeliverWebhookEventsRequest) GetFilter() *VtsiEventFilter {
+	if x != nil {
+		return x.Filter
+	}
+	return nil
+}
+
+// The response message for <code>Events.RedeliverWebhookEvents</code>.
+type RedeliverWebhookEventsResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Events queued for the webhook by this request.
+	EnqueuedCount int32 `protobuf:"varint,1,opt,name=enqueued_count,json=enqueuedCount,proto3" json:"enqueued_count,omitempty"`
+	// Named <code>event_ids</code> the journal does not hold for the webhook&apos;s project (expired, never
+	// journaled, unknown, or of another project). <code>0</code> for a window.
+	NotInJournalCount int32 `protobuf:"varint,2,opt,name=not_in_journal_count,json=notInJournalCount,proto3" json:"not_in_journal_count,omitempty"`
+	// Selected events that were NOT queued: beyond the per-request bound of 1000, or because the
+	// server&apos;s webhook queue (<code>ONDEWO_VTSI_WEBHOOK_MAX_QUEUED_EVENTS_PER_WEBHOOK</code>, 1000 by
+	// default) was full. Send them with another request (for a window: from <code>next_start_time</code>).
+	NotEnqueuedCount int32 `protobuf:"varint,3,opt,name=not_enqueued_count,json=notEnqueuedCount,proto3" json:"not_enqueued_count,omitempty"`
+	// For a window with <code>not_enqueued_count</code> above 0: the <code>event_time</code> of the first event
+	// that was not queued; pass it as the next request&apos;s <code>start_time</code> (with the same
+	// <code>end_time</code>). Events with the same <code>event_time</code> as the last queued one may then be
+	// sent twice; receivers de-duplicate by <code>event_id</code>. Unset otherwise.
+	NextStartTime *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=next_start_time,json=nextStartTime,proto3" json:"next_start_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RedeliverWebhookEventsResponse) Reset() {
+	*x = RedeliverWebhookEventsResponse{}
+	mi := &file_ondewo_vtsi_events_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RedeliverWebhookEventsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RedeliverWebhookEventsResponse) ProtoMessage() {}
+
+func (x *RedeliverWebhookEventsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_events_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RedeliverWebhookEventsResponse.ProtoReflect.Descriptor instead.
+func (*RedeliverWebhookEventsResponse) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_events_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *RedeliverWebhookEventsResponse) GetEnqueuedCount() int32 {
+	if x != nil {
+		return x.EnqueuedCount
+	}
+	return 0
+}
+
+func (x *RedeliverWebhookEventsResponse) GetNotInJournalCount() int32 {
+	if x != nil {
+		return x.NotInJournalCount
+	}
+	return 0
+}
+
+func (x *RedeliverWebhookEventsResponse) GetNotEnqueuedCount() int32 {
+	if x != nil {
+		return x.NotEnqueuedCount
+	}
+	return 0
+}
+
+func (x *RedeliverWebhookEventsResponse) GetNextStartTime() *timestamppb.Timestamp {
+	if x != nil {
+		return x.NextStartTime
+	}
+	return nil
+}
+
 var File_ondewo_vtsi_events_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_events_proto_rawDesc = "" +
@@ -2292,7 +2937,7 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x12\n" +
 	"\x10_sip_status_typeB\x1b\n" +
-	"\x19_previous_sip_status_type\"\x9f\x04\n" +
+	"\x19_previous_sip_status_type\"\xe0\x04\n" +
 	"\x15VtsiEventSubscription\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
 	"\x11vtsi_project_name\x18\x02 \x01(\tR\x0fvtsiProjectName\x12!\n" +
@@ -2312,7 +2957,8 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"modifiedBy\x12;\n" +
 	"\vmodified_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\n" +
 	"modifiedAt\x12%\n" +
-	"\x0ecampaign_names\x18\r \x03(\tR\rcampaignNames\"\xf0\x02\n" +
+	"\x0ecampaign_names\x18\r \x03(\tR\rcampaignNames\x12?\n" +
+	"\x0fexcluded_events\x18\x0e \x03(\x0e2\x16.ondewo.vtsi.VtsiEventR\x0eexcludedEvents\"\xf0\x02\n" +
 	"\x19WebhookDeliveryStatistics\x12'\n" +
 	"\x0fdelivered_count\x18\x01 \x01(\x03R\x0edeliveredCount\x12!\n" +
 	"\ffailed_count\x18\x02 \x01(\x03R\vfailedCount\x12#\n" +
@@ -2321,7 +2967,7 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\x11last_success_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x0flastSuccessTime\x121\n" +
 	"\x15last_http_status_code\x18\x06 \x01(\x05R\x12lastHttpStatusCode\x12\x1d\n" +
 	"\n" +
-	"last_error\x18\a \x01(\tR\tlastError\"\xb3\x05\n" +
+	"last_error\x18\a \x01(\tR\tlastError\"\xda\x05\n" +
 	"\aWebhook\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
 	"\x11vtsi_project_name\x18\x02 \x01(\tR\x0fvtsiProjectName\x12!\n" +
@@ -2341,81 +2987,121 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\vmodified_by\x18\f \x01(\tR\n" +
 	"modifiedBy\x12;\n" +
 	"\vmodified_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\n" +
-	"modifiedAt\x1a@\n" +
+	"modifiedAt\x12%\n" +
+	"\x0esigning_secret\x18\x0e \x01(\tR\rsigningSecret\x1a@\n" +
 	"\x12CustomHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x9e\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xfe\x01\n" +
 	"\x0fVtsiEventFilter\x12.\n" +
 	"\x06events\x18\x01 \x03(\x0e2\x16.ondewo.vtsi.VtsiEventR\x06events\x124\n" +
 	"\x16resource_name_prefixes\x18\x02 \x03(\tR\x14resourceNamePrefixes\x12%\n" +
-	"\x0ecampaign_names\x18\x03 \x03(\tR\rcampaignNames\"\xa3\x01\n" +
+	"\x0ecampaign_names\x18\x03 \x03(\tR\rcampaignNames\x12\x1d\n" +
+	"\n" +
+	"all_events\x18\x04 \x01(\bR\tallEvents\x12?\n" +
+	"\x0fexcluded_events\x18\x05 \x03(\x0e2\x16.ondewo.vtsi.VtsiEventR\x0eexcludedEvents\"\xde\x01\n" +
 	"\"CreateVtsiEventSubscriptionRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12Q\n" +
-	"\x12event_subscription\x18\x02 \x01(\v2\".ondewo.vtsi.VtsiEventSubscriptionR\x11eventSubscription\"5\n" +
+	"\x12event_subscription\x18\x02 \x01(\v2\".ondewo.vtsi.VtsiEventSubscriptionR\x11eventSubscription\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"p\n" +
 	"\x1fGetVtsiEventSubscriptionRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\xb4\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xef\x01\n" +
 	"\"UpdateVtsiEventSubscriptionRequest\x12Q\n" +
 	"\x12event_subscription\x18\x01 \x01(\v2\".ondewo.vtsi.VtsiEventSubscriptionR\x11eventSubscription\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"8\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"s\n" +
 	"\"DeleteVtsiEventSubscriptionRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"9\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"9\n" +
 	"#DeleteVtsiEventSubscriptionResponse\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\x9f\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\xda\x01\n" +
 	"!ListVtsiEventSubscriptionsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\"\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tH\x00R\tpageToken\x88\x01\x01B\r\n" +
+	"page_token\x18\x03 \x01(\tH\x00R\tpageToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\r\n" +
 	"\v_page_token\"\xa1\x01\n" +
 	"\"ListVtsiEventSubscriptionsResponse\x12S\n" +
 	"\x13event_subscriptions\x18\x01 \x03(\v2\".ondewo.vtsi.VtsiEventSubscriptionR\x12eventSubscriptions\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"r\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xad\x01\n" +
 	"\x14CreateWebhookRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12.\n" +
-	"\awebhook\x18\x02 \x01(\v2\x14.ondewo.vtsi.WebhookR\awebhook\"'\n" +
+	"\awebhook\x18\x02 \x01(\v2\x14.ondewo.vtsi.WebhookR\awebhook\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"b\n" +
 	"\x11GetWebhookRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\x83\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xbe\x01\n" +
 	"\x14UpdateWebhookRequest\x12.\n" +
 	"\awebhook\x18\x01 \x01(\v2\x14.ondewo.vtsi.WebhookR\awebhook\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"*\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"e\n" +
 	"\x14DeleteWebhookRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"k\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\n" +
+	"field_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"k\n" +
 	"\x15DeleteWebhookResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12>\n" +
-	"\x1bdetached_subscription_count\x18\x02 \x01(\x05R\x19detachedSubscriptionCount\"\x91\x01\n" +
+	"\x1bdetached_subscription_count\x18\x02 \x01(\x05R\x19detachedSubscriptionCount\"\xcc\x01\n" +
 	"\x13ListWebhooksRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x12\x1b\n" +
 	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12\"\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tH\x00R\tpageToken\x88\x01\x01B\r\n" +
+	"page_token\x18\x03 \x01(\tH\x00R\tpageToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\r\n" +
 	"\v_page_token\"p\n" +
 	"\x14ListWebhooksResponse\x120\n" +
 	"\bwebhooks\x18\x01 \x03(\v2\x14.ondewo.vtsi.WebhookR\bwebhooks\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"(\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"c\n" +
 	"\x12TestWebhookRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"\xce\x01\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
+	"\fsample_event\x18\x02 \x01(\x0e2\x16.ondewo.vtsi.VtsiEventR\vsampleEvent\"\xce\x01\n" +
 	"\x13TestWebhookResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12(\n" +
 	"\x10http_status_code\x18\x02 \x01(\x05R\x0ehttpStatusCode\x123\n" +
 	"\alatency\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\alatency\x12#\n" +
 	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12\x19\n" +
-	"\bevent_id\x18\x05 \x01(\tR\aeventId\"\xff\x01\n" +
+	"\bevent_id\x18\x05 \x01(\tR\aeventId\"\xba\x02\n" +
 	"\x1aSubscribeVtsiEventsRequest\x12*\n" +
 	"\x11vtsi_project_name\x18\x01 \x01(\tR\x0fvtsiProjectName\x128\n" +
 	"\x17event_subscription_name\x18\x02 \x01(\tH\x00R\x15eventSubscriptionName\x126\n" +
 	"\x06filter\x18\x03 \x01(\v2\x1c.ondewo.vtsi.VtsiEventFilterH\x00R\x06filter\x12&\n" +
-	"\fresume_token\x18\x04 \x01(\tH\x01R\vresumeToken\x88\x01\x01B\n" +
+	"\fresume_token\x18\x04 \x01(\tH\x01R\vresumeToken\x88\x01\x01\x129\n" +
+	"\n" +
+	"start_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTimeB\n" +
 	"\n" +
 	"\bselectorB\x0f\n" +
-	"\r_resume_token\"\xc6\x01\n" +
+	"\r_resume_token\"\x8c\x02\n" +
 	"\x1bSubscribeVtsiEventsResponse\x125\n" +
 	"\x06events\x18\x01 \x03(\v2\x1d.ondewo.vtsi.VtsiEventMessageR\x06events\x12!\n" +
 	"\fresume_token\x18\x02 \x01(\tR\vresumeToken\x12.\n" +
 	"\x13dropped_event_count\x18\x03 \x01(\x03R\x11droppedEventCount\x12\x1d\n" +
 	"\n" +
-	"end_reason\x18\x04 \x01(\tR\tendReason*\xca\x1b\n" +
+	"end_reason\x18\x04 \x01(\tR\tendReason\x12D\n" +
+	"\x0fend_reason_type\x18\x05 \x01(\x0e2\x1c.ondewo.vtsi.StreamEndReasonR\rendReasonType\"\x87\x02\n" +
+	"\x1dRedeliverWebhookEventsRequest\x12!\n" +
+	"\fwebhook_name\x18\x01 \x01(\tR\vwebhookName\x12\x1b\n" +
+	"\tevent_ids\x18\x02 \x03(\tR\beventIds\x129\n" +
+	"\n" +
+	"start_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tstartTime\x125\n" +
+	"\bend_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\aendTime\x124\n" +
+	"\x06filter\x18\x05 \x01(\v2\x1c.ondewo.vtsi.VtsiEventFilterR\x06filter\"\xea\x01\n" +
+	"\x1eRedeliverWebhookEventsResponse\x12%\n" +
+	"\x0eenqueued_count\x18\x01 \x01(\x05R\renqueuedCount\x12/\n" +
+	"\x14not_in_journal_count\x18\x02 \x01(\x05R\x11notInJournalCount\x12,\n" +
+	"\x12not_enqueued_count\x18\x03 \x01(\x05R\x10notEnqueuedCount\x12B\n" +
+	"\x0fnext_start_time\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\rnextStartTime*\xdb\x1d\n" +
 	"\tVtsiEvent\x12\x1a\n" +
 	"\x16VTSI_EVENT_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17VTSI_EVENT_CALL_CREATED\x10d\x12\x1d\n" +
@@ -2439,26 +3125,30 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	" VTSI_EVENT_CALL_LISTENING_PAUSED\x10v\x12%\n" +
 	"!VTSI_EVENT_CALL_LISTENING_RESUMED\x10w\x12*\n" +
 	"&VTSI_EVENT_CALL_AUDIO_STREAM_CONNECTED\x10x\x12-\n" +
-	")VTSI_EVENT_CALL_AUDIO_STREAM_DISCONNECTED\x10y\x12\x1e\n" +
+	")VTSI_EVENT_CALL_AUDIO_STREAM_DISCONNECTED\x10y\x12\x1b\n" +
+	"\x17VTSI_EVENT_CALL_UPDATED\x10z\x12\x1e\n" +
 	"\x19VTSI_EVENT_CALLER_STARTED\x10\xc8\x01\x12#\n" +
 	"\x1eVTSI_EVENT_CALLER_START_FAILED\x10\xc9\x01\x12\x1e\n" +
 	"\x19VTSI_EVENT_CALLER_STOPPED\x10\xca\x01\x12\x1e\n" +
 	"\x19VTSI_EVENT_CALLER_DELETED\x10\xcb\x01\x12 \n" +
 	"\x1bVTSI_EVENT_CALLER_RESTARTED\x10\xcc\x01\x12 \n" +
 	"\x1bVTSI_EVENT_CALLER_UNHEALTHY\x10\xcd\x01\x12\x1e\n" +
-	"\x19VTSI_EVENT_CALLER_HEALTHY\x10\xce\x01\x12 \n" +
+	"\x19VTSI_EVENT_CALLER_HEALTHY\x10\xce\x01\x12\x1e\n" +
+	"\x19VTSI_EVENT_CALLER_UPDATED\x10\xcf\x01\x12 \n" +
 	"\x1bVTSI_EVENT_LISTENER_STARTED\x10\xac\x02\x12%\n" +
 	" VTSI_EVENT_LISTENER_START_FAILED\x10\xad\x02\x12 \n" +
 	"\x1bVTSI_EVENT_LISTENER_STOPPED\x10\xae\x02\x12 \n" +
 	"\x1bVTSI_EVENT_LISTENER_DELETED\x10\xaf\x02\x12\"\n" +
 	"\x1dVTSI_EVENT_LISTENER_RESTARTED\x10\xb0\x02\x12\"\n" +
 	"\x1dVTSI_EVENT_LISTENER_UNHEALTHY\x10\xb1\x02\x12 \n" +
-	"\x1bVTSI_EVENT_LISTENER_HEALTHY\x10\xb2\x02\x12(\n" +
+	"\x1bVTSI_EVENT_LISTENER_HEALTHY\x10\xb2\x02\x12 \n" +
+	"\x1bVTSI_EVENT_LISTENER_UPDATED\x10\xb3\x02\x12(\n" +
 	"#VTSI_EVENT_SCHEDULED_CALLER_CREATED\x10\x90\x03\x12&\n" +
 	"!VTSI_EVENT_SCHEDULED_CALLER_FIRED\x10\x91\x03\x12'\n" +
 	"\"VTSI_EVENT_SCHEDULED_CALLER_FAILED\x10\x92\x03\x12*\n" +
 	"%VTSI_EVENT_SCHEDULED_CALLER_CANCELLED\x10\x93\x03\x120\n" +
-	"+VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED\x10\x94\x03\x12 \n" +
+	"+VTSI_EVENT_SCHEDULED_CALLER_RETRY_SCHEDULED\x10\x94\x03\x12(\n" +
+	"#VTSI_EVENT_SCHEDULED_CALLER_UPDATED\x10\x95\x03\x12 \n" +
 	"\x1bVTSI_EVENT_CAMPAIGN_CREATED\x10\xf4\x03\x12 \n" +
 	"\x1bVTSI_EVENT_CAMPAIGN_UPDATED\x10\xf5\x03\x12 \n" +
 	"\x1bVTSI_EVENT_CAMPAIGN_DELETED\x10\xf6\x03\x12 \n" +
@@ -2477,7 +3167,10 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\x1fVTSI_EVENT_CAMPAIGN_CALL_FAILED\x10\x83\x04\x12-\n" +
 	"(VTSI_EVENT_CAMPAIGN_CALL_RETRY_SCHEDULED\x10\x84\x04\x12'\n" +
 	"\"VTSI_EVENT_CAMPAIGN_CALL_CANCELLED\x10\x85\x04\x12%\n" +
-	" VTSI_EVENT_CAMPAIGN_AUTO_STOPPED\x10\x86\x04\x12$\n" +
+	" VTSI_EVENT_CAMPAIGN_AUTO_STOPPED\x10\x86\x04\x12&\n" +
+	"!VTSI_EVENT_CAMPAIGN_CALL_REQUEUED\x10\x87\x04\x12.\n" +
+	")VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_OPENED\x10\x88\x04\x12.\n" +
+	")VTSI_EVENT_CAMPAIGN_CALLING_WINDOW_CLOSED\x10\x89\x04\x12$\n" +
 	"\x1fVTSI_EVENT_VTSI_PROJECT_UPDATED\x10\xd9\x04\x12$\n" +
 	"\x1fVTSI_EVENT_VTSI_PROJECT_DELETED\x10\xda\x04\x12%\n" +
 	" VTSI_EVENT_VTSI_PROJECT_DEPLOYED\x10\xdb\x04\x12*\n" +
@@ -2511,7 +3204,8 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\x11WebhookHttpMethod\x12#\n" +
 	"\x1fWEBHOOK_HTTP_METHOD_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18WEBHOOK_HTTP_METHOD_POST\x10\x01\x12\x1b\n" +
-	"\x17WEBHOOK_HTTP_METHOD_PUT\x10\x022\xa3\t\n" +
+	"\x17WEBHOOK_HTTP_METHOD_PUT\x10\x022\x96\n" +
+	"\n" +
 	"\x06Events\x12r\n" +
 	"\x1bCreateVtsiEventSubscription\x12/.ondewo.vtsi.CreateVtsiEventSubscriptionRequest\x1a\".ondewo.vtsi.VtsiEventSubscription\x12l\n" +
 	"\x18GetVtsiEventSubscription\x12,.ondewo.vtsi.GetVtsiEventSubscriptionRequest\x1a\".ondewo.vtsi.VtsiEventSubscription\x12r\n" +
@@ -2524,7 +3218,8 @@ const file_ondewo_vtsi_events_proto_rawDesc = "" +
 	"\rUpdateWebhook\x12!.ondewo.vtsi.UpdateWebhookRequest\x1a\x14.ondewo.vtsi.Webhook\x12V\n" +
 	"\rDeleteWebhook\x12!.ondewo.vtsi.DeleteWebhookRequest\x1a\".ondewo.vtsi.DeleteWebhookResponse\x12S\n" +
 	"\fListWebhooks\x12 .ondewo.vtsi.ListWebhooksRequest\x1a!.ondewo.vtsi.ListWebhooksResponse\x12P\n" +
-	"\vTestWebhook\x12\x1f.ondewo.vtsi.TestWebhookRequest\x1a .ondewo.vtsi.TestWebhookResponse\x12j\n" +
+	"\vTestWebhook\x12\x1f.ondewo.vtsi.TestWebhookRequest\x1a .ondewo.vtsi.TestWebhookResponse\x12q\n" +
+	"\x16RedeliverWebhookEvents\x12*.ondewo.vtsi.RedeliverWebhookEventsRequest\x1a+.ondewo.vtsi.RedeliverWebhookEventsResponse\x12j\n" +
 	"\x13SubscribeVtsiEvents\x12'.ondewo.vtsi.SubscribeVtsiEventsRequest\x1a(.ondewo.vtsi.SubscribeVtsiEventsResponse0\x01b\x06proto3"
 
 var (
@@ -2540,7 +3235,7 @@ func file_ondewo_vtsi_events_proto_rawDescGZIP() []byte {
 }
 
 var file_ondewo_vtsi_events_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_ondewo_vtsi_events_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_ondewo_vtsi_events_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_ondewo_vtsi_events_proto_goTypes = []any{
 	(VtsiEvent)(0),                              // 0: ondewo.vtsi.VtsiEvent
 	(WebhookHttpMethod)(0),                      // 1: ondewo.vtsi.WebhookHttpMethod
@@ -2567,73 +3262,97 @@ var file_ondewo_vtsi_events_proto_goTypes = []any{
 	(*TestWebhookResponse)(nil),                 // 22: ondewo.vtsi.TestWebhookResponse
 	(*SubscribeVtsiEventsRequest)(nil),          // 23: ondewo.vtsi.SubscribeVtsiEventsRequest
 	(*SubscribeVtsiEventsResponse)(nil),         // 24: ondewo.vtsi.SubscribeVtsiEventsResponse
-	nil,                                         // 25: ondewo.vtsi.VtsiEventMessage.AttributesEntry
-	nil,                                         // 26: ondewo.vtsi.Webhook.CustomHeadersEntry
-	(*timestamppb.Timestamp)(nil),               // 27: google.protobuf.Timestamp
-	(sip.SipStatus_StatusType)(0),               // 28: ondewo.sip.SipStatus.StatusType
-	(*CampaignStatistics)(nil),                  // 29: ondewo.vtsi.CampaignStatistics
-	(*durationpb.Duration)(nil),                 // 30: google.protobuf.Duration
-	(*fieldmaskpb.FieldMask)(nil),               // 31: google.protobuf.FieldMask
+	(*RedeliverWebhookEventsRequest)(nil),       // 25: ondewo.vtsi.RedeliverWebhookEventsRequest
+	(*RedeliverWebhookEventsResponse)(nil),      // 26: ondewo.vtsi.RedeliverWebhookEventsResponse
+	nil,                                         // 27: ondewo.vtsi.VtsiEventMessage.AttributesEntry
+	nil,                                         // 28: ondewo.vtsi.Webhook.CustomHeadersEntry
+	(*timestamppb.Timestamp)(nil),               // 29: google.protobuf.Timestamp
+	(sip.SipStatus_StatusType)(0),               // 30: ondewo.sip.SipStatus.StatusType
+	(*CampaignStatistics)(nil),                  // 31: ondewo.vtsi.CampaignStatistics
+	(*durationpb.Duration)(nil),                 // 32: google.protobuf.Duration
+	(*fieldmaskpb.FieldMask)(nil),               // 33: google.protobuf.FieldMask
+	(StreamEndReason)(0),                        // 34: ondewo.vtsi.StreamEndReason
 }
 var file_ondewo_vtsi_events_proto_depIdxs = []int32{
 	0,  // 0: ondewo.vtsi.VtsiEventMessage.event:type_name -> ondewo.vtsi.VtsiEvent
-	27, // 1: ondewo.vtsi.VtsiEventMessage.event_time:type_name -> google.protobuf.Timestamp
-	28, // 2: ondewo.vtsi.VtsiEventMessage.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	28, // 3: ondewo.vtsi.VtsiEventMessage.previous_sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
-	25, // 4: ondewo.vtsi.VtsiEventMessage.attributes:type_name -> ondewo.vtsi.VtsiEventMessage.AttributesEntry
-	29, // 5: ondewo.vtsi.VtsiEventMessage.campaign_statistics:type_name -> ondewo.vtsi.CampaignStatistics
+	29, // 1: ondewo.vtsi.VtsiEventMessage.event_time:type_name -> google.protobuf.Timestamp
+	30, // 2: ondewo.vtsi.VtsiEventMessage.sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	30, // 3: ondewo.vtsi.VtsiEventMessage.previous_sip_status_type:type_name -> ondewo.sip.SipStatus.StatusType
+	27, // 4: ondewo.vtsi.VtsiEventMessage.attributes:type_name -> ondewo.vtsi.VtsiEventMessage.AttributesEntry
+	31, // 5: ondewo.vtsi.VtsiEventMessage.campaign_statistics:type_name -> ondewo.vtsi.CampaignStatistics
 	0,  // 6: ondewo.vtsi.VtsiEventSubscription.events:type_name -> ondewo.vtsi.VtsiEvent
-	27, // 7: ondewo.vtsi.VtsiEventSubscription.created_at:type_name -> google.protobuf.Timestamp
-	27, // 8: ondewo.vtsi.VtsiEventSubscription.modified_at:type_name -> google.protobuf.Timestamp
-	27, // 9: ondewo.vtsi.WebhookDeliveryStatistics.last_delivery_time:type_name -> google.protobuf.Timestamp
-	27, // 10: ondewo.vtsi.WebhookDeliveryStatistics.last_success_time:type_name -> google.protobuf.Timestamp
-	1,  // 11: ondewo.vtsi.Webhook.http_method:type_name -> ondewo.vtsi.WebhookHttpMethod
-	26, // 12: ondewo.vtsi.Webhook.custom_headers:type_name -> ondewo.vtsi.Webhook.CustomHeadersEntry
-	30, // 13: ondewo.vtsi.Webhook.timeout:type_name -> google.protobuf.Duration
-	4,  // 14: ondewo.vtsi.Webhook.delivery_statistics:type_name -> ondewo.vtsi.WebhookDeliveryStatistics
-	27, // 15: ondewo.vtsi.Webhook.created_at:type_name -> google.protobuf.Timestamp
-	27, // 16: ondewo.vtsi.Webhook.modified_at:type_name -> google.protobuf.Timestamp
-	0,  // 17: ondewo.vtsi.VtsiEventFilter.events:type_name -> ondewo.vtsi.VtsiEvent
-	3,  // 18: ondewo.vtsi.CreateVtsiEventSubscriptionRequest.event_subscription:type_name -> ondewo.vtsi.VtsiEventSubscription
-	3,  // 19: ondewo.vtsi.UpdateVtsiEventSubscriptionRequest.event_subscription:type_name -> ondewo.vtsi.VtsiEventSubscription
-	31, // 20: ondewo.vtsi.UpdateVtsiEventSubscriptionRequest.update_mask:type_name -> google.protobuf.FieldMask
-	3,  // 21: ondewo.vtsi.ListVtsiEventSubscriptionsResponse.event_subscriptions:type_name -> ondewo.vtsi.VtsiEventSubscription
-	5,  // 22: ondewo.vtsi.CreateWebhookRequest.webhook:type_name -> ondewo.vtsi.Webhook
-	5,  // 23: ondewo.vtsi.UpdateWebhookRequest.webhook:type_name -> ondewo.vtsi.Webhook
-	31, // 24: ondewo.vtsi.UpdateWebhookRequest.update_mask:type_name -> google.protobuf.FieldMask
-	5,  // 25: ondewo.vtsi.ListWebhooksResponse.webhooks:type_name -> ondewo.vtsi.Webhook
-	30, // 26: ondewo.vtsi.TestWebhookResponse.latency:type_name -> google.protobuf.Duration
-	6,  // 27: ondewo.vtsi.SubscribeVtsiEventsRequest.filter:type_name -> ondewo.vtsi.VtsiEventFilter
-	2,  // 28: ondewo.vtsi.SubscribeVtsiEventsResponse.events:type_name -> ondewo.vtsi.VtsiEventMessage
-	7,  // 29: ondewo.vtsi.Events.CreateVtsiEventSubscription:input_type -> ondewo.vtsi.CreateVtsiEventSubscriptionRequest
-	8,  // 30: ondewo.vtsi.Events.GetVtsiEventSubscription:input_type -> ondewo.vtsi.GetVtsiEventSubscriptionRequest
-	9,  // 31: ondewo.vtsi.Events.UpdateVtsiEventSubscription:input_type -> ondewo.vtsi.UpdateVtsiEventSubscriptionRequest
-	10, // 32: ondewo.vtsi.Events.DeleteVtsiEventSubscription:input_type -> ondewo.vtsi.DeleteVtsiEventSubscriptionRequest
-	12, // 33: ondewo.vtsi.Events.ListVtsiEventSubscriptions:input_type -> ondewo.vtsi.ListVtsiEventSubscriptionsRequest
-	14, // 34: ondewo.vtsi.Events.CreateWebhook:input_type -> ondewo.vtsi.CreateWebhookRequest
-	15, // 35: ondewo.vtsi.Events.GetWebhook:input_type -> ondewo.vtsi.GetWebhookRequest
-	16, // 36: ondewo.vtsi.Events.UpdateWebhook:input_type -> ondewo.vtsi.UpdateWebhookRequest
-	17, // 37: ondewo.vtsi.Events.DeleteWebhook:input_type -> ondewo.vtsi.DeleteWebhookRequest
-	19, // 38: ondewo.vtsi.Events.ListWebhooks:input_type -> ondewo.vtsi.ListWebhooksRequest
-	21, // 39: ondewo.vtsi.Events.TestWebhook:input_type -> ondewo.vtsi.TestWebhookRequest
-	23, // 40: ondewo.vtsi.Events.SubscribeVtsiEvents:input_type -> ondewo.vtsi.SubscribeVtsiEventsRequest
-	3,  // 41: ondewo.vtsi.Events.CreateVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
-	3,  // 42: ondewo.vtsi.Events.GetVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
-	3,  // 43: ondewo.vtsi.Events.UpdateVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
-	11, // 44: ondewo.vtsi.Events.DeleteVtsiEventSubscription:output_type -> ondewo.vtsi.DeleteVtsiEventSubscriptionResponse
-	13, // 45: ondewo.vtsi.Events.ListVtsiEventSubscriptions:output_type -> ondewo.vtsi.ListVtsiEventSubscriptionsResponse
-	5,  // 46: ondewo.vtsi.Events.CreateWebhook:output_type -> ondewo.vtsi.Webhook
-	5,  // 47: ondewo.vtsi.Events.GetWebhook:output_type -> ondewo.vtsi.Webhook
-	5,  // 48: ondewo.vtsi.Events.UpdateWebhook:output_type -> ondewo.vtsi.Webhook
-	18, // 49: ondewo.vtsi.Events.DeleteWebhook:output_type -> ondewo.vtsi.DeleteWebhookResponse
-	20, // 50: ondewo.vtsi.Events.ListWebhooks:output_type -> ondewo.vtsi.ListWebhooksResponse
-	22, // 51: ondewo.vtsi.Events.TestWebhook:output_type -> ondewo.vtsi.TestWebhookResponse
-	24, // 52: ondewo.vtsi.Events.SubscribeVtsiEvents:output_type -> ondewo.vtsi.SubscribeVtsiEventsResponse
-	41, // [41:53] is the sub-list for method output_type
-	29, // [29:41] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	29, // 7: ondewo.vtsi.VtsiEventSubscription.created_at:type_name -> google.protobuf.Timestamp
+	29, // 8: ondewo.vtsi.VtsiEventSubscription.modified_at:type_name -> google.protobuf.Timestamp
+	0,  // 9: ondewo.vtsi.VtsiEventSubscription.excluded_events:type_name -> ondewo.vtsi.VtsiEvent
+	29, // 10: ondewo.vtsi.WebhookDeliveryStatistics.last_delivery_time:type_name -> google.protobuf.Timestamp
+	29, // 11: ondewo.vtsi.WebhookDeliveryStatistics.last_success_time:type_name -> google.protobuf.Timestamp
+	1,  // 12: ondewo.vtsi.Webhook.http_method:type_name -> ondewo.vtsi.WebhookHttpMethod
+	28, // 13: ondewo.vtsi.Webhook.custom_headers:type_name -> ondewo.vtsi.Webhook.CustomHeadersEntry
+	32, // 14: ondewo.vtsi.Webhook.timeout:type_name -> google.protobuf.Duration
+	4,  // 15: ondewo.vtsi.Webhook.delivery_statistics:type_name -> ondewo.vtsi.WebhookDeliveryStatistics
+	29, // 16: ondewo.vtsi.Webhook.created_at:type_name -> google.protobuf.Timestamp
+	29, // 17: ondewo.vtsi.Webhook.modified_at:type_name -> google.protobuf.Timestamp
+	0,  // 18: ondewo.vtsi.VtsiEventFilter.events:type_name -> ondewo.vtsi.VtsiEvent
+	0,  // 19: ondewo.vtsi.VtsiEventFilter.excluded_events:type_name -> ondewo.vtsi.VtsiEvent
+	3,  // 20: ondewo.vtsi.CreateVtsiEventSubscriptionRequest.event_subscription:type_name -> ondewo.vtsi.VtsiEventSubscription
+	33, // 21: ondewo.vtsi.CreateVtsiEventSubscriptionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 22: ondewo.vtsi.GetVtsiEventSubscriptionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	3,  // 23: ondewo.vtsi.UpdateVtsiEventSubscriptionRequest.event_subscription:type_name -> ondewo.vtsi.VtsiEventSubscription
+	33, // 24: ondewo.vtsi.UpdateVtsiEventSubscriptionRequest.update_mask:type_name -> google.protobuf.FieldMask
+	33, // 25: ondewo.vtsi.UpdateVtsiEventSubscriptionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 26: ondewo.vtsi.DeleteVtsiEventSubscriptionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 27: ondewo.vtsi.ListVtsiEventSubscriptionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	3,  // 28: ondewo.vtsi.ListVtsiEventSubscriptionsResponse.event_subscriptions:type_name -> ondewo.vtsi.VtsiEventSubscription
+	5,  // 29: ondewo.vtsi.CreateWebhookRequest.webhook:type_name -> ondewo.vtsi.Webhook
+	33, // 30: ondewo.vtsi.CreateWebhookRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 31: ondewo.vtsi.GetWebhookRequest.field_mask:type_name -> google.protobuf.FieldMask
+	5,  // 32: ondewo.vtsi.UpdateWebhookRequest.webhook:type_name -> ondewo.vtsi.Webhook
+	33, // 33: ondewo.vtsi.UpdateWebhookRequest.update_mask:type_name -> google.protobuf.FieldMask
+	33, // 34: ondewo.vtsi.UpdateWebhookRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 35: ondewo.vtsi.DeleteWebhookRequest.field_mask:type_name -> google.protobuf.FieldMask
+	33, // 36: ondewo.vtsi.ListWebhooksRequest.field_mask:type_name -> google.protobuf.FieldMask
+	5,  // 37: ondewo.vtsi.ListWebhooksResponse.webhooks:type_name -> ondewo.vtsi.Webhook
+	0,  // 38: ondewo.vtsi.TestWebhookRequest.sample_event:type_name -> ondewo.vtsi.VtsiEvent
+	32, // 39: ondewo.vtsi.TestWebhookResponse.latency:type_name -> google.protobuf.Duration
+	6,  // 40: ondewo.vtsi.SubscribeVtsiEventsRequest.filter:type_name -> ondewo.vtsi.VtsiEventFilter
+	29, // 41: ondewo.vtsi.SubscribeVtsiEventsRequest.start_time:type_name -> google.protobuf.Timestamp
+	2,  // 42: ondewo.vtsi.SubscribeVtsiEventsResponse.events:type_name -> ondewo.vtsi.VtsiEventMessage
+	34, // 43: ondewo.vtsi.SubscribeVtsiEventsResponse.end_reason_type:type_name -> ondewo.vtsi.StreamEndReason
+	29, // 44: ondewo.vtsi.RedeliverWebhookEventsRequest.start_time:type_name -> google.protobuf.Timestamp
+	29, // 45: ondewo.vtsi.RedeliverWebhookEventsRequest.end_time:type_name -> google.protobuf.Timestamp
+	6,  // 46: ondewo.vtsi.RedeliverWebhookEventsRequest.filter:type_name -> ondewo.vtsi.VtsiEventFilter
+	29, // 47: ondewo.vtsi.RedeliverWebhookEventsResponse.next_start_time:type_name -> google.protobuf.Timestamp
+	7,  // 48: ondewo.vtsi.Events.CreateVtsiEventSubscription:input_type -> ondewo.vtsi.CreateVtsiEventSubscriptionRequest
+	8,  // 49: ondewo.vtsi.Events.GetVtsiEventSubscription:input_type -> ondewo.vtsi.GetVtsiEventSubscriptionRequest
+	9,  // 50: ondewo.vtsi.Events.UpdateVtsiEventSubscription:input_type -> ondewo.vtsi.UpdateVtsiEventSubscriptionRequest
+	10, // 51: ondewo.vtsi.Events.DeleteVtsiEventSubscription:input_type -> ondewo.vtsi.DeleteVtsiEventSubscriptionRequest
+	12, // 52: ondewo.vtsi.Events.ListVtsiEventSubscriptions:input_type -> ondewo.vtsi.ListVtsiEventSubscriptionsRequest
+	14, // 53: ondewo.vtsi.Events.CreateWebhook:input_type -> ondewo.vtsi.CreateWebhookRequest
+	15, // 54: ondewo.vtsi.Events.GetWebhook:input_type -> ondewo.vtsi.GetWebhookRequest
+	16, // 55: ondewo.vtsi.Events.UpdateWebhook:input_type -> ondewo.vtsi.UpdateWebhookRequest
+	17, // 56: ondewo.vtsi.Events.DeleteWebhook:input_type -> ondewo.vtsi.DeleteWebhookRequest
+	19, // 57: ondewo.vtsi.Events.ListWebhooks:input_type -> ondewo.vtsi.ListWebhooksRequest
+	21, // 58: ondewo.vtsi.Events.TestWebhook:input_type -> ondewo.vtsi.TestWebhookRequest
+	25, // 59: ondewo.vtsi.Events.RedeliverWebhookEvents:input_type -> ondewo.vtsi.RedeliverWebhookEventsRequest
+	23, // 60: ondewo.vtsi.Events.SubscribeVtsiEvents:input_type -> ondewo.vtsi.SubscribeVtsiEventsRequest
+	3,  // 61: ondewo.vtsi.Events.CreateVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
+	3,  // 62: ondewo.vtsi.Events.GetVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
+	3,  // 63: ondewo.vtsi.Events.UpdateVtsiEventSubscription:output_type -> ondewo.vtsi.VtsiEventSubscription
+	11, // 64: ondewo.vtsi.Events.DeleteVtsiEventSubscription:output_type -> ondewo.vtsi.DeleteVtsiEventSubscriptionResponse
+	13, // 65: ondewo.vtsi.Events.ListVtsiEventSubscriptions:output_type -> ondewo.vtsi.ListVtsiEventSubscriptionsResponse
+	5,  // 66: ondewo.vtsi.Events.CreateWebhook:output_type -> ondewo.vtsi.Webhook
+	5,  // 67: ondewo.vtsi.Events.GetWebhook:output_type -> ondewo.vtsi.Webhook
+	5,  // 68: ondewo.vtsi.Events.UpdateWebhook:output_type -> ondewo.vtsi.Webhook
+	18, // 69: ondewo.vtsi.Events.DeleteWebhook:output_type -> ondewo.vtsi.DeleteWebhookResponse
+	20, // 70: ondewo.vtsi.Events.ListWebhooks:output_type -> ondewo.vtsi.ListWebhooksResponse
+	22, // 71: ondewo.vtsi.Events.TestWebhook:output_type -> ondewo.vtsi.TestWebhookResponse
+	26, // 72: ondewo.vtsi.Events.RedeliverWebhookEvents:output_type -> ondewo.vtsi.RedeliverWebhookEventsResponse
+	24, // 73: ondewo.vtsi.Events.SubscribeVtsiEvents:output_type -> ondewo.vtsi.SubscribeVtsiEventsResponse
+	61, // [61:74] is the sub-list for method output_type
+	48, // [48:61] is the sub-list for method input_type
+	48, // [48:48] is the sub-list for extension type_name
+	48, // [48:48] is the sub-list for extension extendee
+	0,  // [0:48] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_events_proto_init() }
@@ -2655,7 +3374,7 @@ func file_ondewo_vtsi_events_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_events_proto_rawDesc), len(file_ondewo_vtsi_events_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   25,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

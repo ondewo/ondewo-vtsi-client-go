@@ -24,7 +24,6 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
-	_ "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -38,11 +37,80 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// Registration state of a VTSI project&apos;s SIP trunk with the carrier.
+type TrunkRegistrationState int32
+
+const (
+	// Not known: the project is not <code>DEPLOYED</code>, or its Asterisk has not been observed yet.
+	TrunkRegistrationState_TRUNK_REGISTRATION_STATE_UNSPECIFIED TrunkRegistrationState = 0
+	// The carrier accepted the trunk&apos;s registration (<code>Registered</code>).
+	TrunkRegistrationState_TRUNK_REGISTRATION_STATE_REGISTERED TrunkRegistrationState = 1
+	// The trunk is configured to register but is not registered: the registration has not completed
+	// yet, was stopped, or failed without a refusal by the carrier (<code>Unregistered</code>,
+	// <code>Stopped</code>, timeouts and any other state).
+	TrunkRegistrationState_TRUNK_REGISTRATION_STATE_UNREGISTERED TrunkRegistrationState = 2
+	// The carrier refused the registration (<code>Rejected</code>), typically wrong
+	// <code>sip_trunk_username</code> / <code>sip_trunk_password</code>. The Asterisk retries on its own.
+	TrunkRegistrationState_TRUNK_REGISTRATION_STATE_REJECTED TrunkRegistrationState = 3
+	// The project&apos;s running Asterisk has no outbound trunk registration to observe (no
+	// <code>trunk-registration</code> in <code>pjsip show registrations</code>), e.g. no SIP trunk is
+	// configured, or <code>asterisk_configs_files</code> / a target directory define none.
+	TrunkRegistrationState_TRUNK_REGISTRATION_STATE_NOT_CONFIGURED TrunkRegistrationState = 4
+)
+
+// Enum value maps for TrunkRegistrationState.
+var (
+	TrunkRegistrationState_name = map[int32]string{
+		0: "TRUNK_REGISTRATION_STATE_UNSPECIFIED",
+		1: "TRUNK_REGISTRATION_STATE_REGISTERED",
+		2: "TRUNK_REGISTRATION_STATE_UNREGISTERED",
+		3: "TRUNK_REGISTRATION_STATE_REJECTED",
+		4: "TRUNK_REGISTRATION_STATE_NOT_CONFIGURED",
+	}
+	TrunkRegistrationState_value = map[string]int32{
+		"TRUNK_REGISTRATION_STATE_UNSPECIFIED":    0,
+		"TRUNK_REGISTRATION_STATE_REGISTERED":     1,
+		"TRUNK_REGISTRATION_STATE_UNREGISTERED":   2,
+		"TRUNK_REGISTRATION_STATE_REJECTED":       3,
+		"TRUNK_REGISTRATION_STATE_NOT_CONFIGURED": 4,
+	}
+)
+
+func (x TrunkRegistrationState) Enum() *TrunkRegistrationState {
+	p := new(TrunkRegistrationState)
+	*p = x
+	return p
+}
+
+func (x TrunkRegistrationState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TrunkRegistrationState) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_vtsi_projects_proto_enumTypes[0].Descriptor()
+}
+
+func (TrunkRegistrationState) Type() protoreflect.EnumType {
+	return &file_ondewo_vtsi_projects_proto_enumTypes[0]
+}
+
+func (x TrunkRegistrationState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TrunkRegistrationState.Descriptor instead.
+func (TrunkRegistrationState) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{0}
+}
+
 // Status of a VtsiProject.
+// Released with unprefixed value names, which are package scoped in proto3 (so no other enum of
+// <code>ondewo.vtsi</code> can declare e.g. <code>UNSPECIFIED</code>); kept for wire and source
+// compatibility.
 type VtsiProjectStatus int32
 
 const (
-	// No status specified
+	// No status specified. Never returned for a stored project.
 	VtsiProjectStatus_UNSPECIFIED VtsiProjectStatus = 0
 	// Project successfully created and undeployed
 	VtsiProjectStatus_UNDEPLOYED VtsiProjectStatus = 1
@@ -56,8 +124,15 @@ const (
 	VtsiProjectStatus_UNDEPLOYING VtsiProjectStatus = 5
 	// Project is currently deleting
 	VtsiProjectStatus_DELETING VtsiProjectStatus = 6
-	// Project is deleted
+	// Project is deleted. Never returned: a deleted project no longer exists and is
+	// <code>NOT_FOUND</code>. Kept for wire compatibility.
 	VtsiProjectStatus_DELETED VtsiProjectStatus = 7
+	// The last deployment failed: its half-started container was removed and
+	// <code>VtsiProject.status_message</code> says why. Behaves like <code>UNDEPLOYED</code>: the project
+	// can be deployed again, updated or deleted, and undeploying it makes it <code>UNDEPLOYED</code>.
+	// Since 9.1.0; a 9.0.0 server reports a failed deployment as <code>UNDEPLOYED</code>, and a client
+	// built against 9.0.0 sees the unknown value 8.
+	VtsiProjectStatus_DEPLOY_FAILED VtsiProjectStatus = 8
 )
 
 // Enum value maps for VtsiProjectStatus.
@@ -71,16 +146,18 @@ var (
 		5: "UNDEPLOYING",
 		6: "DELETING",
 		7: "DELETED",
+		8: "DEPLOY_FAILED",
 	}
 	VtsiProjectStatus_value = map[string]int32{
-		"UNSPECIFIED": 0,
-		"UNDEPLOYED":  1,
-		"UPDATING":    2,
-		"DEPLOYING":   3,
-		"DEPLOYED":    4,
-		"UNDEPLOYING": 5,
-		"DELETING":    6,
-		"DELETED":     7,
+		"UNSPECIFIED":   0,
+		"UNDEPLOYED":    1,
+		"UPDATING":      2,
+		"DEPLOYING":     3,
+		"DEPLOYED":      4,
+		"UNDEPLOYING":   5,
+		"DELETING":      6,
+		"DELETED":       7,
+		"DEPLOY_FAILED": 8,
 	}
 )
 
@@ -95,11 +172,11 @@ func (x VtsiProjectStatus) String() string {
 }
 
 func (VtsiProjectStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[0].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[1].Descriptor()
 }
 
 func (VtsiProjectStatus) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[0]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[1]
 }
 
 func (x VtsiProjectStatus) Number() protoreflect.EnumNumber {
@@ -108,7 +185,7 @@ func (x VtsiProjectStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VtsiProjectStatus.Descriptor instead.
 func (VtsiProjectStatus) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{0}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{1}
 }
 
 // Transport for the SIP trunk of an Asterisk server.
@@ -153,11 +230,11 @@ func (x SipTrunkTransport) String() string {
 }
 
 func (SipTrunkTransport) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[1].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[2].Descriptor()
 }
 
 func (SipTrunkTransport) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[1]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[2]
 }
 
 func (x SipTrunkTransport) Number() protoreflect.EnumNumber {
@@ -166,10 +243,14 @@ func (x SipTrunkTransport) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SipTrunkTransport.Descriptor instead.
 func (SipTrunkTransport) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{1}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
 }
 
-// Sorting mode
+// Sorting mode.
+// Note: unlike most enums of this API the zero value is a real mode, <code>ASCENDING</code>, not an
+// <code>..._UNSPECIFIED</code> placeholder, so an unset mode means ascending. Released this way and kept
+// for wire and source compatibility (it is also reused by
+// <a href="index.html#ondewo.vtsi.SoftphoneAccountSorting">SoftphoneAccountSorting</a>).
 type VtsiProjectSortingMode int32
 
 const (
@@ -206,11 +287,11 @@ func (x VtsiProjectSortingMode) String() string {
 }
 
 func (VtsiProjectSortingMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[2].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[3].Descriptor()
 }
 
 func (VtsiProjectSortingMode) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[2]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[3]
 }
 
 func (x VtsiProjectSortingMode) Number() protoreflect.EnumNumber {
@@ -219,7 +300,7 @@ func (x VtsiProjectSortingMode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VtsiProjectSortingMode.Descriptor instead.
 func (VtsiProjectSortingMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{3}
 }
 
 // Structure of VTSI_PROJECT view
@@ -271,11 +352,11 @@ func (x VtsiProjectView) String() string {
 }
 
 func (VtsiProjectView) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[3].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[4].Descriptor()
 }
 
 func (VtsiProjectView) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[3]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[4]
 }
 
 func (x VtsiProjectView) Number() protoreflect.EnumNumber {
@@ -284,7 +365,7 @@ func (x VtsiProjectView) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use VtsiProjectView.Descriptor instead.
 func (VtsiProjectView) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{3}
+	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{4}
 }
 
 // Enum to specify the sorting field for VTSI projects.
@@ -292,7 +373,7 @@ func (VtsiProjectView) EnumDescriptor() ([]byte, []int) {
 type VtsiProjectSorting_VtsiProjectSortingField int32
 
 const (
-	// No sorting
+	// The default order: by <code>display_name</code>, ascending.
 	VtsiProjectSorting_NO_VTSI_PROJECT_SORTING VtsiProjectSorting_VtsiProjectSortingField = 0
 	// Sort by project name such as <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>.
 	VtsiProjectSorting_SORT_VTSI_PROJECT_BY_NAME VtsiProjectSorting_VtsiProjectSortingField = 1
@@ -333,11 +414,11 @@ func (x VtsiProjectSorting_VtsiProjectSortingField) String() string {
 }
 
 func (VtsiProjectSorting_VtsiProjectSortingField) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_vtsi_projects_proto_enumTypes[4].Descriptor()
+	return file_ondewo_vtsi_projects_proto_enumTypes[5].Descriptor()
 }
 
 func (VtsiProjectSorting_VtsiProjectSortingField) Type() protoreflect.EnumType {
-	return &file_ondewo_vtsi_projects_proto_enumTypes[4]
+	return &file_ondewo_vtsi_projects_proto_enumTypes[5]
 }
 
 func (x VtsiProjectSorting_VtsiProjectSortingField) Number() protoreflect.EnumNumber {
@@ -358,9 +439,19 @@ type VtsiProject struct {
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// OPTIONAL: The display name of the project
 	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	// The maximum number of callers that this project can have.
+	// The maximum number of callers that this project can have, i.e. the number of caller SIP accounts
+	// provisioned on its Asterisk. <code>0</code> means NO caller can be started (it is not
+	// &quot;unlimited&quot;); negative values are refused with <code>INVALID_ARGUMENT</code>. A
+	// <code>StartCaller</code> / <code>StartCallers</code> beyond the free capacity is refused with
+	// <code>RESOURCE_EXHAUSTED</code>; an idle pooled (persistent) caller does not count. Changing it on a
+	// <code>DEPLOYED</code> project REDEPLOYS the project, which ends every running call (see
+	// <code>UpdateVtsiProject</code>); lowering it below the number of running callers is not refused.
 	MaxCallers int32 `protobuf:"varint,3,opt,name=max_callers,json=maxCallers,proto3" json:"max_callers,omitempty"`
-	// The maximum number of listeners that this project can have.
+	// The maximum number of listeners that this project can have, i.e. the number of listener SIP
+	// accounts provisioned on its Asterisk. Same semantics as <code>max_callers</code>:
+	// <code>0</code> means no listener can be started, a <code>StartListener</code> /
+	// <code>StartListeners</code> beyond the free capacity is <code>RESOURCE_EXHAUSTED</code>, and a change
+	// on a <code>DEPLOYED</code> project redeploys it.
 	MaxListeners int32 `protobuf:"varint,4,opt,name=max_listeners,json=maxListeners,proto3" json:"max_listeners,omitempty"`
 	// Configs to start the asterisk server.
 	AsteriskConfigs *AsteriskConfigs `protobuf:"bytes,5,opt,name=asterisk_configs,json=asteriskConfigs,proto3" json:"asterisk_configs,omitempty"`
@@ -378,7 +469,13 @@ type VtsiProject struct {
 	ActiveCallers int32 `protobuf:"varint,11,opt,name=active_callers,json=activeCallers,proto3" json:"active_callers,omitempty"`
 	// The number of active listeners in this project.
 	ActiveListeners int32 `protobuf:"varint,12,opt,name=active_listeners,json=activeListeners,proto3" json:"active_listeners,omitempty"`
-	// The port of the asterisk server
+	// The port of the asterisk server. The same value as <code>asterisk_configs.asterisk_port</code>, of
+	// which it is a convenience copy: <code>asterisk_configs.asterisk_port</code> is authoritative, and
+	// every response carries the project&apos;s port in both. On create and update, <code>0</code> means
+	// &quot;not stated&quot; (on create: assign a free port); a value set here is copied into
+	// <code>asterisk_configs.asterisk_port</code>; both set and different is refused with
+	// <code>INVALID_ARGUMENT</code>. Changing the port of a <code>DEPLOYED</code> project redeploys it and
+	// voids every softphone client certificate (the certificate authorities belong to the port).
 	AsteriskPort int32 `protobuf:"varint,13,opt,name=asterisk_port,json=asteriskPort,proto3" json:"asterisk_port,omitempty"`
 	// Associated NLU agents.
 	// Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
@@ -395,8 +492,29 @@ type VtsiProject struct {
 	// <pre><code>error_reason = number-not-allowed</code></pre> and nothing is sent.
 	// Updatable with the update mask path <pre><code>transfer_phone_number_allowlist</code></pre>.
 	TransferPhoneNumberAllowlist []string `protobuf:"bytes,17,rep,name=transfer_phone_number_allowlist,json=transferPhoneNumberAllowlist,proto3" json:"transfer_phone_number_allowlist,omitempty"`
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	// Output only. Human-readable detail of the current <code>vtsi_project_status</code>: the reason of a
+	// <code>DEPLOY_FAILED</code> project (the same text as the <code>description</code> of the
+	// <code>VTSI_EVENT_VTSI_PROJECT_DEPLOY_FAILED</code> event), or the reason the last undeploy or update
+	// of the project failed. Empty when there is nothing to report; cleared by the next successful status
+	// change. Secrets are redacted. Ignored on create and update.
+	StatusMessage string `protobuf:"bytes,18,opt,name=status_message,json=statusMessage,proto3" json:"status_message,omitempty"`
+	// Output only. When <code>vtsi_project_status</code> last changed. Unset for a project whose status
+	// has not changed since an older server created it. Ignored on create and update.
+	StatusChangedAt *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=status_changed_at,json=statusChangedAt,proto3" json:"status_changed_at,omitempty"`
+	// Output only. Registration state of the project&apos;s SIP trunk with the carrier, as last observed
+	// on the running Asterisk (<code>pjsip show registrations</code>), refreshed every
+	// <code>ONDEWO_VTSI_ASTERISK_OBSERVER_INTERVAL_S</code> seconds (default 30), so it may lag by that
+	// much. <code>TRUNK_REGISTRATION_STATE_UNSPECIFIED</code> when the project is not
+	// <code>DEPLOYED</code> or has not been observed yet. Ignored on create and update.
+	TrunkRegistrationState TrunkRegistrationState `protobuf:"varint,20,opt,name=trunk_registration_state,json=trunkRegistrationState,proto3,enum=ondewo.vtsi.TrunkRegistrationState" json:"trunk_registration_state,omitempty"`
+	// Output only. The Asterisk version the project&apos;s container RUNS, i.e. the docker image tag of the
+	// ONDEWO Asterisk image it was deployed from: <code>asterisk_configs.asterisk_version</code> when
+	// pinned, otherwise the server default (<code>ONDEWO_VTSI_ASTERISK_IMAGE_TAG</code>) at the moment
+	// of the deployment. Empty when the project is not deployed. It can differ from what a new deployment
+	// would start, e.g. after the server default changed. Ignored on create and update.
+	AsteriskVersionEffective string `protobuf:"bytes,21,opt,name=asterisk_version_effective,json=asteriskVersionEffective,proto3" json:"asterisk_version_effective,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
 }
 
 func (x *VtsiProject) Reset() {
@@ -548,12 +666,47 @@ func (x *VtsiProject) GetTransferPhoneNumberAllowlist() []string {
 	return nil
 }
 
+func (x *VtsiProject) GetStatusMessage() string {
+	if x != nil {
+		return x.StatusMessage
+	}
+	return ""
+}
+
+func (x *VtsiProject) GetStatusChangedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.StatusChangedAt
+	}
+	return nil
+}
+
+func (x *VtsiProject) GetTrunkRegistrationState() TrunkRegistrationState {
+	if x != nil {
+		return x.TrunkRegistrationState
+	}
+	return TrunkRegistrationState_TRUNK_REGISTRATION_STATE_UNSPECIFIED
+}
+
+func (x *VtsiProject) GetAsteriskVersionEffective() string {
+	if x != nil {
+		return x.AsteriskVersionEffective
+	}
+	return ""
+}
+
 // Configuration variables for the Asterisk server
 type AsteriskConfigsVariables struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// SIP trunk username.
 	SipTrunkUsername string `protobuf:"bytes,1,opt,name=sip_trunk_username,json=sipTrunkUsername,proto3" json:"sip_trunk_username,omitempty"`
-	// SIP trunk password.
+	// SIP trunk password. A credential, but NOT write-only: it is stored as sent and returned in clear
+	// to every caller allowed to read <code>asterisk_configs</code> (see the <code>Projects</code> service
+	// description for who that is). Server logs and <code>status_message</code> redact it.
+	// On <code>UpdateVtsiProject</code> WITHOUT an <code>update_mask</code> an empty value KEEPS the stored
+	// password (an empty string cannot be told from &quot;not sent&quot;); WITH an
+	// <code>update_mask</code> naming this field, or a parent of it such as
+	// <code>asterisk_configs</code> or <code>asterisk_configs.asterisk_configs_variables</code>, an empty
+	// value CLEARS it.
 	SipTrunkPassword string `protobuf:"bytes,2,opt,name=sip_trunk_password,json=sipTrunkPassword,proto3" json:"sip_trunk_password,omitempty"`
 	// SIP trunk host.
 	SipTrunkHost string `protobuf:"bytes,3,opt,name=sip_trunk_host,json=sipTrunkHost,proto3" json:"sip_trunk_host,omitempty"`
@@ -813,7 +966,8 @@ type AsteriskConfigs struct {
 	//	*AsteriskConfigs_AsteriskConfigsFiles
 	//	*AsteriskConfigs_AsteriskConfigsTargetDirectoryName
 	AsteriskConfigsOneof isAsteriskConfigs_AsteriskConfigsOneof `protobuf_oneof:"asterisk_configs_oneof"`
-	// OPTIONAL: The port where Asterisk should start.
+	// OPTIONAL: The port where Asterisk should start. Authoritative copy of
+	// <code>VtsiProject.asterisk_port</code> (see there). <code>0</code> on create assigns a free port.
 	AsteriskPort int32 `protobuf:"varint,4,opt,name=asterisk_port,json=asteriskPort,proto3" json:"asterisk_port,omitempty"`
 	// OPTIONAL: The Asterisk version to start, given as the docker image tag of the ONDEWO
 	// Asterisk image, e.g. <pre><code>alpine-3.18-18.20.2</code></pre>.
@@ -821,6 +975,7 @@ type AsteriskConfigs struct {
 	// <pre><code>[A-Za-z0-9_][A-Za-z0-9._-]{0,127}</code></pre>.
 	// Explicitly optional: when the field is not set, the server keeps using its configured
 	// default (the <pre><code>ONDEWO_VTSI_ASTERISK_IMAGE_TAG</code></pre> environment variable).
+	// The version a deployed project actually runs is <code>VtsiProject.asterisk_version_effective</code>.
 	// Sending an empty string is NOT the same as leaving it unset and is rejected.
 	AsteriskVersion *string `protobuf:"bytes,5,opt,name=asterisk_version,json=asteriskVersion,proto3,oneof" json:"asterisk_version,omitempty"`
 	unknownFields   protoimpl.UnknownFields
@@ -938,8 +1093,19 @@ type CreateVtsiProjectRequest struct {
 	// If no name is given a new parent name is created. The parent has the format:
 	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProject *VtsiProject `protobuf:"bytes,1,opt,name=vtsi_project,json=vtsiProject,proto3" json:"vtsi_project,omitempty"`
-	// error message if there are any.
-	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// Deprecated: a request carries no error. Ignored by the server; leave it empty. Kept for wire
+	// compatibility.
+	//
+	// Deprecated: Marked as deprecated in ondewo/vtsi/projects.proto.
+	ErrorMessage string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// Optional. Validate only: run every check of a real create (validation, authorization) and return
+	// the would-be project in <code>CreateVtsiProjectResponse.vtsi_project</code>, but write, reserve and
+	// emit nothing. The fields the server assigns at creation are left empty in that answer because
+	// nothing is reserved: <code>name</code> when the request gave none, the ports when the request gave
+	// <code>0</code>, <code>vtsi_project_status</code> and the audit fields. A successful validation does
+	// not guarantee that a later create succeeds (e.g. a name or port taken meanwhile). Default
+	// <code>false</code>.
+	ValidateOnly  bool `protobuf:"varint,3,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -981,6 +1147,7 @@ func (x *CreateVtsiProjectRequest) GetVtsiProject() *VtsiProject {
 	return nil
 }
 
+// Deprecated: Marked as deprecated in ondewo/vtsi/projects.proto.
 func (x *CreateVtsiProjectRequest) GetErrorMessage() string {
 	if x != nil {
 		return x.ErrorMessage
@@ -988,12 +1155,21 @@ func (x *CreateVtsiProjectRequest) GetErrorMessage() string {
 	return ""
 }
 
+func (x *CreateVtsiProjectRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
 // Response of the create project
 type CreateVtsiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Vtsi project
+	// The created project, <code>UNDEPLOYED</code>, with its assigned name and port (with
+	// <code>validate_only</code>: the would-be project).
 	VtsiProject *VtsiProject `protobuf:"bytes,1,opt,name=vtsi_project,json=vtsiProject,proto3" json:"vtsi_project,omitempty"`
-	// error message if there are any.
+	// Never set: errors are reported as gRPC status codes (see the <code>Projects</code> service
+	// description). Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1050,8 +1226,16 @@ type GetVtsiProjectRequest struct {
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	// Optional. Specify the view of the returned VtsiProject (full view by default)
 	VtsiProjectView VtsiProjectView `protobuf:"varint,2,opt,name=vtsi_project_view,json=vtsiProjectView,proto3,enum=ondewo.vtsi.VtsiProjectView" json:"vtsi_project_view,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Optional. Partial response: the <code>VtsiProject</code> field paths to populate, e.g.
+	// <code>display_name</code>, <code>vtsi_project_status</code>, <code>status_message</code>,
+	// <code>asterisk_configs.asterisk_version</code>. Same convention as
+	// <a href="index.html#ondewo.vtsi.ListVtsiProjectsRequest">ListVtsiProjectsRequest.field_mask</a>:
+	// <code>name</code> is always populated, unset or empty returns every field the
+	// <code>vtsi_project_view</code> populates, an unknown path is rejected with
+	// <code>INVALID_ARGUMENT</code> naming it, and the mask is applied after the view and any redaction.
+	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetVtsiProjectRequest) Reset() {
@@ -1098,20 +1282,58 @@ func (x *GetVtsiProjectRequest) GetVtsiProjectView() VtsiProjectView {
 	return VtsiProjectView_VTSI_PROJECT_VIEW_UNSPECIFIED
 }
 
-// Request to get the list of agents
+func (x *GetVtsiProjectRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+// Request to list VTSI projects. The filters are combined with AND; the values within one repeated
+// field are combined with OR; an unset field or an empty repeated field does not filter.
 type ListVtsiProjectsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Specify the view of the returned VtsiProject (full view by default)
 	VtsiProjectView VtsiProjectView `protobuf:"varint,1,opt,name=vtsi_project_view,json=vtsiProjectView,proto3,enum=ondewo.vtsi.VtsiProjectView" json:"vtsi_project_view,omitempty"`
-	// Optional. The next_page_token value returned from a previous list request.
-	// Example: "current_index-1--page_size-20"
+	// Optional. The <code>next_page_token</code> of a previous response. OPAQUE: never construct or parse
+	// it (its format is internal and may change). Keep every other request field (filters, sorting,
+	// <code>page_size</code>) unchanged while paging: a token sent with other filters or sorting is not
+	// guaranteed to be rejected and then returns that position of the other listing.
 	PageToken *string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3,oneof" json:"page_token,omitempty"`
 	// Optional. Field to define the sorting of the list of VTSI projects in the response.
-	// If not specified, the default behavior is to have no sorting.
+	// Unset or <code>NO_VTSI_PROJECT_SORTING</code>: by <code>display_name</code>, ascending (ties by the
+	// project&apos;s internal id), which is a stable order.
 	VtsiProjectSorting *VtsiProjectSorting `protobuf:"bytes,3,opt,name=vtsi_project_sorting,json=vtsiProjectSorting,proto3,oneof" json:"vtsi_project_sorting,omitempty"`
-	// Optional. Filter based on associated NLU agents.
+	// Optional. Only projects associated with at least one of these NLU agents.
 	// Format: <pre><code>projects/&lt;Project ID&gt;/agent</code></pre>
 	NluAgentNames []string `protobuf:"bytes,4,rep,name=nlu_agent_names,json=nluAgentNames,proto3" json:"nlu_agent_names,omitempty"`
+	// Optional. Partial response: the field paths to populate in every returned <code>VtsiProject</code>,
+	// relative to the <code>VtsiProject</code> message (no <code>vtsi_projects.</code> prefix), e.g.
+	// <code>display_name</code>, <code>vtsi_project_status</code>,
+	// <code>asterisk_configs.asterisk_configs_variables</code>. Nested paths through singular message
+	// fields are allowed; a path below a repeated or map field is not. <code>name</code> is always
+	// populated. Unset or empty returns every field the <code>vtsi_project_view</code> populates. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it. Applied after the
+	// <code>vtsi_project_view</code> and the server&apos;s role-based redaction, so it can only narrow the
+	// response and never populates a field that was left empty. Not part of the paging contract: a
+	// <code>page_token</code> stays valid with another mask.
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,5,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Maximum number of projects per page. <code>0</code> means the server default of 25;
+	// values above 1000 are clamped to 1000; negative values are rejected with
+	// <code>INVALID_ARGUMENT</code>. Fewer projects than <code>page_size</code> may be returned (e.g. after
+	// the authorization filter), and only an empty <code>next_page_token</code> means the end of the list.
+	PageSize int32 `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	// Optional. Only projects in one of these statuses. <code>UNSPECIFIED</code> is rejected with
+	// <code>INVALID_ARGUMENT</code>.
+	Statuses []VtsiProjectStatus `protobuf:"varint,7,rep,packed,name=statuses,proto3,enum=ondewo.vtsi.VtsiProjectStatus" json:"statuses,omitempty"`
+	// Optional. Case-insensitive substring match against <code>display_name</code>. Empty does not
+	// filter. At most 256 characters.
+	DisplayNameContains string `protobuf:"bytes,8,opt,name=display_name_contains,json=displayNameContains,proto3" json:"display_name_contains,omitempty"`
+	// Optional. Only projects created at or after this instant.
+	CreatedAfter *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_after,json=createdAfter,proto3" json:"created_after,omitempty"`
+	// Optional. Only projects created strictly before this instant. A window whose start
+	// (<code>created_after</code>) is not before its end is rejected with <code>INVALID_ARGUMENT</code>.
+	CreatedBefore *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=created_before,json=createdBefore,proto3" json:"created_before,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1174,15 +1396,55 @@ func (x *ListVtsiProjectsRequest) GetNluAgentNames() []string {
 	return nil
 }
 
+func (x *ListVtsiProjectsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *ListVtsiProjectsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListVtsiProjectsRequest) GetStatuses() []VtsiProjectStatus {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
+}
+
+func (x *ListVtsiProjectsRequest) GetDisplayNameContains() string {
+	if x != nil {
+		return x.DisplayNameContains
+	}
+	return ""
+}
+
+func (x *ListVtsiProjectsRequest) GetCreatedAfter() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAfter
+	}
+	return nil
+}
+
+func (x *ListVtsiProjectsRequest) GetCreatedBefore() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedBefore
+	}
+	return nil
+}
+
 // This is a protobuf message definition for the response of getting a list of VTSI projects.
 type ListVtsiProjectsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The list of VTSI projects returned in the response.
-	// Use the &apos;repeated&apos; keyword to indicate that this field can contain multiple instances of VtsiProject.
+	// The VTSI projects of this page.
 	VtsiProjects []*VtsiProject `protobuf:"bytes,1,rep,name=vtsi_projects,json=vtsiProjects,proto3" json:"vtsi_projects,omitempty"`
-	// Token to retrieve the next page of results.
-	// This field is a string that holds a token for fetching the next page of results.
-	// If there are no more results in the list, this field will be empty.
+	// Token to retrieve the next page of results. Opaque (see
+	// <code>ListVtsiProjectsRequest.page_token</code>). Empty when there are no more results.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1232,7 +1494,7 @@ func (x *ListVtsiProjectsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// This protobuf message defines the sorting order for VTSI (Virtual Test System Infrastructure) projects.
+// This protobuf message defines the sorting order for VTSI (Virtual Telephone System Integration) projects.
 type VtsiProjectSorting struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// sorting field for vtsi projects sorting
@@ -1287,10 +1549,13 @@ func (x *VtsiProjectSorting) GetSortingMode() VtsiProjectSortingMode {
 	return VtsiProjectSortingMode_ASCENDING
 }
 
-// Request to updated VTSI project
+// Request to update a VTSI project
 type UpdateVtsiProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Project Configs.
+	// The project to update, identified by <code>vtsi_project.name</code>
+	// (<pre><code>projects/&lt;project_uuid&gt;/project</code></pre>), carrying the new values. The
+	// output-only fields (<code>vtsi_project_status</code>, the audit, counter and status fields) are
+	// ignored.
 	VtsiProject *VtsiProject `protobuf:"bytes,1,opt,name=vtsi_project,json=vtsiProject,proto3" json:"vtsi_project,omitempty"`
 	// OPTIONAL: The mask to control which fields get updated.
 	// Paths are field paths within <pre><code>vtsi_project</code></pre> and carry no leading
@@ -1321,7 +1586,21 @@ type UpdateVtsiProjectRequest struct {
 	//       field exists to remove - so an unrecognised path fails loudly at the first request
 	//       instead.</li>
 	// </ul>
-	UpdateMask    *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	UpdateMask *fieldmaskpb.FieldMask `protobuf:"bytes,2,opt,name=update_mask,json=updateMask,proto3" json:"update_mask,omitempty"`
+	// Optional. Partial response: the <code>VtsiProject</code> field paths to populate in
+	// <code>UpdateVtsiProjectResponse.vtsi_project</code>, relative to the <code>VtsiProject</code> (no
+	// <code>vtsi_project.</code> prefix). Same convention as
+	// <a href="index.html#ondewo.vtsi.GetVtsiProjectRequest">GetVtsiProjectRequest.field_mask</a>; the
+	// <code>name</code> of the response is always populated. Unset or empty returns every field. An
+	// unknown path is rejected with <code>INVALID_ARGUMENT</code> before anything is written. A mask never
+	// changes what is updated (that is <code>update_mask</code>).
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,3,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Validate only: merge the update over the stored project and run every check of a real
+	// update (validation, authorization, the configuration render), and return the would-be project in
+	// <code>UpdateVtsiProjectResponse.vtsi_project</code>, but write nothing, touch no Asterisk, end no
+	// call and emit nothing. A successful validation does not guarantee that a later update succeeds
+	// (the project may change meanwhile). Default <code>false</code>.
+	ValidateOnly  bool `protobuf:"varint,4,opt,name=validate_only,json=validateOnly,proto3" json:"validate_only,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1370,13 +1649,32 @@ func (x *UpdateVtsiProjectRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// Request to updated VTSI project
+func (x *UpdateVtsiProjectRequest) GetFieldMask() *fieldmaskpb.FieldMask {
+	if x != nil {
+		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *UpdateVtsiProjectRequest) GetValidateOnly() bool {
+	if x != nil {
+		return x.ValidateOnly
+	}
+	return false
+}
+
+// Response to the update of a VTSI project
 type UpdateVtsiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
-	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// Never set: errors are reported as gRPC status codes (see the <code>Projects</code> service
+	// description). Kept for wire compatibility.
+	ErrorMessage string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	// The project after the update (with <code>validate_only</code>: the would-be project), in the full
+	// view, redacted like <code>GetVtsiProject</code> and narrowed by
+	// <code>UpdateVtsiProjectRequest.field_mask</code>. Left unset by a 9.0.0 server.
+	VtsiProject   *VtsiProject `protobuf:"bytes,3,opt,name=vtsi_project,json=vtsiProject,proto3" json:"vtsi_project,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1425,8 +1723,16 @@ func (x *UpdateVtsiProjectResponse) GetErrorMessage() string {
 	return ""
 }
 
+func (x *UpdateVtsiProjectResponse) GetVtsiProject() *VtsiProject {
+	if x != nil {
+		return x.VtsiProject
+	}
+	return nil
+}
+
 // Request to delete a VTSI project
-// If a deployed VTSI project was deleted then it was undeployed beforehand automatically
+// A deployed VTSI project is undeployed automatically before it is deleted (see
+// <a href="index.html#ondewo.vtsi.Projects.DeleteVtsiProject">DeleteVtsiProject</a>).
 type DeleteVtsiProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -1473,12 +1779,11 @@ func (x *DeleteVtsiProjectRequest) GetName() string {
 }
 
 // Response to delete a VTSI project
-// If a deployed VTSI project was deleted then it was undeployed beforehand automatically
 type DeleteVtsiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Never set: errors are reported as gRPC status codes. Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1579,7 +1884,7 @@ type DeployVtsiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Never set: errors are reported as gRPC status codes. Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1632,7 +1937,7 @@ func (x *DeployVtsiProjectResponse) GetErrorMessage() string {
 // Request to undeploy a vtsi project
 type UndeployVtsiProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Project name of the VTSI project.
+	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	Name          string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1680,7 +1985,7 @@ type UndeployVtsiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// error message if there are any.
+	// Never set: errors are reported as gRPC status codes. Kept for wire compatibility.
 	ErrorMessage  string `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1734,7 +2039,7 @@ var File_ondewo_vtsi_projects_proto protoreflect.FileDescriptor
 
 const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\n" +
-	"\x1aondewo/vtsi/projects.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x9b\x06\n" +
+	"\x1aondewo/vtsi/projects.proto\x12\vondewo.vtsi\x1a google/protobuf/field_mask.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa7\b\n" +
 	"\vVtsiProject\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x1f\n" +
@@ -1758,7 +2063,11 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\x0fnlu_agent_names\x18\x0e \x03(\tR\rnluAgentNames\x12)\n" +
 	"\x10deployed_callers\x18\x0f \x01(\x05R\x0fdeployedCallers\x12-\n" +
 	"\x12deployed_listeners\x18\x10 \x01(\x05R\x11deployedListeners\x12E\n" +
-	"\x1ftransfer_phone_number_allowlist\x18\x11 \x03(\tR\x1ctransferPhoneNumberAllowlist\"\xc5\x05\n" +
+	"\x1ftransfer_phone_number_allowlist\x18\x11 \x03(\tR\x1ctransferPhoneNumberAllowlist\x12%\n" +
+	"\x0estatus_message\x18\x12 \x01(\tR\rstatusMessage\x12F\n" +
+	"\x11status_changed_at\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\x0fstatusChangedAt\x12]\n" +
+	"\x18trunk_registration_state\x18\x14 \x01(\x0e2#.ondewo.vtsi.TrunkRegistrationStateR\x16trunkRegistrationState\x12<\n" +
+	"\x1aasterisk_version_effective\x18\x15 \x01(\tR\x18asteriskVersionEffective\"\xc5\x05\n" +
 	"\x18AsteriskConfigsVariables\x12,\n" +
 	"\x12sip_trunk_username\x18\x01 \x01(\tR\x10sipTrunkUsername\x12,\n" +
 	"\x12sip_trunk_password\x18\x02 \x01(\tR\x10sipTrunkPassword\x12$\n" +
@@ -1787,22 +2096,33 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\rasterisk_port\x18\x04 \x01(\x05R\fasteriskPort\x12.\n" +
 	"\x10asterisk_version\x18\x05 \x01(\tH\x01R\x0fasteriskVersion\x88\x01\x01B\x18\n" +
 	"\x16asterisk_configs_oneofB\x13\n" +
-	"\x11_asterisk_version\"|\n" +
+	"\x11_asterisk_version\"\xa5\x01\n" +
 	"\x18CreateVtsiProjectRequest\x12;\n" +
-	"\fvtsi_project\x18\x01 \x01(\v2\x18.ondewo.vtsi.VtsiProjectR\vvtsiProject\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"}\n" +
+	"\fvtsi_project\x18\x01 \x01(\v2\x18.ondewo.vtsi.VtsiProjectR\vvtsiProject\x12'\n" +
+	"\rerror_message\x18\x02 \x01(\tB\x02\x18\x01R\ferrorMessage\x12#\n" +
+	"\rvalidate_only\x18\x03 \x01(\bR\fvalidateOnly\"}\n" +
 	"\x19CreateVtsiProjectResponse\x12;\n" +
 	"\fvtsi_project\x18\x01 \x01(\v2\x18.ondewo.vtsi.VtsiProjectR\vvtsiProject\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"u\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"\xb0\x01\n" +
 	"\x15GetVtsiProjectRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12H\n" +
-	"\x11vtsi_project_view\x18\x02 \x01(\x0e2\x1c.ondewo.vtsi.VtsiProjectViewR\x0fvtsiProjectView\"\xaf\x02\n" +
+	"\x11vtsi_project_view\x18\x02 \x01(\x0e2\x1c.ondewo.vtsi.VtsiProjectViewR\x0fvtsiProjectView\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xfb\x04\n" +
 	"\x17ListVtsiProjectsRequest\x12H\n" +
 	"\x11vtsi_project_view\x18\x01 \x01(\x0e2\x1c.ondewo.vtsi.VtsiProjectViewR\x0fvtsiProjectView\x12\"\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tH\x00R\tpageToken\x88\x01\x01\x12V\n" +
 	"\x14vtsi_project_sorting\x18\x03 \x01(\v2\x1f.ondewo.vtsi.VtsiProjectSortingH\x01R\x12vtsiProjectSorting\x88\x01\x01\x12&\n" +
-	"\x0fnlu_agent_names\x18\x04 \x03(\tR\rnluAgentNamesB\r\n" +
+	"\x0fnlu_agent_names\x18\x04 \x03(\tR\rnluAgentNames\x129\n" +
+	"\n" +
+	"field_mask\x18\x05 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12\x1b\n" +
+	"\tpage_size\x18\x06 \x01(\x05R\bpageSize\x12:\n" +
+	"\bstatuses\x18\a \x03(\x0e2\x1e.ondewo.vtsi.VtsiProjectStatusR\bstatuses\x122\n" +
+	"\x15display_name_contains\x18\b \x01(\tR\x13displayNameContains\x12?\n" +
+	"\rcreated_after\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\fcreatedAfter\x12A\n" +
+	"\x0ecreated_before\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\rcreatedBeforeB\r\n" +
 	"\v_page_tokenB\x17\n" +
 	"\x15_vtsi_project_sorting\"\x81\x01\n" +
 	"\x18ListVtsiProjectsResponse\x12=\n" +
@@ -1818,14 +2138,18 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\"SORT_VTSI_PROJECT_BY_CREATION_DATE\x10\x03\x12&\n" +
 	"\"SORT_VTSI_PROJECT_BY_LAST_MODIFIED\x10\x04B\x10\n" +
 	"\x0e_sorting_fieldB\x0f\n" +
-	"\r_sorting_mode\"\x94\x01\n" +
+	"\r_sorting_mode\"\xf4\x01\n" +
 	"\x18UpdateVtsiProjectRequest\x12;\n" +
 	"\fvtsi_project\x18\x01 \x01(\v2\x18.ondewo.vtsi.VtsiProjectR\vvtsiProject\x12;\n" +
 	"\vupdate_mask\x18\x02 \x01(\v2\x1a.google.protobuf.FieldMaskR\n" +
-	"updateMask\"T\n" +
+	"updateMask\x129\n" +
+	"\n" +
+	"field_mask\x18\x03 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12#\n" +
+	"\rvalidate_only\x18\x04 \x01(\bR\fvalidateOnly\"\x91\x01\n" +
 	"\x19UpdateVtsiProjectResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\".\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\x12;\n" +
+	"\fvtsi_project\x18\x03 \x01(\v2\x18.ondewo.vtsi.VtsiProjectR\vvtsiProject\".\n" +
 	"\x18DeleteVtsiProjectRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"T\n" +
 	"\x19DeleteVtsiProjectResponse\x12\x12\n" +
@@ -1840,7 +2164,13 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"V\n" +
 	"\x1bUndeployVtsiProjectResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage*\x8b\x01\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage*\xea\x01\n" +
+	"\x16TrunkRegistrationState\x12(\n" +
+	"$TRUNK_REGISTRATION_STATE_UNSPECIFIED\x10\x00\x12'\n" +
+	"#TRUNK_REGISTRATION_STATE_REGISTERED\x10\x01\x12)\n" +
+	"%TRUNK_REGISTRATION_STATE_UNREGISTERED\x10\x02\x12%\n" +
+	"!TRUNK_REGISTRATION_STATE_REJECTED\x10\x03\x12+\n" +
+	"'TRUNK_REGISTRATION_STATE_NOT_CONFIGURED\x10\x04*\x9e\x01\n" +
 	"\x11VtsiProjectStatus\x12\x0f\n" +
 	"\vUNSPECIFIED\x10\x00\x12\x0e\n" +
 	"\n" +
@@ -1850,7 +2180,8 @@ const file_ondewo_vtsi_projects_proto_rawDesc = "" +
 	"\bDEPLOYED\x10\x04\x12\x0f\n" +
 	"\vUNDEPLOYING\x10\x05\x12\f\n" +
 	"\bDELETING\x10\x06\x12\v\n" +
-	"\aDELETED\x10\a*\x8f\x01\n" +
+	"\aDELETED\x10\a\x12\x11\n" +
+	"\rDEPLOY_FAILED\x10\b*\x8f\x01\n" +
 	"\x11SipTrunkTransport\x12#\n" +
 	"\x1fSIP_TRUNK_TRANSPORT_UNSPECIFIED\x10\x00\x12\x1b\n" +
 	"\x17SIP_TRUNK_TRANSPORT_TLS\x10\x01\x12\x1b\n" +
@@ -1886,72 +2217,82 @@ func file_ondewo_vtsi_projects_proto_rawDescGZIP() []byte {
 	return file_ondewo_vtsi_projects_proto_rawDescData
 }
 
-var file_ondewo_vtsi_projects_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_ondewo_vtsi_projects_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
 var file_ondewo_vtsi_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_ondewo_vtsi_projects_proto_goTypes = []any{
-	(VtsiProjectStatus)(0),                          // 0: ondewo.vtsi.VtsiProjectStatus
-	(SipTrunkTransport)(0),                          // 1: ondewo.vtsi.SipTrunkTransport
-	(VtsiProjectSortingMode)(0),                     // 2: ondewo.vtsi.VtsiProjectSortingMode
-	(VtsiProjectView)(0),                            // 3: ondewo.vtsi.VtsiProjectView
-	(VtsiProjectSorting_VtsiProjectSortingField)(0), // 4: ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
-	(*VtsiProject)(nil),                             // 5: ondewo.vtsi.VtsiProject
-	(*AsteriskConfigsVariables)(nil),                // 6: ondewo.vtsi.AsteriskConfigsVariables
-	(*AsteriskConfigsFiles)(nil),                    // 7: ondewo.vtsi.AsteriskConfigsFiles
-	(*AsteriskConfigs)(nil),                         // 8: ondewo.vtsi.AsteriskConfigs
-	(*CreateVtsiProjectRequest)(nil),                // 9: ondewo.vtsi.CreateVtsiProjectRequest
-	(*CreateVtsiProjectResponse)(nil),               // 10: ondewo.vtsi.CreateVtsiProjectResponse
-	(*GetVtsiProjectRequest)(nil),                   // 11: ondewo.vtsi.GetVtsiProjectRequest
-	(*ListVtsiProjectsRequest)(nil),                 // 12: ondewo.vtsi.ListVtsiProjectsRequest
-	(*ListVtsiProjectsResponse)(nil),                // 13: ondewo.vtsi.ListVtsiProjectsResponse
-	(*VtsiProjectSorting)(nil),                      // 14: ondewo.vtsi.VtsiProjectSorting
-	(*UpdateVtsiProjectRequest)(nil),                // 15: ondewo.vtsi.UpdateVtsiProjectRequest
-	(*UpdateVtsiProjectResponse)(nil),               // 16: ondewo.vtsi.UpdateVtsiProjectResponse
-	(*DeleteVtsiProjectRequest)(nil),                // 17: ondewo.vtsi.DeleteVtsiProjectRequest
-	(*DeleteVtsiProjectResponse)(nil),               // 18: ondewo.vtsi.DeleteVtsiProjectResponse
-	(*DeployVtsiProjectRequest)(nil),                // 19: ondewo.vtsi.DeployVtsiProjectRequest
-	(*DeployVtsiProjectResponse)(nil),               // 20: ondewo.vtsi.DeployVtsiProjectResponse
-	(*UndeployVtsiProjectRequest)(nil),              // 21: ondewo.vtsi.UndeployVtsiProjectRequest
-	(*UndeployVtsiProjectResponse)(nil),             // 22: ondewo.vtsi.UndeployVtsiProjectResponse
-	(*timestamppb.Timestamp)(nil),                   // 23: google.protobuf.Timestamp
-	(*fieldmaskpb.FieldMask)(nil),                   // 24: google.protobuf.FieldMask
+	(TrunkRegistrationState)(0),                     // 0: ondewo.vtsi.TrunkRegistrationState
+	(VtsiProjectStatus)(0),                          // 1: ondewo.vtsi.VtsiProjectStatus
+	(SipTrunkTransport)(0),                          // 2: ondewo.vtsi.SipTrunkTransport
+	(VtsiProjectSortingMode)(0),                     // 3: ondewo.vtsi.VtsiProjectSortingMode
+	(VtsiProjectView)(0),                            // 4: ondewo.vtsi.VtsiProjectView
+	(VtsiProjectSorting_VtsiProjectSortingField)(0), // 5: ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
+	(*VtsiProject)(nil),                             // 6: ondewo.vtsi.VtsiProject
+	(*AsteriskConfigsVariables)(nil),                // 7: ondewo.vtsi.AsteriskConfigsVariables
+	(*AsteriskConfigsFiles)(nil),                    // 8: ondewo.vtsi.AsteriskConfigsFiles
+	(*AsteriskConfigs)(nil),                         // 9: ondewo.vtsi.AsteriskConfigs
+	(*CreateVtsiProjectRequest)(nil),                // 10: ondewo.vtsi.CreateVtsiProjectRequest
+	(*CreateVtsiProjectResponse)(nil),               // 11: ondewo.vtsi.CreateVtsiProjectResponse
+	(*GetVtsiProjectRequest)(nil),                   // 12: ondewo.vtsi.GetVtsiProjectRequest
+	(*ListVtsiProjectsRequest)(nil),                 // 13: ondewo.vtsi.ListVtsiProjectsRequest
+	(*ListVtsiProjectsResponse)(nil),                // 14: ondewo.vtsi.ListVtsiProjectsResponse
+	(*VtsiProjectSorting)(nil),                      // 15: ondewo.vtsi.VtsiProjectSorting
+	(*UpdateVtsiProjectRequest)(nil),                // 16: ondewo.vtsi.UpdateVtsiProjectRequest
+	(*UpdateVtsiProjectResponse)(nil),               // 17: ondewo.vtsi.UpdateVtsiProjectResponse
+	(*DeleteVtsiProjectRequest)(nil),                // 18: ondewo.vtsi.DeleteVtsiProjectRequest
+	(*DeleteVtsiProjectResponse)(nil),               // 19: ondewo.vtsi.DeleteVtsiProjectResponse
+	(*DeployVtsiProjectRequest)(nil),                // 20: ondewo.vtsi.DeployVtsiProjectRequest
+	(*DeployVtsiProjectResponse)(nil),               // 21: ondewo.vtsi.DeployVtsiProjectResponse
+	(*UndeployVtsiProjectRequest)(nil),              // 22: ondewo.vtsi.UndeployVtsiProjectRequest
+	(*UndeployVtsiProjectResponse)(nil),             // 23: ondewo.vtsi.UndeployVtsiProjectResponse
+	(*timestamppb.Timestamp)(nil),                   // 24: google.protobuf.Timestamp
+	(*fieldmaskpb.FieldMask)(nil),                   // 25: google.protobuf.FieldMask
 }
 var file_ondewo_vtsi_projects_proto_depIdxs = []int32{
-	8,  // 0: ondewo.vtsi.VtsiProject.asterisk_configs:type_name -> ondewo.vtsi.AsteriskConfigs
-	0,  // 1: ondewo.vtsi.VtsiProject.vtsi_project_status:type_name -> ondewo.vtsi.VtsiProjectStatus
-	23, // 2: ondewo.vtsi.VtsiProject.created_at:type_name -> google.protobuf.Timestamp
-	23, // 3: ondewo.vtsi.VtsiProject.modified_at:type_name -> google.protobuf.Timestamp
-	1,  // 4: ondewo.vtsi.AsteriskConfigsVariables.sip_trunk_transport:type_name -> ondewo.vtsi.SipTrunkTransport
-	6,  // 5: ondewo.vtsi.AsteriskConfigs.asterisk_configs_variables:type_name -> ondewo.vtsi.AsteriskConfigsVariables
-	7,  // 6: ondewo.vtsi.AsteriskConfigs.asterisk_configs_files:type_name -> ondewo.vtsi.AsteriskConfigsFiles
-	5,  // 7: ondewo.vtsi.CreateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	5,  // 8: ondewo.vtsi.CreateVtsiProjectResponse.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	3,  // 9: ondewo.vtsi.GetVtsiProjectRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
-	3,  // 10: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
-	14, // 11: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_sorting:type_name -> ondewo.vtsi.VtsiProjectSorting
-	5,  // 12: ondewo.vtsi.ListVtsiProjectsResponse.vtsi_projects:type_name -> ondewo.vtsi.VtsiProject
-	4,  // 13: ondewo.vtsi.VtsiProjectSorting.sorting_field:type_name -> ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
-	2,  // 14: ondewo.vtsi.VtsiProjectSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
-	5,  // 15: ondewo.vtsi.UpdateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
-	24, // 16: ondewo.vtsi.UpdateVtsiProjectRequest.update_mask:type_name -> google.protobuf.FieldMask
-	9,  // 17: ondewo.vtsi.Projects.CreateVtsiProject:input_type -> ondewo.vtsi.CreateVtsiProjectRequest
-	11, // 18: ondewo.vtsi.Projects.GetVtsiProject:input_type -> ondewo.vtsi.GetVtsiProjectRequest
-	15, // 19: ondewo.vtsi.Projects.UpdateVtsiProject:input_type -> ondewo.vtsi.UpdateVtsiProjectRequest
-	17, // 20: ondewo.vtsi.Projects.DeleteVtsiProject:input_type -> ondewo.vtsi.DeleteVtsiProjectRequest
-	19, // 21: ondewo.vtsi.Projects.DeployVtsiProject:input_type -> ondewo.vtsi.DeployVtsiProjectRequest
-	21, // 22: ondewo.vtsi.Projects.UndeployVtsiProject:input_type -> ondewo.vtsi.UndeployVtsiProjectRequest
-	12, // 23: ondewo.vtsi.Projects.ListVtsiProjects:input_type -> ondewo.vtsi.ListVtsiProjectsRequest
-	10, // 24: ondewo.vtsi.Projects.CreateVtsiProject:output_type -> ondewo.vtsi.CreateVtsiProjectResponse
-	5,  // 25: ondewo.vtsi.Projects.GetVtsiProject:output_type -> ondewo.vtsi.VtsiProject
-	16, // 26: ondewo.vtsi.Projects.UpdateVtsiProject:output_type -> ondewo.vtsi.UpdateVtsiProjectResponse
-	18, // 27: ondewo.vtsi.Projects.DeleteVtsiProject:output_type -> ondewo.vtsi.DeleteVtsiProjectResponse
-	20, // 28: ondewo.vtsi.Projects.DeployVtsiProject:output_type -> ondewo.vtsi.DeployVtsiProjectResponse
-	22, // 29: ondewo.vtsi.Projects.UndeployVtsiProject:output_type -> ondewo.vtsi.UndeployVtsiProjectResponse
-	13, // 30: ondewo.vtsi.Projects.ListVtsiProjects:output_type -> ondewo.vtsi.ListVtsiProjectsResponse
-	24, // [24:31] is the sub-list for method output_type
-	17, // [17:24] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	9,  // 0: ondewo.vtsi.VtsiProject.asterisk_configs:type_name -> ondewo.vtsi.AsteriskConfigs
+	1,  // 1: ondewo.vtsi.VtsiProject.vtsi_project_status:type_name -> ondewo.vtsi.VtsiProjectStatus
+	24, // 2: ondewo.vtsi.VtsiProject.created_at:type_name -> google.protobuf.Timestamp
+	24, // 3: ondewo.vtsi.VtsiProject.modified_at:type_name -> google.protobuf.Timestamp
+	24, // 4: ondewo.vtsi.VtsiProject.status_changed_at:type_name -> google.protobuf.Timestamp
+	0,  // 5: ondewo.vtsi.VtsiProject.trunk_registration_state:type_name -> ondewo.vtsi.TrunkRegistrationState
+	2,  // 6: ondewo.vtsi.AsteriskConfigsVariables.sip_trunk_transport:type_name -> ondewo.vtsi.SipTrunkTransport
+	7,  // 7: ondewo.vtsi.AsteriskConfigs.asterisk_configs_variables:type_name -> ondewo.vtsi.AsteriskConfigsVariables
+	8,  // 8: ondewo.vtsi.AsteriskConfigs.asterisk_configs_files:type_name -> ondewo.vtsi.AsteriskConfigsFiles
+	6,  // 9: ondewo.vtsi.CreateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	6,  // 10: ondewo.vtsi.CreateVtsiProjectResponse.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	4,  // 11: ondewo.vtsi.GetVtsiProjectRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
+	25, // 12: ondewo.vtsi.GetVtsiProjectRequest.field_mask:type_name -> google.protobuf.FieldMask
+	4,  // 13: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_view:type_name -> ondewo.vtsi.VtsiProjectView
+	15, // 14: ondewo.vtsi.ListVtsiProjectsRequest.vtsi_project_sorting:type_name -> ondewo.vtsi.VtsiProjectSorting
+	25, // 15: ondewo.vtsi.ListVtsiProjectsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	1,  // 16: ondewo.vtsi.ListVtsiProjectsRequest.statuses:type_name -> ondewo.vtsi.VtsiProjectStatus
+	24, // 17: ondewo.vtsi.ListVtsiProjectsRequest.created_after:type_name -> google.protobuf.Timestamp
+	24, // 18: ondewo.vtsi.ListVtsiProjectsRequest.created_before:type_name -> google.protobuf.Timestamp
+	6,  // 19: ondewo.vtsi.ListVtsiProjectsResponse.vtsi_projects:type_name -> ondewo.vtsi.VtsiProject
+	5,  // 20: ondewo.vtsi.VtsiProjectSorting.sorting_field:type_name -> ondewo.vtsi.VtsiProjectSorting.VtsiProjectSortingField
+	3,  // 21: ondewo.vtsi.VtsiProjectSorting.sorting_mode:type_name -> ondewo.vtsi.VtsiProjectSortingMode
+	6,  // 22: ondewo.vtsi.UpdateVtsiProjectRequest.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	25, // 23: ondewo.vtsi.UpdateVtsiProjectRequest.update_mask:type_name -> google.protobuf.FieldMask
+	25, // 24: ondewo.vtsi.UpdateVtsiProjectRequest.field_mask:type_name -> google.protobuf.FieldMask
+	6,  // 25: ondewo.vtsi.UpdateVtsiProjectResponse.vtsi_project:type_name -> ondewo.vtsi.VtsiProject
+	10, // 26: ondewo.vtsi.Projects.CreateVtsiProject:input_type -> ondewo.vtsi.CreateVtsiProjectRequest
+	12, // 27: ondewo.vtsi.Projects.GetVtsiProject:input_type -> ondewo.vtsi.GetVtsiProjectRequest
+	16, // 28: ondewo.vtsi.Projects.UpdateVtsiProject:input_type -> ondewo.vtsi.UpdateVtsiProjectRequest
+	18, // 29: ondewo.vtsi.Projects.DeleteVtsiProject:input_type -> ondewo.vtsi.DeleteVtsiProjectRequest
+	20, // 30: ondewo.vtsi.Projects.DeployVtsiProject:input_type -> ondewo.vtsi.DeployVtsiProjectRequest
+	22, // 31: ondewo.vtsi.Projects.UndeployVtsiProject:input_type -> ondewo.vtsi.UndeployVtsiProjectRequest
+	13, // 32: ondewo.vtsi.Projects.ListVtsiProjects:input_type -> ondewo.vtsi.ListVtsiProjectsRequest
+	11, // 33: ondewo.vtsi.Projects.CreateVtsiProject:output_type -> ondewo.vtsi.CreateVtsiProjectResponse
+	6,  // 34: ondewo.vtsi.Projects.GetVtsiProject:output_type -> ondewo.vtsi.VtsiProject
+	17, // 35: ondewo.vtsi.Projects.UpdateVtsiProject:output_type -> ondewo.vtsi.UpdateVtsiProjectResponse
+	19, // 36: ondewo.vtsi.Projects.DeleteVtsiProject:output_type -> ondewo.vtsi.DeleteVtsiProjectResponse
+	21, // 37: ondewo.vtsi.Projects.DeployVtsiProject:output_type -> ondewo.vtsi.DeployVtsiProjectResponse
+	23, // 38: ondewo.vtsi.Projects.UndeployVtsiProject:output_type -> ondewo.vtsi.UndeployVtsiProjectResponse
+	14, // 39: ondewo.vtsi.Projects.ListVtsiProjects:output_type -> ondewo.vtsi.ListVtsiProjectsResponse
+	33, // [33:40] is the sub-list for method output_type
+	26, // [26:33] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	26, // [26:26] is the sub-list for extension extendee
+	0,  // [0:26] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_projects_proto_init() }
@@ -1972,7 +2313,7 @@ func file_ondewo_vtsi_projects_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_projects_proto_rawDesc), len(file_ondewo_vtsi_projects_proto_rawDesc)),
-			NumEnums:      5,
+			NumEnums:      6,
 			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   1,
