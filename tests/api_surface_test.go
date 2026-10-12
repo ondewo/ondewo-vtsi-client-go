@@ -117,6 +117,10 @@ var expectedMethods = map[string][]string{
 		"StopCall", "StopAllCalls", "TransferCall", "GetCall", "ListCalls",
 		"AddCallersToCampaign", "AddScheduledCallersToCampaign",
 		"InviteToCall", "RemoveCallParticipant", "SetCallMediaControl",
+		// Added in API 9.1.0.
+		"UpdateCaller", "UpdateCallers", "UpdateListener", "UpdateListeners",
+		"UpdateScheduledCaller", "CancelScheduledCallers", "RetryScheduledCaller",
+		"GetCallStatistics", "UpdateCall", "UpdateCalls",
 		// Streaming RPCs live in ServiceDesc.Streams rather than .Methods.
 		"StreamCallerStatus", "StreamListenerStatus", "StreamScheduledCallerStatus",
 		"StreamCallAudio", "ListenCallAudio",
@@ -125,24 +129,27 @@ var expectedMethods = map[string][]string{
 		"CreateCampaign", "GetCampaign", "UpdateCampaign", "DeleteCampaign", "ListCampaigns",
 		"GetCampaignStatistics", "ListCampaignCalls",
 		"StartCampaign", "StopCampaign", "HardStopCampaign", "ResumeCampaign",
+		"GetCampaignCall", "CancelCampaignCalls", "RetryCampaignCalls", "CloneCampaign",
 		"StreamCampaignStatus",
 	},
 	"ondewo.vtsi.Events": {
 		"CreateVtsiEventSubscription", "GetVtsiEventSubscription", "UpdateVtsiEventSubscription",
 		"DeleteVtsiEventSubscription", "ListVtsiEventSubscriptions",
 		"CreateWebhook", "GetWebhook", "UpdateWebhook", "DeleteWebhook", "ListWebhooks", "TestWebhook",
+		"RedeliverWebhookEvents",
 		"SubscribeVtsiEvents",
 	},
 	"ondewo.vtsi.Softphones": {
 		"CreateSoftphoneAccount", "GetSoftphoneAccount", "UpdateSoftphoneAccount",
 		"DeleteSoftphoneAccount", "ListSoftphoneAccounts", "RotateSoftphoneCredentials",
 		"ListSoftphoneCertificates", "GetSoftphoneCertificate", "RevokeSoftphoneCertificate",
-		"GetSoftphoneProvisioning",
+		"GetSoftphoneProvisioning", "GetSoftphoneRegistration",
 	},
 	// StreamCallLogs is server streaming, so it lives in ServiceDesc.Streams rather than
 	// .Methods - the lookup has to consider both.
 	"ondewo.vtsi.Logs": {
 		"ListCallLogs", "StreamCallLogs", "GetCallLogStream", "ListCallLogStreams", "DeleteCallLogs",
+		"ExportCallLogs",
 	},
 	"ondewo.vtsi.Projects": {
 		"CreateVtsiProject", "GetVtsiProject", "UpdateVtsiProject", "DeleteVtsiProject",
