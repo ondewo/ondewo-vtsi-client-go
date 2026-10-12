@@ -469,8 +469,16 @@ check_gh_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the 
 	fi
 	@echo "$(GREEN)[SUCCESS]$(NC) GITHUB_GH_TOKEN is set"
 
+# gh REFUSES `gh auth login` while GH_TOKEN or GITHUB_TOKEN is in the environment ("The value of the
+# GH_TOKEN environment variable is being used for authentication", exit 1) and authenticates every
+# later call with that variable instead. The 9.1.0 release died exactly there - after both tags had
+# been pushed - so the login is skipped when gh already has a token, and the release carries on.
 login_to_gh: check_gh_credentials ## Login to Github CLI with Access Token
-	@printf '%s\n' "$$GITHUB_GH_TOKEN" | gh auth login -p ssh --with-token
+	@if [ -n "$$GH_TOKEN" ] || [ -n "$$GITHUB_TOKEN" ]; then \
+		echo "$(BLUE)[INFO]$(NC) gh already authenticates through GH_TOKEN/GITHUB_TOKEN from the environment - skipping gh auth login"; \
+	else \
+		printf '%s\n' "$$GITHUB_GH_TOKEN" | gh auth login -p ssh --with-token; \
+	fi
 
 check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_VTSI_VERSION
 # `gh release create -n ""` succeeds and publishes an empty release, so an entry that was forgotten
