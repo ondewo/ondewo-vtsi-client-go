@@ -43,7 +43,7 @@ concurrency:
 jobs:
   release:
     name: release ${{ github.ref_name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       # FIRST, before anything is built and long before anything is published: the credential has to
@@ -64,6 +64,12 @@ jobs:
             exit 1
           fi
           echo "Release credentials are present."
+
+      # actions/checkout starts with a bare `git init`, and git >= 2.28 then prints a 13-line
+      # "Using 'master' as the name for the initial branch" hint into every job log. Naming the
+      # default up front is what silences it; master is this repository's default branch anyway.
+      - name: Name git's default branch
+        run: git config --global init.defaultBranch master
 
       - uses: actions/checkout@v7
 

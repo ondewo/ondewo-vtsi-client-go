@@ -18,7 +18,7 @@ concurrency:
 jobs:
   build-and-test:
     name: go ${{ matrix.go-version }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -27,6 +27,12 @@ jobs:
         # toolchain the proto compiler image generates with.
         go-version: ['1.25', '1.27']
     steps:
+      # actions/checkout starts with a bare `git init`, and git >= 2.28 then prints a 13-line
+      # "Using 'master' as the name for the initial branch" hint into every job log. Naming the
+      # default up front is what silences it; master is this repository's default branch anyway.
+      - name: Name git's default branch
+        run: git config --global init.defaultBranch master
+
       # `submodules:` is deliberately NOT enabled: the generated api/ directory is committed to
       # this repository, so the module compiles from the checkout alone, and both submodules are
       # codegen inputs only. Regenerating the stubs needs Docker and is a separate concern - this
@@ -104,9 +110,15 @@ jobs:
   # meant a documentation change could only be caught by a human reading the diff.
   lint:
     name: pre-commit (markdownlint + hygiene)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      # actions/checkout starts with a bare `git init`, and git >= 2.28 then prints a 13-line
+      # "Using 'master' as the name for the initial branch" hint into every job log. Naming the
+      # default up front is what silences it; master is this repository's default branch anyway.
+      - name: Name git's default branch
+        run: git config --global init.defaultBranch master
+
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
