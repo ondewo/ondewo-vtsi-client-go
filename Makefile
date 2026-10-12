@@ -97,6 +97,24 @@ GO_SOURCES=$$(find . -name "*.go" ! -path "./${ONDEWO_PROTO_COMPILER_DIR}/*" ! -
 # only the build target needs the narrower list.
 GO_BUILD_PACKAGES=$$(go list -f '{{if .GoFiles}}{{.ImportPath}}{{end}}' ./... | grep -v "/${ONDEWO_PROTO_COMPILER_DIR}/")
 
+# --- Go toolchain
+# Every go target runs on the host's go when there is one, and otherwise re-runs ITSELF inside the
+# pinned golang image - the same toolchain release.yml uses. The release host (the machine running
+# `make release_go_client` in ondewo-vtsi-api) has no go installed, and `make release` used to die in
+# `go_build` with `go: not found` after the stubs had already been generated. CI is unaffected: its
+# runners have go, so HOST_GO is set there and every recipe below runs exactly as before.
+# No credential is handed to the container: none of these targets needs one, and GITHUB_GH_TOKEN
+# stays in the environment of the host make only. The build and module caches live in a host
+# directory so consecutive targets of one release do not each download the dependency graph again;
+# publish_dry_run still points GOMODCACHE at its own throwaway directory, inside the container too.
+HOST_GO := $(shell command -v go 2>/dev/null)
+GO_DOCKER_IMAGE=golang:1.27.1
+GO_DOCKER_CACHE_DIR?=$(HOME)/.cache/ondewo-go-docker
+GO_DOCKER_RUN=mkdir -p "$(GO_DOCKER_CACHE_DIR)" && docker run --rm --user $$(id -u):$$(id -g) \
+	-e HOME=/tmp/home -e GOCACHE=/go-docker-cache/build -e GOMODCACHE=/go-docker-cache/mod \
+	-v "$(GO_DOCKER_CACHE_DIR)":/go-docker-cache -v "$(CURDIR)":"$(CURDIR)" -w "$(CURDIR)" \
+	$(GO_DOCKER_IMAGE) make
+
 # --- Coverage
 # The threshold is enforced over the HAND-WRITTEN packages only. Everything below ${STUBS_DIR}/ is
 # machine output: gating on it would measure how much of protoc's output a test happens to walk,
@@ -228,12 +246,23 @@ fix_ownership: ## Give the root-owned output of the proto compiler back to the c
 	done
 
 go_build: ## Compile every package of the module that has non-test sources
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	go build $(GO_BUILD_PACKAGES)
+endif
 
 test: ## Run the go test suite
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	go test $(GO_PACKAGES)
+endif
 
 test_coverage: ## Run the suite under the race detector and fail if hand-written coverage < COVERAGE_THRESHOLD
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	@echo "$(BLUE)[INFO]$(NC) Running the test suite, measuring coverage of $(COVERAGE_PACKAGES) ..."
 	go test -count=1 -race -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=$(COVERAGE_PROFILE) $(GO_PACKAGES)
 	@go tool cover -func=$(COVERAGE_PROFILE)
@@ -251,10 +280,15 @@ test_coverage: ## Run the suite under the race detector and fail if hand-written
 		exit 1; \
 	}; \
 	echo "$(GREEN)[SUCCESS]$(NC) hand-written coverage is $$total% (threshold $(COVERAGE_THRESHOLD)%)"
+endif
 
 test_coverage_generated: ## Print how much of the GENERATED stubs the suite exercises (reported, never gated)
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	go test -count=1 -coverpkg=./${STUBS_DIR}/... -coverprofile=generated-$(COVERAGE_PROFILE) $(GO_PACKAGES)
 	@go tool cover -func=generated-$(COVERAGE_PROFILE) | tail -1
+endif
 
 check_stubs: ## Assert the generated stubs are committed - the build has nothing to compile without them
 	@[ -d ${STUBS_DIR} ] || { echo "$(RED)[ERROR]$(NC) ${STUBS_DIR}/ is missing - the generated stubs are not committed"; exit 1; }
@@ -296,20 +330,31 @@ check_go_module_path: ## Assert go.mod and every import agree with the /vN suffi
 	echo "$(GREEN)[SUCCESS]$(NC) every self-import is spelled ${GO_MODULE_PATH}/..."
 
 vet: ## Run go vet over the hand-written packages and the generated stubs
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	go vet $(GO_PACKAGES)
+endif
 
 # Both gofmt targets guard on an empty file list: gofmt with no arguments reads STDIN, which
 # in CI is a hang, not an error. The list is empty in exactly one situation - a fresh clone
 # before the first `make generate_ondewo_protos`.
 fmt: ## Format the hand-written go sources in place
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	@sources=$(GO_SOURCES); \
 	if [ -z "$$sources" ]; then \
 		echo "$(YELLOW)[WARN]$(NC) no go sources yet - run 'make generate_ondewo_protos' first"; \
 		exit 0; \
 	fi; \
 	gofmt -l -w $$sources
+endif
 
 fmt_check: ## Fail if any go source is not gofmt-clean (prints the offenders)
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	@sources=$(GO_SOURCES); \
 	if [ -z "$$sources" ]; then \
 		echo "$(YELLOW)[WARN]$(NC) no go sources yet - run 'make generate_ondewo_protos' first"; \
@@ -322,6 +367,7 @@ fmt_check: ## Fail if any go source is not gofmt-clean (prints the offenders)
 		exit 1; \
 	fi; \
 	echo "$(GREEN)[SUCCESS]$(NC) All go sources are gofmt-clean"
+endif
 
 clean_go_api: ## Remove the generated stubs
 	rm -rf ${STUBS_DIR}
@@ -360,6 +406,13 @@ release: ## Automate the entire release process
 	make build
 	make check_build
 	make check_go_module_path
+# The suite gates the release, and it runs HERE - against the freshly generated stubs, before the
+# first `git push`. It used to run only in release.yml, i.e. on the tag, after the tag had been pushed
+# and announced: 9.1.0 would have shipped with a red TestEveryProtoFileIsRegistered that way. A
+# published go module version is immutable, so a red suite must stop the release, not report on it.
+	make fmt_check
+	make vet
+	make test_coverage
 	-make precommit_hooks_run_all_files
 	git status
 	git add ${STUBS_DIR}
@@ -457,6 +510,9 @@ push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
 # (GOCACHE) stays shared: it is keyed by content hashes, so nothing in it can stand in for a
 # published module version.
 publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exactly as the module proxy would and install it as an outside consumer (no credentials)
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	@git diff --quiet HEAD -- ${STUBS_DIR} go.mod go.sum || \
 		echo "$(YELLOW)[WARN]$(NC) ${STUBS_DIR}/, go.mod or go.sum differ from HEAD - the rehearsal packs HEAD, not your working tree"
 	@echo "$(BLUE)[INFO]$(NC) Packing ${GO_MODULE_PATH}@${GO_RELEASE_TAG} out of the committed tree ..."
@@ -485,6 +541,7 @@ publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exa
 	go build ./...; \
 	resolved=`go list -m ${GO_MODULE_PATH}`; \
 	echo "$(GREEN)[SUCCESS]$(NC) an outside consumer resolved and compiled against $$resolved"
+endif
 # The three settings are exported rather than prefixed onto `go mod tidy` alone, because every go
 # command after it resolves the module too. The checksum database is switched off for THIS module
 # only (GONOSUMDB) - the version being rehearsed is by definition not in sum.golang.org yet - and
@@ -492,9 +549,13 @@ publish_dry_run: check_stubs check_go_module_path ## Pack the committed tree exa
 # dependencies) still comes from wherever the caller's GOPROXY points.
 
 publish_go_module: ## Ask the public go module proxy to fetch the pushed tag (a go module has no registry upload - the tag IS the release)
+ifeq ($(HOST_GO),)
+	$(GO_DOCKER_RUN) $@
+else
 	@echo "$(BLUE)[INFO]$(NC) Requesting ${GO_MODULE_PATH}@${GO_RELEASE_TAG} from proxy.golang.org ..."
 	GOPROXY=https://proxy.golang.org GOFLAGS= go list -m ${GO_MODULE_PATH}@${GO_RELEASE_TAG}
 	@echo "$(GREEN)[SUCCESS]$(NC) ${GO_MODULE_PATH}@${GO_RELEASE_TAG} is served by the module proxy"
+endif
 
 ########################################################
 #		DEVOPS-ACCOUNTS

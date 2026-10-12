@@ -33,7 +33,13 @@ var (
 	modCacheAssignment = regexp.MustCompile(`\bGOMODCACHE=`)
 )
 
-// publishDryRunRecipe returns the trimmed recipe lines of the publish_dry_run target.
+// makeConditional matches the column-0 conditional directives make evaluates while it READS the
+// Makefile. The go targets use them to pick between the host's go and the pinned golang image, so
+// they sit inside the recipe without being part of what the shell runs.
+var makeConditional = regexp.MustCompile(`^(?:ifeq|ifneq|ifdef|ifndef|else|endif)\b`)
+
+// publishDryRunRecipe returns the trimmed recipe lines of the publish_dry_run target, from every
+// branch of a make conditional inside it.
 func publishDryRunRecipe(makefile string) []string {
 	_, after, found := strings.Cut(makefile, "\npublish_dry_run:")
 	if !found {
@@ -42,6 +48,9 @@ func publishDryRunRecipe(makefile string) []string {
 
 	var recipe []string
 	for _, line := range strings.Split(after, "\n")[1:] {
+		if makeConditional.MatchString(line) {
+			continue
+		}
 		if !strings.HasPrefix(line, "\t") {
 			break
 		}

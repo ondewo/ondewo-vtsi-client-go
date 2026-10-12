@@ -18,7 +18,10 @@ package tests
 
 import (
 	"context"
+	"errors"
+	"io/fs"
 	"net"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strings"
@@ -287,8 +290,10 @@ func TestEveryProtoFileIsRegistered(t *testing.T) {
 	})
 	sort.Strings(registered)
 
-	if len(registered) != protoFileCount {
-		t.Fatalf("%d ondewo/**.proto files are registered, want %d:\n%v", len(registered), protoFileCount, registered)
+	expected, source := expectedProtoFiles(t)
+	if !reflect.DeepEqual(registered, expected) {
+		t.Fatalf("%d ondewo/**.proto files are registered, want the %d listed by %s:\nregistered: %v\nexpected:   %v",
+			len(registered), len(expected), source, registered, expected)
 	}
 
 	for _, path := range registered {
@@ -303,4 +308,66 @@ func TestEveryProtoFileIsRegistered(t *testing.T) {
 			t.Errorf("%q is %v, want proto3", path, file.Syntax())
 		}
 	}
+}
+
+// expectedProtoFiles lists, as registry paths (ondewo/<pkg>/<name>.proto), every .proto file the
+// compiler had to consume. It is DERIVED rather than hard-coded, because a constant has to be
+// edited by hand in the same commit that regenerates the stubs for a new API version - and the
+// release automation regenerates them without anybody touching this file, so 9.1.0 (which added
+// ondewo/vtsi/call_configs.proto) shipped a red suite against the constant 28.
+//
+// The source of truth is the ondewo-vtsi-api submodule when it is checked out (a developer
+// machine, the release run): a proto there without a registered descriptor is exactly the "stopped
+// being compiled" case this test exists for. CI does not check the submodule out - the module
+// builds from the committed api/ tree alone - so there the committed message stubs are the list:
+// every api/ondewo/**/<name>.pb.go is generated from ondewo/**/<name>.proto, one to one, and a stub
+// that is committed but not linked into the registry still fails.
+func expectedProtoFiles(t *testing.T) ([]string, string) {
+	t.Helper()
+
+	if protos := collectFiles(t, "../ondewo-vtsi-api", "ondewo", ".proto", ""); len(protos) > 0 {
+		return protos, "the ondewo-vtsi-api submodule"
+	}
+
+	stubs := collectFiles(t, "../api", "ondewo", ".pb.go", "_grpc.pb.go")
+	if len(stubs) == 0 {
+		t.Fatal("neither ondewo-vtsi-api/ondewo/**.proto nor api/ondewo/**.pb.go exists - nothing to compare against")
+	}
+	for i, stub := range stubs {
+		stubs[i] = strings.TrimSuffix(stub, ".pb.go") + ".proto"
+	}
+	sort.Strings(stubs)
+
+	return stubs, "the committed api/ondewo/**.pb.go stubs"
+}
+
+// collectFiles returns the slash-separated paths, relative to root, of every file below
+// root/subdir that ends in suffix but not in exclude (when exclude is non-empty). A missing
+// directory yields nil rather than an error: an absent submodule is a legitimate state.
+func collectFiles(t *testing.T, root, subdir, suffix, exclude string) []string {
+	t.Helper()
+
+	var files []string
+	err := filepath.WalkDir(filepath.Join(root, subdir), func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasSuffix(name, suffix) || (exclude != "" && strings.HasSuffix(name, exclude)) {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		files = append(files, filepath.ToSlash(rel))
+
+		return nil
+	})
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		t.Fatalf("walking %s/%s: %v", root, subdir, err)
+	}
+	sort.Strings(files)
+
+	return files
 }

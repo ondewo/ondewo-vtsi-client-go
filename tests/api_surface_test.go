@@ -42,12 +42,6 @@ import (
 	vtsi "github.com/ondewo/ondewo-vtsi-client-go/v9/api/ondewo/vtsi"
 )
 
-// protoFileCount is the number of .proto files below ondewo-vtsi-api/ondewo that the compiler
-// consumed. Every one of them has to end up in the global descriptor registry when this package
-// is linked; a proto that silently stopped being compiled is otherwise invisible until a
-// consumer misses a type.
-const protoFileCount = 28
-
 // services is every gRPC service this product exposes, keyed by the fully qualified proto name
 // the ServiceDesc must declare.
 var services = map[string]*grpc.ServiceDesc{
