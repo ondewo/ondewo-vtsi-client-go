@@ -379,3 +379,34 @@ func cleanEnv() []string {
 
 	return env
 }
+
+// The release driver passes VERIFY_ATTEMPTS / VERIFY_INTERVAL_S; they must reach the polling of
+// verify_go_module_served (as must the long RELEASE_VERIFY_* names), never be silently ignored.
+func TestTheVerifyPollingHonoursBothOverrideSpellings(t *testing.T) {
+	if _, err := exec.LookPath("make"); err != nil {
+		t.Skip("make is not installed")
+	}
+	for _, tc := range []struct {
+		args     []string
+		env      []string
+		attempts string
+		interval string
+	}{
+		{nil, nil, "20", "30"},
+		{[]string{"VERIFY_ATTEMPTS=3", "VERIFY_INTERVAL_S=7"}, nil, "3", "7"},
+		{nil, []string{"VERIFY_ATTEMPTS=4", "VERIFY_INTERVAL_S=9"}, "4", "9"},
+		{[]string{"RELEASE_VERIFY_ATTEMPTS=5", "RELEASE_VERIFY_INTERVAL_S=11"}, nil, "5", "11"},
+	} {
+		cmd := exec.Command("make", append([]string{"-n", "-C", "..", "verify_go_module_served"}, tc.args...)...)
+		cmd.Env = append(cleanEnv(), tc.env...)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("make -n verify_go_module_served %v: %v\n%s", tc.args, err, out)
+		}
+		for _, want := range []string{"$attempt -ge " + tc.attempts + " ]", "sleep " + tc.interval + ";"} {
+			if !strings.Contains(string(out), want) {
+				t.Errorf("args %v env %v: the polling does not contain %q:\n%s", tc.args, tc.env, want, out)
+			}
+		}
+	}
+}

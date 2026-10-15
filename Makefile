@@ -178,9 +178,10 @@ LOAD_RELEASE_CREDENTIALS=if { [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN
 # --- Release verification
 GO_PROXY_URL=https://proxy.golang.org
 # proxy.golang.org usually serves a fresh tag within seconds; 20 x 30 s is the patience the release
-# allows it before failing.
-RELEASE_VERIFY_ATTEMPTS?=20
-RELEASE_VERIFY_INTERVAL_S?=30
+# allows it before failing. ondewo-vtsi-api's driver passes the short names VERIFY_ATTEMPTS /
+# VERIFY_INTERVAL_S; both spellings are accepted, RELEASE_VERIFY_* winning when both are set.
+RELEASE_VERIFY_ATTEMPTS?=$(if $(VERIFY_ATTEMPTS),$(VERIFY_ATTEMPTS),20)
+RELEASE_VERIFY_INTERVAL_S?=$(if $(VERIFY_INTERVAL_S),$(VERIFY_INTERVAL_S),30)
 
 # `make` with no target prints the help listing.
 .DEFAULT_GOAL := help
