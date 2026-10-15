@@ -13,7 +13,8 @@
 // limitations under the License.
 
 // The GitHub release body is sliced out of RELEASE.md by the Makefile's CURRENT_RELEASE_NOTES: from
-// the line naming `Release ONDEWO <PRODUCT> Go Client <version>` to the next `*****` line. A heading
+// the heading line that is exactly `#... Release ONDEWO <PRODUCT> Go Client <version>` (anchored, the
+// version quoted, so 9.1.1 never starts at a 9.1.10 heading) to the next `*****` line. A heading
 // spelled any other way gives an empty slice, and `gh release create -n ""` then publishes a release
 // without notes and without an error. Only the two constants below name the product.
 package tests
@@ -43,11 +44,12 @@ func readRepoFile(t *testing.T, name string) string {
 	return string(content)
 }
 
-// releaseNotesSlice reproduces the Makefile's perl range /<heading> <version>/../^\*{5}/; ok is
-// false when the heading is missing or no separator ends the section.
+// releaseNotesSlice reproduces the Makefile's perl range /^#+ <heading> \Q<version>\E$/../^\*{5}/;
+// ok is false when the heading is missing or no separator ends the section.
 func releaseNotesSlice(lines []string, version string) (slice []string, ok bool) {
+	heading := regexp.MustCompile(`^#+ ` + regexp.QuoteMeta(releaseHeading+" "+version) + `$`)
 	for start, line := range lines {
-		if !strings.Contains(line, releaseHeading+" "+version) {
+		if !heading.MatchString(line) {
 			continue
 		}
 		for end := start + 1; end < len(lines); end++ {
@@ -65,7 +67,7 @@ func releaseNotesSlice(lines []string, version string) (slice []string, ok bool)
 func TestTheMakefileSlicesTheHeadingThisTestChecks(t *testing.T) {
 	t.Parallel()
 
-	want := `perl -ne 'print if /` + releaseHeading + ` ${` + versionVariable + `}/../^\*{5}/'`
+	want := `perl -ne 'print if /^\#+ ` + releaseHeading + ` \Q${` + versionVariable + `}\E$$/../^\*{5}/'`
 	if !strings.Contains(readRepoFile(t, "Makefile"), want) {
 		t.Errorf("the Makefile's CURRENT_RELEASE_NOTES no longer runs %s", want)
 	}
@@ -132,5 +134,28 @@ func TestTheCurrentVersionHasNonEmptyReleaseNotes(t *testing.T) {
 	}
 	if body < 2 {
 		t.Errorf("the release notes of %s have %d non-blank lines, want at least 2", match[1], body)
+	}
+}
+
+// The slice is anchored: a version that is a prefix of another, or a line that merely mentions the
+// version, must not start a section.
+func TestTheReleaseNotesSliceIsAnchored(t *testing.T) {
+	t.Parallel()
+
+	lines := []string{
+		"See " + releaseHeading + " 9.1.1 for details",
+		"## " + releaseHeading + " 9.1.10",
+		"* ten",
+		"*****",
+		"## " + releaseHeading + " 9.1.1",
+		"* one",
+		"*****",
+	}
+	slice, ok := releaseNotesSlice(lines, "9.1.1")
+	if !ok || len(slice) != 3 || slice[1] != "* one" {
+		t.Errorf("the 9.1.1 slice is %q, want the 9.1.1 section only", slice)
+	}
+	if _, ok := releaseNotesSlice(lines, "9.1"); ok {
+		t.Error("9.1 matched a 9.1.x heading")
 	}
 }

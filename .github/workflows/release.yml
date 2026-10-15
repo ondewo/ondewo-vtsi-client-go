@@ -9,7 +9,8 @@ name: release
 #
 # THERE IS EXACTLY ONE CREATOR OF THE GITHUB RELEASE, AND IT IS NOT THIS WORKFLOW. `make release`
 # on the developer machine runs `push_to_gh` -> `build_gh_release`, which is where the release page
-# is made; `gh release create` is not idempotent (a second create for the same tag is HTTP 422
+# is made - AFTER the tags were pushed and proxy.golang.org was shown to serve the module, so the
+# page can appear several minutes after the tag that started this run; `gh release create` is not idempotent (a second create for the same tag is HTTP 422
 # already_exists), so when both sides created it the local run won the race and this workflow went
 # red on every single release. It now WAITS for that release instead of racing it - the cpp clients
 # solve the same collision the same way - and fails loudly if a `v*` tag was ever pushed without a
@@ -44,7 +45,7 @@ jobs:
   release:
     name: release ${{ github.ref_name }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       # FIRST, before anything is built and long before anything is published: the credential has to
       # be there. Only its emptiness is ever tested - the value is never echoed, never passed on a
@@ -143,8 +144,9 @@ jobs:
       - name: Rehearse the module publication
         run: make publish_dry_run
 
-      # This workflow does NOT create the GitHub release: `make release` already did, seconds after
-      # it pushed the tag that started this run. `gh release create` is not idempotent - a second
+      # This workflow does NOT create the GitHub release: `make release` does, once the module proxy
+      # serves the tag that started this run (publish_go_module + verify_go_module_served, which
+      # allow it up to ~13 minutes). `gh release create` is not idempotent - a second
       # create for the same tag is HTTP 422 already_exists - so creating it here too meant exactly
       # one of the two always failed, and since the local run gets there first it was always this
       # workflow. Poll rather than race. A `v*` tag pushed with no release ever created behind it
@@ -155,15 +157,15 @@ jobs:
           # and never reaches a log.
           GH_TOKEN: ${{ secrets.ONDEWO_GH_TOKEN }}
         run: |
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 60); do
             if gh release view "${ONDEWO_RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
               echo "release ${ONDEWO_RELEASE_TAG} exists"
               exit 0
             fi
-            echo "attempt ${attempt}/30: release ${ONDEWO_RELEASE_TAG} does not exist yet, retrying in 10s"
-            sleep 10
+            echo "attempt ${attempt}/60: release ${ONDEWO_RELEASE_TAG} does not exist yet, retrying in 15s"
+            sleep 15
           done
-          echo "::error title=No GitHub release::Tag ${GITHUB_REF_NAME} has no GitHub release on ${ONDEWO_RELEASE_TAG} after 5 minutes. 'make release' creates it (push_to_gh -> build_gh_release); create it with 'make push_to_gh' and re-run this workflow."
+          echo "::error title=No GitHub release::Tag ${GITHUB_REF_NAME} has no GitHub release on ${ONDEWO_RELEASE_TAG} after 15 minutes. 'make release' creates it (push_to_gh -> build_gh_release); create it with 'make push_to_gh' and re-run this workflow."
           exit 1
 
       # The published page, not the working tree: `gh release create -n ""` publishes an empty

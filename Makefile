@@ -1,4 +1,6 @@
-export
+# NO global `export`: it used to hand every variable of this file - GITHUB_GH_TOKEN included - to
+# every recipe, i.e. to go test, docker and pre-commit as well. The token now reaches only the
+# steps that use it (see WITHOUT_CREDENTIALS and GH_RUN below).
 
 # =====================================================================================
 # ondewo-vtsi-client-go - Makefile
@@ -27,12 +29,14 @@ export
 # 1 - Update Version Number
 # 2 - Update RELEASE.md
 # 3 - make build
-# -------------- Release Process Steps --------------
-# 1 - Get Credentials from devops-accounts repo
-# 2 - Create Release Branch and push
-# 3 - Create Release Tag and push (BOTH the ONDEWO tag and the go `vX.Y.Z` tag)
-# 4 - GitHub Release
-# 5 - Go module release (warm the public module proxy - a go module has no registry upload)
+# -------------- Release Process Steps (make release) --------------
+# 1 - release_preflight: read-only - token valid with push permission, version absent on origin and
+#     on proxy.golang.org, non-empty RELEASE.md section, host tools present
+# 2 - build, then the full test gate (fmt, vet, the suite with its coverage gate)
+# 3 - local release commit, then publish_dry_run against exactly that commit
+# 4 - push, release branch, BOTH tags (the ONDEWO tag and the go `vX.Y.Z` tag)
+# 5 - publish_go_module + verify_go_module_served: the proxy fetches and serves the tag
+# 6 - GitHub release, then release_verify (tags, non-empty release body, module served)
 #
 # Publishing a go module needs NO registry credential: proxy.golang.org serves whatever the public
 # VCS tag carries, so `make publish_dry_run` rehearses the entire publication offline and without a
@@ -68,8 +72,11 @@ PROTOS_TARGET_DIR=ondewo
 # before every run so a renamed or deleted proto leaves no orphan behind -> nothing hand
 # written may live below it.
 STUBS_DIR=api
-# The fixed tag is the ONLY contract between this repo and the compiler submodule
-PROTO_COMPILER_IMAGE=ondewo-go-proto-compiler:latest
+# The compiler image is tagged with the compiler RELEASE it was built from (5.15.7, not `latest`), so
+# a stale image of another pin can never be picked up by mistake, and another repository building
+# its own go compiler image on the same host cannot swap it out underneath a running release.
+PROTO_COMPILER_VERSION=$(subst /,-,$(patsubst tags/%,%,$(ONDEWO_PROTO_COMPILER_GIT_BRANCH)))
+PROTO_COMPILER_IMAGE=ondewo-go-proto-compiler:$(PROTO_COMPILER_VERSION)
 
 # --- Go module identity
 # Go resolves a module straight from its VCS path, and from major version 2 on that path has to
@@ -108,7 +115,8 @@ GO_BUILD_PACKAGES=$$(go list -f '{{if .GoFiles}}{{.ImportPath}}{{end}}' ./... | 
 # directory so consecutive targets of one release do not each download the dependency graph again;
 # publish_dry_run still points GOMODCACHE at its own throwaway directory, inside the container too.
 HOST_GO := $(shell command -v go 2>/dev/null)
-GO_DOCKER_IMAGE=golang:1.27.1
+# Pinned by version AND digest (the multi-arch index): a re-pushed tag cannot change the toolchain.
+GO_DOCKER_IMAGE=golang:1.27.1@sha256:162be5298a40ed317005c8339c6de4d10d3eef336d66dc8e9259b03ab9d3a6d2
 GO_DOCKER_CACHE_DIR?=$(HOME)/.cache/ondewo-go-docker
 GO_DOCKER_RUN=mkdir -p "$(GO_DOCKER_CACHE_DIR)" && docker run --rm --user $$(id -u):$$(id -g) \
 	-e HOME=/tmp/home -e GOCACHE=/go-docker-cache/build -e GOMODCACHE=/go-docker-cache/mod \
@@ -127,13 +135,45 @@ COVERAGE_PROFILE=coverage.out
 
 # Terminate on the ***** separator that delimits release entries, NOT on /\*\*/ - that matches
 # the first markdown **bold** span inside the entry and silently truncates the notes there,
-# with no error from `gh release create`.
+# with no error from `gh release create`. The heading is ANCHORED and the version quoted (\Q..\E),
+# so `9.1.1` can never start at a `9.1.10` heading, nor at a line that merely mentions the version.
 CURRENT_RELEASE_NOTES=`cat RELEASE.md \
-	| perl -ne 'print if /Release ONDEWO VTSI Go Client ${ONDEWO_VTSI_VERSION}/../^\*{5}/'`
+	| perl -ne 'print if /^\#+ Release ONDEWO VTSI Go Client \Q${ONDEWO_VTSI_VERSION}\E$$/../^\*{5}/'`
 
 GH_REPO="https://github.com/ondewo/ondewo-vtsi-client-go"
-DEVOPS_ACCOUNT_GIT="ondewo-devops-accounts"
-DEVOPS_ACCOUNT_DIR="./${DEVOPS_ACCOUNT_GIT}"
+# <owner>/<repo>, the form the GitHub REST API addresses the repository by (check_gh_token_valid).
+GH_REPO_PATH=ondewo/ondewo-vtsi-client-go
+# The devops-accounts clone never lives inside this repository: it is cloned into a fresh mktemp
+# directory and deleted before the release starts (run_release_with_devops). When the environment
+# variable DEVOPS_ACCOUNT_DIR names an existing directory (the release driver's single clone, an
+# absolute path), that one is read instead and nothing is cloned.
+DEVOPS_ACCOUNT_GIT_URL?=git@bitbucket.org:ondewo/ondewo-devops-accounts.git
+
+# --- gh, pinned
+# The GitHub CLI is a pinned, checksum-verified release binary downloaded into a per-user cache
+# (install_gh) - never the host's gh, whatever version that is. It is a static binary, so the
+# release host needs only curl, tar and sha256sum to obtain it.
+GH_VERSION=2.100.0
+GH_SHA256_amd64=e4d4bb4498e8d007abe545b6568926793ace1b6447da598294a610018cb164be
+GH_SHA256_arm64=ea4e7a581a32ccad6cc7923cb1576ac5859ba4b9a16ab22eb8f8a96e78e2e961
+GH_CACHE_DIR?=$(HOME)/.cache/ondewo-gh/$(GH_VERSION)
+GH=$(GH_CACHE_DIR)/bin/gh
+# Every gh call: the token goes in as GH_TOKEN for THAT command only, expanded by the shell from the
+# environment (never on argv, never in a gh config file - there is no `gh auth login`).
+GH_RUN=GH_NO_UPDATE_NOTIFIER=1 GH_PROMPT_DISABLED=1 GH_CONFIG_DIR="$(GH_CACHE_DIR)/config" GH_TOKEN="$$GITHUB_GH_TOKEN" "$(GH)"
+
+# Prefix for every step that does not need a credential (build, the suite, the rehearsal,
+# pre-commit): the token is removed from that process tree altogether.
+WITHOUT_CREDENTIALS=env -u GITHUB_GH_TOKEN -u GH_TOKEN -u GITHUB_TOKEN
+# Non-empty under `make -n` (run_release_with_devops then clones nothing).
+MAKE_DRY_RUN=$(findstring n,$(firstword -$(MAKEFLAGS)))
+
+# --- Release verification
+GO_PROXY_URL=https://proxy.golang.org
+# proxy.golang.org usually serves a fresh tag within seconds; 20 x 30 s is the patience the release
+# allows it before failing.
+RELEASE_VERIFY_ATTEMPTS?=20
+RELEASE_VERIFY_INTERVAL_S?=30
 
 # `make` with no target prints the help listing.
 .DEFAULT_GOAL := help
@@ -167,7 +207,7 @@ makefile_chapters: ## Shows all sections of Makefile
 
 TEST: ## Prints some important variables
 	@echo "Release Notes: \n \n$(CURRENT_RELEASE_NOTES)"
-	@echo "GH Token: \t $(if $(GITHUB_GH_TOKEN),<set>,<unset>)"
+	@echo "GH Token: \t $(if $(filter-out ENTER_YOUR_TOKEN_HERE,$(GITHUB_GH_TOKEN)),<set>,<unset>)"
 	@echo "Go Module Path: \t $(GO_MODULE_PATH)"
 	@echo "Go Release Tag: \t $(GO_RELEASE_TAG)"
 	@echo "Compiler Image: \t $(PROTO_COMPILER_IMAGE)"
@@ -206,9 +246,11 @@ check_build: ## Checks if all built proto-code is there
 
 build: update_submodules checkout_defined_submodule_versions build_compiler generate_ondewo_protos go_build ## Build the client end to end: submodules -> compiler image -> stubs -> go build
 
-build_compiler: ## Build the proto compiler docker image from the pinned submodule
+build_compiler: ## Build the proto compiler docker image from the pinned submodule, tagged with its version
 	@echo "$(BLUE)[INFO]$(NC) Building ${PROTO_COMPILER_IMAGE} from ${ONDEWO_PROTO_COMPILER_DIR}/go ..."
-	cd ${ONDEWO_PROTO_COMPILER_DIR}/go && sh build.sh
+# The same `docker build` as the submodule's go/build.sh, which can only tag `:latest`. The build
+# context is the compiler's own go/ directory, never this repository.
+	docker build --no-cache -t ${PROTO_COMPILER_IMAGE} ${ONDEWO_PROTO_COMPILER_DIR}/go
 	@echo "$(GREEN)[SUCCESS]$(NC) Built ${PROTO_COMPILER_IMAGE}"
 
 generate_ondewo_protos: ## Generate the go stubs from the .proto files of the ondewo-vtsi-api submodule
@@ -217,33 +259,38 @@ generate_ondewo_protos: ## Generate the go stubs from the .proto files of the on
 		exit 1; \
 	}
 	@echo "$(BLUE)[INFO]$(NC) Generating go stubs into ${STUBS_DIR}/ for module ${GO_MODULE_PATH} ..."
-# The mounts and the positional arguments are the contract of the image, taken verbatim from
+# The positional arguments are the contract of the image, taken verbatim from
 #	ondewo-proto-compiler/go/example/run-compile.sh:
 #	  <relative_protos_dir>  directory BELOW the input volume that is protoc's -I root
 #	  <target_sub_directory> sub-directory of that root to compile; quoted, because the module
 #	                         path follows it and must not slide into its place when it is empty
 #	  <go_module_path>       protoc-gen-go bakes it into every generated file, so it has to be
 #	                         known before protoc runs
-# The input volume is this repository (it holds the api submodule); the output volume is this
-#	repository too, because a go module IS its directory tree - the stubs have to land under
-#	${STUBS_DIR}/ of the module named by <go_module_path>.
+# Only what the image needs is mounted: the api submodule, READ-ONLY, as the input, and an empty
+#	staging directory as the output. The repository root is never mounted, so nothing else that
+#	sits in the working tree reaches a container that runs as root.
+# The image writes the stubs as root (GOPATH and GOCACHE are root-owned inside it), so the staging
+#	directory is handed back to the caller by a second run of the same image (`chown`, no sudo)
+#	before ${STUBS_DIR}/ is swapped in. go.mod / go.sum are taken from the image ONLY when this
+#	repository has neither - once committed they are maintained here.
 # NOTE: no -it. A TTY-enabled container breaks every non-interactive caller with
 #	"cannot attach stdin to a TTY-enabled container because stdin is not a terminal".
-# No --user either: GOPATH=/go and GOCACHE=/go/build-cache are root-owned inside the image, so
-#	the `go build ./...` that type checks the generated stubs has to run as root - which leaves
-#	the output root-owned, hence the `fix_ownership` below.
-	docker run \
-		-v ${shell pwd}:/input-volume \
-		-v ${shell pwd}:/output-volume \
-		${PROTO_COMPILER_IMAGE} ${ONDEWO_API_DIR} "${PROTOS_TARGET_DIR}" "${GO_MODULE_PATH}"
-	-make fix_ownership
+	@set -e; \
+	out=`mktemp -d`; \
+	give_back() { docker run --rm --entrypoint chown -v "$$out":/output-volume ${PROTO_COMPILER_IMAGE} -R "`id -u`:`id -g`" /output-volume >/dev/null 2>&1 || true; }; \
+	trap 'give_back; rm -rf "$$out"' EXIT INT TERM; \
+	docker run --rm \
+		-v "$(CURDIR)/${ONDEWO_API_DIR}":/input-volume/${ONDEWO_API_DIR}:ro \
+		-v "$$out":/output-volume \
+		${PROTO_COMPILER_IMAGE} ${ONDEWO_API_DIR} "${PROTOS_TARGET_DIR}" "${GO_MODULE_PATH}"; \
+	give_back; \
+	[ -d "$$out/${STUBS_DIR}" ] || { echo "$(RED)[ERROR]$(NC) the compiler wrote no ${STUBS_DIR}/"; exit 1; }; \
+	rm -rf "${STUBS_DIR}"; \
+	mv "$$out/${STUBS_DIR}" "${STUBS_DIR}"; \
+	if [ ! -f go.mod ] && [ ! -f go.sum ]; then \
+		for manifest in go.mod go.sum; do [ ! -f "$$out/$$manifest" ] || cp "$$out/$$manifest" "$$manifest"; done; \
+	fi
 	@echo "$(GREEN)[SUCCESS]$(NC) Generated go stubs in ${STUBS_DIR}/"
-
-fix_ownership: ## Give the root-owned output of the proto compiler back to the current user
-	@for f in $$(find . -maxdepth 2 -user 0 ! -path "./.git/*"); \
-	do \
-		sudo chown -R $$(id -u):$$(id -g) "$$f" && echo "$(BLUE)[INFO]$(NC) chowned $$f"; \
-	done
 
 go_build: ## Compile every package of the module that has non-test sources
 ifeq ($(HOST_GO),)
@@ -391,52 +438,69 @@ checkout_defined_submodule_versions: ## Check out the submodule versions pinned 
 ########################################################
 #		Release
 
-release: ## Automate the entire release process
+release: ## Automate the entire release process (order pinned by tests/release_order_test.go)
 	@echo "$(BLUE)[INFO]$(NC) Start Release"
-# FIRST, before anything is built, branched or tagged: the credential that buys the GitHub release
-# has to be there. It used to be exercised for the first time by `login_to_gh` inside `push_to_gh`,
-# which runs AFTER the release branch and BOTH tags have been pushed - so a missing token left an
-# immovable tag on origin, and `spc` then refused every retry, because that branch and that tag now
-# exist. The java clients check their publishing credentials first for exactly this reason.
-	make check_gh_credentials
-# Everything else that can be refuted without touching origin is refuted next: a missing RELEASE.md
-# entry or a module path that disagrees with the version must not be discovered after the tags
-# have been pushed, because a published go module version is immutable.
-	make check_release_notes
-	make build
-	make check_build
-	make check_go_module_path
-# The suite gates the release, and it runs HERE - against the freshly generated stubs, before the
-# first `git push`. It used to run only in release.yml, i.e. on the tag, after the tag had been pushed
-# and announced: 9.1.0 would have shipped with a red TestEveryProtoFileIsRegistered that way. A
-# published go module version is immutable, so a red suite must stop the release, not report on it.
-	make fmt_check
-	make vet
-	make test_coverage
-	-make precommit_hooks_run_all_files
+# FIRST, before anything is built, committed, pushed or tagged, and changing nothing: every credential
+# is present AND accepted by GitHub with push permission, the version exists neither on origin nor
+# on proxy.golang.org, RELEASE.md has a non-empty section for it, and the host has its tools. A
+# published go module version is immutable, so everything that can be refuted early is.
+	$(MAKE) release_preflight
+# Build and the FULL test gate, against the freshly generated stubs. No step from here to the
+# commit needs the token, so it is removed from their environment (third-party code runs here).
+	$(WITHOUT_CREDENTIALS) $(MAKE) build
+	$(WITHOUT_CREDENTIALS) $(MAKE) check_build
+	$(WITHOUT_CREDENTIALS) $(MAKE) check_go_module_path
+	$(WITHOUT_CREDENTIALS) $(MAKE) fmt_check
+	$(WITHOUT_CREDENTIALS) $(MAKE) vet
+	$(WITHOUT_CREDENTIALS) $(MAKE) test_coverage
+# pre-commit is optional on a release host; when present it may normalise whitespace before the commit.
+	-$(WITHOUT_CREDENTIALS) $(MAKE) precommit_hooks_run_all_files
 	git status
 	git add ${STUBS_DIR}
 	git add Makefile
 	git add README.md
 	git add RELEASE.md
 # go.mod / go.sum are the manifest of the published module: a release whose tag does not carry
-# them is not installable. go.sum only exists once the module has been resolved, so it is
-# staged leniently.
+# them is not installable.
 	git add go.mod
-	-git add go.sum
+	git add go.sum
 	git add ${ONDEWO_PROTO_COMPILER_DIR}
 	git add ${ONDEWO_API_DIR}
 	git status
-	-git commit --no-verify -m "PREPARING FOR RELEASE ${ONDEWO_VTSI_VERSION}"
+# Commit only when something is staged, but never swallow a REAL commit failure (e.g. no git
+# identity): the tags below would then silently name the previous commit.
+	git diff --cached --quiet || git commit --no-verify -m "PREPARING FOR RELEASE ${ONDEWO_VTSI_VERSION}"
+# The last local refusal: rehearse the publication of exactly the commit the tags will name -
+# `git archive HEAD` resolved by an outside consumer - before anything leaves this machine.
+	$(WITHOUT_CREDENTIALS) $(MAKE) publish_dry_run
 	git push
-	make create_release_branch
-# The last chance to refuse: the stubs are committed now, so this rehearses the exact tree the two
-# tags below are about to name, and a tag is the release - it cannot be corrected afterwards.
-	make publish_dry_run
-	make create_release_tag
-	make push_to_gh
-	make publish_go_module
+	$(MAKE) create_release_branch
+	$(MAKE) create_release_tag
+# A go module has no upload: proxy.golang.org fetches the PUSHED tag, so for Go the publish step
+# necessarily comes after the tag. It runs BEFORE the GitHub release, so a GitHub release only ever
+# exists for a module the proxy actually serves.
+	$(WITHOUT_CREDENTIALS) $(MAKE) publish_go_module
+	$(MAKE) verify_go_module_served
+	$(MAKE) push_to_gh
+	$(MAKE) release_verify
 	@echo "$(GREEN)[SUCCESS]$(NC) Release Finished"
+
+release_preflight: check_release_host_tools check_release_credentials check_gh_token_valid check_version_unreleased check_release_notes ## Read-only: fail before anything is built, committed or pushed
+	@echo "$(GREEN)[SUCCESS]$(NC) Preflight passed for ${ONDEWO_VTSI_VERSION} (${GO_RELEASE_TAG})"
+
+# go itself is NOT required: every go target falls back to the pinned golang image, and gh is the
+# pinned binary install_gh downloads.
+check_release_host_tools: ## Assert the release host has docker (running), make, git, perl, curl, tar and sha256sum
+	@missing=""; \
+	for tool in docker make git perl curl tar sha256sum mktemp; do \
+		command -v $$tool >/dev/null 2>&1 || missing="$$missing $$tool"; \
+	done; \
+	if [ -n "$$missing" ]; then \
+		echo "$(RED)[ERROR]$(NC) the release needs these host tools, which are missing:$$missing"; \
+		exit 1; \
+	fi
+	@docker info >/dev/null 2>&1 || { echo "$(RED)[ERROR]$(NC) the docker daemon is not reachable - the compiler (and go, if absent) run in containers"; exit 1; }
+	@echo "$(GREEN)[SUCCESS]$(NC) host tools present (go: $(if $(HOST_GO),$(HOST_GO),pinned image ${GO_DOCKER_IMAGE}))"
 
 create_release_branch: ## Create Release Branch and push it to origin
 	git checkout -b "release/${ONDEWO_VTSI_VERSION}"
@@ -451,16 +515,10 @@ create_release_tag: ## Create Release Tag and push it to origin
 	git tag -a ${GO_RELEASE_TAG} -m "release/${GO_RELEASE_TAG}"
 	git push origin ${GO_RELEASE_TAG}
 
-# The one guard the release path has against a token that was never supplied. `release:` runs it
-# before anything is built, branched or tagged; `login_to_gh` depends on it too, so a bare
-# `make push_to_gh` cannot hand `gh auth login` the literal string ENTER_YOUR_TOKEN_HERE and then
-# fail one target later, in `build_gh_release`, far away from the actual cause.
-#
-# The value is read from the ENVIRONMENT (`export` at the top of this file puts every variable
-# there), never interpolated into the recipe text, so make's own command echo cannot leak it and a
-# space or a glob character in the token cannot break the command apart. Only its emptiness and the
-# placeholder are ever tested; the token itself is never printed, not even partially.
-check_gh_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the placeholder
+# The value is read from the ENVIRONMENT, never interpolated into the recipe text, so make's own
+# command echo cannot leak it and a space or a glob character in the token cannot break the command
+# apart. Only its emptiness and the placeholder are tested here; check_gh_token_valid asks GitHub.
+check_release_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the placeholder
 	@if [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN" = "ENTER_YOUR_TOKEN_HERE" ]; then \
 		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - the GitHub release cannot be created"; \
 		echo "        Use 'make ondewo_release', which reads it from ondewo-devops-accounts/account_github.env,"; \
@@ -469,33 +527,84 @@ check_gh_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the 
 	fi
 	@echo "$(GREEN)[SUCCESS]$(NC) GITHUB_GH_TOKEN is set"
 
-# gh REFUSES `gh auth login` while GH_TOKEN or GITHUB_TOKEN is in the environment ("The value of the
-# GH_TOKEN environment variable is being used for authentication", exit 1) and authenticates every
-# later call with that variable instead. The 9.1.0 release died exactly there - after both tags had
-# been pushed - so the login is skipped when gh already has a token, and the release carries on.
-login_to_gh: check_gh_credentials ## Login to Github CLI with Access Token
-	@if [ -n "$$GH_TOKEN" ] || [ -n "$$GITHUB_TOKEN" ]; then \
-		echo "$(BLUE)[INFO]$(NC) gh already authenticates through GH_TOKEN/GITHUB_TOKEN from the environment - skipping gh auth login"; \
-	else \
-		printf '%s\n' "$$GITHUB_GH_TOKEN" | gh auth login -p ssh --with-token; \
-	fi
+check_gh_credentials: check_release_credentials ## Deprecated alias of check_release_credentials
 
-check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_VTSI_VERSION
+# GET /repos/<owner>/<repo> changes nothing. `.permissions` is only present for an authenticated
+# caller, and `push` is exactly what the release branch, the tags and the GitHub release need. An
+# expired, revoked or under-scoped token therefore fails HERE instead of after the tags are pushed.
+check_gh_token_valid: check_release_credentials install_gh ## Read-only: assert GitHub accepts GITHUB_GH_TOKEN and it may push to this repository
+	@push=`$(GH_RUN) api "repos/${GH_REPO_PATH}" --jq .permissions.push` \
+		|| { echo "$(RED)[ERROR]$(NC) GitHub refused GITHUB_GH_TOKEN (see the gh error above)"; exit 1; }; \
+	if [ "$$push" != "true" ]; then \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is valid but may not push to ${GH_REPO_PATH} (permissions.push=$$push)"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)[SUCCESS]$(NC) GitHub accepts GITHUB_GH_TOKEN and it may push to ${GH_REPO_PATH}"
+
+# Origin, not the local clone (spc covers that): the exact refs are compared (grep -Fx), so 9.1.0
+# never matches 19.1.0 or 9.1.0-rc. An unreachable origin or proxy fails the check - "could not
+# look" is never read as "absent".
+# Only the proxy's version LIST is read, never `@v/<version>.info`: asking the proxy for a version
+# that is not tagged yet makes it cache the "not found" answer, which would then delay serving the
+# very tag this release is about to push.
+check_version_unreleased: ## Read-only: assert the release branch and both tags are absent on origin and the proxy does not know the version
+	@refs=`git ls-remote origin "refs/heads/release/${ONDEWO_VTSI_VERSION}" "refs/tags/${ONDEWO_VTSI_VERSION}" "refs/tags/${GO_RELEASE_TAG}"` \
+		|| { echo "$(RED)[ERROR]$(NC) git ls-remote origin failed - cannot prove the version is unreleased"; exit 1; }; \
+	found=`printf '%s\n' "$$refs" | cut -f2 | grep -Fx -e "refs/heads/release/${ONDEWO_VTSI_VERSION}" -e "refs/tags/${ONDEWO_VTSI_VERSION}" -e "refs/tags/${GO_RELEASE_TAG}" || true`; \
+	if [ -n "$$found" ]; then \
+		echo "$(RED)[ERROR]$(NC) ${ONDEWO_VTSI_VERSION} already exists on origin:"; echo "$$found"; \
+		exit 1; \
+	fi
+	@list=`mktemp`; \
+	code=`curl -sS -o "$$list" -w '%{http_code}' "${GO_PROXY_URL}/${GO_MODULE_PATH}/@v/list"` \
+		|| { rm -f "$$list"; echo "$(RED)[ERROR]$(NC) ${GO_PROXY_URL} is unreachable - cannot prove ${GO_RELEASE_TAG} is unpublished"; exit 1; }; \
+	case "$$code" in \
+		200) if grep -Fxq "${GO_RELEASE_TAG}" "$$list"; then rm -f "$$list"; echo "$(RED)[ERROR]$(NC) ${GO_MODULE_PATH}@${GO_RELEASE_TAG} is already listed by the module proxy"; exit 1; fi ;; \
+		404|410) ;; \
+		*) rm -f "$$list"; echo "$(RED)[ERROR]$(NC) ${GO_PROXY_URL} answered HTTP $$code for the version list"; exit 1 ;; \
+	esac; \
+	rm -f "$$list"
+	@echo "$(GREEN)[SUCCESS]$(NC) ${ONDEWO_VTSI_VERSION} / ${GO_RELEASE_TAG} exist neither on origin nor on the module proxy"
+
+check_release_notes: ## Assert RELEASE.md has a non-empty '## Release ONDEWO VTSI Go Client <version>' section
 # `gh release create -n ""` succeeds and publishes an empty release, so an entry that was forgotten
-# (or a heading whose wording drifted away from what CURRENT_RELEASE_NOTES greps for) is otherwise
-# only noticed by whoever reads the release page afterwards.
+# (or a heading whose wording drifted away from what CURRENT_RELEASE_NOTES matches) is otherwise
+# only noticed by whoever reads the release page afterwards. A heading followed only by the
+# separator is refused too.
 	@notes="$(CURRENT_RELEASE_NOTES)"; \
-	if [ -z "$$notes" ]; then \
-		echo "$(RED)[ERROR]$(NC) RELEASE.md has no '## Release ONDEWO VTSI Go Client ${ONDEWO_VTSI_VERSION}' entry"; \
+	body=`printf '%s\n' "$$notes" | sed '1d' | grep -v '^\*\{5\}' | tr -d '[:space:]'`; \
+	if [ -z "$$notes" ] || [ -z "$$body" ]; then \
+		echo "$(RED)[ERROR]$(NC) RELEASE.md has no non-empty '## Release ONDEWO VTSI Go Client ${ONDEWO_VTSI_VERSION}' section"; \
 		echo "        The GitHub release would be created with empty notes - add the entry first."; \
 		exit 1; \
 	fi; \
 	echo "$(GREEN)[SUCCESS]$(NC) RELEASE.md has release notes for ${ONDEWO_VTSI_VERSION}"
 
-build_gh_release: check_release_notes ## Generate Github Release with CLI
-	gh release create --repo $(GH_REPO) "$(ONDEWO_VTSI_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_VTSI_VERSION}"
+install_gh: ## Download the pinned gh (GH_VERSION) into GH_CACHE_DIR and verify its sha256 - no host gh needed
+	@[ ! -x "$(GH)" ] || exit 0; \
+	set -e; \
+	case "`uname -m`" in \
+		x86_64|amd64) arch=amd64; sum=${GH_SHA256_amd64} ;; \
+		aarch64|arm64) arch=arm64; sum=${GH_SHA256_arm64} ;; \
+		*) echo "$(RED)[ERROR]$(NC) no pinned gh for `uname -m`"; exit 1 ;; \
+	esac; \
+	tmp=`mktemp -d`; \
+	trap 'rm -rf "$$tmp"' EXIT INT TERM; \
+	echo "$(BLUE)[INFO]$(NC) Downloading gh ${GH_VERSION} ($$arch) ..."; \
+	curl -fsSL --retry 3 -o "$$tmp/gh.tar.gz" "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_$$arch.tar.gz"; \
+	echo "$$sum  $$tmp/gh.tar.gz" | sha256sum -c --quiet -; \
+	tar -xzf "$$tmp/gh.tar.gz" -C "$$tmp"; \
+	mkdir -p "$(GH_CACHE_DIR)/bin"; \
+	cp "$$tmp/gh_${GH_VERSION}_linux_$$arch/bin/gh" "$(GH).partial"; \
+	chmod 0755 "$(GH).partial"; \
+	mv "$(GH).partial" "$(GH)"; \
+	echo "$(GREEN)[SUCCESS]$(NC) gh ${GH_VERSION} verified and installed at $(GH)"
 
-push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and Releases
+build_gh_release: check_release_notes install_gh ## Create the GitHub release (pinned gh, token per call) - refuses empty notes and a missing tag
+	@printf '%s\n' "$(CURRENT_RELEASE_NOTES)" | $(GH_RUN) release create --repo $(GH_REPO) "$(ONDEWO_VTSI_VERSION)" \
+		--verify-tag --notes-file - -t "Release ${ONDEWO_VTSI_VERSION}"
+
+push_to_gh: check_release_credentials build_gh_release ## Create the GitHub release
 	@echo "$(GREEN)[SUCCESS]$(NC) Released to Github"
 
 # The credential-free rehearsal of the publication, and the reason this repository needs no registry
@@ -556,38 +665,97 @@ endif
 # the rehearsal proxy is the FIRST element of the GOPROXY list, so everything else (the module's own
 # dependencies) still comes from wherever the caller's GOPROXY points.
 
-publish_go_module: ## Ask the public go module proxy to fetch the pushed tag (a go module has no registry upload - the tag IS the release)
+publish_go_module: ## Ask the public go module proxy to fetch the pushed tag, with retries (a go module has no registry upload - the tag IS the release)
 ifeq ($(HOST_GO),)
 	$(GO_DOCKER_RUN) $@
 else
 	@echo "$(BLUE)[INFO]$(NC) Requesting ${GO_MODULE_PATH}@${GO_RELEASE_TAG} from proxy.golang.org ..."
-	GOPROXY=https://proxy.golang.org GOFLAGS= go list -m ${GO_MODULE_PATH}@${GO_RELEASE_TAG}
-	@echo "$(GREEN)[SUCCESS]$(NC) ${GO_MODULE_PATH}@${GO_RELEASE_TAG} is served by the module proxy"
+# The proxy fetches the tag from GitHub on demand; a fresh tag can be briefly unknown to it, so the
+# request is retried rather than failing the release one step after the tags were pushed.
+	@for attempt in 1 2 3 4 5 6; do \
+		if GOPROXY=${GO_PROXY_URL} GOFLAGS= go list -m ${GO_MODULE_PATH}@${GO_RELEASE_TAG}; then \
+			echo "$(GREEN)[SUCCESS]$(NC) ${GO_MODULE_PATH}@${GO_RELEASE_TAG} is served by the module proxy"; \
+			exit 0; \
+		fi; \
+		echo "$(YELLOW)[WARN]$(NC) attempt $$attempt/6: the proxy does not serve ${GO_RELEASE_TAG} yet, retrying in 30s"; \
+		sleep 30; \
+	done; \
+	echo "$(RED)[ERROR]$(NC) proxy.golang.org did not fetch ${GO_MODULE_PATH}@${GO_RELEASE_TAG}"; \
+	exit 1
 endif
+
+verify_go_module_served: ## Read-only: poll proxy.golang.org until it serves the version's .info AND module zip
+	@info="${GO_PROXY_URL}/${GO_MODULE_PATH}/@v/${GO_RELEASE_TAG}.info"; \
+	zip="${GO_PROXY_URL}/${GO_MODULE_PATH}/@v/${GO_RELEASE_TAG}.zip"; \
+	attempt=1; \
+	while :; do \
+		version=`curl -fsS "$$info" 2>/dev/null | perl -ne 'print $$1 if /"Version":"([^"]+)"/'`; \
+		if [ "$$version" = "${GO_RELEASE_TAG}" ] && curl -fsS -o /dev/null "$$zip" 2>/dev/null; then \
+			echo "$(GREEN)[SUCCESS]$(NC) proxy.golang.org serves ${GO_MODULE_PATH}@${GO_RELEASE_TAG} (.info and module zip)"; \
+			exit 0; \
+		fi; \
+		if [ $$attempt -ge $(RELEASE_VERIFY_ATTEMPTS) ]; then \
+			echo "$(RED)[ERROR]$(NC) proxy.golang.org does not serve ${GO_RELEASE_TAG} after $(RELEASE_VERIFY_ATTEMPTS) attempts ($$info)"; \
+			exit 1; \
+		fi; \
+		echo "$(YELLOW)[WARN]$(NC) attempt $$attempt/$(RELEASE_VERIFY_ATTEMPTS): ${GO_RELEASE_TAG} not served yet, retrying in $(RELEASE_VERIFY_INTERVAL_S)s"; \
+		attempt=`expr $$attempt + 1`; \
+		sleep $(RELEASE_VERIFY_INTERVAL_S); \
+	done
+
+release_verify: check_release_credentials install_gh ## Read-only: fail unless both tags are on origin, the GitHub release has a non-empty body and the proxy serves the module
+	@refs=`git ls-remote origin "refs/tags/${ONDEWO_VTSI_VERSION}" "refs/tags/${GO_RELEASE_TAG}" | cut -f2`; \
+	for tag in ${ONDEWO_VTSI_VERSION} ${GO_RELEASE_TAG}; do \
+		printf '%s\n' "$$refs" | grep -Fxq "refs/tags/$$tag" \
+			|| { echo "$(RED)[ERROR]$(NC) tag $$tag is not on origin"; exit 1; }; \
+	done
+	@echo "$(GREEN)[SUCCESS]$(NC) tags ${ONDEWO_VTSI_VERSION} and ${GO_RELEASE_TAG} are on origin"
+	@body=`$(GH_RUN) release view "${ONDEWO_VTSI_VERSION}" --repo $(GH_REPO) --json body --jq .body` \
+		|| { echo "$(RED)[ERROR]$(NC) GitHub release ${ONDEWO_VTSI_VERSION} cannot be read"; exit 1; }; \
+	if [ -z "`printf '%s' "$$body" | tr -d '[:space:]'`" ]; then \
+		echo "$(RED)[ERROR]$(NC) GitHub release ${ONDEWO_VTSI_VERSION} has an empty body"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)[SUCCESS]$(NC) GitHub release ${ONDEWO_VTSI_VERSION} has release notes"
+	@$(MAKE) --no-print-directory verify_go_module_served
 
 ########################################################
 #		DEVOPS-ACCOUNTS
 
-ondewo_release: spc clone_devops_accounts run_release_with_devops ## Release with credentials from devops-accounts repo
-	@rm -rf ${DEVOPS_ACCOUNT_GIT}
+ondewo_release: spc run_release_with_devops ## Release with credentials from devops-accounts repo
 
-clone_devops_accounts: ## Clones devops-accounts repo
-	if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
-	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
-
-run_release_with_devops: ## Gets Credentials from devops-repo and run release command with them
+# ONE shell, so that the clone is deleted (a) right after the token is read - before `$(MAKE) release`
+# starts, so no container, test or hook of the release can ever see the account files - and (b) on
+# every failure, by the trap. The clone is made in a fresh mktemp directory OUTSIDE this repository.
+# A DEVOPS_ACCOUNT_DIR from the environment (the release driver's single clone, absolute path) is
+# read in place and left alone: its owner deletes it.
 # The token is loaded into the environment of the sub-make (anchored ^NAME=, so a comment line naming
 # the variable cannot break the value) and never passed as `make release NAME=<value>`: make's argv,
 # like every /proc/<pid>/cmdline, is world-readable.
-	@set -a \
-		&& eval "$$(grep -h -E '^(GITHUB_GH_TOKEN)=' ${DEVOPS_ACCOUNT_DIR}/account_github.env)" \
-		&& set +a \
-		&& $(MAKE) release
+# A line holding $(MAKE) runs even under `make -n`, so a dry run must not clone the credentials.
+run_release_with_devops: ## Gets Credentials from devops-repo and run release command with them
+	@set -e; \
+	clone=""; \
+	trap '[ -z "$$clone" ] || rm -rf "$$clone"' EXIT INT TERM; \
+	if [ -n "$(MAKE_DRY_RUN)" ]; then \
+		accounts=""; \
+		echo "$(BLUE)[INFO]$(NC) dry run (make -n): the devops accounts are neither cloned nor read"; \
+	elif [ -n "$$DEVOPS_ACCOUNT_DIR" ] && [ -d "$$DEVOPS_ACCOUNT_DIR" ]; then \
+		accounts="$$DEVOPS_ACCOUNT_DIR"; \
+		echo "$(BLUE)[INFO]$(NC) reading the credentials from DEVOPS_ACCOUNT_DIR=$$DEVOPS_ACCOUNT_DIR (not cloned, not deleted here)"; \
+	else \
+		clone=`mktemp -d`; \
+		accounts="$$clone/ondewo-devops-accounts"; \
+		git clone --quiet --depth 1 "${DEVOPS_ACCOUNT_GIT_URL}" "$$accounts"; \
+	fi; \
+	set -a; \
+	[ -z "$$accounts" ] || eval "`grep -h -E '^(GITHUB_GH_TOKEN)=' "$$accounts/account_github.env"`"; \
+	set +a; \
+	if [ -n "$$clone" ]; then rm -rf "$$clone"; clone=""; echo "$(BLUE)[INFO]$(NC) devops-accounts clone deleted before the release starts"; fi; \
+	$(MAKE) release
 
-spc: ## Checks if the Release Branch and the two Release Tags already exist
-	$(eval filtered_branches:= $(shell git branch --all | grep "release/${ONDEWO_VTSI_VERSION}"))
-	$(eval filtered_tags:= $(shell git tag --list | grep "^${ONDEWO_VTSI_VERSION}$$"))
-	$(eval filtered_go_tags:= $(shell git tag --list | grep "^${GO_RELEASE_TAG}$$"))
-	@if test "$(filtered_branches)" != ""; then echo "-- Test 1: Branch exists!!" & exit 1; else echo "-- Test 1: Branch is fine";fi
-	@if test "$(filtered_tags)" != ""; then echo "-- Test 2: Tag exists!!" & exit 1; else echo "-- Test 2: Tag is fine";fi
-	@if test "$(filtered_go_tags)" != ""; then echo "-- Test 3: Go tag exists!!" & exit 1; else echo "-- Test 3: Go tag is fine";fi
+spc: ## Checks (anchored, local refs) that the Release Branch and the two Release Tags do not exist yet
+	@if { git for-each-ref --format='%(refname:lstrip=2)' refs/heads; git for-each-ref --format='%(refname:lstrip=3)' refs/remotes; } \
+		| grep -Fxq "release/${ONDEWO_VTSI_VERSION}"; then echo "-- Test 1: Branch exists!!" && exit 1; else echo "-- Test 1: Branch is fine"; fi
+	@if git rev-parse -q --verify "refs/tags/${ONDEWO_VTSI_VERSION}" >/dev/null; then echo "-- Test 2: Tag exists!!" && exit 1; else echo "-- Test 2: Tag is fine"; fi
+	@if git rev-parse -q --verify "refs/tags/${GO_RELEASE_TAG}" >/dev/null; then echo "-- Test 3: Go tag exists!!" && exit 1; else echo "-- Test 3: Go tag is fine"; fi
