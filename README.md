@@ -466,6 +466,10 @@ this repository, reads `GITHUB_GH_TOKEN` from `account_github.env` into the envi
 variable `DEVOPS_ACCOUNT_DIR` names an existing directory (the release driver's single clone, as an
 absolute path), that directory is read instead, nothing is cloned and the directory is left to its
 owner.
+`make release_preflight` and `make release_verify` can also run on their own with only
+`DEVOPS_ACCOUNT_DIR` set (the release driver does this): every step that needs the token reads it
+from that directory when it is not already in the environment. `make -n ondewo_release` clones
+nothing.
 
 ### How publishing works, and what it costs
 

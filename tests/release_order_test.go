@@ -284,16 +284,7 @@ func TestTheDevopsCloneIsGoneWhileTheReleaseRuns(t *testing.T) {
 	run := func(t *testing.T, repo, scratch string, extraEnv []string, args ...string) string {
 		t.Helper()
 		cmd := exec.Command("make", append([]string{"-C", repo, "ondewo_release"}, args...)...)
-		var env []string
-		for _, kv := range os.Environ() {
-			name, _, _ := strings.Cut(kv, "=")
-			switch name {
-			case "GITHUB_GH_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "DEVOPS_ACCOUNT_DIR", "TMPDIR", "MAKEFLAGS", "MAKELEVEL":
-				continue
-			}
-			env = append(env, kv)
-		}
-		cmd.Env = append(env, append([]string{"TMPDIR=" + scratch}, extraEnv...)...)
+		cmd.Env = append(cleanEnv(), append([]string{"TMPDIR=" + scratch}, extraEnv...)...)
 		out, err := cmd.CombinedOutput()
 		if err == nil {
 			t.Fatalf("make ondewo_release succeeded although the stubbed release fails:\n%s", out)
@@ -318,6 +309,48 @@ func TestTheDevopsCloneIsGoneWhileTheReleaseRuns(t *testing.T) {
 		}
 	})
 
+	// make executes a line holding $(MAKE) even under -n, so a dry run must clone nothing.
+	t.Run("dry run", func(t *testing.T) {
+		repo, _, scratch := setup(t)
+		// A clone of this URL fails, so any clone attempt fails the dry run.
+		cmd := exec.Command("make", "-n", "-C", repo, "ondewo_release", "DEVOPS_ACCOUNT_GIT_URL=/nonexistent/must/not/be/cloned")
+		cmd.Env = append(cleanEnv(), "TMPDIR="+scratch)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			t.Fatalf("make -n ondewo_release failed: %v\n%s", err, out)
+		}
+		if !strings.Contains(string(out), "dry run (make -n)") {
+			t.Errorf("make -n ondewo_release did not take the dry-run path:\n%s", out)
+		}
+		if entries, _ := os.ReadDir(scratch); len(entries) != 0 {
+			t.Errorf("make -n ondewo_release left %d entries in TMPDIR", len(entries))
+		}
+	})
+
+	// The release driver runs release_preflight / release_verify standalone, with only
+	// DEVOPS_ACCOUNT_DIR set: the token-using steps load the token from there themselves.
+	t.Run("standalone with DEVOPS_ACCOUNT_DIR", func(t *testing.T) {
+		repo, accounts, _ := setup(t)
+		for _, tc := range []struct {
+			env  []string
+			want string
+			ok   bool
+		}{
+			{[]string{"DEVOPS_ACCOUNT_DIR=" + accounts}, "GITHUB_GH_TOKEN is set", true},
+			{nil, "GITHUB_GH_TOKEN is not set", false},
+		} {
+			cmd := exec.Command("make", "-C", repo, "check_release_credentials")
+			cmd.Env = append(cleanEnv(), tc.env...)
+			out, err := cmd.CombinedOutput()
+			if (err == nil) != tc.ok || !strings.Contains(string(out), tc.want) {
+				t.Errorf("check_release_credentials with %v: err=%v, want %q in:\n%s", tc.env, err, tc.want, out)
+			}
+			if strings.Contains(string(out), "stub-token-value") {
+				t.Error("the token value reached the output")
+			}
+		}
+	})
+
 	t.Run("driver clone", func(t *testing.T) {
 		repo, accounts, scratch := setup(t)
 		out := run(t, repo, scratch, []string{"DEVOPS_ACCOUNT_DIR=" + accounts}, "DEVOPS_ACCOUNT_GIT_URL=/nonexistent/clone/must/not/happen")
@@ -330,4 +363,19 @@ func TestTheDevopsCloneIsGoneWhileTheReleaseRuns(t *testing.T) {
 			t.Errorf("the driver's DEVOPS_ACCOUNT_DIR was touched: %v", err)
 		}
 	})
+}
+
+// cleanEnv is the test process environment without any credential, devops directory or make state.
+func cleanEnv() []string {
+	var env []string
+	for _, kv := range os.Environ() {
+		name, _, _ := strings.Cut(kv, "=")
+		switch name {
+		case "GITHUB_GH_TOKEN", "GH_TOKEN", "GITHUB_TOKEN", "DEVOPS_ACCOUNT_DIR", "TMPDIR", "MAKEFLAGS", "MAKELEVEL":
+			continue
+		}
+		env = append(env, kv)
+	}
+
+	return env
 }
