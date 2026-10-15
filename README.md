@@ -317,7 +317,7 @@ repositories.
 ```shell
 make update_submodules                      ## git submodule update --init --recursive
 make checkout_defined_submodule_versions    ## check out the pins from the Makefile Variables chapter
-make build_compiler                         ## build ondewo-go-proto-compiler:latest from the submodule
+make build_compiler                         ## build ondewo-go-proto-compiler:<compiler version> from the submodule
 make generate_ondewo_protos                 ## generate api/ from ondewo-vtsi-api/ondewo
 make check_build                            ## assert every .proto produced a *.pb.go
 make go_build                               ## compile the module
@@ -327,8 +327,10 @@ make go_build                               ## compile the module
 
 A few properties of the generation worth knowing:
 
-* The image copies the mounted input volume into a temporary directory inside the container and
-  compiles there, so the protos of `ondewo-vtsi-api` are never modified.
+* Only the `ondewo-vtsi-api` submodule is mounted into the compiler container, read-only, and the
+  stubs are written to an empty staging directory that is handed back to your user (by a `chown`
+  run of the same image - no `sudo`) before it replaces `api/`. The repository root is never
+  mounted into it.
 * `api/` is **wiped** before every run, so a proto that was renamed or deleted upstream leaves no
   orphaned stub behind. Never put hand-written code below it.
 * The Go import path is baked into every generated file by `protoc-gen-go`, so the module path is
@@ -385,7 +387,10 @@ handshake as `codes.Unavailable`, CRLF PEMs, IPv6 `[::1]` (skipped without an IP
 before gRPC is reached, half a client identity, a plaintext channel with an identity, a path in
 `GrpcCert` and a mismatched key refused with messages that carry no PEM, the insecure warning
 naming `host:port`, and every `fmt` / `slog` rendering of a `Config` redacting the key.
-`tests/release_notes_test.go` pins the `RELEASE.md` slice `make build_gh_release` publishes.
+`tests/release_notes_test.go` pins the anchored `RELEASE.md` slice `make build_gh_release` publishes, and
+`tests/release_order_test.go` pins the order of `make release`, the read-only preflight, and that
+the devops-accounts clone is gone before the release starts (by running `make ondewo_release`
+against a stubbed release).
 
 **Coverage.** The threshold (`COVERAGE_THRESHOLD` in the `Makefile`, currently **100%**) is
 enforced over the hand-written packages only — `auth/` and `client/` — because everything below `api/` is machine
@@ -395,7 +400,7 @@ are still exercised for real, as listed above; `make test_coverage_generated` pr
 also fails if it ends up measuring no hand-written function at all, so a deleted package cannot
 turn the gate into a green no-op.
 
-`.github/workflows/ci.yml` runs exactly these targets on `ubuntu-latest` against the go directive of
+`.github/workflows/ci.yml` runs exactly these targets on `ubuntu-24.04` against the go directive of
 `go.mod` and the toolchain the compiler image generates with. It does **not** build the compiler
 image or check out the submodules: it builds and tests the committed stubs, which is what a
 consumer of the module gets.
@@ -406,12 +411,61 @@ The release is driven entirely by the `Makefile` — see `make help` for the ful
 
 ```shell
 make ondewo_release                         ## credentials from the devops-accounts repo, then `make release`
+make release_preflight                      ## read-only: would the release start? (needs GITHUB_GH_TOKEN)
+make release_verify                         ## read-only: is the published release complete?
 ```
 
-`make release` builds, commits, creates the release branch, pushes **two** tags for the same commit
-— the ONDEWO release tag (`9.0.0`) and the `v`-prefixed tag Go tooling requires (`v9.0.0`) — creates
-the GitHub release from the matching `RELEASE.md` entry, and asks the public module proxy to fetch
-the new version.
+### Host requirements
+
+The release host needs only **docker** (with a running daemon), **make**, **git**, **perl**,
+**curl**, **tar** and **sha256sum**; `make check_release_host_tools` checks them first.
+
+* **go** is optional: every go target re-runs itself in the pinned
+  `golang:1.27.1@sha256:…` image when the host has none (the digest is in the `Makefile`).
+* **gh** is never taken from the host: `make install_gh` downloads the pinned release
+  (`GH_VERSION`), verifies its sha256 and caches it under `~/.cache/ondewo-gh/`. Every gh call gets
+  the token as `GH_TOKEN` of that single command; nothing ever runs `gh auth login`, so no token is
+  stored on the host.
+* **pre-commit** is optional; when present, `make release` runs it before the release commit.
+* The proto compiler image is built from the pinned `ondewo-proto-compiler` submodule and tagged
+  with its version (`ondewo-go-proto-compiler:5.15.7`), never `latest`.
+
+### What `make release` does, in this order
+
+The order is pinned by `tests/release_order_test.go`.
+
+1. **`release_preflight`** — read-only, before anything is built, committed or pushed:
+   `GITHUB_GH_TOKEN` is set, GitHub accepts it **and** it may push to this repository
+   (`gh api repos/ondewo/ondewo-vtsi-client-go --jq .permissions.push`); neither
+   `release/<version>`, `<version>` nor `v<version>` exists on origin (exact `git ls-remote`
+   match); `proxy.golang.org`'s version list does not contain `v<version>`; `RELEASE.md` has a
+   non-empty section under the exact heading `## Release ONDEWO VTSI Go Client <version>`; the host
+   tools are present.
+2. **Build and the test gate** — `make build` (submodules, compiler image, stubs, `go build`),
+   `check_build`, `check_go_module_path`, `fmt_check`, `vet` and `test_coverage` (the full suite under
+   `-race` with the coverage gate). The token is removed from the environment of all of these.
+3. **Local commit** — the stubs, `go.mod`/`go.sum`, the submodule pins and the docs; a real commit
+   failure (for example a missing git identity) stops the release.
+4. **`publish_dry_run`** — packs `git archive HEAD` exactly as the module proxy will and resolves it
+   from an outside consumer module, before anything leaves the machine.
+5. **Push, release branch, both tags** — the ONDEWO tag (`9.1.0`) and the `v`-prefixed tag Go
+   tooling requires (`v9.1.0`), on the same commit.
+6. **`publish_go_module` and `verify_go_module_served`** — a Go module has no upload: the proxy
+   fetches the pushed tag. This is the one step that must follow the tag. It is requested with
+   retries, then `proxy.golang.org/…/v9/@v/v<version>.info` and the module zip are polled
+   (20 × 30 s) until both are served.
+7. **GitHub release** — created only now, so it exists only for a module the proxy serves. It is made
+   from the `RELEASE.md` section with `--verify-tag`.
+8. **`release_verify`** — both tags are on origin, the GitHub release has a non-empty body, and the
+   proxy serves the module.
+
+`make ondewo_release` first runs `spc` (the release branch and both tags must not exist locally,
+exact matches), then clones `ondewo-devops-accounts` into a fresh temporary directory **outside**
+this repository, reads `GITHUB_GH_TOKEN` from `account_github.env` into the environment, and
+**deletes the clone before `make release` starts** — and on every failure. When the environment
+variable `DEVOPS_ACCOUNT_DIR` names an existing directory (the release driver's single clone, as an
+absolute path), that directory is read instead, nothing is cloned and the directory is left to its
+owner.
 
 ### How publishing works, and what it costs
 
@@ -440,7 +494,7 @@ compiles it from a consumer module outside this tree under the real release vers
 path that disagrees with the tag, a self-import missing its suffix, or generated code that never
 reached the commit all fail here instead of at a stranger's `go get`. It needs no network beyond the
 module cache and no secret of any kind, which is why `.github/workflows/ci.yml` runs it on every
-push, and `make release` runs it once more immediately before the tags are created.
+push, and `make release` runs it once more on the release commit, before anything is pushed.
 
 ### Credentials
 
@@ -450,9 +504,9 @@ The only credential in this repository buys the **GitHub release**, not the modu
 | --- | --- | --- |
 | `GITHUB_GH_TOKEN` | `ondewo-devops-accounts/account_github.env` | `gh release create` — the GitHub release page and its notes |
 
-`make ondewo_release` clones `ondewo-devops-accounts`, reads `account_github.env` and passes the
-token into `make release` (`clone_devops_accounts` + `run_release_with_devops`); the working default
-in the `Makefile` is the placeholder `ENTER_YOUR_TOKEN_HERE`, and a real token is never committed.
+`make ondewo_release` reads `account_github.env` and hands the token to `make release` through the
+environment (`run_release_with_devops`), never on a command line; the working default in the
+`Makefile` is the placeholder `ENTER_YOUR_TOKEN_HERE`, and a real token is never committed.
 
 `.github/workflows/release.yml` re-verifies the tagged tree from CI on a `v*` tag push, reading the
 token from the repository secret **`ONDEWO_GH_TOKEN`** — the same value as `GITHUB_GH_TOKEN` above.
@@ -464,7 +518,8 @@ verified has to stop there, because the tag it describes is already immutable.
 The workflow does **not** create the GitHub release. `make release` does, and `gh release create` is
 not idempotent — a second create for the same tag is HTTP 422 `already_exists` — so when both sides
 created it, the local run won the race and the workflow went red on every single release. It now
-waits for that release to appear and then reads its body back, failing if the notes are empty.
+waits (up to 15 minutes, since the local release creates the page only once the module proxy serves
+the tag) for that release to appear and then reads its body back, failing if the notes are empty.
 
 ## Contributing
 
