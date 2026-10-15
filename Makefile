@@ -171,7 +171,7 @@ MAKE_DRY_RUN=$(findstring n,$(firstword -$(MAKEFLAGS)))
 # STANDALONE, with only an absolute DEVOPS_ACCOUNT_DIR in the environment. Every recipe line that uses
 # the token therefore starts with this: when GITHUB_GH_TOKEN is not already in the environment, it is
 # read from $$DEVOPS_ACCOUNT_DIR/account_github.env (anchored ^NAME=) into that line's shell only.
-LOAD_GH_TOKEN=if { [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN" = "ENTER_YOUR_TOKEN_HERE" ]; } \
+LOAD_RELEASE_CREDENTIALS=if { [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN" = "ENTER_YOUR_TOKEN_HERE" ]; } \
 	&& [ -n "$$DEVOPS_ACCOUNT_DIR" ] && [ -f "$$DEVOPS_ACCOUNT_DIR/account_github.env" ]; then \
 	set -a; eval "`grep -h -E '^(GITHUB_GH_TOKEN)=' "$$DEVOPS_ACCOUNT_DIR/account_github.env"`"; set +a; fi
 
@@ -526,7 +526,7 @@ create_release_tag: ## Create Release Tag and push it to origin
 # command echo cannot leak it and a space or a glob character in the token cannot break the command
 # apart. Only its emptiness and the placeholder are tested here; check_gh_token_valid asks GitHub.
 check_release_credentials: ## Fail loudly when GITHUB_GH_TOKEN is unset or still the placeholder
-	@$(LOAD_GH_TOKEN); \
+	@$(LOAD_RELEASE_CREDENTIALS); \
 	if [ -z "$$GITHUB_GH_TOKEN" ] || [ "$$GITHUB_GH_TOKEN" = "ENTER_YOUR_TOKEN_HERE" ]; then \
 		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - the GitHub release cannot be created"; \
 		echo "        Use 'make ondewo_release', which reads it from ondewo-devops-accounts/account_github.env,"; \
@@ -541,7 +541,7 @@ check_gh_credentials: check_release_credentials ## Deprecated alias of check_rel
 # caller, and `push` is exactly what the release branch, the tags and the GitHub release need. An
 # expired, revoked or under-scoped token therefore fails HERE instead of after the tags are pushed.
 check_gh_token_valid: check_release_credentials install_gh ## Read-only: assert GitHub accepts GITHUB_GH_TOKEN and it may push to this repository
-	@$(LOAD_GH_TOKEN); \
+	@$(LOAD_RELEASE_CREDENTIALS); \
 	push=`$(GH_RUN) api "repos/${GH_REPO_PATH}" --jq .permissions.push` \
 		|| { echo "$(RED)[ERROR]$(NC) GitHub refused GITHUB_GH_TOKEN (see the gh error above)"; exit 1; }; \
 	if [ "$$push" != "true" ]; then \
@@ -610,7 +610,7 @@ install_gh: ## Download the pinned gh (GH_VERSION) into GH_CACHE_DIR and verify 
 	echo "$(GREEN)[SUCCESS]$(NC) gh ${GH_VERSION} verified and installed at $(GH)"
 
 build_gh_release: check_release_notes install_gh ## Create the GitHub release (pinned gh, token per call) - refuses empty notes and a missing tag
-	@$(LOAD_GH_TOKEN); \
+	@$(LOAD_RELEASE_CREDENTIALS); \
 	printf '%s\n' "$(CURRENT_RELEASE_NOTES)" | $(GH_RUN) release create --repo $(GH_REPO) "$(ONDEWO_VTSI_VERSION)" \
 		--verify-tag --notes-file - -t "Release ${ONDEWO_VTSI_VERSION}"
 
@@ -720,7 +720,7 @@ release_verify: check_release_credentials install_gh ## Read-only: fail unless b
 			|| { echo "$(RED)[ERROR]$(NC) tag $$tag is not on origin"; exit 1; }; \
 	done
 	@echo "$(GREEN)[SUCCESS]$(NC) tags ${ONDEWO_VTSI_VERSION} and ${GO_RELEASE_TAG} are on origin"
-	@$(LOAD_GH_TOKEN); \
+	@$(LOAD_RELEASE_CREDENTIALS); \
 	body=`$(GH_RUN) release view "${ONDEWO_VTSI_VERSION}" --repo $(GH_REPO) --json body --jq .body` \
 		|| { echo "$(RED)[ERROR]$(NC) GitHub release ${ONDEWO_VTSI_VERSION} cannot be read"; exit 1; }; \
 	if [ -z "`printf '%s' "$$body" | tr -d '[:space:]'`" ]; then \
