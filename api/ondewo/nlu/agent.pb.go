@@ -2523,8 +2523,12 @@ type GetAgentStatisticsRequest struct {
 	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,9,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
 	// Optional. Restrict LLM aggregations to specific CCAI service providers. Empty = all.
 	LlmCcaiServiceProviderFilter []CcaiServiceProvider `protobuf:"varint,10,rep,packed,name=llm_ccai_service_provider_filter,json=llmCcaiServiceProviderFilter,proto3,enum=ondewo.nlu.CcaiServiceProvider" json:"llm_ccai_service_provider_filter,omitempty"`
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	// Optional. Restrict LLM-typed reports to calls made through specific base URLs (the
+	// <code>LlmTelemetry.base_url</code> values, as reported in <code>LlmTelemetryReport.base_urls_used</code>).
+	// An empty string selects calls whose model configuration states no base URL. Empty list = all.
+	LlmBaseUrlFilter []string `protobuf:"bytes,11,rep,name=llm_base_url_filter,json=llmBaseUrlFilter,proto3" json:"llm_base_url_filter,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetAgentStatisticsRequest) Reset() {
@@ -2623,6 +2627,13 @@ func (x *GetAgentStatisticsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 func (x *GetAgentStatisticsRequest) GetLlmCcaiServiceProviderFilter() []CcaiServiceProvider {
 	if x != nil {
 		return x.LlmCcaiServiceProviderFilter
+	}
+	return nil
+}
+
+func (x *GetAgentStatisticsRequest) GetLlmBaseUrlFilter() []string {
+	if x != nil {
+		return x.LlmBaseUrlFilter
 	}
 	return nil
 }
@@ -2739,8 +2750,12 @@ type GetSessionsStatisticsRequest struct {
 	LlmToolNameFilter []string `protobuf:"bytes,14,rep,name=llm_tool_name_filter,json=llmToolNameFilter,proto3" json:"llm_tool_name_filter,omitempty"`
 	// Optional. Restrict LLM-typed reports to specific CCAI service providers. Empty = all.
 	LlmCcaiServiceProviderFilter []CcaiServiceProvider `protobuf:"varint,15,rep,packed,name=llm_ccai_service_provider_filter,json=llmCcaiServiceProviderFilter,proto3,enum=ondewo.nlu.CcaiServiceProvider" json:"llm_ccai_service_provider_filter,omitempty"`
-	unknownFields                protoimpl.UnknownFields
-	sizeCache                    protoimpl.SizeCache
+	// Optional. Restrict LLM-typed reports to calls made through specific base URLs (the
+	// <code>LlmTelemetry.base_url</code> values, as reported in <code>LlmTelemetryReport.base_urls_used</code>).
+	// An empty string selects calls whose model configuration states no base URL. Empty list = all.
+	LlmBaseUrlFilter []string `protobuf:"bytes,16,rep,name=llm_base_url_filter,json=llmBaseUrlFilter,proto3" json:"llm_base_url_filter,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetSessionsStatisticsRequest) Reset() {
@@ -2878,6 +2893,13 @@ func (x *GetSessionsStatisticsRequest) GetLlmCcaiServiceProviderFilter() []CcaiS
 	return nil
 }
 
+func (x *GetSessionsStatisticsRequest) GetLlmBaseUrlFilter() []string {
+	if x != nil {
+		return x.LlmBaseUrlFilter
+	}
+	return nil
+}
+
 // Report of the statistics about sessions
 type GetSessionsStatisticsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -2981,9 +3003,13 @@ type GetSessionsStatisticsTimeSeriesRequest struct {
 	LlmCcaiServiceProviderFilter []CcaiServiceProvider `protobuf:"varint,10,rep,packed,name=llm_ccai_service_provider_filter,json=llmCcaiServiceProviderFilter,proto3,enum=ondewo.nlu.CcaiServiceProvider" json:"llm_ccai_service_provider_filter,omitempty"`
 	// Optional. The mask to control which data fields will be added to the
 	// returned data (e.g. paths=["llm_telemetry_time_series_buckets.llm_telemetry_report.llm_token_usage"]).
-	FieldMask     *fieldmaskpb.FieldMask `protobuf:"bytes,11,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	FieldMask *fieldmaskpb.FieldMask `protobuf:"bytes,11,opt,name=field_mask,json=fieldMask,proto3" json:"field_mask,omitempty"`
+	// Optional. Restrict LLM-typed reports to calls made through specific base URLs (the
+	// <code>LlmTelemetry.base_url</code> values, as reported in <code>LlmTelemetryReport.base_urls_used</code>).
+	// An empty string selects calls whose model configuration states no base URL. Empty list = all.
+	LlmBaseUrlFilter []string `protobuf:"bytes,12,rep,name=llm_base_url_filter,json=llmBaseUrlFilter,proto3" json:"llm_base_url_filter,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *GetSessionsStatisticsTimeSeriesRequest) Reset() {
@@ -3089,6 +3115,13 @@ func (x *GetSessionsStatisticsTimeSeriesRequest) GetLlmCcaiServiceProviderFilter
 func (x *GetSessionsStatisticsTimeSeriesRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	if x != nil {
 		return x.FieldMask
+	}
+	return nil
+}
+
+func (x *GetSessionsStatisticsTimeSeriesRequest) GetLlmBaseUrlFilter() []string {
+	if x != nil {
+		return x.LlmBaseUrlFilter
 	}
 	return nil
 }
@@ -7668,7 +7701,7 @@ const file_ondewo_nlu_agent_proto_rawDesc = "" +
 	"\ragent_content\x18\x03 \x01(\fH\x00R\fagentContentB\a\n" +
 	"\x05agent\":\n" +
 	"\x13MigrateAgentRequest\x12#\n" +
-	"\ragent_content\x18\x01 \x01(\fR\fagentContent\"\x8b\x04\n" +
+	"\ragent_content\x18\x01 \x01(\fR\fagentContent\"\xba\x04\n" +
 	"\x19GetAgentStatisticsRequest\x12\x16\n" +
 	"\x06parent\x18\x01 \x01(\tR\x06parent\x120\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x18.ondewo.nlu.ReportFormatR\x06format\x12#\n" +
@@ -7681,12 +7714,13 @@ const file_ondewo_nlu_agent_proto_rawDesc = "" +
 	"\n" +
 	"field_mask\x18\t \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12g\n" +
 	" llm_ccai_service_provider_filter\x18\n" +
-	" \x03(\x0e2\x1f.ondewo.nlu.CcaiServiceProviderR\x1cllmCcaiServiceProviderFilter\"\xe6\x01\n" +
+	" \x03(\x0e2\x1f.ondewo.nlu.CcaiServiceProviderR\x1cllmCcaiServiceProviderFilter\x12-\n" +
+	"\x13llm_base_url_filter\x18\v \x03(\tR\x10llmBaseUrlFilter\"\xe6\x01\n" +
 	"\x1aGetAgentStatisticsResponse\x12\x18\n" +
 	"\areports\x18\x01 \x01(\fR\areports\x120\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x18.ondewo.nlu.ReportFormatR\x06format\x12*\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x16.ondewo.nlu.ReportTypeR\x04type\x12P\n" +
-	"\x14llm_telemetry_report\x18\x04 \x01(\v2\x1e.ondewo.nlu.LlmTelemetryReportR\x12llmTelemetryReport\"\xf1\x05\n" +
+	"\x14llm_telemetry_report\x18\x04 \x01(\v2\x1e.ondewo.nlu.LlmTelemetryReportR\x12llmTelemetryReport\"\xa0\x06\n" +
 	"\x1cGetSessionsStatisticsRequest\x12\x16\n" +
 	"\x06parent\x18\x01 \x01(\tR\x06parent\x120\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x18.ondewo.nlu.ReportFormatR\x06format\x122\n" +
@@ -7704,12 +7738,13 @@ const file_ondewo_nlu_agent_proto_rawDesc = "" +
 	"\x13llm_provider_filter\x18\f \x03(\tR\x11llmProviderFilter\x121\n" +
 	"\x15llm_agent_name_filter\x18\r \x03(\tR\x12llmAgentNameFilter\x12/\n" +
 	"\x14llm_tool_name_filter\x18\x0e \x03(\tR\x11llmToolNameFilter\x12g\n" +
-	" llm_ccai_service_provider_filter\x18\x0f \x03(\x0e2\x1f.ondewo.nlu.CcaiServiceProviderR\x1cllmCcaiServiceProviderFilter\"\xf1\x01\n" +
+	" llm_ccai_service_provider_filter\x18\x0f \x03(\x0e2\x1f.ondewo.nlu.CcaiServiceProviderR\x1cllmCcaiServiceProviderFilter\x12-\n" +
+	"\x13llm_base_url_filter\x18\x10 \x03(\tR\x10llmBaseUrlFilter\"\xf1\x01\n" +
 	"\x1dGetSessionsStatisticsResponse\x12\x18\n" +
 	"\areports\x18\x01 \x01(\fR\areports\x120\n" +
 	"\x06format\x18\x02 \x01(\x0e2\x18.ondewo.nlu.ReportFormatR\x06format\x122\n" +
 	"\x04type\x18\x03 \x01(\x0e2\x1e.ondewo.nlu.SessionsReportTypeR\x04type\x12P\n" +
-	"\x14llm_telemetry_report\x18\x04 \x01(\v2\x1e.ondewo.nlu.LlmTelemetryReportR\x12llmTelemetryReport\"\xeb\x04\n" +
+	"\x14llm_telemetry_report\x18\x04 \x01(\v2\x1e.ondewo.nlu.LlmTelemetryReportR\x12llmTelemetryReport\"\x9a\x05\n" +
 	"&GetSessionsStatisticsTimeSeriesRequest\x12\x16\n" +
 	"\x06parent\x18\x01 \x01(\tR\x06parent\x122\n" +
 	"\x04type\x18\x02 \x01(\x0e2\x1e.ondewo.nlu.SessionsReportTypeR\x04type\x12@\n" +
@@ -7724,7 +7759,8 @@ const file_ondewo_nlu_agent_proto_rawDesc = "" +
 	" llm_ccai_service_provider_filter\x18\n" +
 	" \x03(\x0e2\x1f.ondewo.nlu.CcaiServiceProviderR\x1cllmCcaiServiceProviderFilter\x129\n" +
 	"\n" +
-	"field_mask\x18\v \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\"\xea\x01\n" +
+	"field_mask\x18\v \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMask\x12-\n" +
+	"\x13llm_base_url_filter\x18\f \x03(\tR\x10llmBaseUrlFilter\"\xea\x01\n" +
 	"\x1cLlmTelemetryTimeSeriesBucket\x12=\n" +
 	"\fbucket_start\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\vbucketStart\x129\n" +
 	"\n" +

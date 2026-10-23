@@ -135,6 +135,8 @@ const (
 	OperationMetadata_REMOVE_RAG_CRAWLER_RESULT_FROM_DATASET OperationMetadata_OperationType = 12
 	// change the embedding model of dataset that already contains parsed documents
 	OperationMetadata_CHANGE_DATASET_EMBEDDING_MODEL OperationMetadata_OperationType = 13
+	// re-parse of all documents in a dataset
+	OperationMetadata_REPARSE_DATASET OperationMetadata_OperationType = 14
 )
 
 // Enum value maps for OperationMetadata_OperationType.
@@ -154,6 +156,7 @@ var (
 		11: "ADD_RAG_CRAWLER_RESULT_TO_DATASET",
 		12: "REMOVE_RAG_CRAWLER_RESULT_FROM_DATASET",
 		13: "CHANGE_DATASET_EMBEDDING_MODEL",
+		14: "REPARSE_DATASET",
 	}
 	OperationMetadata_OperationType_value = map[string]int32{
 		"OPERATION_TYPE_UNSPECIFIED":             0,
@@ -170,6 +173,7 @@ var (
 		"ADD_RAG_CRAWLER_RESULT_TO_DATASET":      11,
 		"REMOVE_RAG_CRAWLER_RESULT_FROM_DATASET": 12,
 		"CHANGE_DATASET_EMBEDDING_MODEL":         13,
+		"REPARSE_DATASET":                        14,
 	}
 )
 
@@ -441,7 +445,7 @@ var File_ondewo_nlu_operation_metadata_proto protoreflect.FileDescriptor
 const file_ondewo_nlu_operation_metadata_proto_rawDesc = "" +
 	"\n" +
 	"#ondewo/nlu/operation_metadata.proto\x12\n" +
-	"ondewo.nlu\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd8\v\n" +
+	"ondewo.nlu\x1a\x1fgoogle/protobuf/timestamp.proto\"\xed\v\n" +
 	"\x11OperationMetadata\x12<\n" +
 	"\x06status\x18\x01 \x01(\x0e2$.ondewo.nlu.OperationMetadata.StatusR\x06status\x122\n" +
 	"\x15parent_operation_name\x18\x02 \x01(\tR\x13parentOperationName\x12.\n" +
@@ -480,7 +484,7 @@ const file_ondewo_nlu_operation_metadata_proto_rawDesc = "" +
 	"\x04DONE\x10\x03\x12\r\n" +
 	"\tCANCELLED\x10\x04\x12\n" +
 	"\n" +
-	"\x06FAILED\x10\x05\"\xeb\x02\n" +
+	"\x06FAILED\x10\x05\"\x80\x03\n" +
 	"\rOperationType\x12\x1e\n" +
 	"\x1aOPERATION_TYPE_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fCREATE_AGENT\x10\x01\x12\x10\n" +
@@ -496,7 +500,8 @@ const file_ondewo_nlu_operation_metadata_proto_rawDesc = "" +
 	"\x12%\n" +
 	"!ADD_RAG_CRAWLER_RESULT_TO_DATASET\x10\v\x12*\n" +
 	"&REMOVE_RAG_CRAWLER_RESULT_FROM_DATASET\x10\f\x12\"\n" +
-	"\x1eCHANGE_DATASET_EMBEDDING_MODEL\x10\rb\x06proto3"
+	"\x1eCHANGE_DATASET_EMBEDDING_MODEL\x10\r\x12\x13\n" +
+	"\x0fREPARSE_DATASET\x10\x0eb\x06proto3"
 
 var (
 	file_ondewo_nlu_operation_metadata_proto_rawDescOnce sync.Once

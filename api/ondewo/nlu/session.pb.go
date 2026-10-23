@@ -225,6 +225,63 @@ func (LlmSafetyLocation) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{2}
 }
 
+// Lifecycle phase of an AI Team graph node, reported by <code>LlmAgentNodeEvent</code>.
+type LlmAgentNodePhase int32
+
+const (
+	// Not set.
+	LlmAgentNodePhase_LLM_AGENT_NODE_PHASE_UNSPECIFIED LlmAgentNodePhase = 0
+	// The node started running.
+	LlmAgentNodePhase_LLM_AGENT_NODE_PHASE_STARTED LlmAgentNodePhase = 1
+	// The node finished without an error.
+	LlmAgentNodePhase_LLM_AGENT_NODE_PHASE_COMPLETED LlmAgentNodePhase = 2
+	// The node raised an error.
+	LlmAgentNodePhase_LLM_AGENT_NODE_PHASE_FAILED LlmAgentNodePhase = 3
+)
+
+// Enum value maps for LlmAgentNodePhase.
+var (
+	LlmAgentNodePhase_name = map[int32]string{
+		0: "LLM_AGENT_NODE_PHASE_UNSPECIFIED",
+		1: "LLM_AGENT_NODE_PHASE_STARTED",
+		2: "LLM_AGENT_NODE_PHASE_COMPLETED",
+		3: "LLM_AGENT_NODE_PHASE_FAILED",
+	}
+	LlmAgentNodePhase_value = map[string]int32{
+		"LLM_AGENT_NODE_PHASE_UNSPECIFIED": 0,
+		"LLM_AGENT_NODE_PHASE_STARTED":     1,
+		"LLM_AGENT_NODE_PHASE_COMPLETED":   2,
+		"LLM_AGENT_NODE_PHASE_FAILED":      3,
+	}
+)
+
+func (x LlmAgentNodePhase) Enum() *LlmAgentNodePhase {
+	p := new(LlmAgentNodePhase)
+	*p = x
+	return p
+}
+
+func (x LlmAgentNodePhase) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (LlmAgentNodePhase) Descriptor() protoreflect.EnumDescriptor {
+	return file_ondewo_nlu_session_proto_enumTypes[3].Descriptor()
+}
+
+func (LlmAgentNodePhase) Type() protoreflect.EnumType {
+	return &file_ondewo_nlu_session_proto_enumTypes[3]
+}
+
+func (x LlmAgentNodePhase) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use LlmAgentNodePhase.Descriptor instead.
+func (LlmAgentNodePhase) EnumDescriptor() ([]byte, []int) {
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{3}
+}
+
 // Audio encoding of the audio content sent in the conversational query request.
 // Refer to the <a href="/speech/docs/basics">Cloud Speech API documentation</a> for more details.
 type AudioEncoding int32
@@ -301,11 +358,11 @@ func (x AudioEncoding) String() string {
 }
 
 func (AudioEncoding) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[3].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[4].Descriptor()
 }
 
 func (AudioEncoding) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[3]
+	return &file_ondewo_nlu_session_proto_enumTypes[4]
 }
 
 func (x AudioEncoding) Number() protoreflect.EnumNumber {
@@ -314,7 +371,7 @@ func (x AudioEncoding) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AudioEncoding.Descriptor instead.
 func (AudioEncoding) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{3}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{4}
 }
 
 // Type of operator to compare
@@ -370,11 +427,11 @@ func (x ComparisonOperator) String() string {
 }
 
 func (ComparisonOperator) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[4].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[5].Descriptor()
 }
 
 func (ComparisonOperator) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[4]
+	return &file_ondewo_nlu_session_proto_enumTypes[5]
 }
 
 func (x ComparisonOperator) Number() protoreflect.EnumNumber {
@@ -383,7 +440,7 @@ func (x ComparisonOperator) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ComparisonOperator.Descriptor instead.
 func (ComparisonOperator) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{4}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{5}
 }
 
 // The thumbs rating a user gives as feedback.
@@ -423,11 +480,11 @@ func (x FeedbackRating) String() string {
 }
 
 func (FeedbackRating) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[5].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[6].Descriptor()
 }
 
 func (FeedbackRating) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[5]
+	return &file_ondewo_nlu_session_proto_enumTypes[6]
 }
 
 func (x FeedbackRating) Number() protoreflect.EnumNumber {
@@ -436,7 +493,7 @@ func (x FeedbackRating) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FeedbackRating.Descriptor instead.
 func (FeedbackRating) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{5}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{6}
 }
 
 // Who left a piece of feedback — distinguishes trusted reviewers from anonymous production end-users.
@@ -481,11 +538,11 @@ func (x FeedbackAuthorType) String() string {
 }
 
 func (FeedbackAuthorType) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[6].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[7].Descriptor()
 }
 
 func (FeedbackAuthorType) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[6]
+	return &file_ondewo_nlu_session_proto_enumTypes[7]
 }
 
 func (x FeedbackAuthorType) Number() protoreflect.EnumNumber {
@@ -494,7 +551,7 @@ func (x FeedbackAuthorType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FeedbackAuthorType.Descriptor instead.
 func (FeedbackAuthorType) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{6}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{7}
 }
 
 // The scope a feedback filter targets: session-level, step-level, or both.
@@ -534,11 +591,11 @@ func (x FeedbackScope) String() string {
 }
 
 func (FeedbackScope) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[7].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[8].Descriptor()
 }
 
 func (FeedbackScope) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[7]
+	return &file_ondewo_nlu_session_proto_enumTypes[8]
 }
 
 func (x FeedbackScope) Number() protoreflect.EnumNumber {
@@ -547,7 +604,7 @@ func (x FeedbackScope) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FeedbackScope.Descriptor instead.
 func (FeedbackScope) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{7}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{8}
 }
 
 // The calendar granularity of a feedback time series. When set (non-unspecified) it overrides the
@@ -600,11 +657,11 @@ func (x FeedbackTimeGranularity) String() string {
 }
 
 func (FeedbackTimeGranularity) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[8].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[9].Descriptor()
 }
 
 func (FeedbackTimeGranularity) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[8]
+	return &file_ondewo_nlu_session_proto_enumTypes[9]
 }
 
 func (x FeedbackTimeGranularity) Number() protoreflect.EnumNumber {
@@ -613,7 +670,7 @@ func (x FeedbackTimeGranularity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use FeedbackTimeGranularity.Descriptor instead.
 func (FeedbackTimeGranularity) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{8}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{9}
 }
 
 // Represents the options for views of resources.
@@ -657,11 +714,11 @@ func (x ResourceView) String() string {
 }
 
 func (ResourceView) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[9].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[10].Descriptor()
 }
 
 func (ResourceView) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[9]
+	return &file_ondewo_nlu_session_proto_enumTypes[10]
 }
 
 func (x ResourceView) Number() protoreflect.EnumNumber {
@@ -670,7 +727,7 @@ func (x ResourceView) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ResourceView.Descriptor instead.
 func (ResourceView) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{9}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{10}
 }
 
 // File type of an audio resource
@@ -714,11 +771,11 @@ func (x AudioFileResourceType) String() string {
 }
 
 func (AudioFileResourceType) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[10].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[11].Descriptor()
 }
 
 func (AudioFileResourceType) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[10]
+	return &file_ondewo_nlu_session_proto_enumTypes[11]
 }
 
 func (x AudioFileResourceType) Number() protoreflect.EnumNumber {
@@ -727,7 +784,7 @@ func (x AudioFileResourceType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AudioFileResourceType.Descriptor instead.
 func (AudioFileResourceType) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{10}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{11}
 }
 
 // Type of the response message.
@@ -773,11 +830,11 @@ func (x StreamingRecognitionResult_MessageType) String() string {
 }
 
 func (StreamingRecognitionResult_MessageType) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[11].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[12].Descriptor()
 }
 
 func (StreamingRecognitionResult_MessageType) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[11]
+	return &file_ondewo_nlu_session_proto_enumTypes[12]
 }
 
 func (x StreamingRecognitionResult_MessageType) Number() protoreflect.EnumNumber {
@@ -786,7 +843,7 @@ func (x StreamingRecognitionResult_MessageType) Number() protoreflect.EnumNumber
 
 // Deprecated: Use StreamingRecognitionResult_MessageType.Descriptor instead.
 func (StreamingRecognitionResult_MessageType) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{37, 0}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{39, 0}
 }
 
 // Represents the options for views of a session.
@@ -827,11 +884,11 @@ func (x Session_View) String() string {
 }
 
 func (Session_View) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[12].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[13].Descriptor()
 }
 
 func (Session_View) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[12]
+	return &file_ondewo_nlu_session_proto_enumTypes[13]
 }
 
 func (x Session_View) Number() protoreflect.EnumNumber {
@@ -840,7 +897,7 @@ func (x Session_View) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Session_View.Descriptor instead.
 func (Session_View) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{41, 0}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{43, 0}
 }
 
 // Represents the options for views of a session_review.
@@ -881,11 +938,11 @@ func (x SessionReview_View) String() string {
 }
 
 func (SessionReview_View) Descriptor() protoreflect.EnumDescriptor {
-	return file_ondewo_nlu_session_proto_enumTypes[13].Descriptor()
+	return file_ondewo_nlu_session_proto_enumTypes[14].Descriptor()
 }
 
 func (SessionReview_View) Type() protoreflect.EnumType {
-	return &file_ondewo_nlu_session_proto_enumTypes[13]
+	return &file_ondewo_nlu_session_proto_enumTypes[14]
 }
 
 func (x SessionReview_View) Number() protoreflect.EnumNumber {
@@ -894,7 +951,7 @@ func (x SessionReview_View) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SessionReview_View.Descriptor instead.
 func (SessionReview_View) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{56, 0}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{58, 0}
 }
 
 // The request to detect user&apos;s intent.
@@ -3300,6 +3357,82 @@ func (x *LlmCcaiServiceUsage) GetModelNames() []string {
 	return nil
 }
 
+// Per-base-URL usage rollup across the scope. One entry per distinct
+// <code>LlmTelemetry.base_url</code>; calls whose model configuration states no base URL are
+// grouped under an empty <code>base_url</code>.
+type LlmBaseUrlUsage struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Base URL the calls went through (proxy / OpenAI-compatible endpoint), with embedded
+	// credentials redacted. Empty = the model configuration states no base URL.
+	BaseUrl string `protobuf:"bytes,1,opt,name=base_url,json=baseUrl,proto3" json:"base_url,omitempty"`
+	// Number of LLM calls made through this base URL in scope.
+	CallCount int64 `protobuf:"varint,2,opt,name=call_count,json=callCount,proto3" json:"call_count,omitempty"`
+	// Summed token usage for the calls made through this base URL.
+	LlmTokenUsage *LlmTokenUsage `protobuf:"bytes,3,opt,name=llm_token_usage,json=llmTokenUsage,proto3" json:"llm_token_usage,omitempty"`
+	// Distinct model names called through this base URL.
+	ModelNames    []string `protobuf:"bytes,4,rep,name=model_names,json=modelNames,proto3" json:"model_names,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *LlmBaseUrlUsage) Reset() {
+	*x = LlmBaseUrlUsage{}
+	mi := &file_ondewo_nlu_session_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LlmBaseUrlUsage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LlmBaseUrlUsage) ProtoMessage() {}
+
+func (x *LlmBaseUrlUsage) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_nlu_session_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LlmBaseUrlUsage.ProtoReflect.Descriptor instead.
+func (*LlmBaseUrlUsage) Descriptor() ([]byte, []int) {
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *LlmBaseUrlUsage) GetBaseUrl() string {
+	if x != nil {
+		return x.BaseUrl
+	}
+	return ""
+}
+
+func (x *LlmBaseUrlUsage) GetCallCount() int64 {
+	if x != nil {
+		return x.CallCount
+	}
+	return 0
+}
+
+func (x *LlmBaseUrlUsage) GetLlmTokenUsage() *LlmTokenUsage {
+	if x != nil {
+		return x.LlmTokenUsage
+	}
+	return nil
+}
+
+func (x *LlmBaseUrlUsage) GetModelNames() []string {
+	if x != nil {
+		return x.ModelNames
+	}
+	return nil
+}
+
 // Per-intent-agent usage rollup across the scope.
 type LlmAgentUsage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -3321,7 +3454,7 @@ type LlmAgentUsage struct {
 
 func (x *LlmAgentUsage) Reset() {
 	*x = LlmAgentUsage{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[18]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3333,7 +3466,7 @@ func (x *LlmAgentUsage) String() string {
 func (*LlmAgentUsage) ProtoMessage() {}
 
 func (x *LlmAgentUsage) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[18]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3346,7 +3479,7 @@ func (x *LlmAgentUsage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmAgentUsage.ProtoReflect.Descriptor instead.
 func (*LlmAgentUsage) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{18}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *LlmAgentUsage) GetAgentName() string {
@@ -3422,7 +3555,7 @@ type LlmToolUsage struct {
 
 func (x *LlmToolUsage) Reset() {
 	*x = LlmToolUsage{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[19]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3434,7 +3567,7 @@ func (x *LlmToolUsage) String() string {
 func (*LlmToolUsage) ProtoMessage() {}
 
 func (x *LlmToolUsage) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[19]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3447,7 +3580,7 @@ func (x *LlmToolUsage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmToolUsage.ProtoReflect.Descriptor instead.
 func (*LlmToolUsage) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{19}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *LlmToolUsage) GetToolName() string {
@@ -3537,7 +3670,7 @@ type LlmErrorStat struct {
 
 func (x *LlmErrorStat) Reset() {
 	*x = LlmErrorStat{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[20]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3549,7 +3682,7 @@ func (x *LlmErrorStat) String() string {
 func (*LlmErrorStat) ProtoMessage() {}
 
 func (x *LlmErrorStat) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[20]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3562,7 +3695,7 @@ func (x *LlmErrorStat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmErrorStat.ProtoReflect.Descriptor instead.
 func (*LlmErrorStat) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{20}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *LlmErrorStat) GetErrorClass() string {
@@ -3612,7 +3745,7 @@ type LlmErrorStats struct {
 
 func (x *LlmErrorStats) Reset() {
 	*x = LlmErrorStats{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[21]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3624,7 +3757,7 @@ func (x *LlmErrorStats) String() string {
 func (*LlmErrorStats) ProtoMessage() {}
 
 func (x *LlmErrorStats) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[21]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3637,7 +3770,7 @@ func (x *LlmErrorStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmErrorStats.ProtoReflect.Descriptor instead.
 func (*LlmErrorStats) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{21}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *LlmErrorStats) GetTotalErrorCount() int64 {
@@ -3690,7 +3823,7 @@ type LlmFinishReasonStat struct {
 
 func (x *LlmFinishReasonStat) Reset() {
 	*x = LlmFinishReasonStat{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[22]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3702,7 +3835,7 @@ func (x *LlmFinishReasonStat) String() string {
 func (*LlmFinishReasonStat) ProtoMessage() {}
 
 func (x *LlmFinishReasonStat) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[22]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3715,7 +3848,7 @@ func (x *LlmFinishReasonStat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmFinishReasonStat.ProtoReflect.Descriptor instead.
 func (*LlmFinishReasonStat) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{22}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *LlmFinishReasonStat) GetFinishReason() string {
@@ -3756,7 +3889,7 @@ type LlmReasoningEffortStat struct {
 
 func (x *LlmReasoningEffortStat) Reset() {
 	*x = LlmReasoningEffortStat{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[23]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3768,7 +3901,7 @@ func (x *LlmReasoningEffortStat) String() string {
 func (*LlmReasoningEffortStat) ProtoMessage() {}
 
 func (x *LlmReasoningEffortStat) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[23]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3781,7 +3914,7 @@ func (x *LlmReasoningEffortStat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmReasoningEffortStat.ProtoReflect.Descriptor instead.
 func (*LlmReasoningEffortStat) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{23}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *LlmReasoningEffortStat) GetReasoningEffort() ReasoningEffort {
@@ -3858,14 +3991,18 @@ type LlmTelemetryReport struct {
 	ToolCallDurationSecondsTotal float64 `protobuf:"fixed64,19,opt,name=tool_call_duration_seconds_total,json=toolCallDurationSecondsTotal,proto3" json:"tool_call_duration_seconds_total,omitempty"`
 	// Native safety aggregate (counts / rates / mean score). Populated for
 	// *_LLM_SAFETY and *_LLM_TOTAL_STATISTICS reports.
-	SafetyStats   *LlmSafetyStats `protobuf:"bytes,20,opt,name=safety_stats,json=safetyStats,proto3" json:"safety_stats,omitempty"`
+	SafetyStats *LlmSafetyStats `protobuf:"bytes,20,opt,name=safety_stats,json=safetyStats,proto3" json:"safety_stats,omitempty"`
+	// Per-base-URL usage rollup. Populated for *_LLM_TOTAL_STATISTICS. Unlike
+	// <code>LlmModelUsage.base_url</code>, which carries one base URL per model, this lists every
+	// distinct base URL in scope.
+	BaseUrlsUsed  []*LlmBaseUrlUsage `protobuf:"bytes,21,rep,name=base_urls_used,json=baseUrlsUsed,proto3" json:"base_urls_used,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *LlmTelemetryReport) Reset() {
 	*x = LlmTelemetryReport{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[24]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3877,7 +4014,7 @@ func (x *LlmTelemetryReport) String() string {
 func (*LlmTelemetryReport) ProtoMessage() {}
 
 func (x *LlmTelemetryReport) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[24]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3890,7 +4027,7 @@ func (x *LlmTelemetryReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmTelemetryReport.ProtoReflect.Descriptor instead.
 func (*LlmTelemetryReport) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{24}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *LlmTelemetryReport) GetLlmTokenUsage() *LlmTokenUsage {
@@ -4033,6 +4170,13 @@ func (x *LlmTelemetryReport) GetSafetyStats() *LlmSafetyStats {
 	return nil
 }
 
+func (x *LlmTelemetryReport) GetBaseUrlsUsed() []*LlmBaseUrlUsage {
+	if x != nil {
+		return x.BaseUrlsUsed
+	}
+	return nil
+}
+
 // Per-category native-safety aggregate across the LLM calls in scope.
 type LlmSafetyCategoryStat struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -4049,7 +4193,7 @@ type LlmSafetyCategoryStat struct {
 
 func (x *LlmSafetyCategoryStat) Reset() {
 	*x = LlmSafetyCategoryStat{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[25]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4061,7 +4205,7 @@ func (x *LlmSafetyCategoryStat) String() string {
 func (*LlmSafetyCategoryStat) ProtoMessage() {}
 
 func (x *LlmSafetyCategoryStat) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[25]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4074,7 +4218,7 @@ func (x *LlmSafetyCategoryStat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmSafetyCategoryStat.ProtoReflect.Descriptor instead.
 func (*LlmSafetyCategoryStat) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{25}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *LlmSafetyCategoryStat) GetCategory() string {
@@ -4117,7 +4261,7 @@ type LlmSafetyStats struct {
 
 func (x *LlmSafetyStats) Reset() {
 	*x = LlmSafetyStats{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[26]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4129,7 +4273,7 @@ func (x *LlmSafetyStats) String() string {
 func (*LlmSafetyStats) ProtoMessage() {}
 
 func (x *LlmSafetyStats) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[26]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4142,7 +4286,7 @@ func (x *LlmSafetyStats) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmSafetyStats.ProtoReflect.Descriptor instead.
 func (*LlmSafetyStats) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{26}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *LlmSafetyStats) GetTotalAssessed() int64 {
@@ -4192,7 +4336,7 @@ type LlmCallStartedEvent struct {
 
 func (x *LlmCallStartedEvent) Reset() {
 	*x = LlmCallStartedEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[27]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4204,7 +4348,7 @@ func (x *LlmCallStartedEvent) String() string {
 func (*LlmCallStartedEvent) ProtoMessage() {}
 
 func (x *LlmCallStartedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[27]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4217,7 +4361,7 @@ func (x *LlmCallStartedEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmCallStartedEvent.ProtoReflect.Descriptor instead.
 func (*LlmCallStartedEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{27}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *LlmCallStartedEvent) GetLlmCallId() string {
@@ -4272,7 +4416,7 @@ type LlmCallFinishedEvent struct {
 
 func (x *LlmCallFinishedEvent) Reset() {
 	*x = LlmCallFinishedEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[28]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4284,7 +4428,7 @@ func (x *LlmCallFinishedEvent) String() string {
 func (*LlmCallFinishedEvent) ProtoMessage() {}
 
 func (x *LlmCallFinishedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[28]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4297,7 +4441,7 @@ func (x *LlmCallFinishedEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmCallFinishedEvent.ProtoReflect.Descriptor instead.
 func (*LlmCallFinishedEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{28}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *LlmCallFinishedEvent) GetLlmCallId() string {
@@ -4347,7 +4491,7 @@ type LlmToolCallStartedEvent struct {
 
 func (x *LlmToolCallStartedEvent) Reset() {
 	*x = LlmToolCallStartedEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[29]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4359,7 +4503,7 @@ func (x *LlmToolCallStartedEvent) String() string {
 func (*LlmToolCallStartedEvent) ProtoMessage() {}
 
 func (x *LlmToolCallStartedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[29]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4372,7 +4516,7 @@ func (x *LlmToolCallStartedEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmToolCallStartedEvent.ProtoReflect.Descriptor instead.
 func (*LlmToolCallStartedEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{29}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *LlmToolCallStartedEvent) GetToolCallId() string {
@@ -4433,7 +4577,7 @@ type LlmToolCallFinishedEvent struct {
 
 func (x *LlmToolCallFinishedEvent) Reset() {
 	*x = LlmToolCallFinishedEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[30]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4445,7 +4589,7 @@ func (x *LlmToolCallFinishedEvent) String() string {
 func (*LlmToolCallFinishedEvent) ProtoMessage() {}
 
 func (x *LlmToolCallFinishedEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[30]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4458,7 +4602,7 @@ func (x *LlmToolCallFinishedEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmToolCallFinishedEvent.ProtoReflect.Descriptor instead.
 func (*LlmToolCallFinishedEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{30}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *LlmToolCallFinishedEvent) GetToolCallId() string {
@@ -4525,7 +4669,7 @@ type LlmThinkingDeltaEvent struct {
 
 func (x *LlmThinkingDeltaEvent) Reset() {
 	*x = LlmThinkingDeltaEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[31]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4537,7 +4681,7 @@ func (x *LlmThinkingDeltaEvent) String() string {
 func (*LlmThinkingDeltaEvent) ProtoMessage() {}
 
 func (x *LlmThinkingDeltaEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[31]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4550,7 +4694,7 @@ func (x *LlmThinkingDeltaEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmThinkingDeltaEvent.ProtoReflect.Descriptor instead.
 func (*LlmThinkingDeltaEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{31}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *LlmThinkingDeltaEvent) GetLlmCallId() string {
@@ -4587,7 +4731,7 @@ type LlmTokenUsageUpdateEvent struct {
 
 func (x *LlmTokenUsageUpdateEvent) Reset() {
 	*x = LlmTokenUsageUpdateEvent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[32]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4599,7 +4743,7 @@ func (x *LlmTokenUsageUpdateEvent) String() string {
 func (*LlmTokenUsageUpdateEvent) ProtoMessage() {}
 
 func (x *LlmTokenUsageUpdateEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[32]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4612,7 +4756,7 @@ func (x *LlmTokenUsageUpdateEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LlmTokenUsageUpdateEvent.ProtoReflect.Descriptor instead.
 func (*LlmTokenUsageUpdateEvent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{32}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *LlmTokenUsageUpdateEvent) GetLlmCallId() string {
@@ -4627,6 +4771,120 @@ func (x *LlmTokenUsageUpdateEvent) GetLlmTokenUsage() *LlmTokenUsage {
 		return x.LlmTokenUsage
 	}
 	return nil
+}
+
+// Emitted on a streaming DetectIntent when a node of an AI Team graph starts, completes or fails.
+// A node inside a nested graph (a subgraph, or a member agent of a supervisor or swarm) is reported too,
+// with its full <code>llm_agent_node_event_node_path</code>.
+type LlmAgentNodeEvent struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Id of this run of the node. The <code>LLM_AGENT_NODE_PHASE_STARTED</code> event and the
+	// <code>LLM_AGENT_NODE_PHASE_COMPLETED</code> or <code>LLM_AGENT_NODE_PHASE_FAILED</code> event of one run share it.
+	LlmAgentNodeEventNodeRunId string `protobuf:"bytes,1,opt,name=llm_agent_node_event_node_run_id,json=llmAgentNodeEventNodeRunId,proto3" json:"llm_agent_node_event_node_run_id,omitempty"`
+	// <code>llm_agent_node_event_node_run_id</code> of the node run this one is nested in; empty for a node of the outermost graph.
+	LlmAgentNodeEventParentNodeRunId string `protobuf:"bytes,2,opt,name=llm_agent_node_event_parent_node_run_id,json=llmAgentNodeEventParentNodeRunId,proto3" json:"llm_agent_node_event_parent_node_run_id,omitempty"`
+	// Name of the node, e.g. <code>researcher</code>.
+	LlmAgentNodeEventNodeDisplayName string `protobuf:"bytes,3,opt,name=llm_agent_node_event_node_display_name,json=llmAgentNodeEventNodeDisplayName,proto3" json:"llm_agent_node_event_node_display_name,omitempty"`
+	// Names of the nodes from the outermost graph down to this one, e.g.
+	// <code>["supervisor", "researcher", "model"]</code>. The last element equals <code>llm_agent_node_event_node_display_name</code>.
+	LlmAgentNodeEventNodePath []string `protobuf:"bytes,4,rep,name=llm_agent_node_event_node_path,json=llmAgentNodeEventNodePath,proto3" json:"llm_agent_node_event_node_path,omitempty"`
+	// Lifecycle phase this event reports.
+	LlmAgentNodePhase LlmAgentNodePhase `protobuf:"varint,5,opt,name=llm_agent_node_phase,json=llmAgentNodePhase,proto3,enum=ondewo.nlu.LlmAgentNodePhase" json:"llm_agent_node_phase,omitempty"`
+	// Wall-clock time of the event.
+	Timestamp *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	// Duration of the node run in seconds; set only on <code>LLM_AGENT_NODE_PHASE_COMPLETED</code> and
+	// <code>LLM_AGENT_NODE_PHASE_FAILED</code>.
+	LlmAgentNodeEventDurationInS float32 `protobuf:"fixed32,7,opt,name=llm_agent_node_event_duration_in_s,json=llmAgentNodeEventDurationInS,proto3" json:"llm_agent_node_event_duration_in_s,omitempty"`
+	// Populated only on <code>LLM_AGENT_NODE_PHASE_FAILED</code>; empty string otherwise.
+	LlmAgentNodeEventErrorMessage string `protobuf:"bytes,8,opt,name=llm_agent_node_event_error_message,json=llmAgentNodeEventErrorMessage,proto3" json:"llm_agent_node_event_error_message,omitempty"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
+}
+
+func (x *LlmAgentNodeEvent) Reset() {
+	*x = LlmAgentNodeEvent{}
+	mi := &file_ondewo_nlu_session_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LlmAgentNodeEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LlmAgentNodeEvent) ProtoMessage() {}
+
+func (x *LlmAgentNodeEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_nlu_session_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LlmAgentNodeEvent.ProtoReflect.Descriptor instead.
+func (*LlmAgentNodeEvent) Descriptor() ([]byte, []int) {
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventNodeRunId() string {
+	if x != nil {
+		return x.LlmAgentNodeEventNodeRunId
+	}
+	return ""
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventParentNodeRunId() string {
+	if x != nil {
+		return x.LlmAgentNodeEventParentNodeRunId
+	}
+	return ""
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventNodeDisplayName() string {
+	if x != nil {
+		return x.LlmAgentNodeEventNodeDisplayName
+	}
+	return ""
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventNodePath() []string {
+	if x != nil {
+		return x.LlmAgentNodeEventNodePath
+	}
+	return nil
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodePhase() LlmAgentNodePhase {
+	if x != nil {
+		return x.LlmAgentNodePhase
+	}
+	return LlmAgentNodePhase_LLM_AGENT_NODE_PHASE_UNSPECIFIED
+}
+
+func (x *LlmAgentNodeEvent) GetTimestamp() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Timestamp
+	}
+	return nil
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventDurationInS() float32 {
+	if x != nil {
+		return x.LlmAgentNodeEventDurationInS
+	}
+	return 0
+}
+
+func (x *LlmAgentNodeEvent) GetLlmAgentNodeEventErrorMessage() string {
+	if x != nil {
+		return x.LlmAgentNodeEventErrorMessage
+	}
+	return ""
 }
 
 // Chunk information for a document chunk referenced in a RAG based <code>StreamingDetectIntentResponse</code>
@@ -4656,7 +4914,7 @@ type ReferencedChunk struct {
 
 func (x *ReferencedChunk) Reset() {
 	*x = ReferencedChunk{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[33]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4668,7 +4926,7 @@ func (x *ReferencedChunk) String() string {
 func (*ReferencedChunk) ProtoMessage() {}
 
 func (x *ReferencedChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[33]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4681,7 +4939,7 @@ func (x *ReferencedChunk) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReferencedChunk.ProtoReflect.Descriptor instead.
 func (*ReferencedChunk) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{33}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ReferencedChunk) GetReferenceIndex() int32 {
@@ -4826,7 +5084,7 @@ type QueryResult struct {
 
 func (x *QueryResult) Reset() {
 	*x = QueryResult{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[34]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4838,7 +5096,7 @@ func (x *QueryResult) String() string {
 func (*QueryResult) ProtoMessage() {}
 
 func (x *QueryResult) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[34]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4851,7 +5109,7 @@ func (x *QueryResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QueryResult.ProtoReflect.Descriptor instead.
 func (*QueryResult) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{34}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *QueryResult) GetQueryText() string {
@@ -5021,7 +5279,7 @@ type StreamingDetectIntentRequest struct {
 
 func (x *StreamingDetectIntentRequest) Reset() {
 	*x = StreamingDetectIntentRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[35]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5033,7 +5291,7 @@ func (x *StreamingDetectIntentRequest) String() string {
 func (*StreamingDetectIntentRequest) ProtoMessage() {}
 
 func (x *StreamingDetectIntentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[35]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5046,7 +5304,7 @@ func (x *StreamingDetectIntentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamingDetectIntentRequest.ProtoReflect.Descriptor instead.
 func (*StreamingDetectIntentRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{35}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *StreamingDetectIntentRequest) GetSession() string {
@@ -5111,6 +5369,7 @@ type StreamingDetectIntentResponse struct {
 	//	*StreamingDetectIntentResponse_LlmToolCallFinished
 	//	*StreamingDetectIntentResponse_LlmThinkingDelta
 	//	*StreamingDetectIntentResponse_LlmTokenUsageUpdate
+	//	*StreamingDetectIntentResponse_LlmAgentNodeEvent
 	TelemetryEvent isStreamingDetectIntentResponse_TelemetryEvent `protobuf_oneof:"telemetry_event"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -5118,7 +5377,7 @@ type StreamingDetectIntentResponse struct {
 
 func (x *StreamingDetectIntentResponse) Reset() {
 	*x = StreamingDetectIntentResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[36]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5130,7 +5389,7 @@ func (x *StreamingDetectIntentResponse) String() string {
 func (*StreamingDetectIntentResponse) ProtoMessage() {}
 
 func (x *StreamingDetectIntentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[36]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5143,7 +5402,7 @@ func (x *StreamingDetectIntentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamingDetectIntentResponse.ProtoReflect.Descriptor instead.
 func (*StreamingDetectIntentResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{36}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *StreamingDetectIntentResponse) GetResponseId() string {
@@ -5235,6 +5494,15 @@ func (x *StreamingDetectIntentResponse) GetLlmTokenUsageUpdate() *LlmTokenUsageU
 	return nil
 }
 
+func (x *StreamingDetectIntentResponse) GetLlmAgentNodeEvent() *LlmAgentNodeEvent {
+	if x != nil {
+		if x, ok := x.TelemetryEvent.(*StreamingDetectIntentResponse_LlmAgentNodeEvent); ok {
+			return x.LlmAgentNodeEvent
+		}
+	}
+	return nil
+}
+
 type isStreamingDetectIntentResponse_TelemetryEvent interface {
 	isStreamingDetectIntentResponse_TelemetryEvent()
 }
@@ -5269,6 +5537,11 @@ type StreamingDetectIntentResponse_LlmTokenUsageUpdate struct {
 	LlmTokenUsageUpdate *LlmTokenUsageUpdateEvent `protobuf:"bytes,10,opt,name=llm_token_usage_update,json=llmTokenUsageUpdate,proto3,oneof"`
 }
 
+type StreamingDetectIntentResponse_LlmAgentNodeEvent struct {
+	// Emitted when a node of an AI Team graph starts, completes or fails.
+	LlmAgentNodeEvent *LlmAgentNodeEvent `protobuf:"bytes,11,opt,name=llm_agent_node_event,json=llmAgentNodeEvent,proto3,oneof"`
+}
+
 func (*StreamingDetectIntentResponse_LlmCallStarted) isStreamingDetectIntentResponse_TelemetryEvent() {
 }
 
@@ -5285,6 +5558,9 @@ func (*StreamingDetectIntentResponse_LlmThinkingDelta) isStreamingDetectIntentRe
 }
 
 func (*StreamingDetectIntentResponse_LlmTokenUsageUpdate) isStreamingDetectIntentResponse_TelemetryEvent() {
+}
+
+func (*StreamingDetectIntentResponse_LlmAgentNodeEvent) isStreamingDetectIntentResponse_TelemetryEvent() {
 }
 
 // Contains a speech recognition result corresponding to a portion of the audio that is currently being processed or an indication that this is the end of the single requested utterance.
@@ -5346,7 +5622,7 @@ type StreamingRecognitionResult struct {
 
 func (x *StreamingRecognitionResult) Reset() {
 	*x = StreamingRecognitionResult{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[37]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5358,7 +5634,7 @@ func (x *StreamingRecognitionResult) String() string {
 func (*StreamingRecognitionResult) ProtoMessage() {}
 
 func (x *StreamingRecognitionResult) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[37]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5371,7 +5647,7 @@ func (x *StreamingRecognitionResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamingRecognitionResult.ProtoReflect.Descriptor instead.
 func (*StreamingRecognitionResult) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{37}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *StreamingRecognitionResult) GetMessageType() StreamingRecognitionResult_MessageType {
@@ -5428,7 +5704,7 @@ type InputAudioConfig struct {
 
 func (x *InputAudioConfig) Reset() {
 	*x = InputAudioConfig{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[38]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5440,7 +5716,7 @@ func (x *InputAudioConfig) String() string {
 func (*InputAudioConfig) ProtoMessage() {}
 
 func (x *InputAudioConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[38]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5453,7 +5729,7 @@ func (x *InputAudioConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InputAudioConfig.ProtoReflect.Descriptor instead.
 func (*InputAudioConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{38}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *InputAudioConfig) GetAudioEncoding() AudioEncoding {
@@ -5501,7 +5777,7 @@ type TextInput struct {
 
 func (x *TextInput) Reset() {
 	*x = TextInput{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[39]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5513,7 +5789,7 @@ func (x *TextInput) String() string {
 func (*TextInput) ProtoMessage() {}
 
 func (x *TextInput) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[39]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5526,7 +5802,7 @@ func (x *TextInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TextInput.ProtoReflect.Descriptor instead.
 func (*TextInput) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{39}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *TextInput) GetText() string {
@@ -5563,7 +5839,7 @@ type EventInput struct {
 
 func (x *EventInput) Reset() {
 	*x = EventInput{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[40]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5575,7 +5851,7 @@ func (x *EventInput) String() string {
 func (*EventInput) ProtoMessage() {}
 
 func (x *EventInput) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[40]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5588,7 +5864,7 @@ func (x *EventInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventInput.ProtoReflect.Descriptor instead.
 func (*EventInput) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{40}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *EventInput) GetName() string {
@@ -5636,7 +5912,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[41]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5648,7 +5924,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[41]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5661,7 +5937,7 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Session.ProtoReflect.Descriptor instead.
 func (*Session) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{41}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *Session) GetName() string {
@@ -5746,7 +6022,7 @@ type SessionStep struct {
 
 func (x *SessionStep) Reset() {
 	*x = SessionStep{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[42]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5758,7 +6034,7 @@ func (x *SessionStep) String() string {
 func (*SessionStep) ProtoMessage() {}
 
 func (x *SessionStep) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[42]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5771,7 +6047,7 @@ func (x *SessionStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionStep.ProtoReflect.Descriptor instead.
 func (*SessionStep) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{42}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *SessionStep) GetName() string {
@@ -5866,7 +6142,7 @@ type GetSessionStepRequest struct {
 
 func (x *GetSessionStepRequest) Reset() {
 	*x = GetSessionStepRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[43]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5878,7 +6154,7 @@ func (x *GetSessionStepRequest) String() string {
 func (*GetSessionStepRequest) ProtoMessage() {}
 
 func (x *GetSessionStepRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[43]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5891,7 +6167,7 @@ func (x *GetSessionStepRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionStepRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionStepRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{43}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *GetSessionStepRequest) GetName() string {
@@ -5925,7 +6201,7 @@ type UpdateSessionStepRequest struct {
 
 func (x *UpdateSessionStepRequest) Reset() {
 	*x = UpdateSessionStepRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[44]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5937,7 +6213,7 @@ func (x *UpdateSessionStepRequest) String() string {
 func (*UpdateSessionStepRequest) ProtoMessage() {}
 
 func (x *UpdateSessionStepRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[44]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5950,7 +6226,7 @@ func (x *UpdateSessionStepRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSessionStepRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSessionStepRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{44}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *UpdateSessionStepRequest) GetSessionStep() *SessionStep {
@@ -5986,7 +6262,7 @@ type DeleteSessionStepRequest struct {
 
 func (x *DeleteSessionStepRequest) Reset() {
 	*x = DeleteSessionStepRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[45]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5998,7 +6274,7 @@ func (x *DeleteSessionStepRequest) String() string {
 func (*DeleteSessionStepRequest) ProtoMessage() {}
 
 func (x *DeleteSessionStepRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[45]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6011,7 +6287,7 @@ func (x *DeleteSessionStepRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSessionStepRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSessionStepRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{45}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *DeleteSessionStepRequest) GetName() string {
@@ -6038,7 +6314,7 @@ type CreateSessionStepRequest struct {
 
 func (x *CreateSessionStepRequest) Reset() {
 	*x = CreateSessionStepRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[46]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6050,7 +6326,7 @@ func (x *CreateSessionStepRequest) String() string {
 func (*CreateSessionStepRequest) ProtoMessage() {}
 
 func (x *CreateSessionStepRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[46]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6063,7 +6339,7 @@ func (x *CreateSessionStepRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSessionStepRequest.ProtoReflect.Descriptor instead.
 func (*CreateSessionStepRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{46}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *CreateSessionStepRequest) GetSessionId() string {
@@ -6136,7 +6412,7 @@ type ListSessionsRequest struct {
 
 func (x *ListSessionsRequest) Reset() {
 	*x = ListSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[47]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6148,7 +6424,7 @@ func (x *ListSessionsRequest) String() string {
 func (*ListSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[47]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6161,7 +6437,7 @@ func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{47}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *ListSessionsRequest) GetParent() string {
@@ -6216,7 +6492,7 @@ type ContextFilter struct {
 
 func (x *ContextFilter) Reset() {
 	*x = ContextFilter{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[48]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6228,7 +6504,7 @@ func (x *ContextFilter) String() string {
 func (*ContextFilter) ProtoMessage() {}
 
 func (x *ContextFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[48]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6241,7 +6517,7 @@ func (x *ContextFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContextFilter.ProtoReflect.Descriptor instead.
 func (*ContextFilter) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{48}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *ContextFilter) GetContextName() string {
@@ -6399,7 +6675,7 @@ type SessionFilter struct {
 
 func (x *SessionFilter) Reset() {
 	*x = SessionFilter{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[49]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6411,7 +6687,7 @@ func (x *SessionFilter) String() string {
 func (*SessionFilter) ProtoMessage() {}
 
 func (x *SessionFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[49]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6424,7 +6700,7 @@ func (x *SessionFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionFilter.ProtoReflect.Descriptor instead.
 func (*SessionFilter) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{49}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *SessionFilter) GetLanguageCodes() []string {
@@ -6862,7 +7138,7 @@ type SessionInfo struct {
 
 func (x *SessionInfo) Reset() {
 	*x = SessionInfo{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[50]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6874,7 +7150,7 @@ func (x *SessionInfo) String() string {
 func (*SessionInfo) ProtoMessage() {}
 
 func (x *SessionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[50]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6887,7 +7163,7 @@ func (x *SessionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionInfo.ProtoReflect.Descriptor instead.
 func (*SessionInfo) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{50}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *SessionInfo) GetLanguageCodes() []string {
@@ -7135,7 +7411,7 @@ type ListSessionsResponse struct {
 
 func (x *ListSessionsResponse) Reset() {
 	*x = ListSessionsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[51]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7147,7 +7423,7 @@ func (x *ListSessionsResponse) String() string {
 func (*ListSessionsResponse) ProtoMessage() {}
 
 func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[51]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7160,7 +7436,7 @@ func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{51}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ListSessionsResponse) GetSessions() []*Session {
@@ -7194,7 +7470,7 @@ type GetSessionRequest struct {
 
 func (x *GetSessionRequest) Reset() {
 	*x = GetSessionRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[52]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7206,7 +7482,7 @@ func (x *GetSessionRequest) String() string {
 func (*GetSessionRequest) ProtoMessage() {}
 
 func (x *GetSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[52]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7219,7 +7495,7 @@ func (x *GetSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{52}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *GetSessionRequest) GetSessionId() string {
@@ -7262,7 +7538,7 @@ type CreateSessionRequest struct {
 
 func (x *CreateSessionRequest) Reset() {
 	*x = CreateSessionRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[53]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7274,7 +7550,7 @@ func (x *CreateSessionRequest) String() string {
 func (*CreateSessionRequest) ProtoMessage() {}
 
 func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[53]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7287,7 +7563,7 @@ func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSessionRequest.ProtoReflect.Descriptor instead.
 func (*CreateSessionRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{53}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *CreateSessionRequest) GetParent() string {
@@ -7330,7 +7606,7 @@ type DeleteSessionRequest struct {
 
 func (x *DeleteSessionRequest) Reset() {
 	*x = DeleteSessionRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[54]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7342,7 +7618,7 @@ func (x *DeleteSessionRequest) String() string {
 func (*DeleteSessionRequest) ProtoMessage() {}
 
 func (x *DeleteSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[54]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7355,7 +7631,7 @@ func (x *DeleteSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSessionRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSessionRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{54}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *DeleteSessionRequest) GetSessionId() string {
@@ -7386,7 +7662,7 @@ type CreateSessionReviewRequest struct {
 
 func (x *CreateSessionReviewRequest) Reset() {
 	*x = CreateSessionReviewRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[55]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7398,7 +7674,7 @@ func (x *CreateSessionReviewRequest) String() string {
 func (*CreateSessionReviewRequest) ProtoMessage() {}
 
 func (x *CreateSessionReviewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[55]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7411,7 +7687,7 @@ func (x *CreateSessionReviewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateSessionReviewRequest.ProtoReflect.Descriptor instead.
 func (*CreateSessionReviewRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{55}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *CreateSessionReviewRequest) GetSessionId() string {
@@ -7464,7 +7740,7 @@ type SessionReview struct {
 
 func (x *SessionReview) Reset() {
 	*x = SessionReview{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[56]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7476,7 +7752,7 @@ func (x *SessionReview) String() string {
 func (*SessionReview) ProtoMessage() {}
 
 func (x *SessionReview) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[56]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7489,7 +7765,7 @@ func (x *SessionReview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionReview.ProtoReflect.Descriptor instead.
 func (*SessionReview) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{56}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *SessionReview) GetName() string {
@@ -7575,7 +7851,7 @@ type SessionReviewStep struct {
 
 func (x *SessionReviewStep) Reset() {
 	*x = SessionReviewStep{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[57]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7587,7 +7863,7 @@ func (x *SessionReviewStep) String() string {
 func (*SessionReviewStep) ProtoMessage() {}
 
 func (x *SessionReviewStep) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[57]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7600,7 +7876,7 @@ func (x *SessionReviewStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionReviewStep.ProtoReflect.Descriptor instead.
 func (*SessionReviewStep) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{57}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *SessionReviewStep) GetName() string {
@@ -7726,7 +8002,7 @@ type DetectedIntent struct {
 
 func (x *DetectedIntent) Reset() {
 	*x = DetectedIntent{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[58]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7738,7 +8014,7 @@ func (x *DetectedIntent) String() string {
 func (*DetectedIntent) ProtoMessage() {}
 
 func (x *DetectedIntent) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[58]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7751,7 +8027,7 @@ func (x *DetectedIntent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DetectedIntent.ProtoReflect.Descriptor instead.
 func (*DetectedIntent) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{58}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *DetectedIntent) GetIntent() *Intent {
@@ -7800,7 +8076,7 @@ type ListSessionLabelsRequest struct {
 
 func (x *ListSessionLabelsRequest) Reset() {
 	*x = ListSessionLabelsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[59]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7812,7 +8088,7 @@ func (x *ListSessionLabelsRequest) String() string {
 func (*ListSessionLabelsRequest) ProtoMessage() {}
 
 func (x *ListSessionLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[59]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7825,7 +8101,7 @@ func (x *ListSessionLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionLabelsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{59}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ListSessionLabelsRequest) GetSessionId() string {
@@ -7851,7 +8127,7 @@ type ListSessionLabelsOfAllSessionsRequest struct {
 
 func (x *ListSessionLabelsOfAllSessionsRequest) Reset() {
 	*x = ListSessionLabelsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[60]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7863,7 +8139,7 @@ func (x *ListSessionLabelsOfAllSessionsRequest) String() string {
 func (*ListSessionLabelsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionLabelsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[60]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7876,7 +8152,7 @@ func (x *ListSessionLabelsOfAllSessionsRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use ListSessionLabelsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionLabelsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{60}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *ListSessionLabelsOfAllSessionsRequest) GetParent() string {
@@ -7911,7 +8187,7 @@ type ListSessionLabelsResponse struct {
 
 func (x *ListSessionLabelsResponse) Reset() {
 	*x = ListSessionLabelsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[61]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7923,7 +8199,7 @@ func (x *ListSessionLabelsResponse) String() string {
 func (*ListSessionLabelsResponse) ProtoMessage() {}
 
 func (x *ListSessionLabelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[61]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7936,7 +8212,7 @@ func (x *ListSessionLabelsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionLabelsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionLabelsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{61}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *ListSessionLabelsResponse) GetLabels() []string {
@@ -7962,7 +8238,7 @@ type ListLanguageCodesOfAllSessionsRequest struct {
 
 func (x *ListLanguageCodesOfAllSessionsRequest) Reset() {
 	*x = ListLanguageCodesOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[62]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -7974,7 +8250,7 @@ func (x *ListLanguageCodesOfAllSessionsRequest) String() string {
 func (*ListLanguageCodesOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListLanguageCodesOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[62]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -7987,7 +8263,7 @@ func (x *ListLanguageCodesOfAllSessionsRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use ListLanguageCodesOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListLanguageCodesOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{62}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *ListLanguageCodesOfAllSessionsRequest) GetParent() string {
@@ -8022,7 +8298,7 @@ type ListLanguageCodesResponse struct {
 
 func (x *ListLanguageCodesResponse) Reset() {
 	*x = ListLanguageCodesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[63]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8034,7 +8310,7 @@ func (x *ListLanguageCodesResponse) String() string {
 func (*ListLanguageCodesResponse) ProtoMessage() {}
 
 func (x *ListLanguageCodesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[63]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8047,7 +8323,7 @@ func (x *ListLanguageCodesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListLanguageCodesResponse.ProtoReflect.Descriptor instead.
 func (*ListLanguageCodesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{63}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *ListLanguageCodesResponse) GetLanguageCodes() []string {
@@ -8073,7 +8349,7 @@ type ListMatchedIntentsOfAllSessionsRequest struct {
 
 func (x *ListMatchedIntentsOfAllSessionsRequest) Reset() {
 	*x = ListMatchedIntentsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[64]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8085,7 +8361,7 @@ func (x *ListMatchedIntentsOfAllSessionsRequest) String() string {
 func (*ListMatchedIntentsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListMatchedIntentsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[64]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8098,7 +8374,7 @@ func (x *ListMatchedIntentsOfAllSessionsRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use ListMatchedIntentsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListMatchedIntentsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{64}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *ListMatchedIntentsOfAllSessionsRequest) GetParent() string {
@@ -8133,7 +8409,7 @@ type ListMatchedIntentsResponse struct {
 
 func (x *ListMatchedIntentsResponse) Reset() {
 	*x = ListMatchedIntentsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[65]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8145,7 +8421,7 @@ func (x *ListMatchedIntentsResponse) String() string {
 func (*ListMatchedIntentsResponse) ProtoMessage() {}
 
 func (x *ListMatchedIntentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[65]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8158,7 +8434,7 @@ func (x *ListMatchedIntentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMatchedIntentsResponse.ProtoReflect.Descriptor instead.
 func (*ListMatchedIntentsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{65}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ListMatchedIntentsResponse) GetMatchedIntents() []string {
@@ -8184,7 +8460,7 @@ type ListMatchedEntityTypesOfAllSessionsRequest struct {
 
 func (x *ListMatchedEntityTypesOfAllSessionsRequest) Reset() {
 	*x = ListMatchedEntityTypesOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[66]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8196,7 +8472,7 @@ func (x *ListMatchedEntityTypesOfAllSessionsRequest) String() string {
 func (*ListMatchedEntityTypesOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListMatchedEntityTypesOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[66]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8209,7 +8485,7 @@ func (x *ListMatchedEntityTypesOfAllSessionsRequest) ProtoReflect() protoreflect
 
 // Deprecated: Use ListMatchedEntityTypesOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListMatchedEntityTypesOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{66}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *ListMatchedEntityTypesOfAllSessionsRequest) GetParent() string {
@@ -8244,7 +8520,7 @@ type ListMatchedEntityTypesResponse struct {
 
 func (x *ListMatchedEntityTypesResponse) Reset() {
 	*x = ListMatchedEntityTypesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[67]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8256,7 +8532,7 @@ func (x *ListMatchedEntityTypesResponse) String() string {
 func (*ListMatchedEntityTypesResponse) ProtoMessage() {}
 
 func (x *ListMatchedEntityTypesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[67]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8269,7 +8545,7 @@ func (x *ListMatchedEntityTypesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMatchedEntityTypesResponse.ProtoReflect.Descriptor instead.
 func (*ListMatchedEntityTypesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{67}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *ListMatchedEntityTypesResponse) GetMatchedEntityTypes() []string {
@@ -8295,7 +8571,7 @@ type ListUserIdsOfAllSessionsRequest struct {
 
 func (x *ListUserIdsOfAllSessionsRequest) Reset() {
 	*x = ListUserIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[68]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8307,7 +8583,7 @@ func (x *ListUserIdsOfAllSessionsRequest) String() string {
 func (*ListUserIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListUserIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[68]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8320,7 +8596,7 @@ func (x *ListUserIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListUserIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{68}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *ListUserIdsOfAllSessionsRequest) GetParent() string {
@@ -8355,7 +8631,7 @@ type ListUserIdsResponse struct {
 
 func (x *ListUserIdsResponse) Reset() {
 	*x = ListUserIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[69]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8367,7 +8643,7 @@ func (x *ListUserIdsResponse) String() string {
 func (*ListUserIdsResponse) ProtoMessage() {}
 
 func (x *ListUserIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[69]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8380,7 +8656,7 @@ func (x *ListUserIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListUserIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{69}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *ListUserIdsResponse) GetUserIds() []string {
@@ -8406,7 +8682,7 @@ type ListIdentifiedUserIdsOfAllSessionsRequest struct {
 
 func (x *ListIdentifiedUserIdsOfAllSessionsRequest) Reset() {
 	*x = ListIdentifiedUserIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[70]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8418,7 +8694,7 @@ func (x *ListIdentifiedUserIdsOfAllSessionsRequest) String() string {
 func (*ListIdentifiedUserIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListIdentifiedUserIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[70]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8431,7 +8707,7 @@ func (x *ListIdentifiedUserIdsOfAllSessionsRequest) ProtoReflect() protoreflect.
 
 // Deprecated: Use ListIdentifiedUserIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListIdentifiedUserIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{70}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *ListIdentifiedUserIdsOfAllSessionsRequest) GetParent() string {
@@ -8466,7 +8742,7 @@ type ListIdentifiedUserIdsResponse struct {
 
 func (x *ListIdentifiedUserIdsResponse) Reset() {
 	*x = ListIdentifiedUserIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[71]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8478,7 +8754,7 @@ func (x *ListIdentifiedUserIdsResponse) String() string {
 func (*ListIdentifiedUserIdsResponse) ProtoMessage() {}
 
 func (x *ListIdentifiedUserIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[71]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8491,7 +8767,7 @@ func (x *ListIdentifiedUserIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListIdentifiedUserIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListIdentifiedUserIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{71}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *ListIdentifiedUserIdsResponse) GetIdentifiedUserIds() []string {
@@ -8517,7 +8793,7 @@ type ListTagsOfAllSessionsRequest struct {
 
 func (x *ListTagsOfAllSessionsRequest) Reset() {
 	*x = ListTagsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[72]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8529,7 +8805,7 @@ func (x *ListTagsOfAllSessionsRequest) String() string {
 func (*ListTagsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListTagsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[72]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8542,7 +8818,7 @@ func (x *ListTagsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListTagsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{72}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *ListTagsOfAllSessionsRequest) GetParent() string {
@@ -8577,7 +8853,7 @@ type ListTagsResponse struct {
 
 func (x *ListTagsResponse) Reset() {
 	*x = ListTagsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[73]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8589,7 +8865,7 @@ func (x *ListTagsResponse) String() string {
 func (*ListTagsResponse) ProtoMessage() {}
 
 func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[73]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8602,7 +8878,7 @@ func (x *ListTagsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTagsResponse.ProtoReflect.Descriptor instead.
 func (*ListTagsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{73}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *ListTagsResponse) GetTags() []string {
@@ -8628,7 +8904,7 @@ type ListInputContextsOfAllSessionsRequest struct {
 
 func (x *ListInputContextsOfAllSessionsRequest) Reset() {
 	*x = ListInputContextsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[74]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8640,7 +8916,7 @@ func (x *ListInputContextsOfAllSessionsRequest) String() string {
 func (*ListInputContextsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListInputContextsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[74]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8653,7 +8929,7 @@ func (x *ListInputContextsOfAllSessionsRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use ListInputContextsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListInputContextsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{74}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *ListInputContextsOfAllSessionsRequest) GetParent() string {
@@ -8688,7 +8964,7 @@ type ListInputContextsResponse struct {
 
 func (x *ListInputContextsResponse) Reset() {
 	*x = ListInputContextsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[75]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8700,7 +8976,7 @@ func (x *ListInputContextsResponse) String() string {
 func (*ListInputContextsResponse) ProtoMessage() {}
 
 func (x *ListInputContextsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[75]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8713,7 +8989,7 @@ func (x *ListInputContextsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListInputContextsResponse.ProtoReflect.Descriptor instead.
 func (*ListInputContextsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{75}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *ListInputContextsResponse) GetInputContexts() []string {
@@ -8739,7 +9015,7 @@ type ListOutputContextsOfAllSessionsRequest struct {
 
 func (x *ListOutputContextsOfAllSessionsRequest) Reset() {
 	*x = ListOutputContextsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[76]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8751,7 +9027,7 @@ func (x *ListOutputContextsOfAllSessionsRequest) String() string {
 func (*ListOutputContextsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListOutputContextsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[76]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8764,7 +9040,7 @@ func (x *ListOutputContextsOfAllSessionsRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use ListOutputContextsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListOutputContextsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{76}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *ListOutputContextsOfAllSessionsRequest) GetParent() string {
@@ -8799,7 +9075,7 @@ type ListOutputContextsResponse struct {
 
 func (x *ListOutputContextsResponse) Reset() {
 	*x = ListOutputContextsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[77]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8811,7 +9087,7 @@ func (x *ListOutputContextsResponse) String() string {
 func (*ListOutputContextsResponse) ProtoMessage() {}
 
 func (x *ListOutputContextsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[77]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8824,7 +9100,7 @@ func (x *ListOutputContextsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOutputContextsResponse.ProtoReflect.Descriptor instead.
 func (*ListOutputContextsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{77}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *ListOutputContextsResponse) GetOutputContexts() []string {
@@ -8850,7 +9126,7 @@ type ListPlatformsOfAllSessionsRequest struct {
 
 func (x *ListPlatformsOfAllSessionsRequest) Reset() {
 	*x = ListPlatformsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[78]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8862,7 +9138,7 @@ func (x *ListPlatformsOfAllSessionsRequest) String() string {
 func (*ListPlatformsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListPlatformsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[78]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8875,7 +9151,7 @@ func (x *ListPlatformsOfAllSessionsRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListPlatformsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListPlatformsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{78}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *ListPlatformsOfAllSessionsRequest) GetParent() string {
@@ -8910,7 +9186,7 @@ type ListPlatformsResponse struct {
 
 func (x *ListPlatformsResponse) Reset() {
 	*x = ListPlatformsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[79]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8922,7 +9198,7 @@ func (x *ListPlatformsResponse) String() string {
 func (*ListPlatformsResponse) ProtoMessage() {}
 
 func (x *ListPlatformsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[79]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8935,7 +9211,7 @@ func (x *ListPlatformsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPlatformsResponse.ProtoReflect.Descriptor instead.
 func (*ListPlatformsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{79}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *ListPlatformsResponse) GetPlatforms() []string {
@@ -8961,7 +9237,7 @@ type ListAccountIdsOfAllSessionsRequest struct {
 
 func (x *ListAccountIdsOfAllSessionsRequest) Reset() {
 	*x = ListAccountIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[80]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -8973,7 +9249,7 @@ func (x *ListAccountIdsOfAllSessionsRequest) String() string {
 func (*ListAccountIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListAccountIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[80]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -8986,7 +9262,7 @@ func (x *ListAccountIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ListAccountIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListAccountIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{80}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *ListAccountIdsOfAllSessionsRequest) GetParent() string {
@@ -9021,7 +9297,7 @@ type ListAccountIdsResponse struct {
 
 func (x *ListAccountIdsResponse) Reset() {
 	*x = ListAccountIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[81]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9033,7 +9309,7 @@ func (x *ListAccountIdsResponse) String() string {
 func (*ListAccountIdsResponse) ProtoMessage() {}
 
 func (x *ListAccountIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[81]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9046,7 +9322,7 @@ func (x *ListAccountIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAccountIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListAccountIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{81}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *ListAccountIdsResponse) GetAccountIds() []string {
@@ -9070,7 +9346,7 @@ type ListPropertyIdsOfAllSessionsRequest struct {
 
 func (x *ListPropertyIdsOfAllSessionsRequest) Reset() {
 	*x = ListPropertyIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[82]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9082,7 +9358,7 @@ func (x *ListPropertyIdsOfAllSessionsRequest) String() string {
 func (*ListPropertyIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListPropertyIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[82]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9095,7 +9371,7 @@ func (x *ListPropertyIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ListPropertyIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListPropertyIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{82}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *ListPropertyIdsOfAllSessionsRequest) GetParent() string {
@@ -9123,7 +9399,7 @@ type ListPropertyIdsResponse struct {
 
 func (x *ListPropertyIdsResponse) Reset() {
 	*x = ListPropertyIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[83]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9135,7 +9411,7 @@ func (x *ListPropertyIdsResponse) String() string {
 func (*ListPropertyIdsResponse) ProtoMessage() {}
 
 func (x *ListPropertyIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[83]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9148,7 +9424,7 @@ func (x *ListPropertyIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPropertyIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListPropertyIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{83}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *ListPropertyIdsResponse) GetPropertyIds() []string {
@@ -9172,7 +9448,7 @@ type ListDatastreamIdsOfAllSessionsRequest struct {
 
 func (x *ListDatastreamIdsOfAllSessionsRequest) Reset() {
 	*x = ListDatastreamIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[84]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9184,7 +9460,7 @@ func (x *ListDatastreamIdsOfAllSessionsRequest) String() string {
 func (*ListDatastreamIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListDatastreamIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[84]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9197,7 +9473,7 @@ func (x *ListDatastreamIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use ListDatastreamIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListDatastreamIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{84}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *ListDatastreamIdsOfAllSessionsRequest) GetParent() string {
@@ -9225,7 +9501,7 @@ type ListDatastreamIdsResponse struct {
 
 func (x *ListDatastreamIdsResponse) Reset() {
 	*x = ListDatastreamIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[85]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9237,7 +9513,7 @@ func (x *ListDatastreamIdsResponse) String() string {
 func (*ListDatastreamIdsResponse) ProtoMessage() {}
 
 func (x *ListDatastreamIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[85]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9250,7 +9526,7 @@ func (x *ListDatastreamIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDatastreamIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListDatastreamIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{85}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *ListDatastreamIdsResponse) GetDatastreamIds() []string {
@@ -9276,7 +9552,7 @@ type ListOriginIdsOfAllSessionsRequest struct {
 
 func (x *ListOriginIdsOfAllSessionsRequest) Reset() {
 	*x = ListOriginIdsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[86]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9288,7 +9564,7 @@ func (x *ListOriginIdsOfAllSessionsRequest) String() string {
 func (*ListOriginIdsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListOriginIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[86]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9301,7 +9577,7 @@ func (x *ListOriginIdsOfAllSessionsRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ListOriginIdsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListOriginIdsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{86}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *ListOriginIdsOfAllSessionsRequest) GetParent() string {
@@ -9336,7 +9612,7 @@ type ListOriginIdsResponse struct {
 
 func (x *ListOriginIdsResponse) Reset() {
 	*x = ListOriginIdsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[87]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9348,7 +9624,7 @@ func (x *ListOriginIdsResponse) String() string {
 func (*ListOriginIdsResponse) ProtoMessage() {}
 
 func (x *ListOriginIdsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[87]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9361,7 +9637,7 @@ func (x *ListOriginIdsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOriginIdsResponse.ProtoReflect.Descriptor instead.
 func (*ListOriginIdsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{87}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *ListOriginIdsResponse) GetOriginIds() []string {
@@ -9384,7 +9660,7 @@ type AddSessionLabelsRequest struct {
 
 func (x *AddSessionLabelsRequest) Reset() {
 	*x = AddSessionLabelsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[88]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9396,7 +9672,7 @@ func (x *AddSessionLabelsRequest) String() string {
 func (*AddSessionLabelsRequest) ProtoMessage() {}
 
 func (x *AddSessionLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[88]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9409,7 +9685,7 @@ func (x *AddSessionLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSessionLabelsRequest.ProtoReflect.Descriptor instead.
 func (*AddSessionLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{88}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *AddSessionLabelsRequest) GetSessionId() string {
@@ -9439,7 +9715,7 @@ type DeleteSessionLabelsRequest struct {
 
 func (x *DeleteSessionLabelsRequest) Reset() {
 	*x = DeleteSessionLabelsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[89]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9451,7 +9727,7 @@ func (x *DeleteSessionLabelsRequest) String() string {
 func (*DeleteSessionLabelsRequest) ProtoMessage() {}
 
 func (x *DeleteSessionLabelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[89]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9464,7 +9740,7 @@ func (x *DeleteSessionLabelsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSessionLabelsRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSessionLabelsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{89}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *DeleteSessionLabelsRequest) GetSessionId() string {
@@ -9494,7 +9770,7 @@ type AddSessionCommentRequest struct {
 
 func (x *AddSessionCommentRequest) Reset() {
 	*x = AddSessionCommentRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[90]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9506,7 +9782,7 @@ func (x *AddSessionCommentRequest) String() string {
 func (*AddSessionCommentRequest) ProtoMessage() {}
 
 func (x *AddSessionCommentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[90]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9519,7 +9795,7 @@ func (x *AddSessionCommentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSessionCommentRequest.ProtoReflect.Descriptor instead.
 func (*AddSessionCommentRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{90}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *AddSessionCommentRequest) GetSessionId() string {
@@ -9549,7 +9825,7 @@ type DeleteSessionCommentsRequest struct {
 
 func (x *DeleteSessionCommentsRequest) Reset() {
 	*x = DeleteSessionCommentsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[91]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9561,7 +9837,7 @@ func (x *DeleteSessionCommentsRequest) String() string {
 func (*DeleteSessionCommentsRequest) ProtoMessage() {}
 
 func (x *DeleteSessionCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[91]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9574,7 +9850,7 @@ func (x *DeleteSessionCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSessionCommentsRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSessionCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{91}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *DeleteSessionCommentsRequest) GetSessionId() string {
@@ -9604,7 +9880,7 @@ type UpdateSessionCommentsRequest struct {
 
 func (x *UpdateSessionCommentsRequest) Reset() {
 	*x = UpdateSessionCommentsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[92]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9616,7 +9892,7 @@ func (x *UpdateSessionCommentsRequest) String() string {
 func (*UpdateSessionCommentsRequest) ProtoMessage() {}
 
 func (x *UpdateSessionCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[92]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9629,7 +9905,7 @@ func (x *UpdateSessionCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSessionCommentsRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSessionCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{92}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *UpdateSessionCommentsRequest) GetSessionId() string {
@@ -9693,7 +9969,7 @@ type ListSessionCommentsRequest struct {
 
 func (x *ListSessionCommentsRequest) Reset() {
 	*x = ListSessionCommentsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[93]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9705,7 +9981,7 @@ func (x *ListSessionCommentsRequest) String() string {
 func (*ListSessionCommentsRequest) ProtoMessage() {}
 
 func (x *ListSessionCommentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[93]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9718,7 +9994,7 @@ func (x *ListSessionCommentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionCommentsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionCommentsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{93}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{95}
 }
 
 func (x *ListSessionCommentsRequest) GetSessionId() string {
@@ -9770,7 +10046,7 @@ type ListSessionCommentsOfAllSessionsRequest struct {
 
 func (x *ListSessionCommentsOfAllSessionsRequest) Reset() {
 	*x = ListSessionCommentsOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[94]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9782,7 +10058,7 @@ func (x *ListSessionCommentsOfAllSessionsRequest) String() string {
 func (*ListSessionCommentsOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionCommentsOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[94]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9795,7 +10071,7 @@ func (x *ListSessionCommentsOfAllSessionsRequest) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use ListSessionCommentsOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionCommentsOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{94}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *ListSessionCommentsOfAllSessionsRequest) GetParent() string {
@@ -9875,7 +10151,7 @@ type ListSessionCommentsResponse struct {
 
 func (x *ListSessionCommentsResponse) Reset() {
 	*x = ListSessionCommentsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[95]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9887,7 +10163,7 @@ func (x *ListSessionCommentsResponse) String() string {
 func (*ListSessionCommentsResponse) ProtoMessage() {}
 
 func (x *ListSessionCommentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[95]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -9900,7 +10176,7 @@ func (x *ListSessionCommentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionCommentsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionCommentsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{95}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *ListSessionCommentsResponse) GetComment() []*Comment {
@@ -9981,7 +10257,7 @@ type SessionFeedback struct {
 
 func (x *SessionFeedback) Reset() {
 	*x = SessionFeedback{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[96]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -9993,7 +10269,7 @@ func (x *SessionFeedback) String() string {
 func (*SessionFeedback) ProtoMessage() {}
 
 func (x *SessionFeedback) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[96]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10006,7 +10282,7 @@ func (x *SessionFeedback) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionFeedback.ProtoReflect.Descriptor instead.
 func (*SessionFeedback) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{96}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{98}
 }
 
 func (x *SessionFeedback) GetName() string {
@@ -10155,7 +10431,7 @@ type AddSessionFeedbackRequest struct {
 
 func (x *AddSessionFeedbackRequest) Reset() {
 	*x = AddSessionFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[97]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10167,7 +10443,7 @@ func (x *AddSessionFeedbackRequest) String() string {
 func (*AddSessionFeedbackRequest) ProtoMessage() {}
 
 func (x *AddSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[97]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10180,7 +10456,7 @@ func (x *AddSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSessionFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*AddSessionFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{97}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *AddSessionFeedbackRequest) GetSessionId() string {
@@ -10212,7 +10488,7 @@ type AddSessionStepFeedbackRequest struct {
 
 func (x *AddSessionStepFeedbackRequest) Reset() {
 	*x = AddSessionStepFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[98]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10224,7 +10500,7 @@ func (x *AddSessionStepFeedbackRequest) String() string {
 func (*AddSessionStepFeedbackRequest) ProtoMessage() {}
 
 func (x *AddSessionStepFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[98]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10237,7 +10513,7 @@ func (x *AddSessionStepFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSessionStepFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*AddSessionStepFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{98}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{100}
 }
 
 func (x *AddSessionStepFeedbackRequest) GetSessionId() string {
@@ -10274,7 +10550,7 @@ type GetSessionFeedbackRequest struct {
 
 func (x *GetSessionFeedbackRequest) Reset() {
 	*x = GetSessionFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[99]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10286,7 +10562,7 @@ func (x *GetSessionFeedbackRequest) String() string {
 func (*GetSessionFeedbackRequest) ProtoMessage() {}
 
 func (x *GetSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[99]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10299,7 +10575,7 @@ func (x *GetSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{99}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{101}
 }
 
 func (x *GetSessionFeedbackRequest) GetName() string {
@@ -10329,7 +10605,7 @@ type UpdateSessionFeedbackRequest struct {
 
 func (x *UpdateSessionFeedbackRequest) Reset() {
 	*x = UpdateSessionFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[100]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10341,7 +10617,7 @@ func (x *UpdateSessionFeedbackRequest) String() string {
 func (*UpdateSessionFeedbackRequest) ProtoMessage() {}
 
 func (x *UpdateSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[100]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10354,7 +10630,7 @@ func (x *UpdateSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSessionFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSessionFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{100}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *UpdateSessionFeedbackRequest) GetFeedback() *SessionFeedback {
@@ -10382,7 +10658,7 @@ type DeleteSessionFeedbackRequest struct {
 
 func (x *DeleteSessionFeedbackRequest) Reset() {
 	*x = DeleteSessionFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[101]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10394,7 +10670,7 @@ func (x *DeleteSessionFeedbackRequest) String() string {
 func (*DeleteSessionFeedbackRequest) ProtoMessage() {}
 
 func (x *DeleteSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[101]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10407,7 +10683,7 @@ func (x *DeleteSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSessionFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSessionFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{101}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *DeleteSessionFeedbackRequest) GetName() string {
@@ -10432,7 +10708,7 @@ type ListSessionFeedbackRequest struct {
 
 func (x *ListSessionFeedbackRequest) Reset() {
 	*x = ListSessionFeedbackRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[102]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10444,7 +10720,7 @@ func (x *ListSessionFeedbackRequest) String() string {
 func (*ListSessionFeedbackRequest) ProtoMessage() {}
 
 func (x *ListSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[102]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10457,7 +10733,7 @@ func (x *ListSessionFeedbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionFeedbackRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionFeedbackRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{102}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *ListSessionFeedbackRequest) GetSessionId() string {
@@ -10503,7 +10779,7 @@ type ListSessionFeedbackOfAllSessionsRequest struct {
 
 func (x *ListSessionFeedbackOfAllSessionsRequest) Reset() {
 	*x = ListSessionFeedbackOfAllSessionsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[103]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10515,7 +10791,7 @@ func (x *ListSessionFeedbackOfAllSessionsRequest) String() string {
 func (*ListSessionFeedbackOfAllSessionsRequest) ProtoMessage() {}
 
 func (x *ListSessionFeedbackOfAllSessionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[103]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10528,7 +10804,7 @@ func (x *ListSessionFeedbackOfAllSessionsRequest) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use ListSessionFeedbackOfAllSessionsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionFeedbackOfAllSessionsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{103}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *ListSessionFeedbackOfAllSessionsRequest) GetParent() string {
@@ -10588,7 +10864,7 @@ type ListSessionFeedbackResponse struct {
 
 func (x *ListSessionFeedbackResponse) Reset() {
 	*x = ListSessionFeedbackResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[104]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10600,7 +10876,7 @@ func (x *ListSessionFeedbackResponse) String() string {
 func (*ListSessionFeedbackResponse) ProtoMessage() {}
 
 func (x *ListSessionFeedbackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[104]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10613,7 +10889,7 @@ func (x *ListSessionFeedbackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionFeedbackResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionFeedbackResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{104}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *ListSessionFeedbackResponse) GetFeedback() []*SessionFeedback {
@@ -10672,7 +10948,7 @@ type FeedbackFilter struct {
 
 func (x *FeedbackFilter) Reset() {
 	*x = FeedbackFilter{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[105]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10684,7 +10960,7 @@ func (x *FeedbackFilter) String() string {
 func (*FeedbackFilter) ProtoMessage() {}
 
 func (x *FeedbackFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[105]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10697,7 +10973,7 @@ func (x *FeedbackFilter) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedbackFilter.ProtoReflect.Descriptor instead.
 func (*FeedbackFilter) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{105}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *FeedbackFilter) GetRatings() []FeedbackRating {
@@ -10800,7 +11076,7 @@ type FeedbackBreakdownBucket struct {
 
 func (x *FeedbackBreakdownBucket) Reset() {
 	*x = FeedbackBreakdownBucket{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[106]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10812,7 +11088,7 @@ func (x *FeedbackBreakdownBucket) String() string {
 func (*FeedbackBreakdownBucket) ProtoMessage() {}
 
 func (x *FeedbackBreakdownBucket) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[106]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10825,7 +11101,7 @@ func (x *FeedbackBreakdownBucket) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedbackBreakdownBucket.ProtoReflect.Descriptor instead.
 func (*FeedbackBreakdownBucket) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{106}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *FeedbackBreakdownBucket) GetKey() string {
@@ -10897,7 +11173,7 @@ type FeedbackStatistics struct {
 
 func (x *FeedbackStatistics) Reset() {
 	*x = FeedbackStatistics{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[107]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -10909,7 +11185,7 @@ func (x *FeedbackStatistics) String() string {
 func (*FeedbackStatistics) ProtoMessage() {}
 
 func (x *FeedbackStatistics) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[107]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -10922,7 +11198,7 @@ func (x *FeedbackStatistics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedbackStatistics.ProtoReflect.Descriptor instead.
 func (*FeedbackStatistics) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{107}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{109}
 }
 
 func (x *FeedbackStatistics) GetTotalFeedback() int32 {
@@ -11057,7 +11333,7 @@ type GetFeedbackStatisticsRequest struct {
 
 func (x *GetFeedbackStatisticsRequest) Reset() {
 	*x = GetFeedbackStatisticsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[108]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11069,7 +11345,7 @@ func (x *GetFeedbackStatisticsRequest) String() string {
 func (*GetFeedbackStatisticsRequest) ProtoMessage() {}
 
 func (x *GetFeedbackStatisticsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[108]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11082,7 +11358,7 @@ func (x *GetFeedbackStatisticsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedbackStatisticsRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedbackStatisticsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{108}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *GetFeedbackStatisticsRequest) GetParent() string {
@@ -11131,7 +11407,7 @@ type GetFeedbackStatisticsResponse struct {
 
 func (x *GetFeedbackStatisticsResponse) Reset() {
 	*x = GetFeedbackStatisticsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[109]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11143,7 +11419,7 @@ func (x *GetFeedbackStatisticsResponse) String() string {
 func (*GetFeedbackStatisticsResponse) ProtoMessage() {}
 
 func (x *GetFeedbackStatisticsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[109]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11156,7 +11432,7 @@ func (x *GetFeedbackStatisticsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedbackStatisticsResponse.ProtoReflect.Descriptor instead.
 func (*GetFeedbackStatisticsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{109}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{111}
 }
 
 func (x *GetFeedbackStatisticsResponse) GetStatistics() *FeedbackStatistics {
@@ -11185,7 +11461,7 @@ type FeedbackTimeSeriesBucket struct {
 
 func (x *FeedbackTimeSeriesBucket) Reset() {
 	*x = FeedbackTimeSeriesBucket{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[110]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11197,7 +11473,7 @@ func (x *FeedbackTimeSeriesBucket) String() string {
 func (*FeedbackTimeSeriesBucket) ProtoMessage() {}
 
 func (x *FeedbackTimeSeriesBucket) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[110]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11210,7 +11486,7 @@ func (x *FeedbackTimeSeriesBucket) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FeedbackTimeSeriesBucket.ProtoReflect.Descriptor instead.
 func (*FeedbackTimeSeriesBucket) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{110}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{112}
 }
 
 func (x *FeedbackTimeSeriesBucket) GetBucketStart() *timestamppb.Timestamp {
@@ -11278,7 +11554,7 @@ type GetFeedbackStatisticsTimeSeriesRequest struct {
 
 func (x *GetFeedbackStatisticsTimeSeriesRequest) Reset() {
 	*x = GetFeedbackStatisticsTimeSeriesRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[111]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11290,7 +11566,7 @@ func (x *GetFeedbackStatisticsTimeSeriesRequest) String() string {
 func (*GetFeedbackStatisticsTimeSeriesRequest) ProtoMessage() {}
 
 func (x *GetFeedbackStatisticsTimeSeriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[111]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11303,7 +11579,7 @@ func (x *GetFeedbackStatisticsTimeSeriesRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use GetFeedbackStatisticsTimeSeriesRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedbackStatisticsTimeSeriesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{111}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *GetFeedbackStatisticsTimeSeriesRequest) GetParent() string {
@@ -11387,7 +11663,7 @@ type GetFeedbackStatisticsTimeSeriesResponse struct {
 
 func (x *GetFeedbackStatisticsTimeSeriesResponse) Reset() {
 	*x = GetFeedbackStatisticsTimeSeriesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[112]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11399,7 +11675,7 @@ func (x *GetFeedbackStatisticsTimeSeriesResponse) String() string {
 func (*GetFeedbackStatisticsTimeSeriesResponse) ProtoMessage() {}
 
 func (x *GetFeedbackStatisticsTimeSeriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[112]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11412,7 +11688,7 @@ func (x *GetFeedbackStatisticsTimeSeriesResponse) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use GetFeedbackStatisticsTimeSeriesResponse.ProtoReflect.Descriptor instead.
 func (*GetFeedbackStatisticsTimeSeriesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{112}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{114}
 }
 
 func (x *GetFeedbackStatisticsTimeSeriesResponse) GetBuckets() []*FeedbackTimeSeriesBucket {
@@ -11466,7 +11742,7 @@ type ListSessionReviewsRequest struct {
 
 func (x *ListSessionReviewsRequest) Reset() {
 	*x = ListSessionReviewsRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[113]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11478,7 +11754,7 @@ func (x *ListSessionReviewsRequest) String() string {
 func (*ListSessionReviewsRequest) ProtoMessage() {}
 
 func (x *ListSessionReviewsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[113]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11491,7 +11767,7 @@ func (x *ListSessionReviewsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionReviewsRequest.ProtoReflect.Descriptor instead.
 func (*ListSessionReviewsRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{113}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{115}
 }
 
 func (x *ListSessionReviewsRequest) GetSessionId() string {
@@ -11529,7 +11805,7 @@ type ListSessionReviewsResponse struct {
 
 func (x *ListSessionReviewsResponse) Reset() {
 	*x = ListSessionReviewsResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[114]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[116]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11541,7 +11817,7 @@ func (x *ListSessionReviewsResponse) String() string {
 func (*ListSessionReviewsResponse) ProtoMessage() {}
 
 func (x *ListSessionReviewsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[114]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[116]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11554,7 +11830,7 @@ func (x *ListSessionReviewsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListSessionReviewsResponse.ProtoReflect.Descriptor instead.
 func (*ListSessionReviewsResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{114}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{116}
 }
 
 func (x *ListSessionReviewsResponse) GetSessionReviews() []*SessionReview {
@@ -11586,7 +11862,7 @@ type GetSessionReviewRequest struct {
 
 func (x *GetSessionReviewRequest) Reset() {
 	*x = GetSessionReviewRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[115]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[117]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11598,7 +11874,7 @@ func (x *GetSessionReviewRequest) String() string {
 func (*GetSessionReviewRequest) ProtoMessage() {}
 
 func (x *GetSessionReviewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[115]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[117]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11611,7 +11887,7 @@ func (x *GetSessionReviewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSessionReviewRequest.ProtoReflect.Descriptor instead.
 func (*GetSessionReviewRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{115}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{117}
 }
 
 func (x *GetSessionReviewRequest) GetSessionReviewId() string {
@@ -11651,7 +11927,7 @@ type GetLatestSessionReviewRequest struct {
 
 func (x *GetLatestSessionReviewRequest) Reset() {
 	*x = GetLatestSessionReviewRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[116]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[118]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11663,7 +11939,7 @@ func (x *GetLatestSessionReviewRequest) String() string {
 func (*GetLatestSessionReviewRequest) ProtoMessage() {}
 
 func (x *GetLatestSessionReviewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[116]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[118]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11676,7 +11952,7 @@ func (x *GetLatestSessionReviewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetLatestSessionReviewRequest.ProtoReflect.Descriptor instead.
 func (*GetLatestSessionReviewRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{116}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{118}
 }
 
 func (x *GetLatestSessionReviewRequest) GetSessionId() string {
@@ -11719,7 +11995,7 @@ type FileResource struct {
 
 func (x *FileResource) Reset() {
 	*x = FileResource{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[117]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[119]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11731,7 +12007,7 @@ func (x *FileResource) String() string {
 func (*FileResource) ProtoMessage() {}
 
 func (x *FileResource) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[117]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[119]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11744,7 +12020,7 @@ func (x *FileResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileResource.ProtoReflect.Descriptor instead.
 func (*FileResource) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{117}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{119}
 }
 
 func (x *FileResource) GetFileResource() isFileResource_FileResource {
@@ -11847,7 +12123,7 @@ type DocumentFileResource struct {
 
 func (x *DocumentFileResource) Reset() {
 	*x = DocumentFileResource{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[118]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[120]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11859,7 +12135,7 @@ func (x *DocumentFileResource) String() string {
 func (*DocumentFileResource) ProtoMessage() {}
 
 func (x *DocumentFileResource) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[118]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[120]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11872,7 +12148,7 @@ func (x *DocumentFileResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DocumentFileResource.ProtoReflect.Descriptor instead.
 func (*DocumentFileResource) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{118}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{120}
 }
 
 func (x *DocumentFileResource) GetName() string {
@@ -11948,7 +12224,7 @@ type ImageFileResource struct {
 
 func (x *ImageFileResource) Reset() {
 	*x = ImageFileResource{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[119]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[121]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -11960,7 +12236,7 @@ func (x *ImageFileResource) String() string {
 func (*ImageFileResource) ProtoMessage() {}
 
 func (x *ImageFileResource) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[119]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[121]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -11973,7 +12249,7 @@ func (x *ImageFileResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImageFileResource.ProtoReflect.Descriptor instead.
 func (*ImageFileResource) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{119}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{121}
 }
 
 func (x *ImageFileResource) GetName() string {
@@ -12060,7 +12336,7 @@ type AudioFileResource struct {
 
 func (x *AudioFileResource) Reset() {
 	*x = AudioFileResource{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[120]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[122]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12072,7 +12348,7 @@ func (x *AudioFileResource) String() string {
 func (*AudioFileResource) ProtoMessage() {}
 
 func (x *AudioFileResource) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[120]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[122]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12085,7 +12361,7 @@ func (x *AudioFileResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AudioFileResource.ProtoReflect.Descriptor instead.
 func (*AudioFileResource) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{120}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{122}
 }
 
 func (x *AudioFileResource) GetName() string {
@@ -12202,7 +12478,7 @@ type VideoFileResource struct {
 
 func (x *VideoFileResource) Reset() {
 	*x = VideoFileResource{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[121]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[123]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12214,7 +12490,7 @@ func (x *VideoFileResource) String() string {
 func (*VideoFileResource) ProtoMessage() {}
 
 func (x *VideoFileResource) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[121]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[123]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12227,7 +12503,7 @@ func (x *VideoFileResource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VideoFileResource.ProtoReflect.Descriptor instead.
 func (*VideoFileResource) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{121}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{123}
 }
 
 func (x *VideoFileResource) GetName() string {
@@ -12351,7 +12627,7 @@ type GetAudioFilesRequest struct {
 
 func (x *GetAudioFilesRequest) Reset() {
 	*x = GetAudioFilesRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[122]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[124]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12363,7 +12639,7 @@ func (x *GetAudioFilesRequest) String() string {
 func (*GetAudioFilesRequest) ProtoMessage() {}
 
 func (x *GetAudioFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[122]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[124]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12376,7 +12652,7 @@ func (x *GetAudioFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAudioFilesRequest.ProtoReflect.Descriptor instead.
 func (*GetAudioFilesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{122}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{124}
 }
 
 func (x *GetAudioFilesRequest) GetParent() string {
@@ -12438,7 +12714,7 @@ type GetAudioFilesResponse struct {
 
 func (x *GetAudioFilesResponse) Reset() {
 	*x = GetAudioFilesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[123]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[125]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12450,7 +12726,7 @@ func (x *GetAudioFilesResponse) String() string {
 func (*GetAudioFilesResponse) ProtoMessage() {}
 
 func (x *GetAudioFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[123]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[125]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12463,7 +12739,7 @@ func (x *GetAudioFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAudioFilesResponse.ProtoReflect.Descriptor instead.
 func (*GetAudioFilesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{123}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{125}
 }
 
 func (x *GetAudioFilesResponse) GetAudioFiles() []*AudioFileResource {
@@ -12507,7 +12783,7 @@ type AddAudioFilesRequest struct {
 
 func (x *AddAudioFilesRequest) Reset() {
 	*x = AddAudioFilesRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[124]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[126]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12519,7 +12795,7 @@ func (x *AddAudioFilesRequest) String() string {
 func (*AddAudioFilesRequest) ProtoMessage() {}
 
 func (x *AddAudioFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[124]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[126]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12532,7 +12808,7 @@ func (x *AddAudioFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddAudioFilesRequest.ProtoReflect.Descriptor instead.
 func (*AddAudioFilesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{124}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{126}
 }
 
 func (x *AddAudioFilesRequest) GetParent() string {
@@ -12577,7 +12853,7 @@ type AddAudioFilesResponse struct {
 
 func (x *AddAudioFilesResponse) Reset() {
 	*x = AddAudioFilesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[125]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[127]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12589,7 +12865,7 @@ func (x *AddAudioFilesResponse) String() string {
 func (*AddAudioFilesResponse) ProtoMessage() {}
 
 func (x *AddAudioFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[125]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[127]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12602,7 +12878,7 @@ func (x *AddAudioFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddAudioFilesResponse.ProtoReflect.Descriptor instead.
 func (*AddAudioFilesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{125}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{127}
 }
 
 func (x *AddAudioFilesResponse) GetAudioFileResources() []*AudioFileResource {
@@ -12634,7 +12910,7 @@ type DeleteAudioFilesRequest struct {
 
 func (x *DeleteAudioFilesRequest) Reset() {
 	*x = DeleteAudioFilesRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[126]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[128]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12646,7 +12922,7 @@ func (x *DeleteAudioFilesRequest) String() string {
 func (*DeleteAudioFilesRequest) ProtoMessage() {}
 
 func (x *DeleteAudioFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[126]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[128]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12659,7 +12935,7 @@ func (x *DeleteAudioFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAudioFilesRequest.ProtoReflect.Descriptor instead.
 func (*DeleteAudioFilesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{126}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{128}
 }
 
 func (x *DeleteAudioFilesRequest) GetParent() string {
@@ -12690,7 +12966,7 @@ type DeleteAudioFilesResponse struct {
 
 func (x *DeleteAudioFilesResponse) Reset() {
 	*x = DeleteAudioFilesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[127]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[129]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12702,7 +12978,7 @@ func (x *DeleteAudioFilesResponse) String() string {
 func (*DeleteAudioFilesResponse) ProtoMessage() {}
 
 func (x *DeleteAudioFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[127]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[129]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12715,7 +12991,7 @@ func (x *DeleteAudioFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAudioFilesResponse.ProtoReflect.Descriptor instead.
 func (*DeleteAudioFilesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{127}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{129}
 }
 
 func (x *DeleteAudioFilesResponse) GetNames() []string {
@@ -12783,7 +13059,7 @@ type ListAudioFilesRequest struct {
 
 func (x *ListAudioFilesRequest) Reset() {
 	*x = ListAudioFilesRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[128]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[130]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12795,7 +13071,7 @@ func (x *ListAudioFilesRequest) String() string {
 func (*ListAudioFilesRequest) ProtoMessage() {}
 
 func (x *ListAudioFilesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[128]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[130]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12808,7 +13084,7 @@ func (x *ListAudioFilesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAudioFilesRequest.ProtoReflect.Descriptor instead.
 func (*ListAudioFilesRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{128}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{130}
 }
 
 func (x *ListAudioFilesRequest) GetParent() string {
@@ -12870,7 +13146,7 @@ type ListAudioFilesResponse struct {
 
 func (x *ListAudioFilesResponse) Reset() {
 	*x = ListAudioFilesResponse{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[129]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[131]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12882,7 +13158,7 @@ func (x *ListAudioFilesResponse) String() string {
 func (*ListAudioFilesResponse) ProtoMessage() {}
 
 func (x *ListAudioFilesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[129]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[131]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12895,7 +13171,7 @@ func (x *ListAudioFilesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAudioFilesResponse.ProtoReflect.Descriptor instead.
 func (*ListAudioFilesResponse) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{129}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{131}
 }
 
 func (x *ListAudioFilesResponse) GetAudioFiles() []*AudioFileResource {
@@ -12938,7 +13214,7 @@ type GetAudioFileOfSessionRequest struct {
 
 func (x *GetAudioFileOfSessionRequest) Reset() {
 	*x = GetAudioFileOfSessionRequest{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[130]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[132]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -12950,7 +13226,7 @@ func (x *GetAudioFileOfSessionRequest) String() string {
 func (*GetAudioFileOfSessionRequest) ProtoMessage() {}
 
 func (x *GetAudioFileOfSessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[130]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[132]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -12963,7 +13239,7 @@ func (x *GetAudioFileOfSessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAudioFileOfSessionRequest.ProtoReflect.Descriptor instead.
 func (*GetAudioFileOfSessionRequest) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{130}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{132}
 }
 
 func (x *GetAudioFileOfSessionRequest) GetParent() string {
@@ -13005,7 +13281,7 @@ type SessionInfo_ContextSteps struct {
 
 func (x *SessionInfo_ContextSteps) Reset() {
 	*x = SessionInfo_ContextSteps{}
-	mi := &file_ondewo_nlu_session_proto_msgTypes[131]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[133]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -13017,7 +13293,7 @@ func (x *SessionInfo_ContextSteps) String() string {
 func (*SessionInfo_ContextSteps) ProtoMessage() {}
 
 func (x *SessionInfo_ContextSteps) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_nlu_session_proto_msgTypes[131]
+	mi := &file_ondewo_nlu_session_proto_msgTypes[133]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -13030,7 +13306,7 @@ func (x *SessionInfo_ContextSteps) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionInfo_ContextSteps.ProtoReflect.Descriptor instead.
 func (*SessionInfo_ContextSteps) Descriptor() ([]byte, []int) {
-	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{50, 0}
+	return file_ondewo_nlu_session_proto_rawDescGZIP(), []int{52, 0}
 }
 
 func (x *SessionInfo_ContextSteps) GetContexts() []*Context {
@@ -13285,6 +13561,13 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\x0fllm_token_usage\x18\x04 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\x12\x19\n" +
 	"\bbase_url\x18\x05 \x01(\tR\abaseUrl\x12\x1f\n" +
 	"\vmodel_names\x18\x06 \x03(\tR\n" +
+	"modelNames\"\xaf\x01\n" +
+	"\x0fLlmBaseUrlUsage\x12\x19\n" +
+	"\bbase_url\x18\x01 \x01(\tR\abaseUrl\x12\x1d\n" +
+	"\n" +
+	"call_count\x18\x02 \x01(\x03R\tcallCount\x12A\n" +
+	"\x0fllm_token_usage\x18\x03 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\x12\x1f\n" +
+	"\vmodel_names\x18\x04 \x03(\tR\n" +
 	"modelNames\"\xf4\x01\n" +
 	"\rLlmAgentUsage\x12\x1d\n" +
 	"\n" +
@@ -13332,7 +13615,7 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\x10reasoning_effort\x18\x01 \x01(\x0e2\x1b.ondewo.nlu.ReasoningEffortR\x0freasoningEffort\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x03R\x05count\x12\x12\n" +
 	"\x04rate\x18\x03 \x01(\x01R\x04rate\x12A\n" +
-	"\x0fllm_token_usage\x18\x04 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\"\xa6\n" +
+	"\x0fllm_token_usage\x18\x04 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\"\xe9\n" +
 	"\n" +
 	"\x12LlmTelemetryReport\x12A\n" +
 	"\x0fllm_token_usage\x18\x01 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\x121\n" +
@@ -13360,7 +13643,8 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\x1fthinking_duration_seconds_total\x18\x11 \x01(\x01R\x1cthinkingDurationSecondsTotal\x123\n" +
 	"\x16tool_call_tokens_total\x18\x12 \x01(\x03R\x13toolCallTokensTotal\x12F\n" +
 	" tool_call_duration_seconds_total\x18\x13 \x01(\x01R\x1ctoolCallDurationSecondsTotal\x12=\n" +
-	"\fsafety_stats\x18\x14 \x01(\v2\x1a.ondewo.nlu.LlmSafetyStatsR\vsafetyStats\"]\n" +
+	"\fsafety_stats\x18\x14 \x01(\v2\x1a.ondewo.nlu.LlmSafetyStatsR\vsafetyStats\x12A\n" +
+	"\x0ebase_urls_used\x18\x15 \x03(\v2\x1b.ondewo.nlu.LlmBaseUrlUsageR\fbaseUrlsUsed\"]\n" +
 	"\x15LlmSafetyCategoryStat\x12\x1a\n" +
 	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\x14\n" +
 	"\x05count\x18\x02 \x01(\x03R\x05count\x12\x12\n" +
@@ -13408,7 +13692,16 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"}\n" +
 	"\x18LlmTokenUsageUpdateEvent\x12\x1e\n" +
 	"\vllm_call_id\x18\x01 \x01(\tR\tllmCallId\x12A\n" +
-	"\x0fllm_token_usage\x18\x02 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\"\xbb\x02\n" +
+	"\x0fllm_token_usage\x18\x02 \x01(\v2\x19.ondewo.nlu.LlmTokenUsageR\rllmTokenUsage\"\xe0\x04\n" +
+	"\x11LlmAgentNodeEvent\x12D\n" +
+	" llm_agent_node_event_node_run_id\x18\x01 \x01(\tR\x1allmAgentNodeEventNodeRunId\x12Q\n" +
+	"'llm_agent_node_event_parent_node_run_id\x18\x02 \x01(\tR llmAgentNodeEventParentNodeRunId\x12P\n" +
+	"&llm_agent_node_event_node_display_name\x18\x03 \x01(\tR llmAgentNodeEventNodeDisplayName\x12A\n" +
+	"\x1ellm_agent_node_event_node_path\x18\x04 \x03(\tR\x19llmAgentNodeEventNodePath\x12N\n" +
+	"\x14llm_agent_node_phase\x18\x05 \x01(\x0e2\x1d.ondewo.nlu.LlmAgentNodePhaseR\x11llmAgentNodePhase\x128\n" +
+	"\ttimestamp\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12H\n" +
+	"\"llm_agent_node_event_duration_in_s\x18\a \x01(\x02R\x1cllmAgentNodeEventDurationInS\x12I\n" +
+	"\"llm_agent_node_event_error_message\x18\b \x01(\tR\x1dllmAgentNodeEventErrorMessage\"\xbb\x02\n" +
 	"\x0fReferencedChunk\x12'\n" +
 	"\x0freference_index\x18\x01 \x01(\x05R\x0ereferenceIndex\x12\x1d\n" +
 	"\n" +
@@ -13453,7 +13746,7 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"queryInput\x12)\n" +
 	"\x10single_utterance\x18\x04 \x01(\bR\x0fsingleUtterance\x12\x1f\n" +
 	"\vinput_audio\x18\x06 \x01(\fR\n" +
-	"inputAudio\"\xa5\x06\n" +
+	"inputAudio\"\xf7\x06\n" +
 	"\x1dStreamingDetectIntentResponse\x12\x1f\n" +
 	"\vresponse_id\x18\x01 \x01(\tR\n" +
 	"responseId\x12U\n" +
@@ -13466,7 +13759,8 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\x16llm_tool_call_finished\x18\b \x01(\v2$.ondewo.nlu.LlmToolCallFinishedEventH\x00R\x13llmToolCallFinished\x12Q\n" +
 	"\x12llm_thinking_delta\x18\t \x01(\v2!.ondewo.nlu.LlmThinkingDeltaEventH\x00R\x10llmThinkingDelta\x12[\n" +
 	"\x16llm_token_usage_update\x18\n" +
-	" \x01(\v2$.ondewo.nlu.LlmTokenUsageUpdateEventH\x00R\x13llmTokenUsageUpdateB\x11\n" +
+	" \x01(\v2$.ondewo.nlu.LlmTokenUsageUpdateEventH\x00R\x13llmTokenUsageUpdate\x12P\n" +
+	"\x14llm_agent_node_event\x18\v \x01(\v2\x1d.ondewo.nlu.LlmAgentNodeEventH\x00R\x11llmAgentNodeEventB\x11\n" +
 	"\x0ftelemetry_event\"\xa8\x02\n" +
 	"\x1aStreamingRecognitionResult\x12U\n" +
 	"\fmessage_type\x18\x01 \x01(\x0e22.ondewo.nlu.StreamingRecognitionResult.MessageTypeR\vmessageType\x12\x1e\n" +
@@ -14163,7 +14457,12 @@ const file_ondewo_nlu_session_proto_rawDesc = "" +
 	"\x11LlmSafetyLocation\x12#\n" +
 	"\x1fLLM_SAFETY_LOCATION_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19LLM_SAFETY_LOCATION_INPUT\x10\x01\x12\x1e\n" +
-	"\x1aLLM_SAFETY_LOCATION_OUTPUT\x10\x02*\xfb\x01\n" +
+	"\x1aLLM_SAFETY_LOCATION_OUTPUT\x10\x02*\xa0\x01\n" +
+	"\x11LlmAgentNodePhase\x12$\n" +
+	" LLM_AGENT_NODE_PHASE_UNSPECIFIED\x10\x00\x12 \n" +
+	"\x1cLLM_AGENT_NODE_PHASE_STARTED\x10\x01\x12\"\n" +
+	"\x1eLLM_AGENT_NODE_PHASE_COMPLETED\x10\x02\x12\x1f\n" +
+	"\x1bLLM_AGENT_NODE_PHASE_FAILED\x10\x03*\xfb\x01\n" +
 	"\rAudioEncoding\x12\x1e\n" +
 	"\x1aAUDIO_ENCODING_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18AUDIO_ENCODING_LINEAR_16\x10\x01\x12\x17\n" +
@@ -14277,540 +14576,548 @@ func file_ondewo_nlu_session_proto_rawDescGZIP() []byte {
 	return file_ondewo_nlu_session_proto_rawDescData
 }
 
-var file_ondewo_nlu_session_proto_enumTypes = make([]protoimpl.EnumInfo, 14)
-var file_ondewo_nlu_session_proto_msgTypes = make([]protoimpl.MessageInfo, 132)
+var file_ondewo_nlu_session_proto_enumTypes = make([]protoimpl.EnumInfo, 15)
+var file_ondewo_nlu_session_proto_msgTypes = make([]protoimpl.MessageInfo, 134)
 var file_ondewo_nlu_session_proto_goTypes = []any{
 	(TranscriptionType)(0),                             // 0: ondewo.nlu.TranscriptionType
 	(ReasoningEffort)(0),                               // 1: ondewo.nlu.ReasoningEffort
 	(LlmSafetyLocation)(0),                             // 2: ondewo.nlu.LlmSafetyLocation
-	(AudioEncoding)(0),                                 // 3: ondewo.nlu.AudioEncoding
-	(ComparisonOperator)(0),                            // 4: ondewo.nlu.ComparisonOperator
-	(FeedbackRating)(0),                                // 5: ondewo.nlu.FeedbackRating
-	(FeedbackAuthorType)(0),                            // 6: ondewo.nlu.FeedbackAuthorType
-	(FeedbackScope)(0),                                 // 7: ondewo.nlu.FeedbackScope
-	(FeedbackTimeGranularity)(0),                       // 8: ondewo.nlu.FeedbackTimeGranularity
-	(ResourceView)(0),                                  // 9: ondewo.nlu.ResourceView
-	(AudioFileResourceType)(0),                         // 10: ondewo.nlu.AudioFileResourceType
-	(StreamingRecognitionResult_MessageType)(0),        // 11: ondewo.nlu.StreamingRecognitionResult.MessageType
-	(Session_View)(0),                                  // 12: ondewo.nlu.Session.View
-	(SessionReview_View)(0),                            // 13: ondewo.nlu.SessionReview.View
-	(*DetectIntentRequest)(nil),                        // 14: ondewo.nlu.DetectIntentRequest
-	(*DetectIntentResponse)(nil),                       // 15: ondewo.nlu.DetectIntentResponse
-	(*QueryParameters)(nil),                            // 16: ondewo.nlu.QueryParameters
-	(*S2TTranscription)(nil),                           // 17: ondewo.nlu.S2tTranscription
-	(*QueryInput)(nil),                                 // 18: ondewo.nlu.QueryInput
-	(*LlmTokenUsage)(nil),                              // 19: ondewo.nlu.LlmTokenUsage
-	(*LlmToolCallMetadata)(nil),                        // 20: ondewo.nlu.LlmToolCallMetadata
-	(*LlmThinkingMetadata)(nil),                        // 21: ondewo.nlu.LlmThinkingMetadata
-	(*LlmTelemetry)(nil),                               // 22: ondewo.nlu.LlmTelemetry
-	(*LlmSafetyFinding)(nil),                           // 23: ondewo.nlu.LlmSafetyFinding
-	(*LlmSafetyAssessment)(nil),                        // 24: ondewo.nlu.LlmSafetyAssessment
-	(*LlmRetrievedChunk)(nil),                          // 25: ondewo.nlu.LlmRetrievedChunk
-	(*LlmRetrievalMetadata)(nil),                       // 26: ondewo.nlu.LlmRetrievalMetadata
-	(*LlmLatencyStats)(nil),                            // 27: ondewo.nlu.LlmLatencyStats
-	(*LlmCacheStats)(nil),                              // 28: ondewo.nlu.LlmCacheStats
-	(*LlmModelUsage)(nil),                              // 29: ondewo.nlu.LlmModelUsage
-	(*LlmProviderUsage)(nil),                           // 30: ondewo.nlu.LlmProviderUsage
-	(*LlmCcaiServiceUsage)(nil),                        // 31: ondewo.nlu.LlmCcaiServiceUsage
-	(*LlmAgentUsage)(nil),                              // 32: ondewo.nlu.LlmAgentUsage
-	(*LlmToolUsage)(nil),                               // 33: ondewo.nlu.LlmToolUsage
-	(*LlmErrorStat)(nil),                               // 34: ondewo.nlu.LlmErrorStat
-	(*LlmErrorStats)(nil),                              // 35: ondewo.nlu.LlmErrorStats
-	(*LlmFinishReasonStat)(nil),                        // 36: ondewo.nlu.LlmFinishReasonStat
-	(*LlmReasoningEffortStat)(nil),                     // 37: ondewo.nlu.LlmReasoningEffortStat
-	(*LlmTelemetryReport)(nil),                         // 38: ondewo.nlu.LlmTelemetryReport
-	(*LlmSafetyCategoryStat)(nil),                      // 39: ondewo.nlu.LlmSafetyCategoryStat
-	(*LlmSafetyStats)(nil),                             // 40: ondewo.nlu.LlmSafetyStats
-	(*LlmCallStartedEvent)(nil),                        // 41: ondewo.nlu.LlmCallStartedEvent
-	(*LlmCallFinishedEvent)(nil),                       // 42: ondewo.nlu.LlmCallFinishedEvent
-	(*LlmToolCallStartedEvent)(nil),                    // 43: ondewo.nlu.LlmToolCallStartedEvent
-	(*LlmToolCallFinishedEvent)(nil),                   // 44: ondewo.nlu.LlmToolCallFinishedEvent
-	(*LlmThinkingDeltaEvent)(nil),                      // 45: ondewo.nlu.LlmThinkingDeltaEvent
-	(*LlmTokenUsageUpdateEvent)(nil),                   // 46: ondewo.nlu.LlmTokenUsageUpdateEvent
-	(*ReferencedChunk)(nil),                            // 47: ondewo.nlu.ReferencedChunk
-	(*QueryResult)(nil),                                // 48: ondewo.nlu.QueryResult
-	(*StreamingDetectIntentRequest)(nil),               // 49: ondewo.nlu.StreamingDetectIntentRequest
-	(*StreamingDetectIntentResponse)(nil),              // 50: ondewo.nlu.StreamingDetectIntentResponse
-	(*StreamingRecognitionResult)(nil),                 // 51: ondewo.nlu.StreamingRecognitionResult
-	(*InputAudioConfig)(nil),                           // 52: ondewo.nlu.InputAudioConfig
-	(*TextInput)(nil),                                  // 53: ondewo.nlu.TextInput
-	(*EventInput)(nil),                                 // 54: ondewo.nlu.EventInput
-	(*Session)(nil),                                    // 55: ondewo.nlu.Session
-	(*SessionStep)(nil),                                // 56: ondewo.nlu.SessionStep
-	(*GetSessionStepRequest)(nil),                      // 57: ondewo.nlu.GetSessionStepRequest
-	(*UpdateSessionStepRequest)(nil),                   // 58: ondewo.nlu.UpdateSessionStepRequest
-	(*DeleteSessionStepRequest)(nil),                   // 59: ondewo.nlu.DeleteSessionStepRequest
-	(*CreateSessionStepRequest)(nil),                   // 60: ondewo.nlu.CreateSessionStepRequest
-	(*ListSessionsRequest)(nil),                        // 61: ondewo.nlu.ListSessionsRequest
-	(*ContextFilter)(nil),                              // 62: ondewo.nlu.ContextFilter
-	(*SessionFilter)(nil),                              // 63: ondewo.nlu.SessionFilter
-	(*SessionInfo)(nil),                                // 64: ondewo.nlu.SessionInfo
-	(*ListSessionsResponse)(nil),                       // 65: ondewo.nlu.ListSessionsResponse
-	(*GetSessionRequest)(nil),                          // 66: ondewo.nlu.GetSessionRequest
-	(*CreateSessionRequest)(nil),                       // 67: ondewo.nlu.CreateSessionRequest
-	(*DeleteSessionRequest)(nil),                       // 68: ondewo.nlu.DeleteSessionRequest
-	(*CreateSessionReviewRequest)(nil),                 // 69: ondewo.nlu.CreateSessionReviewRequest
-	(*SessionReview)(nil),                              // 70: ondewo.nlu.SessionReview
-	(*SessionReviewStep)(nil),                          // 71: ondewo.nlu.SessionReviewStep
-	(*DetectedIntent)(nil),                             // 72: ondewo.nlu.DetectedIntent
-	(*ListSessionLabelsRequest)(nil),                   // 73: ondewo.nlu.ListSessionLabelsRequest
-	(*ListSessionLabelsOfAllSessionsRequest)(nil),      // 74: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest
-	(*ListSessionLabelsResponse)(nil),                  // 75: ondewo.nlu.ListSessionLabelsResponse
-	(*ListLanguageCodesOfAllSessionsRequest)(nil),      // 76: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest
-	(*ListLanguageCodesResponse)(nil),                  // 77: ondewo.nlu.ListLanguageCodesResponse
-	(*ListMatchedIntentsOfAllSessionsRequest)(nil),     // 78: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest
-	(*ListMatchedIntentsResponse)(nil),                 // 79: ondewo.nlu.ListMatchedIntentsResponse
-	(*ListMatchedEntityTypesOfAllSessionsRequest)(nil), // 80: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest
-	(*ListMatchedEntityTypesResponse)(nil),             // 81: ondewo.nlu.ListMatchedEntityTypesResponse
-	(*ListUserIdsOfAllSessionsRequest)(nil),            // 82: ondewo.nlu.ListUserIdsOfAllSessionsRequest
-	(*ListUserIdsResponse)(nil),                        // 83: ondewo.nlu.ListUserIdsResponse
-	(*ListIdentifiedUserIdsOfAllSessionsRequest)(nil),  // 84: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest
-	(*ListIdentifiedUserIdsResponse)(nil),              // 85: ondewo.nlu.ListIdentifiedUserIdsResponse
-	(*ListTagsOfAllSessionsRequest)(nil),               // 86: ondewo.nlu.ListTagsOfAllSessionsRequest
-	(*ListTagsResponse)(nil),                           // 87: ondewo.nlu.ListTagsResponse
-	(*ListInputContextsOfAllSessionsRequest)(nil),      // 88: ondewo.nlu.ListInputContextsOfAllSessionsRequest
-	(*ListInputContextsResponse)(nil),                  // 89: ondewo.nlu.ListInputContextsResponse
-	(*ListOutputContextsOfAllSessionsRequest)(nil),     // 90: ondewo.nlu.ListOutputContextsOfAllSessionsRequest
-	(*ListOutputContextsResponse)(nil),                 // 91: ondewo.nlu.ListOutputContextsResponse
-	(*ListPlatformsOfAllSessionsRequest)(nil),          // 92: ondewo.nlu.ListPlatformsOfAllSessionsRequest
-	(*ListPlatformsResponse)(nil),                      // 93: ondewo.nlu.ListPlatformsResponse
-	(*ListAccountIdsOfAllSessionsRequest)(nil),         // 94: ondewo.nlu.ListAccountIdsOfAllSessionsRequest
-	(*ListAccountIdsResponse)(nil),                     // 95: ondewo.nlu.ListAccountIdsResponse
-	(*ListPropertyIdsOfAllSessionsRequest)(nil),        // 96: ondewo.nlu.ListPropertyIdsOfAllSessionsRequest
-	(*ListPropertyIdsResponse)(nil),                    // 97: ondewo.nlu.ListPropertyIdsResponse
-	(*ListDatastreamIdsOfAllSessionsRequest)(nil),      // 98: ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest
-	(*ListDatastreamIdsResponse)(nil),                  // 99: ondewo.nlu.ListDatastreamIdsResponse
-	(*ListOriginIdsOfAllSessionsRequest)(nil),          // 100: ondewo.nlu.ListOriginIdsOfAllSessionsRequest
-	(*ListOriginIdsResponse)(nil),                      // 101: ondewo.nlu.ListOriginIdsResponse
-	(*AddSessionLabelsRequest)(nil),                    // 102: ondewo.nlu.AddSessionLabelsRequest
-	(*DeleteSessionLabelsRequest)(nil),                 // 103: ondewo.nlu.DeleteSessionLabelsRequest
-	(*AddSessionCommentRequest)(nil),                   // 104: ondewo.nlu.AddSessionCommentRequest
-	(*DeleteSessionCommentsRequest)(nil),               // 105: ondewo.nlu.DeleteSessionCommentsRequest
-	(*UpdateSessionCommentsRequest)(nil),               // 106: ondewo.nlu.UpdateSessionCommentsRequest
-	(*ListSessionCommentsRequest)(nil),                 // 107: ondewo.nlu.ListSessionCommentsRequest
-	(*ListSessionCommentsOfAllSessionsRequest)(nil),    // 108: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest
-	(*ListSessionCommentsResponse)(nil),                // 109: ondewo.nlu.ListSessionCommentsResponse
-	(*SessionFeedback)(nil),                            // 110: ondewo.nlu.SessionFeedback
-	(*AddSessionFeedbackRequest)(nil),                  // 111: ondewo.nlu.AddSessionFeedbackRequest
-	(*AddSessionStepFeedbackRequest)(nil),              // 112: ondewo.nlu.AddSessionStepFeedbackRequest
-	(*GetSessionFeedbackRequest)(nil),                  // 113: ondewo.nlu.GetSessionFeedbackRequest
-	(*UpdateSessionFeedbackRequest)(nil),               // 114: ondewo.nlu.UpdateSessionFeedbackRequest
-	(*DeleteSessionFeedbackRequest)(nil),               // 115: ondewo.nlu.DeleteSessionFeedbackRequest
-	(*ListSessionFeedbackRequest)(nil),                 // 116: ondewo.nlu.ListSessionFeedbackRequest
-	(*ListSessionFeedbackOfAllSessionsRequest)(nil),    // 117: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest
-	(*ListSessionFeedbackResponse)(nil),                // 118: ondewo.nlu.ListSessionFeedbackResponse
-	(*FeedbackFilter)(nil),                             // 119: ondewo.nlu.FeedbackFilter
-	(*FeedbackBreakdownBucket)(nil),                    // 120: ondewo.nlu.FeedbackBreakdownBucket
-	(*FeedbackStatistics)(nil),                         // 121: ondewo.nlu.FeedbackStatistics
-	(*GetFeedbackStatisticsRequest)(nil),               // 122: ondewo.nlu.GetFeedbackStatisticsRequest
-	(*GetFeedbackStatisticsResponse)(nil),              // 123: ondewo.nlu.GetFeedbackStatisticsResponse
-	(*FeedbackTimeSeriesBucket)(nil),                   // 124: ondewo.nlu.FeedbackTimeSeriesBucket
-	(*GetFeedbackStatisticsTimeSeriesRequest)(nil),     // 125: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest
-	(*GetFeedbackStatisticsTimeSeriesResponse)(nil),    // 126: ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse
-	(*ListSessionReviewsRequest)(nil),                  // 127: ondewo.nlu.ListSessionReviewsRequest
-	(*ListSessionReviewsResponse)(nil),                 // 128: ondewo.nlu.ListSessionReviewsResponse
-	(*GetSessionReviewRequest)(nil),                    // 129: ondewo.nlu.GetSessionReviewRequest
-	(*GetLatestSessionReviewRequest)(nil),              // 130: ondewo.nlu.GetLatestSessionReviewRequest
-	(*FileResource)(nil),                               // 131: ondewo.nlu.FileResource
-	(*DocumentFileResource)(nil),                       // 132: ondewo.nlu.DocumentFileResource
-	(*ImageFileResource)(nil),                          // 133: ondewo.nlu.ImageFileResource
-	(*AudioFileResource)(nil),                          // 134: ondewo.nlu.AudioFileResource
-	(*VideoFileResource)(nil),                          // 135: ondewo.nlu.VideoFileResource
-	(*GetAudioFilesRequest)(nil),                       // 136: ondewo.nlu.GetAudioFilesRequest
-	(*GetAudioFilesResponse)(nil),                      // 137: ondewo.nlu.GetAudioFilesResponse
-	(*AddAudioFilesRequest)(nil),                       // 138: ondewo.nlu.AddAudioFilesRequest
-	(*AddAudioFilesResponse)(nil),                      // 139: ondewo.nlu.AddAudioFilesResponse
-	(*DeleteAudioFilesRequest)(nil),                    // 140: ondewo.nlu.DeleteAudioFilesRequest
-	(*DeleteAudioFilesResponse)(nil),                   // 141: ondewo.nlu.DeleteAudioFilesResponse
-	(*ListAudioFilesRequest)(nil),                      // 142: ondewo.nlu.ListAudioFilesRequest
-	(*ListAudioFilesResponse)(nil),                     // 143: ondewo.nlu.ListAudioFilesResponse
-	(*GetAudioFileOfSessionRequest)(nil),               // 144: ondewo.nlu.GetAudioFileOfSessionRequest
-	(*SessionInfo_ContextSteps)(nil),                   // 145: ondewo.nlu.SessionInfo.ContextSteps
-	(*status.Status)(nil),                              // 146: google.rpc.Status
-	(*latlng.LatLng)(nil),                              // 147: google.type.LatLng
-	(*Context)(nil),                                    // 148: ondewo.nlu.Context
-	(*structpb.Struct)(nil),                            // 149: google.protobuf.Struct
-	(Intent_Message_Platform)(0),                       // 150: ondewo.nlu.Intent.Message.Platform
-	(*timestamppb.Timestamp)(nil),                      // 151: google.protobuf.Timestamp
-	(*LlmEvaluationFeedback)(nil),                      // 152: ondewo.nlu.LlmEvaluationFeedback
-	(CcaiServiceProvider)(0),                           // 153: ondewo.nlu.CcaiServiceProvider
-	(*Intent_Message)(nil),                             // 154: ondewo.nlu.Intent.Message
-	(*Intent)(nil),                                     // 155: ondewo.nlu.Intent
-	(*fieldmaskpb.FieldMask)(nil),                      // 156: google.protobuf.FieldMask
-	(*EntityType)(nil),                                 // 157: ondewo.nlu.EntityType
-	(*Comment)(nil),                                    // 158: ondewo.nlu.Comment
-	(*Intent_TrainingPhrase)(nil),                      // 159: ondewo.nlu.Intent.TrainingPhrase
-	(SortingMode)(0),                                   // 160: ondewo.nlu.SortingMode
-	(*emptypb.Empty)(nil),                              // 161: google.protobuf.Empty
+	(LlmAgentNodePhase)(0),                             // 3: ondewo.nlu.LlmAgentNodePhase
+	(AudioEncoding)(0),                                 // 4: ondewo.nlu.AudioEncoding
+	(ComparisonOperator)(0),                            // 5: ondewo.nlu.ComparisonOperator
+	(FeedbackRating)(0),                                // 6: ondewo.nlu.FeedbackRating
+	(FeedbackAuthorType)(0),                            // 7: ondewo.nlu.FeedbackAuthorType
+	(FeedbackScope)(0),                                 // 8: ondewo.nlu.FeedbackScope
+	(FeedbackTimeGranularity)(0),                       // 9: ondewo.nlu.FeedbackTimeGranularity
+	(ResourceView)(0),                                  // 10: ondewo.nlu.ResourceView
+	(AudioFileResourceType)(0),                         // 11: ondewo.nlu.AudioFileResourceType
+	(StreamingRecognitionResult_MessageType)(0),        // 12: ondewo.nlu.StreamingRecognitionResult.MessageType
+	(Session_View)(0),                                  // 13: ondewo.nlu.Session.View
+	(SessionReview_View)(0),                            // 14: ondewo.nlu.SessionReview.View
+	(*DetectIntentRequest)(nil),                        // 15: ondewo.nlu.DetectIntentRequest
+	(*DetectIntentResponse)(nil),                       // 16: ondewo.nlu.DetectIntentResponse
+	(*QueryParameters)(nil),                            // 17: ondewo.nlu.QueryParameters
+	(*S2TTranscription)(nil),                           // 18: ondewo.nlu.S2tTranscription
+	(*QueryInput)(nil),                                 // 19: ondewo.nlu.QueryInput
+	(*LlmTokenUsage)(nil),                              // 20: ondewo.nlu.LlmTokenUsage
+	(*LlmToolCallMetadata)(nil),                        // 21: ondewo.nlu.LlmToolCallMetadata
+	(*LlmThinkingMetadata)(nil),                        // 22: ondewo.nlu.LlmThinkingMetadata
+	(*LlmTelemetry)(nil),                               // 23: ondewo.nlu.LlmTelemetry
+	(*LlmSafetyFinding)(nil),                           // 24: ondewo.nlu.LlmSafetyFinding
+	(*LlmSafetyAssessment)(nil),                        // 25: ondewo.nlu.LlmSafetyAssessment
+	(*LlmRetrievedChunk)(nil),                          // 26: ondewo.nlu.LlmRetrievedChunk
+	(*LlmRetrievalMetadata)(nil),                       // 27: ondewo.nlu.LlmRetrievalMetadata
+	(*LlmLatencyStats)(nil),                            // 28: ondewo.nlu.LlmLatencyStats
+	(*LlmCacheStats)(nil),                              // 29: ondewo.nlu.LlmCacheStats
+	(*LlmModelUsage)(nil),                              // 30: ondewo.nlu.LlmModelUsage
+	(*LlmProviderUsage)(nil),                           // 31: ondewo.nlu.LlmProviderUsage
+	(*LlmCcaiServiceUsage)(nil),                        // 32: ondewo.nlu.LlmCcaiServiceUsage
+	(*LlmBaseUrlUsage)(nil),                            // 33: ondewo.nlu.LlmBaseUrlUsage
+	(*LlmAgentUsage)(nil),                              // 34: ondewo.nlu.LlmAgentUsage
+	(*LlmToolUsage)(nil),                               // 35: ondewo.nlu.LlmToolUsage
+	(*LlmErrorStat)(nil),                               // 36: ondewo.nlu.LlmErrorStat
+	(*LlmErrorStats)(nil),                              // 37: ondewo.nlu.LlmErrorStats
+	(*LlmFinishReasonStat)(nil),                        // 38: ondewo.nlu.LlmFinishReasonStat
+	(*LlmReasoningEffortStat)(nil),                     // 39: ondewo.nlu.LlmReasoningEffortStat
+	(*LlmTelemetryReport)(nil),                         // 40: ondewo.nlu.LlmTelemetryReport
+	(*LlmSafetyCategoryStat)(nil),                      // 41: ondewo.nlu.LlmSafetyCategoryStat
+	(*LlmSafetyStats)(nil),                             // 42: ondewo.nlu.LlmSafetyStats
+	(*LlmCallStartedEvent)(nil),                        // 43: ondewo.nlu.LlmCallStartedEvent
+	(*LlmCallFinishedEvent)(nil),                       // 44: ondewo.nlu.LlmCallFinishedEvent
+	(*LlmToolCallStartedEvent)(nil),                    // 45: ondewo.nlu.LlmToolCallStartedEvent
+	(*LlmToolCallFinishedEvent)(nil),                   // 46: ondewo.nlu.LlmToolCallFinishedEvent
+	(*LlmThinkingDeltaEvent)(nil),                      // 47: ondewo.nlu.LlmThinkingDeltaEvent
+	(*LlmTokenUsageUpdateEvent)(nil),                   // 48: ondewo.nlu.LlmTokenUsageUpdateEvent
+	(*LlmAgentNodeEvent)(nil),                          // 49: ondewo.nlu.LlmAgentNodeEvent
+	(*ReferencedChunk)(nil),                            // 50: ondewo.nlu.ReferencedChunk
+	(*QueryResult)(nil),                                // 51: ondewo.nlu.QueryResult
+	(*StreamingDetectIntentRequest)(nil),               // 52: ondewo.nlu.StreamingDetectIntentRequest
+	(*StreamingDetectIntentResponse)(nil),              // 53: ondewo.nlu.StreamingDetectIntentResponse
+	(*StreamingRecognitionResult)(nil),                 // 54: ondewo.nlu.StreamingRecognitionResult
+	(*InputAudioConfig)(nil),                           // 55: ondewo.nlu.InputAudioConfig
+	(*TextInput)(nil),                                  // 56: ondewo.nlu.TextInput
+	(*EventInput)(nil),                                 // 57: ondewo.nlu.EventInput
+	(*Session)(nil),                                    // 58: ondewo.nlu.Session
+	(*SessionStep)(nil),                                // 59: ondewo.nlu.SessionStep
+	(*GetSessionStepRequest)(nil),                      // 60: ondewo.nlu.GetSessionStepRequest
+	(*UpdateSessionStepRequest)(nil),                   // 61: ondewo.nlu.UpdateSessionStepRequest
+	(*DeleteSessionStepRequest)(nil),                   // 62: ondewo.nlu.DeleteSessionStepRequest
+	(*CreateSessionStepRequest)(nil),                   // 63: ondewo.nlu.CreateSessionStepRequest
+	(*ListSessionsRequest)(nil),                        // 64: ondewo.nlu.ListSessionsRequest
+	(*ContextFilter)(nil),                              // 65: ondewo.nlu.ContextFilter
+	(*SessionFilter)(nil),                              // 66: ondewo.nlu.SessionFilter
+	(*SessionInfo)(nil),                                // 67: ondewo.nlu.SessionInfo
+	(*ListSessionsResponse)(nil),                       // 68: ondewo.nlu.ListSessionsResponse
+	(*GetSessionRequest)(nil),                          // 69: ondewo.nlu.GetSessionRequest
+	(*CreateSessionRequest)(nil),                       // 70: ondewo.nlu.CreateSessionRequest
+	(*DeleteSessionRequest)(nil),                       // 71: ondewo.nlu.DeleteSessionRequest
+	(*CreateSessionReviewRequest)(nil),                 // 72: ondewo.nlu.CreateSessionReviewRequest
+	(*SessionReview)(nil),                              // 73: ondewo.nlu.SessionReview
+	(*SessionReviewStep)(nil),                          // 74: ondewo.nlu.SessionReviewStep
+	(*DetectedIntent)(nil),                             // 75: ondewo.nlu.DetectedIntent
+	(*ListSessionLabelsRequest)(nil),                   // 76: ondewo.nlu.ListSessionLabelsRequest
+	(*ListSessionLabelsOfAllSessionsRequest)(nil),      // 77: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest
+	(*ListSessionLabelsResponse)(nil),                  // 78: ondewo.nlu.ListSessionLabelsResponse
+	(*ListLanguageCodesOfAllSessionsRequest)(nil),      // 79: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest
+	(*ListLanguageCodesResponse)(nil),                  // 80: ondewo.nlu.ListLanguageCodesResponse
+	(*ListMatchedIntentsOfAllSessionsRequest)(nil),     // 81: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest
+	(*ListMatchedIntentsResponse)(nil),                 // 82: ondewo.nlu.ListMatchedIntentsResponse
+	(*ListMatchedEntityTypesOfAllSessionsRequest)(nil), // 83: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest
+	(*ListMatchedEntityTypesResponse)(nil),             // 84: ondewo.nlu.ListMatchedEntityTypesResponse
+	(*ListUserIdsOfAllSessionsRequest)(nil),            // 85: ondewo.nlu.ListUserIdsOfAllSessionsRequest
+	(*ListUserIdsResponse)(nil),                        // 86: ondewo.nlu.ListUserIdsResponse
+	(*ListIdentifiedUserIdsOfAllSessionsRequest)(nil),  // 87: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest
+	(*ListIdentifiedUserIdsResponse)(nil),              // 88: ondewo.nlu.ListIdentifiedUserIdsResponse
+	(*ListTagsOfAllSessionsRequest)(nil),               // 89: ondewo.nlu.ListTagsOfAllSessionsRequest
+	(*ListTagsResponse)(nil),                           // 90: ondewo.nlu.ListTagsResponse
+	(*ListInputContextsOfAllSessionsRequest)(nil),      // 91: ondewo.nlu.ListInputContextsOfAllSessionsRequest
+	(*ListInputContextsResponse)(nil),                  // 92: ondewo.nlu.ListInputContextsResponse
+	(*ListOutputContextsOfAllSessionsRequest)(nil),     // 93: ondewo.nlu.ListOutputContextsOfAllSessionsRequest
+	(*ListOutputContextsResponse)(nil),                 // 94: ondewo.nlu.ListOutputContextsResponse
+	(*ListPlatformsOfAllSessionsRequest)(nil),          // 95: ondewo.nlu.ListPlatformsOfAllSessionsRequest
+	(*ListPlatformsResponse)(nil),                      // 96: ondewo.nlu.ListPlatformsResponse
+	(*ListAccountIdsOfAllSessionsRequest)(nil),         // 97: ondewo.nlu.ListAccountIdsOfAllSessionsRequest
+	(*ListAccountIdsResponse)(nil),                     // 98: ondewo.nlu.ListAccountIdsResponse
+	(*ListPropertyIdsOfAllSessionsRequest)(nil),        // 99: ondewo.nlu.ListPropertyIdsOfAllSessionsRequest
+	(*ListPropertyIdsResponse)(nil),                    // 100: ondewo.nlu.ListPropertyIdsResponse
+	(*ListDatastreamIdsOfAllSessionsRequest)(nil),      // 101: ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest
+	(*ListDatastreamIdsResponse)(nil),                  // 102: ondewo.nlu.ListDatastreamIdsResponse
+	(*ListOriginIdsOfAllSessionsRequest)(nil),          // 103: ondewo.nlu.ListOriginIdsOfAllSessionsRequest
+	(*ListOriginIdsResponse)(nil),                      // 104: ondewo.nlu.ListOriginIdsResponse
+	(*AddSessionLabelsRequest)(nil),                    // 105: ondewo.nlu.AddSessionLabelsRequest
+	(*DeleteSessionLabelsRequest)(nil),                 // 106: ondewo.nlu.DeleteSessionLabelsRequest
+	(*AddSessionCommentRequest)(nil),                   // 107: ondewo.nlu.AddSessionCommentRequest
+	(*DeleteSessionCommentsRequest)(nil),               // 108: ondewo.nlu.DeleteSessionCommentsRequest
+	(*UpdateSessionCommentsRequest)(nil),               // 109: ondewo.nlu.UpdateSessionCommentsRequest
+	(*ListSessionCommentsRequest)(nil),                 // 110: ondewo.nlu.ListSessionCommentsRequest
+	(*ListSessionCommentsOfAllSessionsRequest)(nil),    // 111: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest
+	(*ListSessionCommentsResponse)(nil),                // 112: ondewo.nlu.ListSessionCommentsResponse
+	(*SessionFeedback)(nil),                            // 113: ondewo.nlu.SessionFeedback
+	(*AddSessionFeedbackRequest)(nil),                  // 114: ondewo.nlu.AddSessionFeedbackRequest
+	(*AddSessionStepFeedbackRequest)(nil),              // 115: ondewo.nlu.AddSessionStepFeedbackRequest
+	(*GetSessionFeedbackRequest)(nil),                  // 116: ondewo.nlu.GetSessionFeedbackRequest
+	(*UpdateSessionFeedbackRequest)(nil),               // 117: ondewo.nlu.UpdateSessionFeedbackRequest
+	(*DeleteSessionFeedbackRequest)(nil),               // 118: ondewo.nlu.DeleteSessionFeedbackRequest
+	(*ListSessionFeedbackRequest)(nil),                 // 119: ondewo.nlu.ListSessionFeedbackRequest
+	(*ListSessionFeedbackOfAllSessionsRequest)(nil),    // 120: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest
+	(*ListSessionFeedbackResponse)(nil),                // 121: ondewo.nlu.ListSessionFeedbackResponse
+	(*FeedbackFilter)(nil),                             // 122: ondewo.nlu.FeedbackFilter
+	(*FeedbackBreakdownBucket)(nil),                    // 123: ondewo.nlu.FeedbackBreakdownBucket
+	(*FeedbackStatistics)(nil),                         // 124: ondewo.nlu.FeedbackStatistics
+	(*GetFeedbackStatisticsRequest)(nil),               // 125: ondewo.nlu.GetFeedbackStatisticsRequest
+	(*GetFeedbackStatisticsResponse)(nil),              // 126: ondewo.nlu.GetFeedbackStatisticsResponse
+	(*FeedbackTimeSeriesBucket)(nil),                   // 127: ondewo.nlu.FeedbackTimeSeriesBucket
+	(*GetFeedbackStatisticsTimeSeriesRequest)(nil),     // 128: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest
+	(*GetFeedbackStatisticsTimeSeriesResponse)(nil),    // 129: ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse
+	(*ListSessionReviewsRequest)(nil),                  // 130: ondewo.nlu.ListSessionReviewsRequest
+	(*ListSessionReviewsResponse)(nil),                 // 131: ondewo.nlu.ListSessionReviewsResponse
+	(*GetSessionReviewRequest)(nil),                    // 132: ondewo.nlu.GetSessionReviewRequest
+	(*GetLatestSessionReviewRequest)(nil),              // 133: ondewo.nlu.GetLatestSessionReviewRequest
+	(*FileResource)(nil),                               // 134: ondewo.nlu.FileResource
+	(*DocumentFileResource)(nil),                       // 135: ondewo.nlu.DocumentFileResource
+	(*ImageFileResource)(nil),                          // 136: ondewo.nlu.ImageFileResource
+	(*AudioFileResource)(nil),                          // 137: ondewo.nlu.AudioFileResource
+	(*VideoFileResource)(nil),                          // 138: ondewo.nlu.VideoFileResource
+	(*GetAudioFilesRequest)(nil),                       // 139: ondewo.nlu.GetAudioFilesRequest
+	(*GetAudioFilesResponse)(nil),                      // 140: ondewo.nlu.GetAudioFilesResponse
+	(*AddAudioFilesRequest)(nil),                       // 141: ondewo.nlu.AddAudioFilesRequest
+	(*AddAudioFilesResponse)(nil),                      // 142: ondewo.nlu.AddAudioFilesResponse
+	(*DeleteAudioFilesRequest)(nil),                    // 143: ondewo.nlu.DeleteAudioFilesRequest
+	(*DeleteAudioFilesResponse)(nil),                   // 144: ondewo.nlu.DeleteAudioFilesResponse
+	(*ListAudioFilesRequest)(nil),                      // 145: ondewo.nlu.ListAudioFilesRequest
+	(*ListAudioFilesResponse)(nil),                     // 146: ondewo.nlu.ListAudioFilesResponse
+	(*GetAudioFileOfSessionRequest)(nil),               // 147: ondewo.nlu.GetAudioFileOfSessionRequest
+	(*SessionInfo_ContextSteps)(nil),                   // 148: ondewo.nlu.SessionInfo.ContextSteps
+	(*status.Status)(nil),                              // 149: google.rpc.Status
+	(*latlng.LatLng)(nil),                              // 150: google.type.LatLng
+	(*Context)(nil),                                    // 151: ondewo.nlu.Context
+	(*structpb.Struct)(nil),                            // 152: google.protobuf.Struct
+	(Intent_Message_Platform)(0),                       // 153: ondewo.nlu.Intent.Message.Platform
+	(*timestamppb.Timestamp)(nil),                      // 154: google.protobuf.Timestamp
+	(*LlmEvaluationFeedback)(nil),                      // 155: ondewo.nlu.LlmEvaluationFeedback
+	(CcaiServiceProvider)(0),                           // 156: ondewo.nlu.CcaiServiceProvider
+	(*Intent_Message)(nil),                             // 157: ondewo.nlu.Intent.Message
+	(*Intent)(nil),                                     // 158: ondewo.nlu.Intent
+	(*fieldmaskpb.FieldMask)(nil),                      // 159: google.protobuf.FieldMask
+	(*EntityType)(nil),                                 // 160: ondewo.nlu.EntityType
+	(*Comment)(nil),                                    // 161: ondewo.nlu.Comment
+	(*Intent_TrainingPhrase)(nil),                      // 162: ondewo.nlu.Intent.TrainingPhrase
+	(SortingMode)(0),                                   // 163: ondewo.nlu.SortingMode
+	(*emptypb.Empty)(nil),                              // 164: google.protobuf.Empty
 }
 var file_ondewo_nlu_session_proto_depIdxs = []int32{
-	16,  // 0: ondewo.nlu.DetectIntentRequest.query_params:type_name -> ondewo.nlu.QueryParameters
-	18,  // 1: ondewo.nlu.DetectIntentRequest.query_input:type_name -> ondewo.nlu.QueryInput
-	48,  // 2: ondewo.nlu.DetectIntentResponse.query_result:type_name -> ondewo.nlu.QueryResult
-	146, // 3: ondewo.nlu.DetectIntentResponse.webhook_status:type_name -> google.rpc.Status
-	38,  // 4: ondewo.nlu.DetectIntentResponse.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
-	147, // 5: ondewo.nlu.QueryParameters.geo_location:type_name -> google.type.LatLng
-	148, // 6: ondewo.nlu.QueryParameters.contexts:type_name -> ondewo.nlu.Context
-	149, // 7: ondewo.nlu.QueryParameters.payload:type_name -> google.protobuf.Struct
-	150, // 8: ondewo.nlu.QueryParameters.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	17,  // 9: ondewo.nlu.QueryParameters.transcriptions:type_name -> ondewo.nlu.S2tTranscription
+	17,  // 0: ondewo.nlu.DetectIntentRequest.query_params:type_name -> ondewo.nlu.QueryParameters
+	19,  // 1: ondewo.nlu.DetectIntentRequest.query_input:type_name -> ondewo.nlu.QueryInput
+	51,  // 2: ondewo.nlu.DetectIntentResponse.query_result:type_name -> ondewo.nlu.QueryResult
+	149, // 3: ondewo.nlu.DetectIntentResponse.webhook_status:type_name -> google.rpc.Status
+	40,  // 4: ondewo.nlu.DetectIntentResponse.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
+	150, // 5: ondewo.nlu.QueryParameters.geo_location:type_name -> google.type.LatLng
+	151, // 6: ondewo.nlu.QueryParameters.contexts:type_name -> ondewo.nlu.Context
+	152, // 7: ondewo.nlu.QueryParameters.payload:type_name -> google.protobuf.Struct
+	153, // 8: ondewo.nlu.QueryParameters.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	18,  // 9: ondewo.nlu.QueryParameters.transcriptions:type_name -> ondewo.nlu.S2tTranscription
 	0,   // 10: ondewo.nlu.S2tTranscription.transcription_type:type_name -> ondewo.nlu.TranscriptionType
-	151, // 11: ondewo.nlu.S2tTranscription.created_at:type_name -> google.protobuf.Timestamp
-	151, // 12: ondewo.nlu.S2tTranscription.modified_at:type_name -> google.protobuf.Timestamp
-	52,  // 13: ondewo.nlu.QueryInput.audio_config:type_name -> ondewo.nlu.InputAudioConfig
-	53,  // 14: ondewo.nlu.QueryInput.text:type_name -> ondewo.nlu.TextInput
-	54,  // 15: ondewo.nlu.QueryInput.event:type_name -> ondewo.nlu.EventInput
-	131, // 16: ondewo.nlu.QueryInput.file_resources:type_name -> ondewo.nlu.FileResource
-	151, // 17: ondewo.nlu.LlmToolCallMetadata.start_time:type_name -> google.protobuf.Timestamp
-	151, // 18: ondewo.nlu.LlmToolCallMetadata.end_time:type_name -> google.protobuf.Timestamp
-	19,  // 19: ondewo.nlu.LlmToolCallMetadata.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	149, // 20: ondewo.nlu.LlmToolCallMetadata.arguments:type_name -> google.protobuf.Struct
-	149, // 21: ondewo.nlu.LlmToolCallMetadata.result:type_name -> google.protobuf.Struct
-	19,  // 22: ondewo.nlu.LlmThinkingMetadata.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	151, // 23: ondewo.nlu.LlmThinkingMetadata.start_time:type_name -> google.protobuf.Timestamp
-	151, // 24: ondewo.nlu.LlmThinkingMetadata.end_time:type_name -> google.protobuf.Timestamp
-	19,  // 25: ondewo.nlu.LlmTelemetry.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	20,  // 26: ondewo.nlu.LlmTelemetry.llm_tool_call_metadatas:type_name -> ondewo.nlu.LlmToolCallMetadata
-	21,  // 27: ondewo.nlu.LlmTelemetry.llm_thinking_metadata:type_name -> ondewo.nlu.LlmThinkingMetadata
-	151, // 28: ondewo.nlu.LlmTelemetry.start_time:type_name -> google.protobuf.Timestamp
-	151, // 29: ondewo.nlu.LlmTelemetry.end_time:type_name -> google.protobuf.Timestamp
-	149, // 30: ondewo.nlu.LlmTelemetry.metadata:type_name -> google.protobuf.Struct
-	149, // 31: ondewo.nlu.LlmTelemetry.inputs:type_name -> google.protobuf.Struct
-	149, // 32: ondewo.nlu.LlmTelemetry.outputs:type_name -> google.protobuf.Struct
-	152, // 33: ondewo.nlu.LlmTelemetry.llm_evaluation_feedbacks:type_name -> ondewo.nlu.LlmEvaluationFeedback
-	149, // 34: ondewo.nlu.LlmTelemetry.default_headers:type_name -> google.protobuf.Struct
-	149, // 35: ondewo.nlu.LlmTelemetry.default_query:type_name -> google.protobuf.Struct
-	149, // 36: ondewo.nlu.LlmTelemetry.openai_metadata:type_name -> google.protobuf.Struct
+	154, // 11: ondewo.nlu.S2tTranscription.created_at:type_name -> google.protobuf.Timestamp
+	154, // 12: ondewo.nlu.S2tTranscription.modified_at:type_name -> google.protobuf.Timestamp
+	55,  // 13: ondewo.nlu.QueryInput.audio_config:type_name -> ondewo.nlu.InputAudioConfig
+	56,  // 14: ondewo.nlu.QueryInput.text:type_name -> ondewo.nlu.TextInput
+	57,  // 15: ondewo.nlu.QueryInput.event:type_name -> ondewo.nlu.EventInput
+	134, // 16: ondewo.nlu.QueryInput.file_resources:type_name -> ondewo.nlu.FileResource
+	154, // 17: ondewo.nlu.LlmToolCallMetadata.start_time:type_name -> google.protobuf.Timestamp
+	154, // 18: ondewo.nlu.LlmToolCallMetadata.end_time:type_name -> google.protobuf.Timestamp
+	20,  // 19: ondewo.nlu.LlmToolCallMetadata.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	152, // 20: ondewo.nlu.LlmToolCallMetadata.arguments:type_name -> google.protobuf.Struct
+	152, // 21: ondewo.nlu.LlmToolCallMetadata.result:type_name -> google.protobuf.Struct
+	20,  // 22: ondewo.nlu.LlmThinkingMetadata.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	154, // 23: ondewo.nlu.LlmThinkingMetadata.start_time:type_name -> google.protobuf.Timestamp
+	154, // 24: ondewo.nlu.LlmThinkingMetadata.end_time:type_name -> google.protobuf.Timestamp
+	20,  // 25: ondewo.nlu.LlmTelemetry.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	21,  // 26: ondewo.nlu.LlmTelemetry.llm_tool_call_metadatas:type_name -> ondewo.nlu.LlmToolCallMetadata
+	22,  // 27: ondewo.nlu.LlmTelemetry.llm_thinking_metadata:type_name -> ondewo.nlu.LlmThinkingMetadata
+	154, // 28: ondewo.nlu.LlmTelemetry.start_time:type_name -> google.protobuf.Timestamp
+	154, // 29: ondewo.nlu.LlmTelemetry.end_time:type_name -> google.protobuf.Timestamp
+	152, // 30: ondewo.nlu.LlmTelemetry.metadata:type_name -> google.protobuf.Struct
+	152, // 31: ondewo.nlu.LlmTelemetry.inputs:type_name -> google.protobuf.Struct
+	152, // 32: ondewo.nlu.LlmTelemetry.outputs:type_name -> google.protobuf.Struct
+	155, // 33: ondewo.nlu.LlmTelemetry.llm_evaluation_feedbacks:type_name -> ondewo.nlu.LlmEvaluationFeedback
+	152, // 34: ondewo.nlu.LlmTelemetry.default_headers:type_name -> google.protobuf.Struct
+	152, // 35: ondewo.nlu.LlmTelemetry.default_query:type_name -> google.protobuf.Struct
+	152, // 36: ondewo.nlu.LlmTelemetry.openai_metadata:type_name -> google.protobuf.Struct
 	1,   // 37: ondewo.nlu.LlmTelemetry.reasoning_effort:type_name -> ondewo.nlu.ReasoningEffort
-	149, // 38: ondewo.nlu.LlmTelemetry.extra_headers:type_name -> google.protobuf.Struct
-	149, // 39: ondewo.nlu.LlmTelemetry.extra_query:type_name -> google.protobuf.Struct
-	149, // 40: ondewo.nlu.LlmTelemetry.extra_body:type_name -> google.protobuf.Struct
-	153, // 41: ondewo.nlu.LlmTelemetry.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
-	24,  // 42: ondewo.nlu.LlmTelemetry.llm_safety_assessment:type_name -> ondewo.nlu.LlmSafetyAssessment
-	26,  // 43: ondewo.nlu.LlmTelemetry.llm_retrieval_metadata:type_name -> ondewo.nlu.LlmRetrievalMetadata
+	152, // 38: ondewo.nlu.LlmTelemetry.extra_headers:type_name -> google.protobuf.Struct
+	152, // 39: ondewo.nlu.LlmTelemetry.extra_query:type_name -> google.protobuf.Struct
+	152, // 40: ondewo.nlu.LlmTelemetry.extra_body:type_name -> google.protobuf.Struct
+	156, // 41: ondewo.nlu.LlmTelemetry.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
+	25,  // 42: ondewo.nlu.LlmTelemetry.llm_safety_assessment:type_name -> ondewo.nlu.LlmSafetyAssessment
+	27,  // 43: ondewo.nlu.LlmTelemetry.llm_retrieval_metadata:type_name -> ondewo.nlu.LlmRetrievalMetadata
 	2,   // 44: ondewo.nlu.LlmSafetyFinding.location:type_name -> ondewo.nlu.LlmSafetyLocation
-	23,  // 45: ondewo.nlu.LlmSafetyAssessment.findings:type_name -> ondewo.nlu.LlmSafetyFinding
-	25,  // 46: ondewo.nlu.LlmRetrievalMetadata.chunks:type_name -> ondewo.nlu.LlmRetrievedChunk
-	19,  // 47: ondewo.nlu.LlmModelUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	28,  // 48: ondewo.nlu.LlmModelUsage.cache_stats:type_name -> ondewo.nlu.LlmCacheStats
-	153, // 49: ondewo.nlu.LlmModelUsage.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
-	19,  // 50: ondewo.nlu.LlmProviderUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	153, // 51: ondewo.nlu.LlmCcaiServiceUsage.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
-	19,  // 52: ondewo.nlu.LlmCcaiServiceUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	19,  // 53: ondewo.nlu.LlmAgentUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	19,  // 54: ondewo.nlu.LlmToolUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	149, // 55: ondewo.nlu.LlmToolUsage.arguments:type_name -> google.protobuf.Struct
-	34,  // 56: ondewo.nlu.LlmErrorStats.errors_by_class:type_name -> ondewo.nlu.LlmErrorStat
-	1,   // 57: ondewo.nlu.LlmReasoningEffortStat.reasoning_effort:type_name -> ondewo.nlu.ReasoningEffort
-	19,  // 58: ondewo.nlu.LlmReasoningEffortStat.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	19,  // 59: ondewo.nlu.LlmTelemetryReport.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	22,  // 60: ondewo.nlu.LlmTelemetryReport.llm_telemetries:type_name -> ondewo.nlu.LlmTelemetry
-	29,  // 61: ondewo.nlu.LlmTelemetryReport.models_used:type_name -> ondewo.nlu.LlmModelUsage
-	30,  // 62: ondewo.nlu.LlmTelemetryReport.providers_used:type_name -> ondewo.nlu.LlmProviderUsage
-	31,  // 63: ondewo.nlu.LlmTelemetryReport.ccai_services_used:type_name -> ondewo.nlu.LlmCcaiServiceUsage
-	32,  // 64: ondewo.nlu.LlmTelemetryReport.agents_used:type_name -> ondewo.nlu.LlmAgentUsage
-	33,  // 65: ondewo.nlu.LlmTelemetryReport.tools_used:type_name -> ondewo.nlu.LlmToolUsage
-	27,  // 66: ondewo.nlu.LlmTelemetryReport.latency_stats:type_name -> ondewo.nlu.LlmLatencyStats
-	28,  // 67: ondewo.nlu.LlmTelemetryReport.cache_stats:type_name -> ondewo.nlu.LlmCacheStats
-	35,  // 68: ondewo.nlu.LlmTelemetryReport.error_stats:type_name -> ondewo.nlu.LlmErrorStats
-	36,  // 69: ondewo.nlu.LlmTelemetryReport.finish_reason_distribution:type_name -> ondewo.nlu.LlmFinishReasonStat
-	37,  // 70: ondewo.nlu.LlmTelemetryReport.reasoning_effort_distribution:type_name -> ondewo.nlu.LlmReasoningEffortStat
-	40,  // 71: ondewo.nlu.LlmTelemetryReport.safety_stats:type_name -> ondewo.nlu.LlmSafetyStats
-	39,  // 72: ondewo.nlu.LlmSafetyStats.category_stats:type_name -> ondewo.nlu.LlmSafetyCategoryStat
-	151, // 73: ondewo.nlu.LlmCallStartedEvent.start_time:type_name -> google.protobuf.Timestamp
-	151, // 74: ondewo.nlu.LlmCallFinishedEvent.end_time:type_name -> google.protobuf.Timestamp
-	19,  // 75: ondewo.nlu.LlmCallFinishedEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	149, // 76: ondewo.nlu.LlmToolCallStartedEvent.arguments:type_name -> google.protobuf.Struct
-	151, // 77: ondewo.nlu.LlmToolCallStartedEvent.start_time:type_name -> google.protobuf.Timestamp
-	151, // 78: ondewo.nlu.LlmToolCallFinishedEvent.end_time:type_name -> google.protobuf.Timestamp
-	19,  // 79: ondewo.nlu.LlmToolCallFinishedEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	149, // 80: ondewo.nlu.LlmToolCallFinishedEvent.result:type_name -> google.protobuf.Struct
-	151, // 81: ondewo.nlu.LlmThinkingDeltaEvent.timestamp:type_name -> google.protobuf.Timestamp
-	19,  // 82: ondewo.nlu.LlmTokenUsageUpdateEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
-	149, // 83: ondewo.nlu.QueryResult.parameters:type_name -> google.protobuf.Struct
-	154, // 84: ondewo.nlu.QueryResult.fulfillment_messages:type_name -> ondewo.nlu.Intent.Message
-	149, // 85: ondewo.nlu.QueryResult.webhook_payload:type_name -> google.protobuf.Struct
-	148, // 86: ondewo.nlu.QueryResult.output_contexts:type_name -> ondewo.nlu.Context
-	155, // 87: ondewo.nlu.QueryResult.intent:type_name -> ondewo.nlu.Intent
-	149, // 88: ondewo.nlu.QueryResult.diagnostic_info:type_name -> google.protobuf.Struct
-	131, // 89: ondewo.nlu.QueryResult.file_resources:type_name -> ondewo.nlu.FileResource
-	38,  // 90: ondewo.nlu.QueryResult.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
-	47,  // 91: ondewo.nlu.QueryResult.referenced_chunks:type_name -> ondewo.nlu.ReferencedChunk
-	16,  // 92: ondewo.nlu.StreamingDetectIntentRequest.query_params:type_name -> ondewo.nlu.QueryParameters
-	18,  // 93: ondewo.nlu.StreamingDetectIntentRequest.query_input:type_name -> ondewo.nlu.QueryInput
-	51,  // 94: ondewo.nlu.StreamingDetectIntentResponse.recognition_result:type_name -> ondewo.nlu.StreamingRecognitionResult
-	48,  // 95: ondewo.nlu.StreamingDetectIntentResponse.query_result:type_name -> ondewo.nlu.QueryResult
-	146, // 96: ondewo.nlu.StreamingDetectIntentResponse.webhook_status:type_name -> google.rpc.Status
-	41,  // 97: ondewo.nlu.StreamingDetectIntentResponse.llm_call_started:type_name -> ondewo.nlu.LlmCallStartedEvent
-	42,  // 98: ondewo.nlu.StreamingDetectIntentResponse.llm_call_finished:type_name -> ondewo.nlu.LlmCallFinishedEvent
-	43,  // 99: ondewo.nlu.StreamingDetectIntentResponse.llm_tool_call_started:type_name -> ondewo.nlu.LlmToolCallStartedEvent
-	44,  // 100: ondewo.nlu.StreamingDetectIntentResponse.llm_tool_call_finished:type_name -> ondewo.nlu.LlmToolCallFinishedEvent
-	45,  // 101: ondewo.nlu.StreamingDetectIntentResponse.llm_thinking_delta:type_name -> ondewo.nlu.LlmThinkingDeltaEvent
-	46,  // 102: ondewo.nlu.StreamingDetectIntentResponse.llm_token_usage_update:type_name -> ondewo.nlu.LlmTokenUsageUpdateEvent
-	11,  // 103: ondewo.nlu.StreamingRecognitionResult.message_type:type_name -> ondewo.nlu.StreamingRecognitionResult.MessageType
-	3,   // 104: ondewo.nlu.InputAudioConfig.audio_encoding:type_name -> ondewo.nlu.AudioEncoding
-	149, // 105: ondewo.nlu.EventInput.parameters:type_name -> google.protobuf.Struct
-	56,  // 106: ondewo.nlu.Session.session_steps:type_name -> ondewo.nlu.SessionStep
-	64,  // 107: ondewo.nlu.Session.session_info:type_name -> ondewo.nlu.SessionInfo
-	151, // 108: ondewo.nlu.Session.created_at:type_name -> google.protobuf.Timestamp
-	151, // 109: ondewo.nlu.Session.modified_at:type_name -> google.protobuf.Timestamp
-	14,  // 110: ondewo.nlu.SessionStep.detect_intent_request:type_name -> ondewo.nlu.DetectIntentRequest
-	15,  // 111: ondewo.nlu.SessionStep.detect_intent_response:type_name -> ondewo.nlu.DetectIntentResponse
-	148, // 112: ondewo.nlu.SessionStep.contexts:type_name -> ondewo.nlu.Context
-	151, // 113: ondewo.nlu.SessionStep.timestamp:type_name -> google.protobuf.Timestamp
-	151, // 114: ondewo.nlu.SessionStep.created_at:type_name -> google.protobuf.Timestamp
-	151, // 115: ondewo.nlu.SessionStep.modified_at:type_name -> google.protobuf.Timestamp
-	134, // 116: ondewo.nlu.SessionStep.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
-	38,  // 117: ondewo.nlu.SessionStep.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
-	156, // 118: ondewo.nlu.GetSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
-	56,  // 119: ondewo.nlu.UpdateSessionStepRequest.session_step:type_name -> ondewo.nlu.SessionStep
-	156, // 120: ondewo.nlu.UpdateSessionStepRequest.update_mask:type_name -> google.protobuf.FieldMask
-	156, // 121: ondewo.nlu.UpdateSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
-	56,  // 122: ondewo.nlu.CreateSessionStepRequest.session_step:type_name -> ondewo.nlu.SessionStep
-	156, // 123: ondewo.nlu.CreateSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
-	12,  // 124: ondewo.nlu.ListSessionsRequest.session_view:type_name -> ondewo.nlu.Session.View
-	63,  // 125: ondewo.nlu.ListSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 126: ondewo.nlu.ListSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	4,   // 127: ondewo.nlu.ContextFilter.operator:type_name -> ondewo.nlu.ComparisonOperator
-	155, // 128: ondewo.nlu.SessionFilter.matched_intents:type_name -> ondewo.nlu.Intent
-	157, // 129: ondewo.nlu.SessionFilter.matched_entity_types:type_name -> ondewo.nlu.EntityType
-	148, // 130: ondewo.nlu.SessionFilter.input_contexts:type_name -> ondewo.nlu.Context
-	148, // 131: ondewo.nlu.SessionFilter.output_contexts:type_name -> ondewo.nlu.Context
-	150, // 132: ondewo.nlu.SessionFilter.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	155, // 133: ondewo.nlu.SessionInfo.matched_intents:type_name -> ondewo.nlu.Intent
-	157, // 134: ondewo.nlu.SessionInfo.matched_entity_types:type_name -> ondewo.nlu.EntityType
-	145, // 135: ondewo.nlu.SessionInfo.input_context_steps:type_name -> ondewo.nlu.SessionInfo.ContextSteps
-	145, // 136: ondewo.nlu.SessionInfo.output_context_steps:type_name -> ondewo.nlu.SessionInfo.ContextSteps
-	150, // 137: ondewo.nlu.SessionInfo.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	158, // 138: ondewo.nlu.SessionInfo.parent_comment:type_name -> ondewo.nlu.Comment
-	55,  // 139: ondewo.nlu.ListSessionsResponse.sessions:type_name -> ondewo.nlu.Session
-	12,  // 140: ondewo.nlu.GetSessionRequest.session_view:type_name -> ondewo.nlu.Session.View
-	156, // 141: ondewo.nlu.GetSessionRequest.field_mask:type_name -> google.protobuf.FieldMask
-	148, // 142: ondewo.nlu.CreateSessionRequest.contexts:type_name -> ondewo.nlu.Context
-	70,  // 143: ondewo.nlu.CreateSessionReviewRequest.session_review:type_name -> ondewo.nlu.SessionReview
-	13,  // 144: ondewo.nlu.CreateSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
-	71,  // 145: ondewo.nlu.SessionReview.session_review_steps:type_name -> ondewo.nlu.SessionReviewStep
-	151, // 146: ondewo.nlu.SessionReview.created_at:type_name -> google.protobuf.Timestamp
-	151, // 147: ondewo.nlu.SessionReview.modified_at:type_name -> google.protobuf.Timestamp
-	159, // 148: ondewo.nlu.SessionReviewStep.annotated_usersays:type_name -> ondewo.nlu.Intent.TrainingPhrase
-	72,  // 149: ondewo.nlu.SessionReviewStep.detected_intents:type_name -> ondewo.nlu.DetectedIntent
-	148, // 150: ondewo.nlu.SessionReviewStep.contexts:type_name -> ondewo.nlu.Context
-	148, // 151: ondewo.nlu.SessionReviewStep.contexts_out:type_name -> ondewo.nlu.Context
-	150, // 152: ondewo.nlu.SessionReviewStep.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
-	151, // 153: ondewo.nlu.SessionReviewStep.timestamp:type_name -> google.protobuf.Timestamp
-	151, // 154: ondewo.nlu.SessionReviewStep.created_at:type_name -> google.protobuf.Timestamp
-	151, // 155: ondewo.nlu.SessionReviewStep.modified_at:type_name -> google.protobuf.Timestamp
-	134, // 156: ondewo.nlu.SessionReviewStep.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
-	155, // 157: ondewo.nlu.DetectedIntent.intent:type_name -> ondewo.nlu.Intent
-	154, // 158: ondewo.nlu.DetectedIntent.fulfillment_messages:type_name -> ondewo.nlu.Intent.Message
-	63,  // 159: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 160: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 161: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 162: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 163: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 164: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 165: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 166: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 167: ondewo.nlu.ListUserIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 168: ondewo.nlu.ListUserIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 169: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 170: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 171: ondewo.nlu.ListTagsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 172: ondewo.nlu.ListTagsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 173: ondewo.nlu.ListInputContextsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 174: ondewo.nlu.ListInputContextsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 175: ondewo.nlu.ListOutputContextsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 176: ondewo.nlu.ListOutputContextsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 177: ondewo.nlu.ListPlatformsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 178: ondewo.nlu.ListPlatformsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 179: ondewo.nlu.ListAccountIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 180: ondewo.nlu.ListAccountIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 181: ondewo.nlu.ListPropertyIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	63,  // 182: ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	63,  // 183: ondewo.nlu.ListOriginIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 184: ondewo.nlu.ListOriginIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	158, // 185: ondewo.nlu.AddSessionCommentRequest.comment:type_name -> ondewo.nlu.Comment
-	158, // 186: ondewo.nlu.UpdateSessionCommentsRequest.comment:type_name -> ondewo.nlu.Comment
-	156, // 187: ondewo.nlu.ListSessionCommentsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 188: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 189: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	158, // 190: ondewo.nlu.ListSessionCommentsResponse.comment:type_name -> ondewo.nlu.Comment
-	5,   // 191: ondewo.nlu.SessionFeedback.rating:type_name -> ondewo.nlu.FeedbackRating
-	6,   // 192: ondewo.nlu.SessionFeedback.author_type:type_name -> ondewo.nlu.FeedbackAuthorType
-	149, // 193: ondewo.nlu.SessionFeedback.raw:type_name -> google.protobuf.Struct
-	151, // 194: ondewo.nlu.SessionFeedback.created_at:type_name -> google.protobuf.Timestamp
-	151, // 195: ondewo.nlu.SessionFeedback.modified_at:type_name -> google.protobuf.Timestamp
-	110, // 196: ondewo.nlu.AddSessionFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
-	110, // 197: ondewo.nlu.AddSessionStepFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
-	156, // 198: ondewo.nlu.GetSessionFeedbackRequest.field_mask:type_name -> google.protobuf.FieldMask
-	110, // 199: ondewo.nlu.UpdateSessionFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
-	156, // 200: ondewo.nlu.UpdateSessionFeedbackRequest.update_mask:type_name -> google.protobuf.FieldMask
-	156, // 201: ondewo.nlu.ListSessionFeedbackRequest.field_mask:type_name -> google.protobuf.FieldMask
-	63,  // 202: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 203: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	119, // 204: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
-	110, // 205: ondewo.nlu.ListSessionFeedbackResponse.feedback:type_name -> ondewo.nlu.SessionFeedback
-	5,   // 206: ondewo.nlu.FeedbackFilter.ratings:type_name -> ondewo.nlu.FeedbackRating
-	6,   // 207: ondewo.nlu.FeedbackFilter.author_types:type_name -> ondewo.nlu.FeedbackAuthorType
-	151, // 208: ondewo.nlu.FeedbackFilter.earliest:type_name -> google.protobuf.Timestamp
-	151, // 209: ondewo.nlu.FeedbackFilter.latest:type_name -> google.protobuf.Timestamp
-	7,   // 210: ondewo.nlu.FeedbackFilter.scope:type_name -> ondewo.nlu.FeedbackScope
-	120, // 211: ondewo.nlu.FeedbackStatistics.by_language:type_name -> ondewo.nlu.FeedbackBreakdownBucket
-	120, // 212: ondewo.nlu.FeedbackStatistics.by_intent:type_name -> ondewo.nlu.FeedbackBreakdownBucket
-	120, // 213: ondewo.nlu.FeedbackStatistics.by_author_type:type_name -> ondewo.nlu.FeedbackBreakdownBucket
-	120, // 214: ondewo.nlu.FeedbackStatistics.by_origin:type_name -> ondewo.nlu.FeedbackBreakdownBucket
-	120, // 215: ondewo.nlu.FeedbackStatistics.by_criterion:type_name -> ondewo.nlu.FeedbackBreakdownBucket
-	63,  // 216: ondewo.nlu.GetFeedbackStatisticsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 217: ondewo.nlu.GetFeedbackStatisticsRequest.field_mask:type_name -> google.protobuf.FieldMask
-	119, // 218: ondewo.nlu.GetFeedbackStatisticsRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
-	121, // 219: ondewo.nlu.GetFeedbackStatisticsResponse.statistics:type_name -> ondewo.nlu.FeedbackStatistics
-	151, // 220: ondewo.nlu.FeedbackTimeSeriesBucket.bucket_start:type_name -> google.protobuf.Timestamp
-	151, // 221: ondewo.nlu.FeedbackTimeSeriesBucket.bucket_end:type_name -> google.protobuf.Timestamp
-	63,  // 222: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
-	156, // 223: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.field_mask:type_name -> google.protobuf.FieldMask
-	119, // 224: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
-	8,   // 225: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.granularity:type_name -> ondewo.nlu.FeedbackTimeGranularity
-	151, // 226: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.start:type_name -> google.protobuf.Timestamp
-	151, // 227: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.end:type_name -> google.protobuf.Timestamp
-	124, // 228: ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse.buckets:type_name -> ondewo.nlu.FeedbackTimeSeriesBucket
-	13,  // 229: ondewo.nlu.ListSessionReviewsRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
-	70,  // 230: ondewo.nlu.ListSessionReviewsResponse.session_reviews:type_name -> ondewo.nlu.SessionReview
-	13,  // 231: ondewo.nlu.GetSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
-	156, // 232: ondewo.nlu.GetSessionReviewRequest.field_mask:type_name -> google.protobuf.FieldMask
-	13,  // 233: ondewo.nlu.GetLatestSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
-	156, // 234: ondewo.nlu.GetLatestSessionReviewRequest.field_mask:type_name -> google.protobuf.FieldMask
-	132, // 235: ondewo.nlu.FileResource.document_file_resource:type_name -> ondewo.nlu.DocumentFileResource
-	134, // 236: ondewo.nlu.FileResource.audio_file_resource:type_name -> ondewo.nlu.AudioFileResource
-	133, // 237: ondewo.nlu.FileResource.image_file_resource:type_name -> ondewo.nlu.ImageFileResource
-	135, // 238: ondewo.nlu.FileResource.video_file_resource:type_name -> ondewo.nlu.VideoFileResource
-	151, // 239: ondewo.nlu.DocumentFileResource.created_at:type_name -> google.protobuf.Timestamp
-	151, // 240: ondewo.nlu.DocumentFileResource.modified_at:type_name -> google.protobuf.Timestamp
-	151, // 241: ondewo.nlu.ImageFileResource.created_at:type_name -> google.protobuf.Timestamp
-	151, // 242: ondewo.nlu.ImageFileResource.modified_at:type_name -> google.protobuf.Timestamp
-	10,  // 243: ondewo.nlu.AudioFileResource.audio_file_resource_type:type_name -> ondewo.nlu.AudioFileResourceType
-	17,  // 244: ondewo.nlu.AudioFileResource.transcriptions:type_name -> ondewo.nlu.S2tTranscription
-	151, // 245: ondewo.nlu.AudioFileResource.created_at:type_name -> google.protobuf.Timestamp
-	151, // 246: ondewo.nlu.AudioFileResource.modified_at:type_name -> google.protobuf.Timestamp
-	151, // 247: ondewo.nlu.VideoFileResource.created_at:type_name -> google.protobuf.Timestamp
-	151, // 248: ondewo.nlu.VideoFileResource.modified_at:type_name -> google.protobuf.Timestamp
-	9,   // 249: ondewo.nlu.GetAudioFilesRequest.resource_view:type_name -> ondewo.nlu.ResourceView
-	160, // 250: ondewo.nlu.GetAudioFilesRequest.sorting_mode:type_name -> ondewo.nlu.SortingMode
-	156, // 251: ondewo.nlu.GetAudioFilesRequest.field_mask:type_name -> google.protobuf.FieldMask
-	134, // 252: ondewo.nlu.GetAudioFilesResponse.audio_files:type_name -> ondewo.nlu.AudioFileResource
-	134, // 253: ondewo.nlu.AddAudioFilesRequest.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
-	134, // 254: ondewo.nlu.AddAudioFilesResponse.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
-	9,   // 255: ondewo.nlu.ListAudioFilesRequest.resource_view:type_name -> ondewo.nlu.ResourceView
-	160, // 256: ondewo.nlu.ListAudioFilesRequest.sorting_mode:type_name -> ondewo.nlu.SortingMode
-	156, // 257: ondewo.nlu.ListAudioFilesRequest.field_mask:type_name -> google.protobuf.FieldMask
-	134, // 258: ondewo.nlu.ListAudioFilesResponse.audio_files:type_name -> ondewo.nlu.AudioFileResource
-	9,   // 259: ondewo.nlu.GetAudioFileOfSessionRequest.resource_view:type_name -> ondewo.nlu.ResourceView
-	156, // 260: ondewo.nlu.GetAudioFileOfSessionRequest.field_mask:type_name -> google.protobuf.FieldMask
-	148, // 261: ondewo.nlu.SessionInfo.ContextSteps.contexts:type_name -> ondewo.nlu.Context
-	14,  // 262: ondewo.nlu.Sessions.DetectIntent:input_type -> ondewo.nlu.DetectIntentRequest
-	49,  // 263: ondewo.nlu.Sessions.StreamingDetectIntent:input_type -> ondewo.nlu.StreamingDetectIntentRequest
-	61,  // 264: ondewo.nlu.Sessions.ListSessions:input_type -> ondewo.nlu.ListSessionsRequest
-	66,  // 265: ondewo.nlu.Sessions.GetSession:input_type -> ondewo.nlu.GetSessionRequest
-	67,  // 266: ondewo.nlu.Sessions.CreateSession:input_type -> ondewo.nlu.CreateSessionRequest
-	60,  // 267: ondewo.nlu.Sessions.CreateSessionStep:input_type -> ondewo.nlu.CreateSessionStepRequest
-	57,  // 268: ondewo.nlu.Sessions.GetSessionStep:input_type -> ondewo.nlu.GetSessionStepRequest
-	58,  // 269: ondewo.nlu.Sessions.UpdateSessionStep:input_type -> ondewo.nlu.UpdateSessionStepRequest
-	59,  // 270: ondewo.nlu.Sessions.DeleteSessionStep:input_type -> ondewo.nlu.DeleteSessionStepRequest
-	68,  // 271: ondewo.nlu.Sessions.DeleteSession:input_type -> ondewo.nlu.DeleteSessionRequest
-	73,  // 272: ondewo.nlu.Sessions.ListSessionLabels:input_type -> ondewo.nlu.ListSessionLabelsRequest
-	74,  // 273: ondewo.nlu.Sessions.ListSessionLabelsOfAllSessions:input_type -> ondewo.nlu.ListSessionLabelsOfAllSessionsRequest
-	76,  // 274: ondewo.nlu.Sessions.ListLanguageCodesOfAllSessions:input_type -> ondewo.nlu.ListLanguageCodesOfAllSessionsRequest
-	78,  // 275: ondewo.nlu.Sessions.ListMatchedIntentsOfAllSessions:input_type -> ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest
-	80,  // 276: ondewo.nlu.Sessions.ListMatchedEntityTypesOfAllSessions:input_type -> ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest
-	82,  // 277: ondewo.nlu.Sessions.ListUserIdsOfAllSessions:input_type -> ondewo.nlu.ListUserIdsOfAllSessionsRequest
-	84,  // 278: ondewo.nlu.Sessions.ListIdentifiedUserIdsOfAllSessions:input_type -> ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest
-	86,  // 279: ondewo.nlu.Sessions.ListTagsOfAllSessions:input_type -> ondewo.nlu.ListTagsOfAllSessionsRequest
-	88,  // 280: ondewo.nlu.Sessions.ListInputContextsOfAllSessions:input_type -> ondewo.nlu.ListInputContextsOfAllSessionsRequest
-	90,  // 281: ondewo.nlu.Sessions.ListOutputContextsOfAllSessions:input_type -> ondewo.nlu.ListOutputContextsOfAllSessionsRequest
-	92,  // 282: ondewo.nlu.Sessions.ListPlatformsOfAllSessions:input_type -> ondewo.nlu.ListPlatformsOfAllSessionsRequest
-	94,  // 283: ondewo.nlu.Sessions.ListAccountIdsOfAllSessions:input_type -> ondewo.nlu.ListAccountIdsOfAllSessionsRequest
-	96,  // 284: ondewo.nlu.Sessions.ListPropertyIdsOfAllSessions:input_type -> ondewo.nlu.ListPropertyIdsOfAllSessionsRequest
-	98,  // 285: ondewo.nlu.Sessions.ListDatastreamIdsOfAllSessions:input_type -> ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest
-	100, // 286: ondewo.nlu.Sessions.ListOriginIdsOfAllSessions:input_type -> ondewo.nlu.ListOriginIdsOfAllSessionsRequest
-	102, // 287: ondewo.nlu.Sessions.AddSessionLabels:input_type -> ondewo.nlu.AddSessionLabelsRequest
-	103, // 288: ondewo.nlu.Sessions.DeleteSessionLabels:input_type -> ondewo.nlu.DeleteSessionLabelsRequest
-	104, // 289: ondewo.nlu.Sessions.AddSessionComment:input_type -> ondewo.nlu.AddSessionCommentRequest
-	105, // 290: ondewo.nlu.Sessions.DeleteSessionComments:input_type -> ondewo.nlu.DeleteSessionCommentsRequest
-	106, // 291: ondewo.nlu.Sessions.UpdateSessionComments:input_type -> ondewo.nlu.UpdateSessionCommentsRequest
-	107, // 292: ondewo.nlu.Sessions.ListSessionComments:input_type -> ondewo.nlu.ListSessionCommentsRequest
-	108, // 293: ondewo.nlu.Sessions.ListSessionCommentsOfAllSessions:input_type -> ondewo.nlu.ListSessionCommentsOfAllSessionsRequest
-	111, // 294: ondewo.nlu.Sessions.AddSessionFeedback:input_type -> ondewo.nlu.AddSessionFeedbackRequest
-	112, // 295: ondewo.nlu.Sessions.AddSessionStepFeedback:input_type -> ondewo.nlu.AddSessionStepFeedbackRequest
-	113, // 296: ondewo.nlu.Sessions.GetSessionFeedback:input_type -> ondewo.nlu.GetSessionFeedbackRequest
-	114, // 297: ondewo.nlu.Sessions.UpdateSessionFeedback:input_type -> ondewo.nlu.UpdateSessionFeedbackRequest
-	115, // 298: ondewo.nlu.Sessions.DeleteSessionFeedback:input_type -> ondewo.nlu.DeleteSessionFeedbackRequest
-	116, // 299: ondewo.nlu.Sessions.ListSessionFeedback:input_type -> ondewo.nlu.ListSessionFeedbackRequest
-	117, // 300: ondewo.nlu.Sessions.ListSessionFeedbackOfAllSessions:input_type -> ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest
-	122, // 301: ondewo.nlu.Sessions.GetFeedbackStatistics:input_type -> ondewo.nlu.GetFeedbackStatisticsRequest
-	125, // 302: ondewo.nlu.Sessions.GetFeedbackStatisticsTimeSeries:input_type -> ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest
-	127, // 303: ondewo.nlu.Sessions.ListSessionReviews:input_type -> ondewo.nlu.ListSessionReviewsRequest
-	129, // 304: ondewo.nlu.Sessions.GetSessionReview:input_type -> ondewo.nlu.GetSessionReviewRequest
-	130, // 305: ondewo.nlu.Sessions.GetLatestSessionReview:input_type -> ondewo.nlu.GetLatestSessionReviewRequest
-	69,  // 306: ondewo.nlu.Sessions.CreateSessionReview:input_type -> ondewo.nlu.CreateSessionReviewRequest
-	136, // 307: ondewo.nlu.Sessions.GetAudioFiles:input_type -> ondewo.nlu.GetAudioFilesRequest
-	138, // 308: ondewo.nlu.Sessions.AddAudioFiles:input_type -> ondewo.nlu.AddAudioFilesRequest
-	140, // 309: ondewo.nlu.Sessions.DeleteAudioFiles:input_type -> ondewo.nlu.DeleteAudioFilesRequest
-	144, // 310: ondewo.nlu.Sessions.GetAudioFileOfSession:input_type -> ondewo.nlu.GetAudioFileOfSessionRequest
-	142, // 311: ondewo.nlu.Sessions.ListAudioFiles:input_type -> ondewo.nlu.ListAudioFilesRequest
-	15,  // 312: ondewo.nlu.Sessions.DetectIntent:output_type -> ondewo.nlu.DetectIntentResponse
-	50,  // 313: ondewo.nlu.Sessions.StreamingDetectIntent:output_type -> ondewo.nlu.StreamingDetectIntentResponse
-	65,  // 314: ondewo.nlu.Sessions.ListSessions:output_type -> ondewo.nlu.ListSessionsResponse
-	55,  // 315: ondewo.nlu.Sessions.GetSession:output_type -> ondewo.nlu.Session
-	55,  // 316: ondewo.nlu.Sessions.CreateSession:output_type -> ondewo.nlu.Session
-	56,  // 317: ondewo.nlu.Sessions.CreateSessionStep:output_type -> ondewo.nlu.SessionStep
-	56,  // 318: ondewo.nlu.Sessions.GetSessionStep:output_type -> ondewo.nlu.SessionStep
-	56,  // 319: ondewo.nlu.Sessions.UpdateSessionStep:output_type -> ondewo.nlu.SessionStep
-	161, // 320: ondewo.nlu.Sessions.DeleteSessionStep:output_type -> google.protobuf.Empty
-	161, // 321: ondewo.nlu.Sessions.DeleteSession:output_type -> google.protobuf.Empty
-	75,  // 322: ondewo.nlu.Sessions.ListSessionLabels:output_type -> ondewo.nlu.ListSessionLabelsResponse
-	75,  // 323: ondewo.nlu.Sessions.ListSessionLabelsOfAllSessions:output_type -> ondewo.nlu.ListSessionLabelsResponse
-	77,  // 324: ondewo.nlu.Sessions.ListLanguageCodesOfAllSessions:output_type -> ondewo.nlu.ListLanguageCodesResponse
-	79,  // 325: ondewo.nlu.Sessions.ListMatchedIntentsOfAllSessions:output_type -> ondewo.nlu.ListMatchedIntentsResponse
-	81,  // 326: ondewo.nlu.Sessions.ListMatchedEntityTypesOfAllSessions:output_type -> ondewo.nlu.ListMatchedEntityTypesResponse
-	83,  // 327: ondewo.nlu.Sessions.ListUserIdsOfAllSessions:output_type -> ondewo.nlu.ListUserIdsResponse
-	85,  // 328: ondewo.nlu.Sessions.ListIdentifiedUserIdsOfAllSessions:output_type -> ondewo.nlu.ListIdentifiedUserIdsResponse
-	87,  // 329: ondewo.nlu.Sessions.ListTagsOfAllSessions:output_type -> ondewo.nlu.ListTagsResponse
-	89,  // 330: ondewo.nlu.Sessions.ListInputContextsOfAllSessions:output_type -> ondewo.nlu.ListInputContextsResponse
-	91,  // 331: ondewo.nlu.Sessions.ListOutputContextsOfAllSessions:output_type -> ondewo.nlu.ListOutputContextsResponse
-	93,  // 332: ondewo.nlu.Sessions.ListPlatformsOfAllSessions:output_type -> ondewo.nlu.ListPlatformsResponse
-	95,  // 333: ondewo.nlu.Sessions.ListAccountIdsOfAllSessions:output_type -> ondewo.nlu.ListAccountIdsResponse
-	97,  // 334: ondewo.nlu.Sessions.ListPropertyIdsOfAllSessions:output_type -> ondewo.nlu.ListPropertyIdsResponse
-	99,  // 335: ondewo.nlu.Sessions.ListDatastreamIdsOfAllSessions:output_type -> ondewo.nlu.ListDatastreamIdsResponse
-	101, // 336: ondewo.nlu.Sessions.ListOriginIdsOfAllSessions:output_type -> ondewo.nlu.ListOriginIdsResponse
-	55,  // 337: ondewo.nlu.Sessions.AddSessionLabels:output_type -> ondewo.nlu.Session
-	55,  // 338: ondewo.nlu.Sessions.DeleteSessionLabels:output_type -> ondewo.nlu.Session
-	158, // 339: ondewo.nlu.Sessions.AddSessionComment:output_type -> ondewo.nlu.Comment
-	55,  // 340: ondewo.nlu.Sessions.DeleteSessionComments:output_type -> ondewo.nlu.Session
-	55,  // 341: ondewo.nlu.Sessions.UpdateSessionComments:output_type -> ondewo.nlu.Session
-	109, // 342: ondewo.nlu.Sessions.ListSessionComments:output_type -> ondewo.nlu.ListSessionCommentsResponse
-	109, // 343: ondewo.nlu.Sessions.ListSessionCommentsOfAllSessions:output_type -> ondewo.nlu.ListSessionCommentsResponse
-	110, // 344: ondewo.nlu.Sessions.AddSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
-	110, // 345: ondewo.nlu.Sessions.AddSessionStepFeedback:output_type -> ondewo.nlu.SessionFeedback
-	110, // 346: ondewo.nlu.Sessions.GetSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
-	110, // 347: ondewo.nlu.Sessions.UpdateSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
-	161, // 348: ondewo.nlu.Sessions.DeleteSessionFeedback:output_type -> google.protobuf.Empty
-	118, // 349: ondewo.nlu.Sessions.ListSessionFeedback:output_type -> ondewo.nlu.ListSessionFeedbackResponse
-	118, // 350: ondewo.nlu.Sessions.ListSessionFeedbackOfAllSessions:output_type -> ondewo.nlu.ListSessionFeedbackResponse
-	123, // 351: ondewo.nlu.Sessions.GetFeedbackStatistics:output_type -> ondewo.nlu.GetFeedbackStatisticsResponse
-	126, // 352: ondewo.nlu.Sessions.GetFeedbackStatisticsTimeSeries:output_type -> ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse
-	128, // 353: ondewo.nlu.Sessions.ListSessionReviews:output_type -> ondewo.nlu.ListSessionReviewsResponse
-	70,  // 354: ondewo.nlu.Sessions.GetSessionReview:output_type -> ondewo.nlu.SessionReview
-	70,  // 355: ondewo.nlu.Sessions.GetLatestSessionReview:output_type -> ondewo.nlu.SessionReview
-	70,  // 356: ondewo.nlu.Sessions.CreateSessionReview:output_type -> ondewo.nlu.SessionReview
-	137, // 357: ondewo.nlu.Sessions.GetAudioFiles:output_type -> ondewo.nlu.GetAudioFilesResponse
-	139, // 358: ondewo.nlu.Sessions.AddAudioFiles:output_type -> ondewo.nlu.AddAudioFilesResponse
-	141, // 359: ondewo.nlu.Sessions.DeleteAudioFiles:output_type -> ondewo.nlu.DeleteAudioFilesResponse
-	134, // 360: ondewo.nlu.Sessions.GetAudioFileOfSession:output_type -> ondewo.nlu.AudioFileResource
-	143, // 361: ondewo.nlu.Sessions.ListAudioFiles:output_type -> ondewo.nlu.ListAudioFilesResponse
-	312, // [312:362] is the sub-list for method output_type
-	262, // [262:312] is the sub-list for method input_type
-	262, // [262:262] is the sub-list for extension type_name
-	262, // [262:262] is the sub-list for extension extendee
-	0,   // [0:262] is the sub-list for field type_name
+	24,  // 45: ondewo.nlu.LlmSafetyAssessment.findings:type_name -> ondewo.nlu.LlmSafetyFinding
+	26,  // 46: ondewo.nlu.LlmRetrievalMetadata.chunks:type_name -> ondewo.nlu.LlmRetrievedChunk
+	20,  // 47: ondewo.nlu.LlmModelUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	29,  // 48: ondewo.nlu.LlmModelUsage.cache_stats:type_name -> ondewo.nlu.LlmCacheStats
+	156, // 49: ondewo.nlu.LlmModelUsage.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
+	20,  // 50: ondewo.nlu.LlmProviderUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	156, // 51: ondewo.nlu.LlmCcaiServiceUsage.ccai_service_provider:type_name -> ondewo.nlu.CcaiServiceProvider
+	20,  // 52: ondewo.nlu.LlmCcaiServiceUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	20,  // 53: ondewo.nlu.LlmBaseUrlUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	20,  // 54: ondewo.nlu.LlmAgentUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	20,  // 55: ondewo.nlu.LlmToolUsage.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	152, // 56: ondewo.nlu.LlmToolUsage.arguments:type_name -> google.protobuf.Struct
+	36,  // 57: ondewo.nlu.LlmErrorStats.errors_by_class:type_name -> ondewo.nlu.LlmErrorStat
+	1,   // 58: ondewo.nlu.LlmReasoningEffortStat.reasoning_effort:type_name -> ondewo.nlu.ReasoningEffort
+	20,  // 59: ondewo.nlu.LlmReasoningEffortStat.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	20,  // 60: ondewo.nlu.LlmTelemetryReport.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	23,  // 61: ondewo.nlu.LlmTelemetryReport.llm_telemetries:type_name -> ondewo.nlu.LlmTelemetry
+	30,  // 62: ondewo.nlu.LlmTelemetryReport.models_used:type_name -> ondewo.nlu.LlmModelUsage
+	31,  // 63: ondewo.nlu.LlmTelemetryReport.providers_used:type_name -> ondewo.nlu.LlmProviderUsage
+	32,  // 64: ondewo.nlu.LlmTelemetryReport.ccai_services_used:type_name -> ondewo.nlu.LlmCcaiServiceUsage
+	34,  // 65: ondewo.nlu.LlmTelemetryReport.agents_used:type_name -> ondewo.nlu.LlmAgentUsage
+	35,  // 66: ondewo.nlu.LlmTelemetryReport.tools_used:type_name -> ondewo.nlu.LlmToolUsage
+	28,  // 67: ondewo.nlu.LlmTelemetryReport.latency_stats:type_name -> ondewo.nlu.LlmLatencyStats
+	29,  // 68: ondewo.nlu.LlmTelemetryReport.cache_stats:type_name -> ondewo.nlu.LlmCacheStats
+	37,  // 69: ondewo.nlu.LlmTelemetryReport.error_stats:type_name -> ondewo.nlu.LlmErrorStats
+	38,  // 70: ondewo.nlu.LlmTelemetryReport.finish_reason_distribution:type_name -> ondewo.nlu.LlmFinishReasonStat
+	39,  // 71: ondewo.nlu.LlmTelemetryReport.reasoning_effort_distribution:type_name -> ondewo.nlu.LlmReasoningEffortStat
+	42,  // 72: ondewo.nlu.LlmTelemetryReport.safety_stats:type_name -> ondewo.nlu.LlmSafetyStats
+	33,  // 73: ondewo.nlu.LlmTelemetryReport.base_urls_used:type_name -> ondewo.nlu.LlmBaseUrlUsage
+	41,  // 74: ondewo.nlu.LlmSafetyStats.category_stats:type_name -> ondewo.nlu.LlmSafetyCategoryStat
+	154, // 75: ondewo.nlu.LlmCallStartedEvent.start_time:type_name -> google.protobuf.Timestamp
+	154, // 76: ondewo.nlu.LlmCallFinishedEvent.end_time:type_name -> google.protobuf.Timestamp
+	20,  // 77: ondewo.nlu.LlmCallFinishedEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	152, // 78: ondewo.nlu.LlmToolCallStartedEvent.arguments:type_name -> google.protobuf.Struct
+	154, // 79: ondewo.nlu.LlmToolCallStartedEvent.start_time:type_name -> google.protobuf.Timestamp
+	154, // 80: ondewo.nlu.LlmToolCallFinishedEvent.end_time:type_name -> google.protobuf.Timestamp
+	20,  // 81: ondewo.nlu.LlmToolCallFinishedEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	152, // 82: ondewo.nlu.LlmToolCallFinishedEvent.result:type_name -> google.protobuf.Struct
+	154, // 83: ondewo.nlu.LlmThinkingDeltaEvent.timestamp:type_name -> google.protobuf.Timestamp
+	20,  // 84: ondewo.nlu.LlmTokenUsageUpdateEvent.llm_token_usage:type_name -> ondewo.nlu.LlmTokenUsage
+	3,   // 85: ondewo.nlu.LlmAgentNodeEvent.llm_agent_node_phase:type_name -> ondewo.nlu.LlmAgentNodePhase
+	154, // 86: ondewo.nlu.LlmAgentNodeEvent.timestamp:type_name -> google.protobuf.Timestamp
+	152, // 87: ondewo.nlu.QueryResult.parameters:type_name -> google.protobuf.Struct
+	157, // 88: ondewo.nlu.QueryResult.fulfillment_messages:type_name -> ondewo.nlu.Intent.Message
+	152, // 89: ondewo.nlu.QueryResult.webhook_payload:type_name -> google.protobuf.Struct
+	151, // 90: ondewo.nlu.QueryResult.output_contexts:type_name -> ondewo.nlu.Context
+	158, // 91: ondewo.nlu.QueryResult.intent:type_name -> ondewo.nlu.Intent
+	152, // 92: ondewo.nlu.QueryResult.diagnostic_info:type_name -> google.protobuf.Struct
+	134, // 93: ondewo.nlu.QueryResult.file_resources:type_name -> ondewo.nlu.FileResource
+	40,  // 94: ondewo.nlu.QueryResult.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
+	50,  // 95: ondewo.nlu.QueryResult.referenced_chunks:type_name -> ondewo.nlu.ReferencedChunk
+	17,  // 96: ondewo.nlu.StreamingDetectIntentRequest.query_params:type_name -> ondewo.nlu.QueryParameters
+	19,  // 97: ondewo.nlu.StreamingDetectIntentRequest.query_input:type_name -> ondewo.nlu.QueryInput
+	54,  // 98: ondewo.nlu.StreamingDetectIntentResponse.recognition_result:type_name -> ondewo.nlu.StreamingRecognitionResult
+	51,  // 99: ondewo.nlu.StreamingDetectIntentResponse.query_result:type_name -> ondewo.nlu.QueryResult
+	149, // 100: ondewo.nlu.StreamingDetectIntentResponse.webhook_status:type_name -> google.rpc.Status
+	43,  // 101: ondewo.nlu.StreamingDetectIntentResponse.llm_call_started:type_name -> ondewo.nlu.LlmCallStartedEvent
+	44,  // 102: ondewo.nlu.StreamingDetectIntentResponse.llm_call_finished:type_name -> ondewo.nlu.LlmCallFinishedEvent
+	45,  // 103: ondewo.nlu.StreamingDetectIntentResponse.llm_tool_call_started:type_name -> ondewo.nlu.LlmToolCallStartedEvent
+	46,  // 104: ondewo.nlu.StreamingDetectIntentResponse.llm_tool_call_finished:type_name -> ondewo.nlu.LlmToolCallFinishedEvent
+	47,  // 105: ondewo.nlu.StreamingDetectIntentResponse.llm_thinking_delta:type_name -> ondewo.nlu.LlmThinkingDeltaEvent
+	48,  // 106: ondewo.nlu.StreamingDetectIntentResponse.llm_token_usage_update:type_name -> ondewo.nlu.LlmTokenUsageUpdateEvent
+	49,  // 107: ondewo.nlu.StreamingDetectIntentResponse.llm_agent_node_event:type_name -> ondewo.nlu.LlmAgentNodeEvent
+	12,  // 108: ondewo.nlu.StreamingRecognitionResult.message_type:type_name -> ondewo.nlu.StreamingRecognitionResult.MessageType
+	4,   // 109: ondewo.nlu.InputAudioConfig.audio_encoding:type_name -> ondewo.nlu.AudioEncoding
+	152, // 110: ondewo.nlu.EventInput.parameters:type_name -> google.protobuf.Struct
+	59,  // 111: ondewo.nlu.Session.session_steps:type_name -> ondewo.nlu.SessionStep
+	67,  // 112: ondewo.nlu.Session.session_info:type_name -> ondewo.nlu.SessionInfo
+	154, // 113: ondewo.nlu.Session.created_at:type_name -> google.protobuf.Timestamp
+	154, // 114: ondewo.nlu.Session.modified_at:type_name -> google.protobuf.Timestamp
+	15,  // 115: ondewo.nlu.SessionStep.detect_intent_request:type_name -> ondewo.nlu.DetectIntentRequest
+	16,  // 116: ondewo.nlu.SessionStep.detect_intent_response:type_name -> ondewo.nlu.DetectIntentResponse
+	151, // 117: ondewo.nlu.SessionStep.contexts:type_name -> ondewo.nlu.Context
+	154, // 118: ondewo.nlu.SessionStep.timestamp:type_name -> google.protobuf.Timestamp
+	154, // 119: ondewo.nlu.SessionStep.created_at:type_name -> google.protobuf.Timestamp
+	154, // 120: ondewo.nlu.SessionStep.modified_at:type_name -> google.protobuf.Timestamp
+	137, // 121: ondewo.nlu.SessionStep.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
+	40,  // 122: ondewo.nlu.SessionStep.llm_telemetry_report:type_name -> ondewo.nlu.LlmTelemetryReport
+	159, // 123: ondewo.nlu.GetSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
+	59,  // 124: ondewo.nlu.UpdateSessionStepRequest.session_step:type_name -> ondewo.nlu.SessionStep
+	159, // 125: ondewo.nlu.UpdateSessionStepRequest.update_mask:type_name -> google.protobuf.FieldMask
+	159, // 126: ondewo.nlu.UpdateSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
+	59,  // 127: ondewo.nlu.CreateSessionStepRequest.session_step:type_name -> ondewo.nlu.SessionStep
+	159, // 128: ondewo.nlu.CreateSessionStepRequest.field_mask:type_name -> google.protobuf.FieldMask
+	13,  // 129: ondewo.nlu.ListSessionsRequest.session_view:type_name -> ondewo.nlu.Session.View
+	66,  // 130: ondewo.nlu.ListSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 131: ondewo.nlu.ListSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	5,   // 132: ondewo.nlu.ContextFilter.operator:type_name -> ondewo.nlu.ComparisonOperator
+	158, // 133: ondewo.nlu.SessionFilter.matched_intents:type_name -> ondewo.nlu.Intent
+	160, // 134: ondewo.nlu.SessionFilter.matched_entity_types:type_name -> ondewo.nlu.EntityType
+	151, // 135: ondewo.nlu.SessionFilter.input_contexts:type_name -> ondewo.nlu.Context
+	151, // 136: ondewo.nlu.SessionFilter.output_contexts:type_name -> ondewo.nlu.Context
+	153, // 137: ondewo.nlu.SessionFilter.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	158, // 138: ondewo.nlu.SessionInfo.matched_intents:type_name -> ondewo.nlu.Intent
+	160, // 139: ondewo.nlu.SessionInfo.matched_entity_types:type_name -> ondewo.nlu.EntityType
+	148, // 140: ondewo.nlu.SessionInfo.input_context_steps:type_name -> ondewo.nlu.SessionInfo.ContextSteps
+	148, // 141: ondewo.nlu.SessionInfo.output_context_steps:type_name -> ondewo.nlu.SessionInfo.ContextSteps
+	153, // 142: ondewo.nlu.SessionInfo.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	161, // 143: ondewo.nlu.SessionInfo.parent_comment:type_name -> ondewo.nlu.Comment
+	58,  // 144: ondewo.nlu.ListSessionsResponse.sessions:type_name -> ondewo.nlu.Session
+	13,  // 145: ondewo.nlu.GetSessionRequest.session_view:type_name -> ondewo.nlu.Session.View
+	159, // 146: ondewo.nlu.GetSessionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	151, // 147: ondewo.nlu.CreateSessionRequest.contexts:type_name -> ondewo.nlu.Context
+	73,  // 148: ondewo.nlu.CreateSessionReviewRequest.session_review:type_name -> ondewo.nlu.SessionReview
+	14,  // 149: ondewo.nlu.CreateSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
+	74,  // 150: ondewo.nlu.SessionReview.session_review_steps:type_name -> ondewo.nlu.SessionReviewStep
+	154, // 151: ondewo.nlu.SessionReview.created_at:type_name -> google.protobuf.Timestamp
+	154, // 152: ondewo.nlu.SessionReview.modified_at:type_name -> google.protobuf.Timestamp
+	162, // 153: ondewo.nlu.SessionReviewStep.annotated_usersays:type_name -> ondewo.nlu.Intent.TrainingPhrase
+	75,  // 154: ondewo.nlu.SessionReviewStep.detected_intents:type_name -> ondewo.nlu.DetectedIntent
+	151, // 155: ondewo.nlu.SessionReviewStep.contexts:type_name -> ondewo.nlu.Context
+	151, // 156: ondewo.nlu.SessionReviewStep.contexts_out:type_name -> ondewo.nlu.Context
+	153, // 157: ondewo.nlu.SessionReviewStep.platforms:type_name -> ondewo.nlu.Intent.Message.Platform
+	154, // 158: ondewo.nlu.SessionReviewStep.timestamp:type_name -> google.protobuf.Timestamp
+	154, // 159: ondewo.nlu.SessionReviewStep.created_at:type_name -> google.protobuf.Timestamp
+	154, // 160: ondewo.nlu.SessionReviewStep.modified_at:type_name -> google.protobuf.Timestamp
+	137, // 161: ondewo.nlu.SessionReviewStep.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
+	158, // 162: ondewo.nlu.DetectedIntent.intent:type_name -> ondewo.nlu.Intent
+	157, // 163: ondewo.nlu.DetectedIntent.fulfillment_messages:type_name -> ondewo.nlu.Intent.Message
+	66,  // 164: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 165: ondewo.nlu.ListSessionLabelsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 166: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 167: ondewo.nlu.ListLanguageCodesOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 168: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 169: ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 170: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 171: ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 172: ondewo.nlu.ListUserIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 173: ondewo.nlu.ListUserIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 174: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 175: ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 176: ondewo.nlu.ListTagsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 177: ondewo.nlu.ListTagsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 178: ondewo.nlu.ListInputContextsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 179: ondewo.nlu.ListInputContextsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 180: ondewo.nlu.ListOutputContextsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 181: ondewo.nlu.ListOutputContextsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 182: ondewo.nlu.ListPlatformsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 183: ondewo.nlu.ListPlatformsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 184: ondewo.nlu.ListAccountIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 185: ondewo.nlu.ListAccountIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 186: ondewo.nlu.ListPropertyIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	66,  // 187: ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	66,  // 188: ondewo.nlu.ListOriginIdsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 189: ondewo.nlu.ListOriginIdsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	161, // 190: ondewo.nlu.AddSessionCommentRequest.comment:type_name -> ondewo.nlu.Comment
+	161, // 191: ondewo.nlu.UpdateSessionCommentsRequest.comment:type_name -> ondewo.nlu.Comment
+	159, // 192: ondewo.nlu.ListSessionCommentsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 193: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 194: ondewo.nlu.ListSessionCommentsOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	161, // 195: ondewo.nlu.ListSessionCommentsResponse.comment:type_name -> ondewo.nlu.Comment
+	6,   // 196: ondewo.nlu.SessionFeedback.rating:type_name -> ondewo.nlu.FeedbackRating
+	7,   // 197: ondewo.nlu.SessionFeedback.author_type:type_name -> ondewo.nlu.FeedbackAuthorType
+	152, // 198: ondewo.nlu.SessionFeedback.raw:type_name -> google.protobuf.Struct
+	154, // 199: ondewo.nlu.SessionFeedback.created_at:type_name -> google.protobuf.Timestamp
+	154, // 200: ondewo.nlu.SessionFeedback.modified_at:type_name -> google.protobuf.Timestamp
+	113, // 201: ondewo.nlu.AddSessionFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
+	113, // 202: ondewo.nlu.AddSessionStepFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
+	159, // 203: ondewo.nlu.GetSessionFeedbackRequest.field_mask:type_name -> google.protobuf.FieldMask
+	113, // 204: ondewo.nlu.UpdateSessionFeedbackRequest.feedback:type_name -> ondewo.nlu.SessionFeedback
+	159, // 205: ondewo.nlu.UpdateSessionFeedbackRequest.update_mask:type_name -> google.protobuf.FieldMask
+	159, // 206: ondewo.nlu.ListSessionFeedbackRequest.field_mask:type_name -> google.protobuf.FieldMask
+	66,  // 207: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 208: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	122, // 209: ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
+	113, // 210: ondewo.nlu.ListSessionFeedbackResponse.feedback:type_name -> ondewo.nlu.SessionFeedback
+	6,   // 211: ondewo.nlu.FeedbackFilter.ratings:type_name -> ondewo.nlu.FeedbackRating
+	7,   // 212: ondewo.nlu.FeedbackFilter.author_types:type_name -> ondewo.nlu.FeedbackAuthorType
+	154, // 213: ondewo.nlu.FeedbackFilter.earliest:type_name -> google.protobuf.Timestamp
+	154, // 214: ondewo.nlu.FeedbackFilter.latest:type_name -> google.protobuf.Timestamp
+	8,   // 215: ondewo.nlu.FeedbackFilter.scope:type_name -> ondewo.nlu.FeedbackScope
+	123, // 216: ondewo.nlu.FeedbackStatistics.by_language:type_name -> ondewo.nlu.FeedbackBreakdownBucket
+	123, // 217: ondewo.nlu.FeedbackStatistics.by_intent:type_name -> ondewo.nlu.FeedbackBreakdownBucket
+	123, // 218: ondewo.nlu.FeedbackStatistics.by_author_type:type_name -> ondewo.nlu.FeedbackBreakdownBucket
+	123, // 219: ondewo.nlu.FeedbackStatistics.by_origin:type_name -> ondewo.nlu.FeedbackBreakdownBucket
+	123, // 220: ondewo.nlu.FeedbackStatistics.by_criterion:type_name -> ondewo.nlu.FeedbackBreakdownBucket
+	66,  // 221: ondewo.nlu.GetFeedbackStatisticsRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 222: ondewo.nlu.GetFeedbackStatisticsRequest.field_mask:type_name -> google.protobuf.FieldMask
+	122, // 223: ondewo.nlu.GetFeedbackStatisticsRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
+	124, // 224: ondewo.nlu.GetFeedbackStatisticsResponse.statistics:type_name -> ondewo.nlu.FeedbackStatistics
+	154, // 225: ondewo.nlu.FeedbackTimeSeriesBucket.bucket_start:type_name -> google.protobuf.Timestamp
+	154, // 226: ondewo.nlu.FeedbackTimeSeriesBucket.bucket_end:type_name -> google.protobuf.Timestamp
+	66,  // 227: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.session_filter:type_name -> ondewo.nlu.SessionFilter
+	159, // 228: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.field_mask:type_name -> google.protobuf.FieldMask
+	122, // 229: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.feedback_filter:type_name -> ondewo.nlu.FeedbackFilter
+	9,   // 230: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.granularity:type_name -> ondewo.nlu.FeedbackTimeGranularity
+	154, // 231: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.start:type_name -> google.protobuf.Timestamp
+	154, // 232: ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest.end:type_name -> google.protobuf.Timestamp
+	127, // 233: ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse.buckets:type_name -> ondewo.nlu.FeedbackTimeSeriesBucket
+	14,  // 234: ondewo.nlu.ListSessionReviewsRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
+	73,  // 235: ondewo.nlu.ListSessionReviewsResponse.session_reviews:type_name -> ondewo.nlu.SessionReview
+	14,  // 236: ondewo.nlu.GetSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
+	159, // 237: ondewo.nlu.GetSessionReviewRequest.field_mask:type_name -> google.protobuf.FieldMask
+	14,  // 238: ondewo.nlu.GetLatestSessionReviewRequest.session_review_view:type_name -> ondewo.nlu.SessionReview.View
+	159, // 239: ondewo.nlu.GetLatestSessionReviewRequest.field_mask:type_name -> google.protobuf.FieldMask
+	135, // 240: ondewo.nlu.FileResource.document_file_resource:type_name -> ondewo.nlu.DocumentFileResource
+	137, // 241: ondewo.nlu.FileResource.audio_file_resource:type_name -> ondewo.nlu.AudioFileResource
+	136, // 242: ondewo.nlu.FileResource.image_file_resource:type_name -> ondewo.nlu.ImageFileResource
+	138, // 243: ondewo.nlu.FileResource.video_file_resource:type_name -> ondewo.nlu.VideoFileResource
+	154, // 244: ondewo.nlu.DocumentFileResource.created_at:type_name -> google.protobuf.Timestamp
+	154, // 245: ondewo.nlu.DocumentFileResource.modified_at:type_name -> google.protobuf.Timestamp
+	154, // 246: ondewo.nlu.ImageFileResource.created_at:type_name -> google.protobuf.Timestamp
+	154, // 247: ondewo.nlu.ImageFileResource.modified_at:type_name -> google.protobuf.Timestamp
+	11,  // 248: ondewo.nlu.AudioFileResource.audio_file_resource_type:type_name -> ondewo.nlu.AudioFileResourceType
+	18,  // 249: ondewo.nlu.AudioFileResource.transcriptions:type_name -> ondewo.nlu.S2tTranscription
+	154, // 250: ondewo.nlu.AudioFileResource.created_at:type_name -> google.protobuf.Timestamp
+	154, // 251: ondewo.nlu.AudioFileResource.modified_at:type_name -> google.protobuf.Timestamp
+	154, // 252: ondewo.nlu.VideoFileResource.created_at:type_name -> google.protobuf.Timestamp
+	154, // 253: ondewo.nlu.VideoFileResource.modified_at:type_name -> google.protobuf.Timestamp
+	10,  // 254: ondewo.nlu.GetAudioFilesRequest.resource_view:type_name -> ondewo.nlu.ResourceView
+	163, // 255: ondewo.nlu.GetAudioFilesRequest.sorting_mode:type_name -> ondewo.nlu.SortingMode
+	159, // 256: ondewo.nlu.GetAudioFilesRequest.field_mask:type_name -> google.protobuf.FieldMask
+	137, // 257: ondewo.nlu.GetAudioFilesResponse.audio_files:type_name -> ondewo.nlu.AudioFileResource
+	137, // 258: ondewo.nlu.AddAudioFilesRequest.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
+	137, // 259: ondewo.nlu.AddAudioFilesResponse.audio_file_resources:type_name -> ondewo.nlu.AudioFileResource
+	10,  // 260: ondewo.nlu.ListAudioFilesRequest.resource_view:type_name -> ondewo.nlu.ResourceView
+	163, // 261: ondewo.nlu.ListAudioFilesRequest.sorting_mode:type_name -> ondewo.nlu.SortingMode
+	159, // 262: ondewo.nlu.ListAudioFilesRequest.field_mask:type_name -> google.protobuf.FieldMask
+	137, // 263: ondewo.nlu.ListAudioFilesResponse.audio_files:type_name -> ondewo.nlu.AudioFileResource
+	10,  // 264: ondewo.nlu.GetAudioFileOfSessionRequest.resource_view:type_name -> ondewo.nlu.ResourceView
+	159, // 265: ondewo.nlu.GetAudioFileOfSessionRequest.field_mask:type_name -> google.protobuf.FieldMask
+	151, // 266: ondewo.nlu.SessionInfo.ContextSteps.contexts:type_name -> ondewo.nlu.Context
+	15,  // 267: ondewo.nlu.Sessions.DetectIntent:input_type -> ondewo.nlu.DetectIntentRequest
+	52,  // 268: ondewo.nlu.Sessions.StreamingDetectIntent:input_type -> ondewo.nlu.StreamingDetectIntentRequest
+	64,  // 269: ondewo.nlu.Sessions.ListSessions:input_type -> ondewo.nlu.ListSessionsRequest
+	69,  // 270: ondewo.nlu.Sessions.GetSession:input_type -> ondewo.nlu.GetSessionRequest
+	70,  // 271: ondewo.nlu.Sessions.CreateSession:input_type -> ondewo.nlu.CreateSessionRequest
+	63,  // 272: ondewo.nlu.Sessions.CreateSessionStep:input_type -> ondewo.nlu.CreateSessionStepRequest
+	60,  // 273: ondewo.nlu.Sessions.GetSessionStep:input_type -> ondewo.nlu.GetSessionStepRequest
+	61,  // 274: ondewo.nlu.Sessions.UpdateSessionStep:input_type -> ondewo.nlu.UpdateSessionStepRequest
+	62,  // 275: ondewo.nlu.Sessions.DeleteSessionStep:input_type -> ondewo.nlu.DeleteSessionStepRequest
+	71,  // 276: ondewo.nlu.Sessions.DeleteSession:input_type -> ondewo.nlu.DeleteSessionRequest
+	76,  // 277: ondewo.nlu.Sessions.ListSessionLabels:input_type -> ondewo.nlu.ListSessionLabelsRequest
+	77,  // 278: ondewo.nlu.Sessions.ListSessionLabelsOfAllSessions:input_type -> ondewo.nlu.ListSessionLabelsOfAllSessionsRequest
+	79,  // 279: ondewo.nlu.Sessions.ListLanguageCodesOfAllSessions:input_type -> ondewo.nlu.ListLanguageCodesOfAllSessionsRequest
+	81,  // 280: ondewo.nlu.Sessions.ListMatchedIntentsOfAllSessions:input_type -> ondewo.nlu.ListMatchedIntentsOfAllSessionsRequest
+	83,  // 281: ondewo.nlu.Sessions.ListMatchedEntityTypesOfAllSessions:input_type -> ondewo.nlu.ListMatchedEntityTypesOfAllSessionsRequest
+	85,  // 282: ondewo.nlu.Sessions.ListUserIdsOfAllSessions:input_type -> ondewo.nlu.ListUserIdsOfAllSessionsRequest
+	87,  // 283: ondewo.nlu.Sessions.ListIdentifiedUserIdsOfAllSessions:input_type -> ondewo.nlu.ListIdentifiedUserIdsOfAllSessionsRequest
+	89,  // 284: ondewo.nlu.Sessions.ListTagsOfAllSessions:input_type -> ondewo.nlu.ListTagsOfAllSessionsRequest
+	91,  // 285: ondewo.nlu.Sessions.ListInputContextsOfAllSessions:input_type -> ondewo.nlu.ListInputContextsOfAllSessionsRequest
+	93,  // 286: ondewo.nlu.Sessions.ListOutputContextsOfAllSessions:input_type -> ondewo.nlu.ListOutputContextsOfAllSessionsRequest
+	95,  // 287: ondewo.nlu.Sessions.ListPlatformsOfAllSessions:input_type -> ondewo.nlu.ListPlatformsOfAllSessionsRequest
+	97,  // 288: ondewo.nlu.Sessions.ListAccountIdsOfAllSessions:input_type -> ondewo.nlu.ListAccountIdsOfAllSessionsRequest
+	99,  // 289: ondewo.nlu.Sessions.ListPropertyIdsOfAllSessions:input_type -> ondewo.nlu.ListPropertyIdsOfAllSessionsRequest
+	101, // 290: ondewo.nlu.Sessions.ListDatastreamIdsOfAllSessions:input_type -> ondewo.nlu.ListDatastreamIdsOfAllSessionsRequest
+	103, // 291: ondewo.nlu.Sessions.ListOriginIdsOfAllSessions:input_type -> ondewo.nlu.ListOriginIdsOfAllSessionsRequest
+	105, // 292: ondewo.nlu.Sessions.AddSessionLabels:input_type -> ondewo.nlu.AddSessionLabelsRequest
+	106, // 293: ondewo.nlu.Sessions.DeleteSessionLabels:input_type -> ondewo.nlu.DeleteSessionLabelsRequest
+	107, // 294: ondewo.nlu.Sessions.AddSessionComment:input_type -> ondewo.nlu.AddSessionCommentRequest
+	108, // 295: ondewo.nlu.Sessions.DeleteSessionComments:input_type -> ondewo.nlu.DeleteSessionCommentsRequest
+	109, // 296: ondewo.nlu.Sessions.UpdateSessionComments:input_type -> ondewo.nlu.UpdateSessionCommentsRequest
+	110, // 297: ondewo.nlu.Sessions.ListSessionComments:input_type -> ondewo.nlu.ListSessionCommentsRequest
+	111, // 298: ondewo.nlu.Sessions.ListSessionCommentsOfAllSessions:input_type -> ondewo.nlu.ListSessionCommentsOfAllSessionsRequest
+	114, // 299: ondewo.nlu.Sessions.AddSessionFeedback:input_type -> ondewo.nlu.AddSessionFeedbackRequest
+	115, // 300: ondewo.nlu.Sessions.AddSessionStepFeedback:input_type -> ondewo.nlu.AddSessionStepFeedbackRequest
+	116, // 301: ondewo.nlu.Sessions.GetSessionFeedback:input_type -> ondewo.nlu.GetSessionFeedbackRequest
+	117, // 302: ondewo.nlu.Sessions.UpdateSessionFeedback:input_type -> ondewo.nlu.UpdateSessionFeedbackRequest
+	118, // 303: ondewo.nlu.Sessions.DeleteSessionFeedback:input_type -> ondewo.nlu.DeleteSessionFeedbackRequest
+	119, // 304: ondewo.nlu.Sessions.ListSessionFeedback:input_type -> ondewo.nlu.ListSessionFeedbackRequest
+	120, // 305: ondewo.nlu.Sessions.ListSessionFeedbackOfAllSessions:input_type -> ondewo.nlu.ListSessionFeedbackOfAllSessionsRequest
+	125, // 306: ondewo.nlu.Sessions.GetFeedbackStatistics:input_type -> ondewo.nlu.GetFeedbackStatisticsRequest
+	128, // 307: ondewo.nlu.Sessions.GetFeedbackStatisticsTimeSeries:input_type -> ondewo.nlu.GetFeedbackStatisticsTimeSeriesRequest
+	130, // 308: ondewo.nlu.Sessions.ListSessionReviews:input_type -> ondewo.nlu.ListSessionReviewsRequest
+	132, // 309: ondewo.nlu.Sessions.GetSessionReview:input_type -> ondewo.nlu.GetSessionReviewRequest
+	133, // 310: ondewo.nlu.Sessions.GetLatestSessionReview:input_type -> ondewo.nlu.GetLatestSessionReviewRequest
+	72,  // 311: ondewo.nlu.Sessions.CreateSessionReview:input_type -> ondewo.nlu.CreateSessionReviewRequest
+	139, // 312: ondewo.nlu.Sessions.GetAudioFiles:input_type -> ondewo.nlu.GetAudioFilesRequest
+	141, // 313: ondewo.nlu.Sessions.AddAudioFiles:input_type -> ondewo.nlu.AddAudioFilesRequest
+	143, // 314: ondewo.nlu.Sessions.DeleteAudioFiles:input_type -> ondewo.nlu.DeleteAudioFilesRequest
+	147, // 315: ondewo.nlu.Sessions.GetAudioFileOfSession:input_type -> ondewo.nlu.GetAudioFileOfSessionRequest
+	145, // 316: ondewo.nlu.Sessions.ListAudioFiles:input_type -> ondewo.nlu.ListAudioFilesRequest
+	16,  // 317: ondewo.nlu.Sessions.DetectIntent:output_type -> ondewo.nlu.DetectIntentResponse
+	53,  // 318: ondewo.nlu.Sessions.StreamingDetectIntent:output_type -> ondewo.nlu.StreamingDetectIntentResponse
+	68,  // 319: ondewo.nlu.Sessions.ListSessions:output_type -> ondewo.nlu.ListSessionsResponse
+	58,  // 320: ondewo.nlu.Sessions.GetSession:output_type -> ondewo.nlu.Session
+	58,  // 321: ondewo.nlu.Sessions.CreateSession:output_type -> ondewo.nlu.Session
+	59,  // 322: ondewo.nlu.Sessions.CreateSessionStep:output_type -> ondewo.nlu.SessionStep
+	59,  // 323: ondewo.nlu.Sessions.GetSessionStep:output_type -> ondewo.nlu.SessionStep
+	59,  // 324: ondewo.nlu.Sessions.UpdateSessionStep:output_type -> ondewo.nlu.SessionStep
+	164, // 325: ondewo.nlu.Sessions.DeleteSessionStep:output_type -> google.protobuf.Empty
+	164, // 326: ondewo.nlu.Sessions.DeleteSession:output_type -> google.protobuf.Empty
+	78,  // 327: ondewo.nlu.Sessions.ListSessionLabels:output_type -> ondewo.nlu.ListSessionLabelsResponse
+	78,  // 328: ondewo.nlu.Sessions.ListSessionLabelsOfAllSessions:output_type -> ondewo.nlu.ListSessionLabelsResponse
+	80,  // 329: ondewo.nlu.Sessions.ListLanguageCodesOfAllSessions:output_type -> ondewo.nlu.ListLanguageCodesResponse
+	82,  // 330: ondewo.nlu.Sessions.ListMatchedIntentsOfAllSessions:output_type -> ondewo.nlu.ListMatchedIntentsResponse
+	84,  // 331: ondewo.nlu.Sessions.ListMatchedEntityTypesOfAllSessions:output_type -> ondewo.nlu.ListMatchedEntityTypesResponse
+	86,  // 332: ondewo.nlu.Sessions.ListUserIdsOfAllSessions:output_type -> ondewo.nlu.ListUserIdsResponse
+	88,  // 333: ondewo.nlu.Sessions.ListIdentifiedUserIdsOfAllSessions:output_type -> ondewo.nlu.ListIdentifiedUserIdsResponse
+	90,  // 334: ondewo.nlu.Sessions.ListTagsOfAllSessions:output_type -> ondewo.nlu.ListTagsResponse
+	92,  // 335: ondewo.nlu.Sessions.ListInputContextsOfAllSessions:output_type -> ondewo.nlu.ListInputContextsResponse
+	94,  // 336: ondewo.nlu.Sessions.ListOutputContextsOfAllSessions:output_type -> ondewo.nlu.ListOutputContextsResponse
+	96,  // 337: ondewo.nlu.Sessions.ListPlatformsOfAllSessions:output_type -> ondewo.nlu.ListPlatformsResponse
+	98,  // 338: ondewo.nlu.Sessions.ListAccountIdsOfAllSessions:output_type -> ondewo.nlu.ListAccountIdsResponse
+	100, // 339: ondewo.nlu.Sessions.ListPropertyIdsOfAllSessions:output_type -> ondewo.nlu.ListPropertyIdsResponse
+	102, // 340: ondewo.nlu.Sessions.ListDatastreamIdsOfAllSessions:output_type -> ondewo.nlu.ListDatastreamIdsResponse
+	104, // 341: ondewo.nlu.Sessions.ListOriginIdsOfAllSessions:output_type -> ondewo.nlu.ListOriginIdsResponse
+	58,  // 342: ondewo.nlu.Sessions.AddSessionLabels:output_type -> ondewo.nlu.Session
+	58,  // 343: ondewo.nlu.Sessions.DeleteSessionLabels:output_type -> ondewo.nlu.Session
+	161, // 344: ondewo.nlu.Sessions.AddSessionComment:output_type -> ondewo.nlu.Comment
+	58,  // 345: ondewo.nlu.Sessions.DeleteSessionComments:output_type -> ondewo.nlu.Session
+	58,  // 346: ondewo.nlu.Sessions.UpdateSessionComments:output_type -> ondewo.nlu.Session
+	112, // 347: ondewo.nlu.Sessions.ListSessionComments:output_type -> ondewo.nlu.ListSessionCommentsResponse
+	112, // 348: ondewo.nlu.Sessions.ListSessionCommentsOfAllSessions:output_type -> ondewo.nlu.ListSessionCommentsResponse
+	113, // 349: ondewo.nlu.Sessions.AddSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
+	113, // 350: ondewo.nlu.Sessions.AddSessionStepFeedback:output_type -> ondewo.nlu.SessionFeedback
+	113, // 351: ondewo.nlu.Sessions.GetSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
+	113, // 352: ondewo.nlu.Sessions.UpdateSessionFeedback:output_type -> ondewo.nlu.SessionFeedback
+	164, // 353: ondewo.nlu.Sessions.DeleteSessionFeedback:output_type -> google.protobuf.Empty
+	121, // 354: ondewo.nlu.Sessions.ListSessionFeedback:output_type -> ondewo.nlu.ListSessionFeedbackResponse
+	121, // 355: ondewo.nlu.Sessions.ListSessionFeedbackOfAllSessions:output_type -> ondewo.nlu.ListSessionFeedbackResponse
+	126, // 356: ondewo.nlu.Sessions.GetFeedbackStatistics:output_type -> ondewo.nlu.GetFeedbackStatisticsResponse
+	129, // 357: ondewo.nlu.Sessions.GetFeedbackStatisticsTimeSeries:output_type -> ondewo.nlu.GetFeedbackStatisticsTimeSeriesResponse
+	131, // 358: ondewo.nlu.Sessions.ListSessionReviews:output_type -> ondewo.nlu.ListSessionReviewsResponse
+	73,  // 359: ondewo.nlu.Sessions.GetSessionReview:output_type -> ondewo.nlu.SessionReview
+	73,  // 360: ondewo.nlu.Sessions.GetLatestSessionReview:output_type -> ondewo.nlu.SessionReview
+	73,  // 361: ondewo.nlu.Sessions.CreateSessionReview:output_type -> ondewo.nlu.SessionReview
+	140, // 362: ondewo.nlu.Sessions.GetAudioFiles:output_type -> ondewo.nlu.GetAudioFilesResponse
+	142, // 363: ondewo.nlu.Sessions.AddAudioFiles:output_type -> ondewo.nlu.AddAudioFilesResponse
+	144, // 364: ondewo.nlu.Sessions.DeleteAudioFiles:output_type -> ondewo.nlu.DeleteAudioFilesResponse
+	137, // 365: ondewo.nlu.Sessions.GetAudioFileOfSession:output_type -> ondewo.nlu.AudioFileResource
+	146, // 366: ondewo.nlu.Sessions.ListAudioFiles:output_type -> ondewo.nlu.ListAudioFilesResponse
+	317, // [317:367] is the sub-list for method output_type
+	267, // [267:317] is the sub-list for method input_type
+	267, // [267:267] is the sub-list for extension type_name
+	267, // [267:267] is the sub-list for extension extendee
+	0,   // [0:267] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_nlu_session_proto_init() }
@@ -14830,19 +15137,20 @@ func file_ondewo_nlu_session_proto_init() {
 		(*QueryInput_Event)(nil),
 	}
 	file_ondewo_nlu_session_proto_msgTypes[8].OneofWrappers = []any{}
-	file_ondewo_nlu_session_proto_msgTypes[36].OneofWrappers = []any{
+	file_ondewo_nlu_session_proto_msgTypes[38].OneofWrappers = []any{
 		(*StreamingDetectIntentResponse_LlmCallStarted)(nil),
 		(*StreamingDetectIntentResponse_LlmCallFinished)(nil),
 		(*StreamingDetectIntentResponse_LlmToolCallStarted)(nil),
 		(*StreamingDetectIntentResponse_LlmToolCallFinished)(nil),
 		(*StreamingDetectIntentResponse_LlmThinkingDelta)(nil),
 		(*StreamingDetectIntentResponse_LlmTokenUsageUpdate)(nil),
+		(*StreamingDetectIntentResponse_LlmAgentNodeEvent)(nil),
 	}
-	file_ondewo_nlu_session_proto_msgTypes[93].OneofWrappers = []any{}
-	file_ondewo_nlu_session_proto_msgTypes[94].OneofWrappers = []any{}
+	file_ondewo_nlu_session_proto_msgTypes[95].OneofWrappers = []any{}
 	file_ondewo_nlu_session_proto_msgTypes[96].OneofWrappers = []any{}
-	file_ondewo_nlu_session_proto_msgTypes[105].OneofWrappers = []any{}
-	file_ondewo_nlu_session_proto_msgTypes[117].OneofWrappers = []any{
+	file_ondewo_nlu_session_proto_msgTypes[98].OneofWrappers = []any{}
+	file_ondewo_nlu_session_proto_msgTypes[107].OneofWrappers = []any{}
+	file_ondewo_nlu_session_proto_msgTypes[119].OneofWrappers = []any{
 		(*FileResource_DocumentFileResource)(nil),
 		(*FileResource_AudioFileResource)(nil),
 		(*FileResource_ImageFileResource)(nil),
@@ -14853,8 +15161,8 @@ func file_ondewo_nlu_session_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_nlu_session_proto_rawDesc), len(file_ondewo_nlu_session_proto_rawDesc)),
-			NumEnums:      14,
-			NumMessages:   132,
+			NumEnums:      15,
+			NumMessages:   134,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

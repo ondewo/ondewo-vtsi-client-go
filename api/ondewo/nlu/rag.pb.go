@@ -5165,7 +5165,7 @@ type RagCrawlerConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Concurrency and pacing controls for crawler requests.
 	ConcurrencyConfig *RagCrawlerConcurrencyConfig `protobuf:"bytes,1,opt,name=concurrency_config,json=concurrencyConfig,proto3" json:"concurrency_config,omitempty"`
-	// Optional. Deep crawler behavior (enable + depth/pages/scoring/filter chain).
+	// Optional. Deep crawler behavior (enable + depth/scoring/filter chain).
 	DeepCrawlerConfig *RagCrawlerDeepCrawlerConfig `protobuf:"bytes,2,opt,name=deep_crawler_config,json=deepCrawlerConfig,proto3" json:"deep_crawler_config,omitempty"`
 	// Optional. Structured output configuration (format + metadata policy).
 	OutputConfig *RagCrawlerResultsConfig `protobuf:"bytes,3,opt,name=output_config,json=outputConfig,proto3" json:"output_config,omitempty"`
@@ -5173,8 +5173,10 @@ type RagCrawlerConfig struct {
 	StatusFilter *RagCrawlerStatusFilter `protobuf:"bytes,4,opt,name=status_filter,json=statusFilter,proto3" json:"status_filter,omitempty"`
 	// Optional. Incremental crawling: reuse unchanged pages from the previous run instead of re-fetching them.
 	IncrementalConfig *RagCrawlerIncrementalConfig `protobuf:"bytes,5,opt,name=incremental_config,json=incrementalConfig,proto3" json:"incremental_config,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Optional. Hard cap on pages fetched successfully in this run; <code>0</code> means unlimited.
+	MaxPages      *int32 `protobuf:"varint,6,opt,name=max_pages,json=maxPages,proto3,oneof" json:"max_pages,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RagCrawlerConfig) Reset() {
@@ -5242,6 +5244,13 @@ func (x *RagCrawlerConfig) GetIncrementalConfig() *RagCrawlerIncrementalConfig {
 	return nil
 }
 
+func (x *RagCrawlerConfig) GetMaxPages() int32 {
+	if x != nil && x.MaxPages != nil {
+		return *x.MaxPages
+	}
+	return 0
+}
+
 // Deep crawler options grouped under one config node.
 type RagCrawlerDeepCrawlerConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -5252,7 +5261,9 @@ type RagCrawlerDeepCrawlerConfig struct {
 	CrawlStrategy RagCrawlerCrawlStrategy `protobuf:"varint,2,opt,name=crawl_strategy,json=crawlStrategy,proto3,enum=ondewo.nlu.RagCrawlerCrawlStrategy" json:"crawl_strategy,omitempty"`
 	// Optional. Maximum link depth from seed URLs, counted from the nearest seed. <code>0</code> means unlimited depth.
 	MaxDepth *int32 `protobuf:"varint,3,opt,name=max_depth,json=maxDepth,proto3,oneof" json:"max_depth,omitempty"`
-	// Optional. Hard cap on pages fetched successfully in this run; <code>0</code> means unlimited.
+	// Deprecated. Use <code>RagCrawlerConfig.max_pages</code> instead
+	//
+	// Deprecated: Marked as deprecated in ondewo/nlu/rag.proto.
 	MaxPages int32 `protobuf:"varint,4,opt,name=max_pages,json=maxPages,proto3" json:"max_pages,omitempty"`
 	// Optional. URL and domain restrictions.
 	DeepCrawlerFilters *RagCrawlerFilters `protobuf:"bytes,5,opt,name=deep_crawler_filters,json=deepCrawlerFilters,proto3" json:"deep_crawler_filters,omitempty"`
@@ -5313,6 +5324,7 @@ func (x *RagCrawlerDeepCrawlerConfig) GetMaxDepth() int32 {
 	return 0
 }
 
+// Deprecated: Marked as deprecated in ondewo/nlu/rag.proto.
 func (x *RagCrawlerDeepCrawlerConfig) GetMaxPages() int32 {
 	if x != nil {
 		return x.MaxPages
@@ -7954,18 +7966,21 @@ const file_ondewo_nlu_rag_proto_rawDesc = "" +
 	"\x1bRagCrawlerConcurrencyConfig\x126\n" +
 	"\x17max_concurrent_requests\x18\x01 \x01(\x05R\x15maxConcurrentRequests\x12\x1d\n" +
 	"\n" +
-	"slow_crawl\x18\x02 \x01(\bR\tslowCrawl\"\xae\x03\n" +
+	"slow_crawl\x18\x02 \x01(\bR\tslowCrawl\"\xde\x03\n" +
 	"\x10RagCrawlerConfig\x12V\n" +
 	"\x12concurrency_config\x18\x01 \x01(\v2'.ondewo.nlu.RagCrawlerConcurrencyConfigR\x11concurrencyConfig\x12W\n" +
 	"\x13deep_crawler_config\x18\x02 \x01(\v2'.ondewo.nlu.RagCrawlerDeepCrawlerConfigR\x11deepCrawlerConfig\x12H\n" +
 	"\routput_config\x18\x03 \x01(\v2#.ondewo.nlu.RagCrawlerResultsConfigR\foutputConfig\x12G\n" +
 	"\rstatus_filter\x18\x04 \x01(\v2\".ondewo.nlu.RagCrawlerStatusFilterR\fstatusFilter\x12V\n" +
-	"\x12incremental_config\x18\x05 \x01(\v2'.ondewo.nlu.RagCrawlerIncrementalConfigR\x11incrementalConfig\"\xee\x02\n" +
+	"\x12incremental_config\x18\x05 \x01(\v2'.ondewo.nlu.RagCrawlerIncrementalConfigR\x11incrementalConfig\x12 \n" +
+	"\tmax_pages\x18\x06 \x01(\x05H\x00R\bmaxPages\x88\x01\x01B\f\n" +
+	"\n" +
+	"_max_pages\"\xf2\x02\n" +
 	"\x1bRagCrawlerDeepCrawlerConfig\x12\x1b\n" +
 	"\tis_active\x18\x01 \x01(\bR\bisActive\x12J\n" +
 	"\x0ecrawl_strategy\x18\x02 \x01(\x0e2#.ondewo.nlu.RagCrawlerCrawlStrategyR\rcrawlStrategy\x12 \n" +
-	"\tmax_depth\x18\x03 \x01(\x05H\x00R\bmaxDepth\x88\x01\x01\x12\x1b\n" +
-	"\tmax_pages\x18\x04 \x01(\x05R\bmaxPages\x12O\n" +
+	"\tmax_depth\x18\x03 \x01(\x05H\x00R\bmaxDepth\x88\x01\x01\x12\x1f\n" +
+	"\tmax_pages\x18\x04 \x01(\x05B\x02\x18\x01R\bmaxPages\x12O\n" +
 	"\x14deep_crawler_filters\x18\x05 \x01(\v2\x1d.ondewo.nlu.RagCrawlerFiltersR\x12deepCrawlerFilters\x121\n" +
 	"\x12normalize_url_case\x18\x06 \x01(\bH\x01R\x10normalizeUrlCase\x88\x01\x01B\f\n" +
 	"\n" +
@@ -8572,6 +8587,7 @@ func file_ondewo_nlu_rag_proto_init() {
 	file_ondewo_nlu_rag_proto_msgTypes[25].OneofWrappers = []any{}
 	file_ondewo_nlu_rag_proto_msgTypes[32].OneofWrappers = []any{}
 	file_ondewo_nlu_rag_proto_msgTypes[43].OneofWrappers = []any{}
+	file_ondewo_nlu_rag_proto_msgTypes[46].OneofWrappers = []any{}
 	file_ondewo_nlu_rag_proto_msgTypes[47].OneofWrappers = []any{}
 	file_ondewo_nlu_rag_proto_msgTypes[48].OneofWrappers = []any{}
 	file_ondewo_nlu_rag_proto_msgTypes[50].OneofWrappers = []any{}

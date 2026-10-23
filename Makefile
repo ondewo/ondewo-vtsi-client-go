@@ -49,10 +49,10 @@
 
 # MUST BE THE SAME AS API in Major and Minor Version Number
 # example: API 2.9.0 --> Client 2.9.X
-ONDEWO_VTSI_VERSION=9.2.0
+ONDEWO_VTSI_VERSION=9.3.0
 
 # Submodule pins - `make checkout_defined_submodule_versions` checks these out
-ONDEWO_VTSI_API_GIT_BRANCH=tags/9.2.0
+ONDEWO_VTSI_API_GIT_BRANCH=tags/9.3.0
 ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.7
 
 # You need to setup an access token at https://github.com/settings/tokens - permissions are important
