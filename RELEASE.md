@@ -2,6 +2,15 @@
 
 *****************
 
+## Release ONDEWO VTSI Go Client 9.5.0
+
+### Improvements
+
+* Tracking API Version [9.5.0](https://github.com/ondewo/ondewo-vtsi-api/releases/tag/9.5.0) ( [Documentation](https://ondewo.github.io/ondewo-vtsi-api/) )
+* Generated with ondewo-proto-compiler 5.17.0; runtime floors: `google.golang.org/grpc` v1.85.0, `google.golang.org/protobuf` v1.36.12, `go 1.26.0`.
+
+*****************
+
 ## Release ONDEWO VTSI Go Client 9.3.0
 
 ### Improvements
