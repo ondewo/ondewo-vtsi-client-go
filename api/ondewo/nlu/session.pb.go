@@ -2176,7 +2176,7 @@ func (x *LlmTokenUsage) GetOutputTokens() int64 {
 // Metadata for one tool call executed by the LLM.
 type LlmToolCallMetadata struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Stable id assigned by the upstream framework (autogen / langchain).
+	// Stable id assigned by the upstream framework (e.g. langchain).
 	ToolCallId string `protobuf:"bytes,1,opt,name=tool_call_id,json=toolCallId,proto3" json:"tool_call_id,omitempty"`
 	// Name of the tool / function invoked.
 	ToolName string `protobuf:"bytes,2,opt,name=tool_name,json=toolName,proto3" json:"tool_name,omitempty"`
@@ -2377,7 +2377,8 @@ func (x *LlmThinkingMetadata) GetThinkingText() string {
 // Telemetry for a single LLM invocation inside one DetectIntent turn.
 type LlmTelemetry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Provider tag: "autogen" | "langchain" | "openai" | "anthropic" | ...
+	// Provider tag: "langchain" | "openai" | "anthropic" | ... ("autogen" only on telemetry recorded before AutoGen
+	// was removed).
 	Provider string `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
 	// Concrete model identifier (e.g. "Qwen/Qwen3.6-27b-fp8").
 	ModelName string `protobuf:"bytes,2,opt,name=model_name,json=modelName,proto3" json:"model_name,omitempty"`
@@ -2450,21 +2451,22 @@ type LlmTelemetry struct {
 	CacheCreationInputTokens int32 `protobuf:"varint,34,opt,name=cache_creation_input_tokens,json=cacheCreationInputTokens,proto3" json:"cache_creation_input_tokens,omitempty"`
 	// LangSmith run URL for direct click-through when LangSmith tracing is active.
 	LangsmithRunUrl string `protobuf:"bytes,35,opt,name=langsmith_run_url,json=langsmithRunUrl,proto3" json:"langsmith_run_url,omitempty"`
-	// Autogen team display name owning the call.
+	// Display name of the agent team owning the call; empty for a single agent.
 	TeamName string `protobuf:"bytes,36,opt,name=team_name,json=teamName,proto3" json:"team_name,omitempty"`
-	// Autogen team identifier (UUID).
+	// Identifier (UUID) of the agent team owning the call.
 	TeamId string `protobuf:"bytes,37,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	// Autogen agent role tag (user_proxy | assistant | tool_executor | reflection).
+	// Role tag of the agent that made the call inside its team.
 	AgentRole string `protobuf:"bytes,38,opt,name=agent_role,json=agentRole,proto3" json:"agent_role,omitempty"`
-	// Name of the autogen agent that produced the message.
+	// Name of the agent that produced the message.
 	SenderAgent string `protobuf:"bytes,39,opt,name=sender_agent,json=senderAgent,proto3" json:"sender_agent,omitempty"`
-	// Name of the autogen agent that received the message.
+	// Name of the agent that received the message.
 	RecipientAgent string `protobuf:"bytes,40,opt,name=recipient_agent,json=recipientAgent,proto3" json:"recipient_agent,omitempty"`
-	// Zero-based position of this LLM call inside the autogen <code>run_stream()</code> sequence.
+	// Zero-based position of this LLM call inside the agent run&apos;s sequence of LLM calls.
 	TurnIndex int32 `protobuf:"varint,41,opt,name=turn_index,json=turnIndex,proto3" json:"turn_index,omitempty"`
-	// Number of reflection loops executed in <code>robust_assistant_agent</code> for this call.
+	// Deprecated: number of reflection loops of the removed AutoGen <code>robust_assistant_agent</code> for this
+	// call. No current agent runs reflection loops, so it is 0.
 	ReflectionIterations int32 `protobuf:"varint,42,opt,name=reflection_iterations,json=reflectionIterations,proto3" json:"reflection_iterations,omitempty"`
-	// Autogen <code>TaskResult.stop_reason</code> string when surfaced.
+	// Stop reason of the agent team run when surfaced (formerly AutoGen <code>TaskResult.stop_reason</code>).
 	TerminationReason string `protobuf:"bytes,43,opt,name=termination_reason,json=terminationReason,proto3" json:"termination_reason,omitempty"`
 	// Join key linking this LLM call to an evaluator run (see llm_evaluation.proto).
 	EvaluatorRunsJoinKey string `protobuf:"bytes,44,opt,name=evaluator_runs_join_key,json=evaluatorRunsJoinKey,proto3" json:"evaluator_runs_join_key,omitempty"`
@@ -2531,7 +2533,7 @@ type LlmTelemetry struct {
 	// <code>llm_call_id</code> (<code>LlmLlmCallStartedEvent</code>,
 	// <code>LlmToolCallStartedEvent</code>, ...), so an aggregate or a persisted row can be
 	// correlated back to the live event stream. Distinct from <code>run_id</code> (field 11),
-	// which is the UPSTREAM framework's id (autogen / langchain).
+	// which is the UPSTREAM framework's id (e.g. langchain).
 	LlmCallId     string `protobuf:"bytes,63,opt,name=llm_call_id,json=llmCallId,proto3" json:"llm_call_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4058,7 +4060,7 @@ type LlmToolUsage struct {
 	// Groups the representative invocation under its <code>LlmTelemetry</code> entry.
 	LlmCallId string `protobuf:"bytes,9,opt,name=llm_call_id,json=llmCallId,proto3" json:"llm_call_id,omitempty"`
 	// Stable id of the representative invocation, assigned by the upstream framework
-	// (autogen / langchain).
+	// (e.g. langchain).
 	ToolCallId    string `protobuf:"bytes,10,opt,name=tool_call_id,json=toolCallId,proto3" json:"tool_call_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -4833,7 +4835,8 @@ type LlmCallStartedEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Collector-assigned id grouping all events emitted for this LLM call.
 	LlmCallId string `protobuf:"bytes,1,opt,name=llm_call_id,json=llmCallId,proto3" json:"llm_call_id,omitempty"`
-	// Provider tag: "autogen" | "langchain" | "openai" | "anthropic" | ...
+	// Provider tag: "langchain" | "openai" | "anthropic" | ... ("autogen" only on telemetry recorded before AutoGen
+	// was removed).
 	Provider string `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
 	// Concrete model identifier (e.g. "claude-3-5-sonnet-20241022").
 	ModelName string `protobuf:"bytes,3,opt,name=model_name,json=modelName,proto3" json:"model_name,omitempty"`
@@ -4986,7 +4989,7 @@ func (x *LlmCallFinishedEvent) GetLlmTokenUsage() *LlmTokenUsage {
 // Emitted on a streaming DetectIntent when a tool call starts.
 type LlmToolCallStartedEvent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Stable id assigned by the upstream framework (autogen / langchain).
+	// Stable id assigned by the upstream framework (e.g. langchain).
 	ToolCallId string `protobuf:"bytes,1,opt,name=tool_call_id,json=toolCallId,proto3" json:"tool_call_id,omitempty"`
 	// Name of the tool / function invoked.
 	ToolName string `protobuf:"bytes,2,opt,name=tool_name,json=toolName,proto3" json:"tool_name,omitempty"`

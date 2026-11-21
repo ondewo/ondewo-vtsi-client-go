@@ -318,8 +318,11 @@ const (
 	// Microsoft Azure as the CCAI service provider, using Microsoft&apos;s Azure cognitive services
 	// <a href="https://azure.microsoft.com/en-us/products/cognitive-services/openai-service/">Azure OpenAI</a>
 	CcaiServiceProvider_CCAI_SERVICE_PROVIDER_MICROSOFT_AZURE_OPENAI CcaiServiceProvider = 3
-	// Microsoft AutoGen as the CCAI service provider
-	// <a href="https://github.com/microsoft/autogen">AutoGen</a>
+	// Deprecated: Microsoft AutoGen as the CCAI service provider
+	// <a href="https://github.com/microsoft/autogen">AutoGen</a>.
+	// The server no longer runs AutoGen and refuses to create services with this provider; stored AutoGen
+	// services are migrated to AI Teams v2 (LangChain / LangGraph). The value is kept for wire
+	// compatibility and may still appear on data written before the migration.
 	CcaiServiceProvider_CCAI_SERVICE_PROVIDER_MICROSOFT_AUTOGEN CcaiServiceProvider = 4
 	// Ollama as the CCAI service provider, typically associated with specific OLLAMA AI tools
 	// <a href="https://github.com/ollama/ollama">Ollama</a>
