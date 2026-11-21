@@ -125,6 +125,57 @@ func main() {
 }
 ```
 
+## Keycloak authentication (password or offline token)
+
+Instead of handing a static access token to `auth.WithBearerToken`, let the client log in to
+Keycloak itself and keep the token fresh. Set the Keycloak triple (`KeycloakURL`, `Realm`,
+`ClientID`) on the `client.Config` plus ONE credential, and `client.NewChannel` attaches
+`authorization: Bearer <access token>` to every RPC:
+
+```go
+// Password (ROPC) login: one grant_type=password with scope=offline_access at start-up.
+cfg := client.Config{
+    Host: "grpc-vtsi.ondewo.com", Port: "443",
+    KeycloakURL: "https://keycloak.ondewo.com/auth", Realm: "ondewo-ccai-platform",
+    ClientID: "ondewo-vtsi-cai-sdk-public",
+    Username: os.Getenv("ONDEWO_USER"), Password: os.Getenv("ONDEWO_PASSWORD"),
+}
+
+// Offline token: preferred when many processes share one technical user. The start-up is ONE
+// grant_type=refresh_token with the handed-off token - no password is ever sent, not even as a
+// fallback, so Keycloak's brute-force detection (which counts failed logins) never sees a burst.
+cfg = client.Config{
+    Host: "grpc-vtsi.ondewo.com", Port: "443",
+    KeycloakURL: "https://keycloak.ondewo.com/auth", Realm: "ondewo-ccai-platform",
+    ClientID: "ondewo-vtsi-cai-sdk-public", Username: os.Getenv("ONDEWO_USER"),
+    RefreshToken: os.Getenv("ONDEWO_OFFLINE_TOKEN"),
+}
+
+conn, err := client.NewChannel(cfg) // a refused login returns *auth.KeycloakAuthenticationError
+```
+
+What the provider (`auth.KeycloakTokenProvider`) does, identically in every ONDEWO client SDK:
+
+* It refreshes the access token 30 s before it expires, in a background goroutine and lazily on
+  every RPC. Both share one lock and one backoff: after a failed refresh it retries after a jittered
+  5 s, 10 s, 20 s ... up to 300 s, sends NO token request in between, and keeps serving the current
+  token while it is still valid - so a Keycloak outage neither stalls every RPC nor turns it into a
+  token request. Only an expired token that cannot be refreshed fails the RPC (`Unauthenticated`,
+  with the `*auth.KeycloakAuthenticationError` text). A failure never ends the background refresh.
+* `TokenExpirationInS` bounds how long it refreshes (0 = until the offline session dies);
+  `KeycloakInsecureSkipVerify` disables TLS verification of the token endpoint only (for a
+  self-signed local Envoy).
+* Every connection of the same credentials shares one provider and one login
+  (`auth.SharedKeycloakTokenProvider`, keyed by a SHA-256 of the credentials). It is held weakly:
+  once no connection uses it, it is collected and its goroutine stops. To stop it deterministically,
+  `provider, _ := auth.SharedKeycloakTokenProvider(cfg.KeycloakConfig()); provider.Close()`.
+* A partial triple, or a triple with neither `Password` nor `RefreshToken`, is refused before any
+  network I/O. Every `fmt` / `slog` rendering of a `client.Config` or `auth.KeycloakConfig` shows
+  `Password` and `RefreshToken` as `***REDACTED***`; no log line or error carries a credential.
+  Warnings and recoveries are logged through `log/slog` (`Config.Logger`, else `slog.Default()`).
+* Without `client.NewChannel`: `auth.NewKeycloakTokenProvider(auth.KeycloakConfig{...})` and
+  `grpc.WithPerRPCCredentials(provider)` (TLS only) or `provider.PerRPCCredentials(true)`.
+
 ## TLS, mutual TLS and certificates
 
 gRPC encrypts with **TLS**. `client.NewChannel` opens the connection from a `client.Config`; it
@@ -290,7 +341,7 @@ A failed handshake is `codes.Unavailable`; the cause is in the error text:
 │       ├── s2t                            <-----   nlu, qa, s2t, sip and t2s are vendored by
 │       ├── sip                            <-----   ondewo-vtsi-api and published from here too
 │       └── t2s
-├── auth                                   <----- HAND WRITTEN - the `authorization: Bearer` credential
+├── auth                                   <----- HAND WRITTEN - the `authorization: Bearer` credential and the Keycloak token provider
 ├── client                                 <----- HAND WRITTEN - client.NewChannel: plaintext, TLS and mutual TLS
 ├── tests                                  <----- HAND WRITTEN - the go test suite (see Testing below)
 ├── ondewo-vtsi-api                             <----- submodule @ https://github.com/ondewo/ondewo-vtsi-api

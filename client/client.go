@@ -36,6 +36,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
+
+	"github.com/ondewo/ondewo-vtsi-client-go/v9/auth"
 )
 
 // The connection defaults, the same values the python SDKs pass to grpc-core.
@@ -91,8 +93,47 @@ type Config struct {
 	// zero value is a TLS connection. Never use it in production.
 	Insecure bool
 
-	// Logger receives the warning about a plaintext connection. Nil: slog.Default().
+	// Logger receives the warning about a plaintext connection, and the Keycloak provider's
+	// refresh warnings. Nil: slog.Default().
 	Logger *slog.Logger
+
+	// KeycloakURL, Realm and ClientID switch on Keycloak authentication when all three are set:
+	// NewChannel then attaches `authorization: Bearer <access token>` to every RPC, from the
+	// provider shared by every connection of the same credentials (auth.SharedKeycloakTokenProvider).
+	// None set: no credential is attached. See auth.KeycloakConfig for every field.
+	KeycloakURL string
+	Realm       string
+	ClientID    string
+
+	// Username and Password are the technical user of the password grant. Password is SECRET.
+	Username string
+	Password string
+
+	// TokenExpirationInS bounds how long the token is refreshed (seconds; 0 = until the offline
+	// session dies).
+	TokenExpirationInS int
+
+	// KeycloakInsecureSkipVerify disables TLS verification of the token-endpoint call only.
+	KeycloakInsecureSkipVerify bool
+
+	// RefreshToken is a handed-off Keycloak OFFLINE refresh token, used instead of Password
+	// (never a password grant, not even as a fallback). SECRET. Always the LAST field.
+	RefreshToken string
+}
+
+// KeycloakConfig is the Keycloak part of the Config, e.g. to reach the shared provider with
+// auth.SharedKeycloakTokenProvider and Close it.
+func (c Config) KeycloakConfig() auth.KeycloakConfig {
+	return auth.KeycloakConfig{
+		KeycloakURL:        c.KeycloakURL,
+		Realm:              c.Realm,
+		ClientID:           c.ClientID,
+		Username:           c.Username,
+		Password:           c.Password,
+		TokenExpirationInS: c.TokenExpirationInS,
+		InsecureSkipVerify: c.KeycloakInsecureSkipVerify,
+		RefreshToken:       c.RefreshToken,
+	}
 }
 
 // Target is the gRPC target of the connection, "Host:Port". A bare IPv6 literal is bracketed
@@ -108,8 +149,12 @@ func (c Config) Target() string {
 // String renders the Config without any secret: see the Config documentation.
 func (c Config) String() string {
 	return fmt.Sprintf(
-		"client.Config{Host: %q, Port: %q, GrpcCert: %s, GrpcClientCert: %s, GrpcClientKey: %s, Insecure: %t}",
+		"client.Config{Host: %q, Port: %q, GrpcCert: %s, GrpcClientCert: %s, GrpcClientKey: %s, Insecure: %t, "+
+			"KeycloakURL: %q, Realm: %q, ClientID: %q, Username: %q, Password: %s, TokenExpirationInS: %d, "+
+			"KeycloakInsecureSkipVerify: %t, RefreshToken: %s}",
 		c.Host, c.Port, pemSummary(c.GrpcCert), pemSummary(c.GrpcClientCert), secret(c.GrpcClientKey), c.Insecure,
+		c.KeycloakURL, c.Realm, c.ClientID, c.Username, secret(c.Password), c.TokenExpirationInS,
+		c.KeycloakInsecureSkipVerify, secret(c.RefreshToken),
 	)
 }
 
@@ -129,6 +174,14 @@ func (c Config) LogValue() slog.Value {
 		slog.String("grpc_client_cert", pemSummary(c.GrpcClientCert)),
 		slog.String("grpc_client_key", secret(c.GrpcClientKey)),
 		slog.Bool("insecure", c.Insecure),
+		slog.String("keycloak_url", c.KeycloakURL),
+		slog.String("realm", c.Realm),
+		slog.String("client_id", c.ClientID),
+		slog.String("username", c.Username),
+		slog.String("password", secret(c.Password)),
+		slog.Int("token_expiration_in_s", c.TokenExpirationInS),
+		slog.Bool("keycloak_insecure_skip_verify", c.KeycloakInsecureSkipVerify),
+		slog.String("refresh_token", secret(c.RefreshToken)),
 	)
 }
 
@@ -142,9 +195,18 @@ func (c Config) LogValue() slog.Value {
 //
 // It refuses, before gRPC sees any of it, a Config that sets only one of GrpcClientCert and
 // GrpcClientKey, a plaintext Config that carries a client identity, a GrpcCert that holds no PEM
-// certificate, and a client certificate and key that do not form a pair.
+// certificate, a client certificate and key that do not form a pair, a partial Keycloak triple and
+// a Keycloak triple with neither Password nor RefreshToken.
+//
+// When Keycloak is configured it performs the initial token acquisition (once per credential set,
+// shared with every other connection of the same credentials) and returns its
+// *auth.KeycloakAuthenticationError if that fails.
 func NewChannel(cfg Config, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 	target := cfg.Target()
+	keycloak := cfg.KeycloakConfig()
+	if err := keycloak.Validate(); err != nil {
+		return nil, fmt.Errorf("ondewo/client: client.Config for %s: %w", target, err)
+	}
 	hasClientCert, hasClientKey := cfg.GrpcClientCert != "", cfg.GrpcClientKey != ""
 
 	if hasClientCert != hasClientKey {
@@ -210,6 +272,20 @@ func NewChannel(cfg Config, opts ...grpc.DialOption) (*grpc.ClientConn, error) {
 			grpc.MaxCallSendMsgSize(MaxMessageLength),
 		),
 	}, opts...)
+
+	if keycloak.Configured() {
+		var providerOptions []auth.KeycloakOption
+		if cfg.Logger != nil {
+			providerOptions = append(providerOptions, auth.WithKeycloakLogger(cfg.Logger))
+		}
+		provider, err := auth.SharedKeycloakTokenProvider(keycloak, providerOptions...)
+		if err != nil {
+			return nil, err
+		}
+		// A plaintext Config is an explicit choice (a local server, or an ingress terminating TLS),
+		// so the token travels on it like it does in the python SDKs.
+		dialOptions = append(dialOptions, grpc.WithPerRPCCredentials(provider.PerRPCCredentials(cfg.Insecure)))
+	}
 
 	return grpc.NewClient(target, dialOptions...)
 }

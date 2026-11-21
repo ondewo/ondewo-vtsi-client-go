@@ -633,7 +633,9 @@ func TestConfigRendersAnEmptyKeyAsEmpty(t *testing.T) {
 	t.Parallel()
 
 	got := client.Config{Host: "localhost", Port: "50051"}.String()
-	want := `client.Config{Host: "localhost", Port: "50051", GrpcCert: "", GrpcClientCert: "", GrpcClientKey: "", Insecure: false}`
+	want := `client.Config{Host: "localhost", Port: "50051", GrpcCert: "", GrpcClientCert: "", GrpcClientKey: "", Insecure: false, ` +
+		`KeycloakURL: "", Realm: "", ClientID: "", Username: "", Password: "", TokenExpirationInS: 0, ` +
+		`KeycloakInsecureSkipVerify: false, RefreshToken: ""}`
 	if got != want {
 		t.Errorf("String() = %q, want %q", got, want)
 	}
