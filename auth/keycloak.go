@@ -25,6 +25,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"net/url"
+	"reflect"
 	"runtime"
 	"sort"
 	"strconv"
@@ -722,7 +723,26 @@ func jsonType(value any) string {
 	}
 }
 
-// describe renders an error as "<Type>: <message>".
+// describe renders an error as "<Type>: <message>", where <Type> is the bare type name the python
+// SDK prints (type(exception).__name__): no package qualifier and no pointer, so a log line or an
+// error reads the same in every SDK ("errorString: ...", "Error: ...", "OpError: ...").
 func describe(err error) string {
-	return fmt.Sprintf("%T: %v", err, err)
+	return fmt.Sprintf("%s: %v", errorTypeName(err), err)
+}
+
+// errorTypeName returns the bare name of err's dynamic type. An unnamed type (a struct literal that
+// embeds an error) falls back to its full spelling; a nil error is named "nil".
+func errorTypeName(err error) string {
+	if err == nil {
+		return "nil"
+	}
+	errType := reflect.TypeOf(err)
+	for errType.Kind() == reflect.Pointer {
+		errType = errType.Elem()
+	}
+	if name := errType.Name(); name != "" {
+		return name
+	}
+
+	return errType.String()
 }

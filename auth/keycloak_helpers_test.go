@@ -21,11 +21,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"math"
 	"net/url"
 	"runtime"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -288,4 +290,30 @@ func repeat(value string, n int) []string {
 	}
 
 	return out
+}
+
+// describe must print the bare type name, as the python SDK's type(exception).__name__ does, never
+// Go's package-qualified pointer spelling ("*errors.errorString").
+func TestDescribeUsesTheBareTypeName(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		err  error
+		want string
+	}{
+		"pointer type":    {err: errors.New("boom"), want: "errorString: boom"},
+		"url error":       {err: &url.Error{Op: "Post", URL: "https://kc", Err: errors.New("refused")}, want: `Error: Post "https://kc": refused`},
+		"value type":      {err: syscall.ECONNREFUSED, want: "Errno: " + syscall.ECONNREFUSED.Error()},
+		"typed auth":      {err: &KeycloakAuthenticationError{Message: "m"}, want: "KeycloakAuthenticationError: m"},
+		"unnamed wrapper": {err: struct{ error }{errors.New("inner")}, want: "struct { error }: inner"},
+		"nil":             {err: nil, want: "nil: <nil>"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			if got := describe(tc.err); got != tc.want {
+				t.Errorf("describe() = %q, want %q", got, tc.want)
+			}
+		})
+	}
 }

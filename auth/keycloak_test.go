@@ -418,7 +418,7 @@ func TestT23ANonKeycloakErrorReachesTheCallerAsAKeycloakError(t *testing.T) {
 	if !errors.As(err, &authErr) || !errors.Is(err, bug) {
 		t.Fatalf("err = %v, want the typed error caused by the transport's error", err)
 	}
-	if !strings.Contains(err.Error(), "Keycloak token refresh failed (*errors.errorString: transport bug)") {
+	if !strings.Contains(err.Error(), "Keycloak token refresh failed (errorString: transport bug)") {
 		t.Errorf("err = %v", err)
 	}
 }
@@ -988,7 +988,7 @@ func TestTheProviderRefusesAnInvalidOrUnconfiguredConfig(t *testing.T) {
 func TestAPanicWithANonErrorValueAtStartUpIsATypedError(t *testing.T) {
 	t.Parallel()
 	err := newProviderError(t, passwordConfig(), step{panicWith: 42})
-	if err.Error() != "Keycloak token login failed (*errors.errorString: 42)" || errors.Unwrap(err) == nil {
+	if err.Error() != "Keycloak token login failed (errorString: 42)" || errors.Unwrap(err) == nil {
 		t.Errorf("err = %v", err)
 	}
 }
