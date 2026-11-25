@@ -37,7 +37,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// <p>The kind of an IVR node</p>
+// The kind of an IVR node
 type IvrNodeType int32
 
 const (
@@ -106,7 +106,7 @@ func (IvrNodeType) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_ivr_menus_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>Publication state of an IVR menu</p>
+// Publication state of an IVR menu
 type IvrMenuState int32
 
 const (
@@ -269,7 +269,7 @@ func (IvrMenuIssueSeverity) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_ivr_menus_proto_rawDescGZIP(), []int{3}
 }
 
-// <p>State of a test call of an IVR menu</p>
+// State of a test call of an IVR menu
 type IvrMenuTestState int32
 
 const (
@@ -330,10 +330,7 @@ func (IvrMenuTestState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_ivr_menus_proto_rawDescGZIP(), []int{4}
 }
 
-// <p>An IVR menu of a VTSI project. The graph fields (<code>entry_node_id</code>, <code>nodes</code>,
-// <code>language_code</code>, <code>t2s_pipeline_id</code>) are versioned by <code>revision</code>; the routing
-// fields (<code>inbound_phone_numbers</code>, <code>default_inbound</code>, <code>disabled</code>) take effect on the
-// next publish.</p>
+// An IVR menu of a VTSI project. The graph fields (<code>entry_node_id</code>, <code>nodes</code>, <code>language_code</code>, <code>t2s_pipeline_id</code>) are versioned by <code>revision</code>; the routing fields (<code>inbound_phone_numbers</code>, <code>default_inbound</code>, <code>disabled</code>) take effect on the next publish.
 type IvrMenu struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Output only. Resource name of the menu.
@@ -584,8 +581,7 @@ func (x *IvrMenu) GetNodeStatsUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-// <p>One node of an IVR menu. Which fields apply depends on <code>type</code>; a field set on a node type it does not
-// apply to is refused with <code>INVALID_ARGUMENT</code>.</p>
+// One node of an IVR menu. Which fields apply depends on <code>type</code>; a field set on a node type it does not apply to is refused with <code>INVALID_ARGUMENT</code>.
 type IvrNode struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. <code>^[a-z0-9_-]{1,64}$</code>, unique within the menu.
@@ -773,7 +769,7 @@ func (x *IvrNode) GetGotoMenuName() string {
 	return ""
 }
 
-// <p>One key of a MENU node</p>
+// One key of a MENU node
 type IvrOption struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Exactly one of <code>0-9 * #</code>, unique within the node.
@@ -838,7 +834,7 @@ func (x *IvrOption) GetLabel() string {
 	return ""
 }
 
-// <p>An audio prompt. Exactly one source must be set.</p>
+// An audio prompt. Exactly one source must be set.
 type IvrPrompt struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The source of the audio
@@ -952,7 +948,7 @@ func (*IvrPrompt_Wav) isIvrPrompt_Source() {}
 
 func (*IvrPrompt_AsteriskSound) isIvrPrompt_Source() {}
 
-// <p>Position of a node on the editor canvas</p>
+// Position of a node on the editor canvas
 type IvrNodePosition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Horizontal position
@@ -1007,7 +1003,7 @@ func (x *IvrNodePosition) GetY() float64 {
 	return 0
 }
 
-// <p>Traffic counters of one node, in <code>IvrMenu.node_stats</code>. Approximate.</p>
+// Traffic counters of one node, in <code>IvrMenu.node_stats</code>. Approximate.
 type IvrNodeStats struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Entries into the node in the published revision since it was published.
@@ -1770,7 +1766,7 @@ func (x *ValidateIvrMenuRequest) GetIvrMenu() *IvrMenu {
 	return nil
 }
 
-// <p>One problem of an IVR menu draft</p>
+// One problem of an IVR menu draft
 type IvrMenuIssue struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Whether the issue blocks a save or a publish
@@ -1968,8 +1964,7 @@ func (x *PublishIvrMenuRequest) GetRevision() int64 {
 	return 0
 }
 
-// Request to clone an IVR menu. The clone has no <code>inbound_phone_numbers</code>, <code>default_inbound</code>
-// <code>false</code> and the state DRAFT.
+// Request to clone an IVR menu. The clone has no <code>inbound_phone_numbers</code>, <code>default_inbound</code> <code>false</code> and the state DRAFT.
 type CloneIvrMenuRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The source menu: <pre><code>projects/&lt;project_uuid&gt;/ivr_menus/&lt;ivr_menu_uuid&gt;</code></pre>
@@ -2106,7 +2101,7 @@ func (x *ListIvrMenuRevisionsRequest) GetPageToken() string {
 	return ""
 }
 
-// <p>One saved revision of an IVR menu</p>
+// One saved revision of an IVR menu
 type IvrMenuRevision struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The revision number
@@ -2253,7 +2248,7 @@ func (x *ListIvrMenuRevisionsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// <p>One step of the key script of a test call</p>
+// One step of the key script of a test call
 type IvrTestStep struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Milliseconds to wait after the previous step (for the first step: after the call entered the menu) before
@@ -2423,7 +2418,7 @@ func (x *GetIvrMenuTestRequest) GetName() string {
 	return ""
 }
 
-// <p>One node entry of a test call</p>
+// One node entry of a test call
 type IvrTraversalStep struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The node entered (of the menu named by <code>ivr_menu_name</code>, which changes after a GOTO_MENU node)
@@ -2507,7 +2502,7 @@ func (x *IvrTraversalStep) GetIvrMenuName() string {
 	return ""
 }
 
-// <p>A test call of an IVR menu, started by <code>TestIvrMenu</code>. Leaves no call record and no NLU session.</p>
+// A test call of an IVR menu, started by <code>TestIvrMenu</code>. Leaves no call record and no NLU session.
 type IvrMenuTest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the test.

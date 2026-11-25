@@ -38,8 +38,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Which process inside the container emitted a log entry. All of these share a single docker log
-// stream, because ondewo-csi runs as a child process of the ondewo-sip container.
+// Which process inside the container emitted a log entry. All of these share a single docker log stream, because ondewo-csi runs as a child process of the ondewo-sip container.
 type LogSource int32
 
 const (
@@ -159,9 +158,7 @@ func (LogStreamChannel) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{1}
 }
 
-// The state of VTSI&apos;s capture of one log stream. This describes the CAPTURE, not the container:
-// a healthy container whose capture lease was lost is <code>DETACHED</code>, and a container that no
-// longer exists but whose capture completed cleanly is <code>STOPPED</code>.
+// The state of VTSI&apos;s capture of one log stream. This describes the CAPTURE, not the container: a healthy container whose capture lease was lost is <code>DETACHED</code>, and a container that no longer exists but whose capture completed cleanly is <code>STOPPED</code>.
 type LogCaptureState int32
 
 const (
@@ -222,9 +219,7 @@ func (LogCaptureState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{2}
 }
 
-// Identifies a field of <a href="index.html#ondewo.vtsi.CallLogFilter">CallLogFilter</a>. Used by
-// <a href="index.html#ondewo.vtsi.ListCallLogsResponse">ListCallLogsResponse.scope_limited_filters</a>
-// to declare which filters could only be applied inside the returned window.
+// Identifies a field of <a href="index.html#ondewo.vtsi.CallLogFilter">CallLogFilter</a>. Used by <a href="index.html#ondewo.vtsi.ListCallLogsResponse">ListCallLogsResponse.scope_limited_filters</a> to declare which filters could only be applied inside the returned window.
 type CallLogFilterField int32
 
 const (
@@ -297,9 +292,7 @@ func (CallLogFilterField) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{3}
 }
 
-// Why the SERVER ended a <code>StreamCallLogs</code> stream. Carried by the final
-// <a href="index.html#ondewo.vtsi.StreamCallLogsResponse">StreamCallLogsResponse</a> beside the
-// human-readable <code>end_reason</code>. A stream ended by the client has no final message.
+// Why the SERVER ended a <code>StreamCallLogs</code> stream. Carried by the final <a href="index.html#ondewo.vtsi.StreamCallLogsResponse">StreamCallLogsResponse</a> beside the human-readable <code>end_reason</code>. A stream ended by the client has no final message.
 type LogStreamEndReason int32
 
 const (
@@ -370,9 +363,7 @@ func (LogStreamEndReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{4}
 }
 
-// File format of an <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">ExportCallLogs</a> export. Every
-// format is UTF-8 with <code>\n</code> line endings and one entry per record; a multi-line entry stays one
-// record.
+// File format of an <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">ExportCallLogs</a> export. Every format is UTF-8 with <code>\n</code> line endings and one entry per record; a multi-line entry stays one record.
 type LogExportFormat int32
 
 const (
@@ -440,9 +431,7 @@ func (LogExportFormat) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_logs_proto_rawDescGZIP(), []int{5}
 }
 
-// A single captured container log record. One record may span several physical docker log lines: a
-// Python traceback, a protobuf <code>str()</code> dump and a multi-line configuration banner are all
-// one record, and are stored and returned as one entry.
+// A single captured container log record. One record may span several physical docker log lines: a Python traceback, a protobuf <code>str()</code> dump and a multi-line configuration banner are all one record, and are stored and returned as one entry.
 type CallLogEntry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Ordering cursor. Assigned by the database, monotonically increasing WITHIN ONE LOG STREAM.
@@ -689,12 +678,9 @@ func (x *SipHeaderFilter) GetValue() string {
 	return ""
 }
 
-// Narrows a log query. Every field is optional; an empty repeated field means &quot;do not filter on
-// this&quot;. Fields are combined with AND; the values within one repeated field are combined with OR.
+// Narrows a log query. Every field is optional; an empty repeated field means &quot;do not filter on this&quot;. Fields are combined with AND; the values within one repeated field are combined with OR.
 //
-// <p>Filters fall into two groups. IDENTITY filters select which containers and which calls are of
-// interest and are resolved against VTSI&apos;s own call records. CONTENT filters select which
-// entries of those containers to return.</p>
+// Filters fall into two groups. IDENTITY filters select which containers and which calls are of interest and are resolved against VTSI&apos;s own call records. CONTENT filters select which entries of those containers to return.
 type CallLogFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Call resource names of the form
@@ -1066,9 +1052,7 @@ func (x *CallLogFilter) GetAsteriskPortNumbers() []int32 {
 	return nil
 }
 
-// One capture generation of one container on one docker channel. A container that is recreated
-// yields a NEW log stream, because a recreated container is a different docker container and the
-// previous container&apos;s logs no longer exist anywhere except here.
+// One capture generation of one container on one docker channel. A container that is recreated yields a NEW log stream, because a recreated container is a different docker container and the previous container&apos;s logs no longer exist anywhere except here.
 type CallLogStream struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the log stream.
@@ -1315,8 +1299,7 @@ func (x *CallLogStream) GetVtsiProjectName() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>.
 type StreamCallLogsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to stream the logs.
@@ -1411,10 +1394,7 @@ func (x *StreamCallLogsRequest) GetAfterSeq() int64 {
 	return 0
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>. The stream carries an
-// envelope rather than a bare entry so that a viewer can tell a healthy quiet container from a
-// capture that has died.
+// The response message for <a href="index.html#ondewo.vtsi.Logs.StreamCallLogs">Logs.StreamCallLogs</a>. The stream carries an envelope rather than a bare entry so that a viewer can tell a healthy quiet container from a capture that has died.
 type StreamCallLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The entries in this batch, oldest first. May be empty, e.g. on the final message that carries
@@ -1523,8 +1503,7 @@ func (x *StreamCallLogsResponse) GetEndReasonCode() LogStreamEndReason {
 	return LogStreamEndReason_LOG_STREAM_END_REASON_UNSPECIFIED
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
 type ListCallLogsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to list the logs.
@@ -1662,8 +1641,7 @@ func (x *ListCallLogsRequest) GetIncludeCounts() bool {
 	return false
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Logs.ListCallLogs">Logs.ListCallLogs</a>.
 type ListCallLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The matching entries, oldest first.
@@ -1801,8 +1779,7 @@ func (x *ListCallLogsResponse) GetCountByLevel() map[string]int64 {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.GetCallLogStream">Logs.GetCallLogStream</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.GetCallLogStream">Logs.GetCallLogStream</a>.
 type GetCallLogStreamRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -1873,8 +1850,7 @@ func (x *GetCallLogStreamRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
 type ListCallLogStreamsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to list the log streams.
@@ -1983,8 +1959,7 @@ func (x *ListCallLogStreamsRequest) GetCaptureStates() []LogCaptureState {
 	return nil
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Logs.ListCallLogStreams">Logs.ListCallLogStreams</a>.
 type ListCallLogStreamsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The log streams of this page, newest <code>capture_started_at</code> first.
@@ -2040,8 +2015,7 @@ func (x *ListCallLogStreamsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.DeleteCallLogs">Logs.DeleteCallLogs</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.DeleteCallLogs">Logs.DeleteCallLogs</a>.
 type DeleteCallLogsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name for which to delete the logs.
@@ -2111,8 +2085,7 @@ func (x *DeleteCallLogsRequest) GetValidateOnly() bool {
 	return false
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Logs.DeleteCallLogs">Logs.DeleteCallLogs</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Logs.DeleteCallLogs">Logs.DeleteCallLogs</a>.
 type DeleteCallLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// How many log entries were deleted (with <code>validate_only</code>: would be deleted).
@@ -2168,8 +2141,7 @@ func (x *DeleteCallLogsResponse) GetDeletedLogStreamCount() int64 {
 	return 0
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">Logs.ExportCallLogs</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Logs.ExportCallLogs">Logs.ExportCallLogs</a>.
 type ExportCallLogsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project whose logs to export.

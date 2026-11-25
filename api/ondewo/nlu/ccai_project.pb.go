@@ -113,9 +113,7 @@ func (CcaiProjectStatus) EnumDescriptor() ([]byte, []int) {
 
 // Defines the types of CCAI (Call Center AI) services available in the system.
 //
-// Each service type represents a specific capability or module within the ONDEWO platform
-// that enables comprehensive call center and customer interaction management. Services can be
-// composed in workflows and are identified by their type, language code, and provider configuration.
+// Each service type represents a specific capability or module within the ONDEWO platform that enables comprehensive call center and customer interaction management. Services can be composed in workflows and are identified by their type, language code, and provider configuration.
 type CcaiServiceType int32
 
 const (
@@ -1786,8 +1784,7 @@ func (x *UpdateCcaiProjectResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to delete a CCAI service project
-// If a deployed CCAI service project was deleted then it was undeployed beforehand automatically
+// Request to delete a CCAI service project If a deployed CCAI service project was deleted then it was undeployed beforehand automatically
 type DeleteCcaiProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// CCAI service project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -1843,8 +1840,7 @@ func (x *DeleteCcaiProjectRequest) GetNluProjectName() string {
 	return ""
 }
 
-// Response to delete a CCAI service project
-// If a deployed CCAI service project was deleted then it was undeployed beforehand automatically
+// Response to delete a CCAI service project If a deployed CCAI service project was deleted then it was undeployed beforehand automatically
 type DeleteCcaiProjectResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// CCAI service project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>

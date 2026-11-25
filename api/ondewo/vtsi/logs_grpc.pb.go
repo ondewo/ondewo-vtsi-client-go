@@ -45,29 +45,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Reads, follows, exports and erases the CONTAINER LOGS VTSI captures from the per-call
-// ondewo-sip / ondewo-csi containers of a VTSI project. Entries are served from the VTSI database, not
-// from the docker daemon, so the logs of a container that was already removed stay readable until
-// retention or <code>DeleteCallLogs</code> removes them.</p>
-// <p><b>Secrets are redacted server-side</b> in every RPC that returns log text
-// (<code>StreamCallLogs</code>, <code>ListCallLogs</code>, <code>ExportCallLogs</code>): the
-// project&apos;s SIP passwords, the call-control secrets and, unless the operator disabled it
-// (<code>ONDEWO_VTSI_LOG_MASK_IDENTIFIERS</code>, default true), identifiers such as phone numbers. The
-// redaction runs when the entry is read, so a redaction rule added later also applies to entries
-// captured before it.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name,
-// filter, cursor, <code>page_token</code> or <code>field_mask</code> (each naming the field);
-// <code>NOT_FOUND</code> for an unknown project or log stream; <code>RESOURCE_EXHAUSTED</code> when the
-// server already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the
-// database cannot be reached.</p>
-// <p>Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller
-// without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires
-// <code>PROJECT_DEVELOPER</code> or higher on the project (<code>PROJECT_EXECUTOR</code> and
-// <code>PROJECT_USER</code> are refused, because log text can carry conversation content), otherwise
-// <code>PERMISSION_DENIED</code>, also for an unknown project. A long-running
-// <code>StreamCallLogs</code> or <code>ExportCallLogs</code> re-checks the caller&apos;s role
-// periodically and ends when it was revoked or the credential expired.</p>
+// # ONDEWO VTSI API
+//
+// Reads, follows, exports and erases the CONTAINER LOGS VTSI captures from the per-call ondewo-sip / ondewo-csi containers of a VTSI project. Entries are served from the VTSI database, not from the docker daemon, so the logs of a container that was already removed stay readable until retention or <code>DeleteCallLogs</code> removes them.
+//
+// <b>Secrets are redacted server-side</b> in every RPC that returns log text (<code>StreamCallLogs</code>, <code>ListCallLogs</code>, <code>ExportCallLogs</code>): the project&apos;s SIP passwords, the call-control secrets and, unless the operator disabled it (<code>ONDEWO_VTSI_LOG_MASK_IDENTIFIERS</code>, default true), identifiers such as phone numbers. The redaction runs when the entry is read, so a redaction rule added later also applies to entries captured before it.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, cursor, <code>page_token</code> or <code>field_mask</code> (each naming the field); <code>NOT_FOUND</code> for an unknown project or log stream; <code>RESOURCE_EXHAUSTED</code> when the server already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the database cannot be reached.
+//
+// Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires <code>PROJECT_DEVELOPER</code> or higher on the project (<code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code> are refused, because log text can carry conversation content), otherwise <code>PERMISSION_DENIED</code>, also for an unknown project. A long-running <code>StreamCallLogs</code> or <code>ExportCallLogs</code> re-checks the caller&apos;s role periodically and ends when it was revoked or the credential expired.
 type LogsClient interface {
 	// <p>Streams the container logs of the ondewo-sip / ondewo-csi containers of a VTSI project as
 	// they are captured, in the manner of <code>docker logs --follow</code>. The stream replays
@@ -266,29 +252,15 @@ type Logs_ExportCallLogsClient = grpc.ServerStreamingClient[ExportCallLogsRespon
 // All implementations must embed UnimplementedLogsServer
 // for forward compatibility.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Reads, follows, exports and erases the CONTAINER LOGS VTSI captures from the per-call
-// ondewo-sip / ondewo-csi containers of a VTSI project. Entries are served from the VTSI database, not
-// from the docker daemon, so the logs of a container that was already removed stay readable until
-// retention or <code>DeleteCallLogs</code> removes them.</p>
-// <p><b>Secrets are redacted server-side</b> in every RPC that returns log text
-// (<code>StreamCallLogs</code>, <code>ListCallLogs</code>, <code>ExportCallLogs</code>): the
-// project&apos;s SIP passwords, the call-control secrets and, unless the operator disabled it
-// (<code>ONDEWO_VTSI_LOG_MASK_IDENTIFIERS</code>, default true), identifiers such as phone numbers. The
-// redaction runs when the entry is read, so a redaction rule added later also applies to entries
-// captured before it.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name,
-// filter, cursor, <code>page_token</code> or <code>field_mask</code> (each naming the field);
-// <code>NOT_FOUND</code> for an unknown project or log stream; <code>RESOURCE_EXHAUSTED</code> when the
-// server already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the
-// database cannot be reached.</p>
-// <p>Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller
-// without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires
-// <code>PROJECT_DEVELOPER</code> or higher on the project (<code>PROJECT_EXECUTOR</code> and
-// <code>PROJECT_USER</code> are refused, because log text can carry conversation content), otherwise
-// <code>PERMISSION_DENIED</code>, also for an unknown project. A long-running
-// <code>StreamCallLogs</code> or <code>ExportCallLogs</code> re-checks the caller&apos;s role
-// periodically and ends when it was revoked or the credential expired.</p>
+// # ONDEWO VTSI API
+//
+// Reads, follows, exports and erases the CONTAINER LOGS VTSI captures from the per-call ondewo-sip / ondewo-csi containers of a VTSI project. Entries are served from the VTSI database, not from the docker daemon, so the logs of a container that was already removed stay readable until retention or <code>DeleteCallLogs</code> removes them.
+//
+// <b>Secrets are redacted server-side</b> in every RPC that returns log text (<code>StreamCallLogs</code>, <code>ListCallLogs</code>, <code>ExportCallLogs</code>): the project&apos;s SIP passwords, the call-control secrets and, unless the operator disabled it (<code>ONDEWO_VTSI_LOG_MASK_IDENTIFIERS</code>, default true), identifiers such as phone numbers. The redaction runs when the entry is read, so a redaction rule added later also applies to entries captured before it.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, cursor, <code>page_token</code> or <code>field_mask</code> (each naming the field); <code>NOT_FOUND</code> for an unknown project or log stream; <code>RESOURCE_EXHAUSTED</code> when the server already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the database cannot be reached.
+//
+// Authorization (only when the server enforces it, see the <code>Projects</code> service): a caller without a credential is <code>UNAUTHENTICATED</code>; every RPC of this service requires <code>PROJECT_DEVELOPER</code> or higher on the project (<code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code> are refused, because log text can carry conversation content), otherwise <code>PERMISSION_DENIED</code>, also for an unknown project. A long-running <code>StreamCallLogs</code> or <code>ExportCallLogs</code> re-checks the caller&apos;s role periodically and ends when it was revoked or the credential expired.
 type LogsServer interface {
 	// <p>Streams the container logs of the ondewo-sip / ondewo-csi containers of a VTSI project as
 	// they are captured, in the manner of <code>docker logs --follow</code>. The stream replays

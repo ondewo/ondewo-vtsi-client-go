@@ -53,9 +53,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Represents the options for views of an entity type.
-// An entity type can be a sizable object. Therefore, we provide a resource view that
-// does not return all values and synonyms besides the full view that is set by default.
+// Represents the options for views of an entity type. An entity type can be a sizable object. Therefore, we provide a resource view that does not return all values and synonyms besides the full view that is set by default.
 type EntityTypeView int32
 
 const (
@@ -273,9 +271,7 @@ func (EntityType_EntityTypeStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_entity_type_proto_rawDescGZIP(), []int{0, 1}
 }
 
-// Represents different entity type expansion modes. Automated expansion
-// allows an agent to recognize values that have not been explicitly listed in
-// the entity (for example, new kinds of shopping list items).
+// Represents different entity type expansion modes. Automated expansion allows an agent to recognize values that have not been explicitly listed in the entity (for example, new kinds of shopping list items).
 type EntityType_AutoExpansionMode int32
 
 const (
@@ -447,9 +443,7 @@ func (EntityValueSorting_EntityValueSortingField) EnumDescriptor() ([]byte, []in
 	return file_ondewo_nlu_entity_type_proto_rawDescGZIP(), []int{26, 0}
 }
 
-// Represents an entity type.
-// Entity types serve as a tool for extracting parameter values from natural
-// language queries.
+// Represents an entity type. Entity types serve as a tool for extracting parameter values from natural language queries.
 type EntityType struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required for all methods except <code>create</code> (<code>create</code> populates the name

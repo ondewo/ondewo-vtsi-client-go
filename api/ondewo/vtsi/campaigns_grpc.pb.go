@@ -55,99 +55,39 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Manages the CAMPAIGNS of a VTSI project. A campaign is a named set of outbound calls that VTSI
-// places for the client while keeping at most <code>max_parallel_calls</code> of them running at
-// the same time. If 100 callers are added to a campaign with <code>max_parallel_calls = 10</code>,
-// at any moment at most 10 of those calls are being set up or are connected; the next one starts
-// when one ends.</p>
-// <p>Calls are added to a campaign with
-// <a href="index.html#ondewo.vtsi.Calls.AddCallersToCampaign">Calls.AddCallersToCampaign</a> or
-// <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>
-// (a server that predates them answers <code>UNIMPLEMENTED</code> and starts nothing); a scheduled call of a campaign is started at or after its scheduled time AND when the campaign has
-// a free slot.</p>
-// <p>A call that fails is retried up to <code>max_attempts</code> times in total, waiting
-// <code>retry_delay</code> between attempts. A call counts as failed only after its last attempt.
-// A failure that cannot succeed by repetition (for example a rejected credential, an invalid
-// configuration) is never retried.</p>
-// <p>Lifecycle: <code>StartCampaign</code> starts a created campaign; <code>StopCampaign</code> lets
-// the ongoing calls finish and starts no new ones; <code>HardStopCampaign</code> ends the ongoing
-// calls immediately and starts no new ones; <code>ResumeCampaign</code> continues a stopped or hard
-// stopped campaign with the calls that have not finished yet.</p>
-// <p>Every RPC about ONE campaign accepts either its resource name or its display name. Display names
-// are unique within a project, so a display name is resolved within the project named by the
-// request&apos;s top-level <code>vtsi_project_name</code>, which is REQUIRED with a display name
-// (<code>INVALID_ARGUMENT</code> when it is empty or malformed) and checked against the campaign
-// when a resource name is used. (The <code>CampaignDisplayName</code> message of 9.0.0, which
-// carried the project and the display name together, was removed in 9.1.0; its field numbers are
-// <code>reserved</code>.)</p>
-// <p>A malformed selector is <code>INVALID_ARGUMENT</code> for every authenticated caller, with or
-// without authorization enforced (also when authorization could resolve no project from it): neither
-// the resource name nor the display name set (also how an old 9.0.0 client&apos;s removed
-// <code>CampaignDisplayName</code> arrives), a malformed resource name, a display name with an empty
-// or malformed <code>vtsi_project_name</code>, and a <code>vtsi_project_name</code> that is not the
-// project of the resource name. With authorization enforced, a well-formed request naming a project
-// the caller holds no role on (an unknown project included) is refused with
-// <code>PERMISSION_DENIED</code> before any lookup, so it is not answered <code>NOT_FOUND</code>, and
-// a caller without a credential is <code>UNAUTHENTICATED</code> whatever it sent.</p>
-// <p>Campaign-level call defaults: <code>campaign_common_services_config</code> and
-// <code>campaign_sip_caller_config</code> of a <code>Campaign</code> are the defaults of EVERY call of
-// the campaign. They are read LIVE when a campaign call is dispatched (every attempt, retries
-// included): the effective configuration of the call is a copy of the campaign&apos;s config with the
-// call&apos;s own <code>StartCallerRequest</code> config merged over it (protobuf
-// <code>MergeFrom</code>), see <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>. The one exception
-// is the callee: <code>campaign_sip_caller_config.callee_id</code> is resolved and FIXED when a call is
-// added (it is that call&apos;s <code>CampaignCall.phone_number</code>), so every attempt of a call dials the
-// number its campaign call reports.</p>
-// <p>Partial responses: <code>ListCampaigns</code>, <code>ListCampaignCalls</code>,
-// <code>CreateCampaign</code>, <code>GetCampaign</code>, <code>UpdateCampaign</code>,
-// <code>DeleteCampaign</code> (paths of <code>DeleteCampaignResponse</code>), the four lifecycle RPCs
-// <code>StartCampaign</code>, <code>StopCampaign</code>, <code>HardStopCampaign</code> and
-// <code>ResumeCampaign</code>, <code>CloneCampaign</code> and <code>GetCampaignCall</code> accept an optional
-// <code>field_mask</code> naming the field paths of the returned resource (for a listing: of each listed
-// element) to populate. A mask never changes what the RPC does. Unset or empty returns every
-// field (one exception: <code>ListCampaigns</code> returns <code>campaign_callers</code> and
-// <code>campaign_callers_truncated</code> only when its mask names them); the identifying <code>name</code> is always populated; an unknown path is rejected with
-// <code>INVALID_ARGUMENT</code> naming it; nested paths through singular message fields (e.g.
-// <code>statistics.completed</code>) are allowed, a path below a repeated or map field is not. The
-// mask is applied after any role-based redaction, so it can only narrow what the caller may see.</p>
-// <p>Callers and calls of a campaign: <code>Campaign.campaign_callers</code> names the callers that placed
-// its calls (bounded); <code>Calls.ListCallers</code> with <code>ListCallersRequest.campaign_name</code> /
-// <code>campaign_display_name</code> lists them paginated as <code>Caller</code> resources, and
-// <code>Calls.ListCalls</code> with <code>CallFilter.campaign_name</code> /
-// <code>campaign_display_name</code> lists the calls they placed as <code>Call</code> resources.</p>
-// <p>Calling window: a campaign with a <code>calling_window</code> starts calls (first attempts, retries and
-// due scheduled calls alike) only inside one of the window&apos;s weekly slots, in the window&apos;s time zone.
-// Outside every slot it stays <code>RUNNING</code> and reports <code>outside_calling_window = true</code>; calls
-// already running are never ended by a slot ending. See
-// <a href="index.html#ondewo.vtsi.CampaignCallingWindow">CampaignCallingWindow</a>.</p>
-// <p>Limits and defaults of the server (environment variables of ondewo-vtsi, read at start-up): at most
-// <code>ONDEWO_VTSI_CAMPAIGN_MAX_CALLS</code> (100000) calls per campaign; <code>max_parallel_calls</code>
-// defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_MAX_PARALLEL_CALLS</code> (1) and is at most
-// <code>ONDEWO_VTSI_CAMPAIGN_MAX_PARALLEL_CALLS_LIMIT</code> (1000); <code>max_attempts</code> defaults to 1
-// and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10); <code>retry_delay</code> defaults
-// to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_RETRY_DELAY_S</code> (60 s); one <code>AddCallersToCampaign</code> /
-// <code>AddScheduledCallersToCampaign</code> request carries at most 1000 entries (a fixed server limit,
-// <code>INVALID_ARGUMENT</code> above it); <code>CancelCampaignCalls</code> and <code>RetryCampaignCalls</code>
-// act on at most 1000 calls per request. The status stream is bounded by
-// <code>ONDEWO_VTSI_STATUS_STREAM_MAX_DURATION_S</code> (3600 s), sends a keep-alive after
-// <code>ONDEWO_VTSI_STATUS_STREAM_KEEPALIVE_S</code> (15 s) without a change and at most
-// <code>ONDEWO_VTSI_STATUS_STREAM_MAX_CONCURRENT</code> (16) status streams are open per server replica.</p>
-// <p>Authorization (when enforced): every RPC of this service needs <code>PROJECT_EXECUTOR</code> or a
-// higher role (<code>PROJECT_DEVELOPER</code>, <code>PROJECT_ADMIN</code>) on the campaign&apos;s project, or
-// <code>SERVER_ADMIN</code>; credential-bearing call defaults are returned only to the roles named at
-// <code>Campaign.campaign_common_services_config</code>.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name,
-// filter, field mask or value; <code>NOT_FOUND</code> for an unknown project, campaign or campaign
-// call (with authorization enforced: <code>PERMISSION_DENIED</code> for a project the caller holds
-// no role on, or a role below <code>PROJECT_EXECUTOR</code>); <code>UNAUTHENTICATED</code> for a request
-// without a valid credential while authorization is enforced; <code>ALREADY_EXISTS</code> for a
-// <code>display_name</code> already used in the project;
-// <code>FAILED_PRECONDITION</code> for a state that does not allow the operation (each RPC names its
-// cases); <code>ABORTED</code> when a concurrent change won, nothing was stored and the request can
-// be retried; <code>DEADLINE_EXCEEDED</code> for a forced <code>DeleteCampaign</code> whose hang-ups were not
-// confirmed in time (the hard stop stays in effect, retry the request); <code>RESOURCE_EXHAUSTED</code> when
-// the server has no free stream slot.</p>
+// # ONDEWO VTSI API
+//
+// Manages the CAMPAIGNS of a VTSI project. A campaign is a named set of outbound calls that VTSI places for the client while keeping at most <code>max_parallel_calls</code> of them running at the same time. If 100 callers are added to a campaign with <code>max_parallel_calls = 10</code>, at any moment at most 10 of those calls are being set up or are connected; the next one starts when one ends.
+//
+// Calls are added to a campaign with <a href="index.html#ondewo.vtsi.Calls.AddCallersToCampaign">Calls.AddCallersToCampaign</a> or <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a> (a server that predates them answers <code>UNIMPLEMENTED</code> and starts nothing); a scheduled call of a campaign is started at or after its scheduled time AND when the campaign has a free slot.
+//
+// A call that fails is retried up to <code>max_attempts</code> times in total, waiting <code>retry_delay</code> between attempts. A call counts as failed only after its last attempt. A failure that cannot succeed by repetition (for example a rejected credential, an invalid configuration) is never retried.
+//
+// Lifecycle: <code>StartCampaign</code> starts a created campaign; <code>StopCampaign</code> lets the ongoing calls finish and starts no new ones; <code>HardStopCampaign</code> ends the ongoing calls immediately and starts no new ones; <code>ResumeCampaign</code> continues a stopped or hard stopped campaign with the calls that have not finished yet.
+//
+// Every RPC about ONE campaign accepts either its resource name or its display name. Display names are unique within a project, so a display name is resolved within the project named by the request&apos;s top-level <code>vtsi_project_name</code>, which is REQUIRED with a display name (<code>INVALID_ARGUMENT</code> when it is empty or malformed) and checked against the campaign when a resource name is used. (The <code>CampaignDisplayName</code> message of 9.0.0, which carried the project and the display name together, was removed in 9.1.0; its field numbers are <code>reserved</code>.)
+//
+// A malformed selector is <code>INVALID_ARGUMENT</code> for every authenticated caller, with or without authorization enforced (also when authorization could resolve no project from it): neither the resource name nor the display name set (also how an old 9.0.0 client&apos;s removed <code>CampaignDisplayName</code> arrives), a malformed resource name, a display name with an empty or malformed <code>vtsi_project_name</code>, and a <code>vtsi_project_name</code> that is not the project of the resource name. With authorization enforced, a well-formed request naming a project the caller holds no role on (an unknown project included) is refused with <code>PERMISSION_DENIED</code> before any lookup, so it is not answered <code>NOT_FOUND</code>, and a caller without a credential is <code>UNAUTHENTICATED</code> whatever it sent.
+//
+// Campaign-level call defaults: <code>campaign_common_services_config</code> and <code>campaign_sip_caller_config</code> of a <code>Campaign</code> are the defaults of EVERY call of the campaign. They are read LIVE when a campaign call is dispatched (every attempt, retries included): the effective configuration of the call is a copy of the campaign&apos;s config with the call&apos;s own <code>StartCallerRequest</code> config merged over it (protobuf <code>MergeFrom</code>), see <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>. The one exception is the callee: <code>campaign_sip_caller_config.callee_id</code> is resolved and FIXED when a call is added (it is that call&apos;s <code>CampaignCall.phone_number</code>), so every attempt of a call dials the number its campaign call reports.
+//
+// How a campaign call behaves: every setting of the effective configuration acts on that one call exactly as if a <code>StartCallerRequest</code> had carried it (the call settings are explained at <a href="index.html#ondewo.vtsi.CommonServicesConfig">CommonServicesConfig</a>). For each single-valued setting the first of these that is present decides (a list setting combines the campaign&apos;s entries and the call&apos;s, a map such as <code>sip_headers</code> merges by key, and a deployment-wide limit or master switch applies on top of any value; see <code>Campaign.campaign_common_services_config</code>):
+//
+// <ol> <li>the call&apos;s own value (its entry of <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code>); for a warm transfer, the <code>TransferCall</code> request&apos;s own <code>warm_transfer_config</code> wins over all of these;</li> <li>the campaign&apos;s value (<code>campaign_common_services_config</code> / <code>campaign_sip_caller_config</code>);</li> <li>a project default where one exists (e.g. <code>VtsiProject.warm_transfer_defaults</code> for a warm transfer);</li> <li>the deployment-wide <code>ONDEWO_VTSI_*</code> setting of the server, where the operator set one;</li> <li>the built-in default of the setting.</li> </ol>
+//
+// So a campaign default is a per-call value for every call that does not set its own: it wins over the deployment-wide setting. Example: a campaign whose <code>campaign_common_services_config.voice_interaction_config.interruption_handling_config</code> sets <code>enabled = true</code> lets the callee interrupt the bot on every call of the campaign; an entry that sets <code>enabled = false</code> turns it off for that one call only.
+//
+// Partial responses: <code>ListCampaigns</code>, <code>ListCampaignCalls</code>, <code>CreateCampaign</code>, <code>GetCampaign</code>, <code>UpdateCampaign</code>, <code>DeleteCampaign</code> (paths of <code>DeleteCampaignResponse</code>), the four lifecycle RPCs <code>StartCampaign</code>, <code>StopCampaign</code>, <code>HardStopCampaign</code> and <code>ResumeCampaign</code>, <code>CloneCampaign</code> and <code>GetCampaignCall</code> accept an optional <code>field_mask</code> naming the field paths of the returned resource (for a listing: of each listed element) to populate. A mask never changes what the RPC does. Unset or empty returns every field (one exception: <code>ListCampaigns</code> returns <code>campaign_callers</code> and <code>campaign_callers_truncated</code> only when its mask names them); the identifying <code>name</code> is always populated; an unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it; nested paths through singular message fields (e.g. <code>statistics.completed</code>) are allowed, a path below a repeated or map field is not. The mask is applied after any role-based redaction, so it can only narrow what the caller may see.
+//
+// Callers and calls of a campaign: <code>Campaign.campaign_callers</code> names the callers that placed its calls (bounded); <code>Calls.ListCallers</code> with <code>ListCallersRequest.campaign_name</code> / <code>campaign_display_name</code> lists them paginated as <code>Caller</code> resources, and <code>Calls.ListCalls</code> with <code>CallFilter.campaign_name</code> / <code>campaign_display_name</code> lists the calls they placed as <code>Call</code> resources.
+//
+// Calling window: a campaign with a <code>calling_window</code> starts calls (first attempts, retries and due scheduled calls alike) only inside one of the window&apos;s weekly slots, in the window&apos;s time zone. Outside every slot it stays <code>RUNNING</code> and reports <code>outside_calling_window = true</code>; calls already running are never ended by a slot ending. See <a href="index.html#ondewo.vtsi.CampaignCallingWindow">CampaignCallingWindow</a>.
+//
+// Limits and defaults of the server (environment variables of ondewo-vtsi, read at start-up): at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_CALLS</code> (100000) calls per campaign; <code>max_parallel_calls</code> defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_MAX_PARALLEL_CALLS</code> (1) and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_PARALLEL_CALLS_LIMIT</code> (1000); <code>max_attempts</code> defaults to 1 and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10); <code>retry_delay</code> defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_RETRY_DELAY_S</code> (60 s); one <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code> request carries at most 1000 entries (a fixed server limit, <code>INVALID_ARGUMENT</code> above it); <code>CancelCampaignCalls</code> and <code>RetryCampaignCalls</code> act on at most 1000 calls per request. The status stream is bounded by <code>ONDEWO_VTSI_STATUS_STREAM_MAX_DURATION_S</code> (3600 s), sends a keep-alive after <code>ONDEWO_VTSI_STATUS_STREAM_KEEPALIVE_S</code> (15 s) without a change and at most <code>ONDEWO_VTSI_STATUS_STREAM_MAX_CONCURRENT</code> (16) status streams are open per server replica.
+//
+// Authorization (when enforced): every RPC of this service needs <code>PROJECT_EXECUTOR</code> or a higher role (<code>PROJECT_DEVELOPER</code>, <code>PROJECT_ADMIN</code>) on the campaign&apos;s project, or <code>SERVER_ADMIN</code>; credential-bearing call defaults are returned only to the roles named at <code>Campaign.campaign_common_services_config</code>.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, field mask or value; <code>NOT_FOUND</code> for an unknown project, campaign or campaign call (with authorization enforced: <code>PERMISSION_DENIED</code> for a project the caller holds no role on, or a role below <code>PROJECT_EXECUTOR</code>); <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced; <code>ALREADY_EXISTS</code> for a <code>display_name</code> already used in the project; <code>FAILED_PRECONDITION</code> for a state that does not allow the operation (each RPC names its cases); <code>ABORTED</code> when a concurrent change won, nothing was stored and the request can be retried; <code>DEADLINE_EXCEEDED</code> for a forced <code>DeleteCampaign</code> whose hang-ups were not confirmed in time (the hard stop stays in effect, retry the request); <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot.
 type CampaignsClient interface {
 	// <p>Creates a campaign in state <code>CAMPAIGN_STATE_CREATED</code>. Calls are added with
 	// <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code>; nothing is dialled before
@@ -587,99 +527,39 @@ func (c *campaignsClient) CloneCampaign(ctx context.Context, in *CloneCampaignRe
 // All implementations must embed UnimplementedCampaignsServer
 // for forward compatibility.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Manages the CAMPAIGNS of a VTSI project. A campaign is a named set of outbound calls that VTSI
-// places for the client while keeping at most <code>max_parallel_calls</code> of them running at
-// the same time. If 100 callers are added to a campaign with <code>max_parallel_calls = 10</code>,
-// at any moment at most 10 of those calls are being set up or are connected; the next one starts
-// when one ends.</p>
-// <p>Calls are added to a campaign with
-// <a href="index.html#ondewo.vtsi.Calls.AddCallersToCampaign">Calls.AddCallersToCampaign</a> or
-// <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>
-// (a server that predates them answers <code>UNIMPLEMENTED</code> and starts nothing); a scheduled call of a campaign is started at or after its scheduled time AND when the campaign has
-// a free slot.</p>
-// <p>A call that fails is retried up to <code>max_attempts</code> times in total, waiting
-// <code>retry_delay</code> between attempts. A call counts as failed only after its last attempt.
-// A failure that cannot succeed by repetition (for example a rejected credential, an invalid
-// configuration) is never retried.</p>
-// <p>Lifecycle: <code>StartCampaign</code> starts a created campaign; <code>StopCampaign</code> lets
-// the ongoing calls finish and starts no new ones; <code>HardStopCampaign</code> ends the ongoing
-// calls immediately and starts no new ones; <code>ResumeCampaign</code> continues a stopped or hard
-// stopped campaign with the calls that have not finished yet.</p>
-// <p>Every RPC about ONE campaign accepts either its resource name or its display name. Display names
-// are unique within a project, so a display name is resolved within the project named by the
-// request&apos;s top-level <code>vtsi_project_name</code>, which is REQUIRED with a display name
-// (<code>INVALID_ARGUMENT</code> when it is empty or malformed) and checked against the campaign
-// when a resource name is used. (The <code>CampaignDisplayName</code> message of 9.0.0, which
-// carried the project and the display name together, was removed in 9.1.0; its field numbers are
-// <code>reserved</code>.)</p>
-// <p>A malformed selector is <code>INVALID_ARGUMENT</code> for every authenticated caller, with or
-// without authorization enforced (also when authorization could resolve no project from it): neither
-// the resource name nor the display name set (also how an old 9.0.0 client&apos;s removed
-// <code>CampaignDisplayName</code> arrives), a malformed resource name, a display name with an empty
-// or malformed <code>vtsi_project_name</code>, and a <code>vtsi_project_name</code> that is not the
-// project of the resource name. With authorization enforced, a well-formed request naming a project
-// the caller holds no role on (an unknown project included) is refused with
-// <code>PERMISSION_DENIED</code> before any lookup, so it is not answered <code>NOT_FOUND</code>, and
-// a caller without a credential is <code>UNAUTHENTICATED</code> whatever it sent.</p>
-// <p>Campaign-level call defaults: <code>campaign_common_services_config</code> and
-// <code>campaign_sip_caller_config</code> of a <code>Campaign</code> are the defaults of EVERY call of
-// the campaign. They are read LIVE when a campaign call is dispatched (every attempt, retries
-// included): the effective configuration of the call is a copy of the campaign&apos;s config with the
-// call&apos;s own <code>StartCallerRequest</code> config merged over it (protobuf
-// <code>MergeFrom</code>), see <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>. The one exception
-// is the callee: <code>campaign_sip_caller_config.callee_id</code> is resolved and FIXED when a call is
-// added (it is that call&apos;s <code>CampaignCall.phone_number</code>), so every attempt of a call dials the
-// number its campaign call reports.</p>
-// <p>Partial responses: <code>ListCampaigns</code>, <code>ListCampaignCalls</code>,
-// <code>CreateCampaign</code>, <code>GetCampaign</code>, <code>UpdateCampaign</code>,
-// <code>DeleteCampaign</code> (paths of <code>DeleteCampaignResponse</code>), the four lifecycle RPCs
-// <code>StartCampaign</code>, <code>StopCampaign</code>, <code>HardStopCampaign</code> and
-// <code>ResumeCampaign</code>, <code>CloneCampaign</code> and <code>GetCampaignCall</code> accept an optional
-// <code>field_mask</code> naming the field paths of the returned resource (for a listing: of each listed
-// element) to populate. A mask never changes what the RPC does. Unset or empty returns every
-// field (one exception: <code>ListCampaigns</code> returns <code>campaign_callers</code> and
-// <code>campaign_callers_truncated</code> only when its mask names them); the identifying <code>name</code> is always populated; an unknown path is rejected with
-// <code>INVALID_ARGUMENT</code> naming it; nested paths through singular message fields (e.g.
-// <code>statistics.completed</code>) are allowed, a path below a repeated or map field is not. The
-// mask is applied after any role-based redaction, so it can only narrow what the caller may see.</p>
-// <p>Callers and calls of a campaign: <code>Campaign.campaign_callers</code> names the callers that placed
-// its calls (bounded); <code>Calls.ListCallers</code> with <code>ListCallersRequest.campaign_name</code> /
-// <code>campaign_display_name</code> lists them paginated as <code>Caller</code> resources, and
-// <code>Calls.ListCalls</code> with <code>CallFilter.campaign_name</code> /
-// <code>campaign_display_name</code> lists the calls they placed as <code>Call</code> resources.</p>
-// <p>Calling window: a campaign with a <code>calling_window</code> starts calls (first attempts, retries and
-// due scheduled calls alike) only inside one of the window&apos;s weekly slots, in the window&apos;s time zone.
-// Outside every slot it stays <code>RUNNING</code> and reports <code>outside_calling_window = true</code>; calls
-// already running are never ended by a slot ending. See
-// <a href="index.html#ondewo.vtsi.CampaignCallingWindow">CampaignCallingWindow</a>.</p>
-// <p>Limits and defaults of the server (environment variables of ondewo-vtsi, read at start-up): at most
-// <code>ONDEWO_VTSI_CAMPAIGN_MAX_CALLS</code> (100000) calls per campaign; <code>max_parallel_calls</code>
-// defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_MAX_PARALLEL_CALLS</code> (1) and is at most
-// <code>ONDEWO_VTSI_CAMPAIGN_MAX_PARALLEL_CALLS_LIMIT</code> (1000); <code>max_attempts</code> defaults to 1
-// and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10); <code>retry_delay</code> defaults
-// to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_RETRY_DELAY_S</code> (60 s); one <code>AddCallersToCampaign</code> /
-// <code>AddScheduledCallersToCampaign</code> request carries at most 1000 entries (a fixed server limit,
-// <code>INVALID_ARGUMENT</code> above it); <code>CancelCampaignCalls</code> and <code>RetryCampaignCalls</code>
-// act on at most 1000 calls per request. The status stream is bounded by
-// <code>ONDEWO_VTSI_STATUS_STREAM_MAX_DURATION_S</code> (3600 s), sends a keep-alive after
-// <code>ONDEWO_VTSI_STATUS_STREAM_KEEPALIVE_S</code> (15 s) without a change and at most
-// <code>ONDEWO_VTSI_STATUS_STREAM_MAX_CONCURRENT</code> (16) status streams are open per server replica.</p>
-// <p>Authorization (when enforced): every RPC of this service needs <code>PROJECT_EXECUTOR</code> or a
-// higher role (<code>PROJECT_DEVELOPER</code>, <code>PROJECT_ADMIN</code>) on the campaign&apos;s project, or
-// <code>SERVER_ADMIN</code>; credential-bearing call defaults are returned only to the roles named at
-// <code>Campaign.campaign_common_services_config</code>.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name,
-// filter, field mask or value; <code>NOT_FOUND</code> for an unknown project, campaign or campaign
-// call (with authorization enforced: <code>PERMISSION_DENIED</code> for a project the caller holds
-// no role on, or a role below <code>PROJECT_EXECUTOR</code>); <code>UNAUTHENTICATED</code> for a request
-// without a valid credential while authorization is enforced; <code>ALREADY_EXISTS</code> for a
-// <code>display_name</code> already used in the project;
-// <code>FAILED_PRECONDITION</code> for a state that does not allow the operation (each RPC names its
-// cases); <code>ABORTED</code> when a concurrent change won, nothing was stored and the request can
-// be retried; <code>DEADLINE_EXCEEDED</code> for a forced <code>DeleteCampaign</code> whose hang-ups were not
-// confirmed in time (the hard stop stays in effect, retry the request); <code>RESOURCE_EXHAUSTED</code> when
-// the server has no free stream slot.</p>
+// # ONDEWO VTSI API
+//
+// Manages the CAMPAIGNS of a VTSI project. A campaign is a named set of outbound calls that VTSI places for the client while keeping at most <code>max_parallel_calls</code> of them running at the same time. If 100 callers are added to a campaign with <code>max_parallel_calls = 10</code>, at any moment at most 10 of those calls are being set up or are connected; the next one starts when one ends.
+//
+// Calls are added to a campaign with <a href="index.html#ondewo.vtsi.Calls.AddCallersToCampaign">Calls.AddCallersToCampaign</a> or <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a> (a server that predates them answers <code>UNIMPLEMENTED</code> and starts nothing); a scheduled call of a campaign is started at or after its scheduled time AND when the campaign has a free slot.
+//
+// A call that fails is retried up to <code>max_attempts</code> times in total, waiting <code>retry_delay</code> between attempts. A call counts as failed only after its last attempt. A failure that cannot succeed by repetition (for example a rejected credential, an invalid configuration) is never retried.
+//
+// Lifecycle: <code>StartCampaign</code> starts a created campaign; <code>StopCampaign</code> lets the ongoing calls finish and starts no new ones; <code>HardStopCampaign</code> ends the ongoing calls immediately and starts no new ones; <code>ResumeCampaign</code> continues a stopped or hard stopped campaign with the calls that have not finished yet.
+//
+// Every RPC about ONE campaign accepts either its resource name or its display name. Display names are unique within a project, so a display name is resolved within the project named by the request&apos;s top-level <code>vtsi_project_name</code>, which is REQUIRED with a display name (<code>INVALID_ARGUMENT</code> when it is empty or malformed) and checked against the campaign when a resource name is used. (The <code>CampaignDisplayName</code> message of 9.0.0, which carried the project and the display name together, was removed in 9.1.0; its field numbers are <code>reserved</code>.)
+//
+// A malformed selector is <code>INVALID_ARGUMENT</code> for every authenticated caller, with or without authorization enforced (also when authorization could resolve no project from it): neither the resource name nor the display name set (also how an old 9.0.0 client&apos;s removed <code>CampaignDisplayName</code> arrives), a malformed resource name, a display name with an empty or malformed <code>vtsi_project_name</code>, and a <code>vtsi_project_name</code> that is not the project of the resource name. With authorization enforced, a well-formed request naming a project the caller holds no role on (an unknown project included) is refused with <code>PERMISSION_DENIED</code> before any lookup, so it is not answered <code>NOT_FOUND</code>, and a caller without a credential is <code>UNAUTHENTICATED</code> whatever it sent.
+//
+// Campaign-level call defaults: <code>campaign_common_services_config</code> and <code>campaign_sip_caller_config</code> of a <code>Campaign</code> are the defaults of EVERY call of the campaign. They are read LIVE when a campaign call is dispatched (every attempt, retries included): the effective configuration of the call is a copy of the campaign&apos;s config with the call&apos;s own <code>StartCallerRequest</code> config merged over it (protobuf <code>MergeFrom</code>), see <a href="index.html#ondewo.vtsi.Campaign">Campaign</a>. The one exception is the callee: <code>campaign_sip_caller_config.callee_id</code> is resolved and FIXED when a call is added (it is that call&apos;s <code>CampaignCall.phone_number</code>), so every attempt of a call dials the number its campaign call reports.
+//
+// How a campaign call behaves: every setting of the effective configuration acts on that one call exactly as if a <code>StartCallerRequest</code> had carried it (the call settings are explained at <a href="index.html#ondewo.vtsi.CommonServicesConfig">CommonServicesConfig</a>). For each single-valued setting the first of these that is present decides (a list setting combines the campaign&apos;s entries and the call&apos;s, a map such as <code>sip_headers</code> merges by key, and a deployment-wide limit or master switch applies on top of any value; see <code>Campaign.campaign_common_services_config</code>):
+//
+// <ol> <li>the call&apos;s own value (its entry of <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code>); for a warm transfer, the <code>TransferCall</code> request&apos;s own <code>warm_transfer_config</code> wins over all of these;</li> <li>the campaign&apos;s value (<code>campaign_common_services_config</code> / <code>campaign_sip_caller_config</code>);</li> <li>a project default where one exists (e.g. <code>VtsiProject.warm_transfer_defaults</code> for a warm transfer);</li> <li>the deployment-wide <code>ONDEWO_VTSI_*</code> setting of the server, where the operator set one;</li> <li>the built-in default of the setting.</li> </ol>
+//
+// So a campaign default is a per-call value for every call that does not set its own: it wins over the deployment-wide setting. Example: a campaign whose <code>campaign_common_services_config.voice_interaction_config.interruption_handling_config</code> sets <code>enabled = true</code> lets the callee interrupt the bot on every call of the campaign; an entry that sets <code>enabled = false</code> turns it off for that one call only.
+//
+// Partial responses: <code>ListCampaigns</code>, <code>ListCampaignCalls</code>, <code>CreateCampaign</code>, <code>GetCampaign</code>, <code>UpdateCampaign</code>, <code>DeleteCampaign</code> (paths of <code>DeleteCampaignResponse</code>), the four lifecycle RPCs <code>StartCampaign</code>, <code>StopCampaign</code>, <code>HardStopCampaign</code> and <code>ResumeCampaign</code>, <code>CloneCampaign</code> and <code>GetCampaignCall</code> accept an optional <code>field_mask</code> naming the field paths of the returned resource (for a listing: of each listed element) to populate. A mask never changes what the RPC does. Unset or empty returns every field (one exception: <code>ListCampaigns</code> returns <code>campaign_callers</code> and <code>campaign_callers_truncated</code> only when its mask names them); the identifying <code>name</code> is always populated; an unknown path is rejected with <code>INVALID_ARGUMENT</code> naming it; nested paths through singular message fields (e.g. <code>statistics.completed</code>) are allowed, a path below a repeated or map field is not. The mask is applied after any role-based redaction, so it can only narrow what the caller may see.
+//
+// Callers and calls of a campaign: <code>Campaign.campaign_callers</code> names the callers that placed its calls (bounded); <code>Calls.ListCallers</code> with <code>ListCallersRequest.campaign_name</code> / <code>campaign_display_name</code> lists them paginated as <code>Caller</code> resources, and <code>Calls.ListCalls</code> with <code>CallFilter.campaign_name</code> / <code>campaign_display_name</code> lists the calls they placed as <code>Call</code> resources.
+//
+// Calling window: a campaign with a <code>calling_window</code> starts calls (first attempts, retries and due scheduled calls alike) only inside one of the window&apos;s weekly slots, in the window&apos;s time zone. Outside every slot it stays <code>RUNNING</code> and reports <code>outside_calling_window = true</code>; calls already running are never ended by a slot ending. See <a href="index.html#ondewo.vtsi.CampaignCallingWindow">CampaignCallingWindow</a>.
+//
+// Limits and defaults of the server (environment variables of ondewo-vtsi, read at start-up): at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_CALLS</code> (100000) calls per campaign; <code>max_parallel_calls</code> defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_MAX_PARALLEL_CALLS</code> (1) and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_PARALLEL_CALLS_LIMIT</code> (1000); <code>max_attempts</code> defaults to 1 and is at most <code>ONDEWO_VTSI_CAMPAIGN_MAX_ATTEMPTS_LIMIT</code> (10); <code>retry_delay</code> defaults to <code>ONDEWO_VTSI_CAMPAIGN_DEFAULT_RETRY_DELAY_S</code> (60 s); one <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code> request carries at most 1000 entries (a fixed server limit, <code>INVALID_ARGUMENT</code> above it); <code>CancelCampaignCalls</code> and <code>RetryCampaignCalls</code> act on at most 1000 calls per request. The status stream is bounded by <code>ONDEWO_VTSI_STATUS_STREAM_MAX_DURATION_S</code> (3600 s), sends a keep-alive after <code>ONDEWO_VTSI_STATUS_STREAM_KEEPALIVE_S</code> (15 s) without a change and at most <code>ONDEWO_VTSI_STATUS_STREAM_MAX_CONCURRENT</code> (16) status streams are open per server replica.
+//
+// Authorization (when enforced): every RPC of this service needs <code>PROJECT_EXECUTOR</code> or a higher role (<code>PROJECT_DEVELOPER</code>, <code>PROJECT_ADMIN</code>) on the campaign&apos;s project, or <code>SERVER_ADMIN</code>; credential-bearing call defaults are returned only to the roles named at <code>Campaign.campaign_common_services_config</code>.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, field mask or value; <code>NOT_FOUND</code> for an unknown project, campaign or campaign call (with authorization enforced: <code>PERMISSION_DENIED</code> for a project the caller holds no role on, or a role below <code>PROJECT_EXECUTOR</code>); <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced; <code>ALREADY_EXISTS</code> for a <code>display_name</code> already used in the project; <code>FAILED_PRECONDITION</code> for a state that does not allow the operation (each RPC names its cases); <code>ABORTED</code> when a concurrent change won, nothing was stored and the request can be retried; <code>DEADLINE_EXCEEDED</code> for a forced <code>DeleteCampaign</code> whose hang-ups were not confirmed in time (the hard stop stays in effect, retry the request); <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot.
 type CampaignsServer interface {
 	// <p>Creates a campaign in state <code>CAMPAIGN_STATE_CREATED</code>. Calls are added with
 	// <code>AddCallersToCampaign</code> / <code>AddScheduledCallersToCampaign</code>; nothing is dialled before

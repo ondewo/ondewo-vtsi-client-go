@@ -56,7 +56,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>Speech-to-text service</p>
+// Speech-to-text service
 type Speech2TextClient interface {
 	// <p>Transcribes an audio file</p>
 	TranscribeFile(ctx context.Context, in *TranscribeFileRequest, opts ...grpc.CallOption) (*TranscribeFileResponse, error)
@@ -271,7 +271,7 @@ func (c *speech2TextClient) ListS2TNormalizationPipelines(ctx context.Context, i
 // All implementations must embed UnimplementedSpeech2TextServer
 // for forward compatibility.
 //
-// <p>Speech-to-text service</p>
+// Speech-to-text service
 type Speech2TextServer interface {
 	// <p>Transcribes an audio file</p>
 	TranscribeFile(context.Context, *TranscribeFileRequest) (*TranscribeFileResponse, error)

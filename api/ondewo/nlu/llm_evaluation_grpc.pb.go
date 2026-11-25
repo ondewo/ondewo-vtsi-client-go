@@ -112,12 +112,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// LangSmith-style evaluation surface: datasets, examples, experiments, evaluator
-// runs, feedback (LLM-as-judge / human / heuristic / custom code / pairwise),
-// pairwise comparisons, release gates + persisted gate runs, scorecards,
-// per-project evaluation settings (judge configuration), the evaluator registry,
-// golden-transcript recording from sessions, conversation simulation
-// (standard + adversarial red-teaming), recurring schedules and report artifacts.
+// LangSmith-style evaluation surface: datasets, examples, experiments, evaluator runs, feedback (LLM-as-judge / human / heuristic / custom code / pairwise), pairwise comparisons, release gates + persisted gate runs, scorecards, per-project evaluation settings (judge configuration), the evaluator registry, golden-transcript recording from sessions, conversation simulation (standard + adversarial red-teaming), recurring schedules and report artifacts.
 type LlmEvaluationsClient interface {
 	// Create a new evaluation dataset.
 	LlmEvaluationCreateDataset(ctx context.Context, in *CreateLlmEvaluationDatasetRequest, opts ...grpc.CallOption) (*LlmEvaluationDataset, error)
@@ -1044,12 +1039,7 @@ func (c *llmEvaluationsClient) LlmEvaluationPromoteAnnotationQueueItem(ctx conte
 // All implementations must embed UnimplementedLlmEvaluationsServer
 // for forward compatibility.
 //
-// LangSmith-style evaluation surface: datasets, examples, experiments, evaluator
-// runs, feedback (LLM-as-judge / human / heuristic / custom code / pairwise),
-// pairwise comparisons, release gates + persisted gate runs, scorecards,
-// per-project evaluation settings (judge configuration), the evaluator registry,
-// golden-transcript recording from sessions, conversation simulation
-// (standard + adversarial red-teaming), recurring schedules and report artifacts.
+// LangSmith-style evaluation surface: datasets, examples, experiments, evaluator runs, feedback (LLM-as-judge / human / heuristic / custom code / pairwise), pairwise comparisons, release gates + persisted gate runs, scorecards, per-project evaluation settings (judge configuration), the evaluator registry, golden-transcript recording from sessions, conversation simulation (standard + adversarial red-teaming), recurring schedules and report artifacts.
 type LlmEvaluationsServer interface {
 	// Create a new evaluation dataset.
 	LlmEvaluationCreateDataset(context.Context, *CreateLlmEvaluationDatasetRequest) (*LlmEvaluationDataset, error)

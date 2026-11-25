@@ -88,7 +88,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO VTSI API</p>
+// ONDEWO VTSI API
 type CallsClient interface {
 	// <p>Starts one caller in a VTSI project: an ondewo-sip container that places one outbound call to
 	// <code>sip_caller_config.callee_id</code> (or a pooled caller of the server&apos;s caller pool that runs the same
@@ -1160,7 +1160,7 @@ type Calls_ListenCallAudioClient = grpc.ServerStreamingClient[StreamCallAudioRes
 // All implementations must embed UnimplementedCallsServer
 // for forward compatibility.
 //
-// <p>ONDEWO VTSI API</p>
+// ONDEWO VTSI API
 type CallsServer interface {
 	// <p>Starts one caller in a VTSI project: an ondewo-sip container that places one outbound call to
 	// <code>sip_caller_config.callee_id</code> (or a pooled caller of the server&apos;s caller pool that runs the same

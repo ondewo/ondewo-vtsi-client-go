@@ -1440,10 +1440,7 @@ func (x *RemoteOperationContainerStatus) GetImage() string {
 	return ""
 }
 
-// Describes one docker container started by a remote operation. A single operation may start several
-// containers sequentially (hardware-check, GPU pre-allocation, build-cache, and one training container
-// per algorithm), so containers are enumerated by
-// <a href="index.html#ondewo.nlu.Operations.ListRemoteOperationContainers">Operations.ListRemoteOperationContainers</a>.
+// Describes one docker container started by a remote operation. A single operation may start several containers sequentially (hardware-check, GPU pre-allocation, build-cache, and one training container per algorithm), so containers are enumerated by <a href="index.html#ondewo.nlu.Operations.ListRemoteOperationContainers">Operations.ListRemoteOperationContainers</a>.
 type RemoteOperationContainer struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The docker container id (64-hex). Empty until captured at launch.

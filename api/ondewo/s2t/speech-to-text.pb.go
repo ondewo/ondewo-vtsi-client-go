@@ -163,7 +163,7 @@ func (InferenceBackend) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{1}
 }
 
-// <p>Latency tier to use for processing an OpenAI request. Affects cost and throughput.</p>
+// Latency tier to use for processing an OpenAI request. Affects cost and throughput.
 type ServiceTier int32
 
 const (
@@ -228,7 +228,7 @@ func (ServiceTier) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{2}
 }
 
-// <p>Verbosity level for the response output.</p>
+// Verbosity level for the response output.
 type Verbosity int32
 
 const (
@@ -285,7 +285,7 @@ func (Verbosity) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{3}
 }
 
-// <p>Effort level for reasoning models (e.g., o1, o3). Controls the trade-off between speed and quality.</p>
+// Effort level for reasoning models (e.g., o1, o3). Controls the trade-off between speed and quality.
 type ReasoningEffort int32
 
 const (
@@ -346,7 +346,7 @@ func (ReasoningEffort) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{4}
 }
 
-// <p>VadMethod selects the model used to split the audio stream into utterances.</p>
+// VadMethod selects the model used to split the audio stream into utterances.
 type VadMethod int32
 
 const (
@@ -400,9 +400,7 @@ func (VadMethod) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{5}
 }
 
-// <p>TsdMethod selects the model used for target-speaker detection (TSD): deciding whether a
-// newly detected utterance came from the main speaker of the call, so that speech from anyone
-// else (crosstalk, background speakers, barge-in) can be rejected.</p>
+// TsdMethod selects the model used for target-speaker detection (TSD): deciding whether a newly detected utterance came from the main speaker of the call, so that speech from anyone else (crosstalk, background speakers, barge-in) can be rejected.
 type TsdMethod int32
 
 const (
@@ -466,7 +464,7 @@ func (TsdMethod) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{6}
 }
 
-// <p>Who spoke the turn.</p>
+// Who spoke the turn.
 type TurnDetectionContextTurn_Role int32
 
 const (
@@ -520,7 +518,7 @@ func (TurnDetectionContextTurn_Role) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_s2t_speech_to_text_proto_rawDescGZIP(), []int{50, 0}
 }
 
-// <p>Configuration for a request to transcribe audio</p>
+// Configuration for a request to transcribe audio
 type TranscribeRequestConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. id of the pipeline (model setup) that will generate audio
@@ -809,7 +807,7 @@ type TranscribeRequestConfig_ReturnOptions struct {
 
 func (*TranscribeRequestConfig_ReturnOptions) isTranscribeRequestConfig_OneofReturnOptions() {}
 
-// <p>Configuration for cloud provider settings for Speech-to-Text (S2T).</p>
+// Configuration for cloud provider settings for Speech-to-Text (S2T).
 type S2TCloudProviderConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Configuration for Amazon web service speech-to-text provider.
@@ -882,7 +880,7 @@ func (x *S2TCloudProviderConfig) GetS2TCloudProviderConfigMicrosoft() *S2TCloudP
 	return nil
 }
 
-// <p>Configuration details specific to the Amazon web service speech-to-text provider.</p>
+// Configuration details specific to the Amazon web service speech-to-text provider.
 type S2TCloudProviderConfigAmazon struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Enables or disables <code>partial_results_stabilization</code> feature. More details at:
@@ -962,7 +960,7 @@ func (x *S2TCloudProviderConfigAmazon) GetVocabularyName() string {
 	return ""
 }
 
-// <p>Configuration details specific to the Deepgram speech-to-text provider.</p>
+// Configuration details specific to the Deepgram speech-to-text provider.
 type S2TCloudProviderConfigDeepgram struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Enables or disables <code>punctuate</code> feature of Deepgram to add punctuations to the resulted transcript.
@@ -1050,7 +1048,7 @@ func (x *S2TCloudProviderConfigDeepgram) GetDictation() bool {
 	return false
 }
 
-// <p>Configuration details specific to the Google speech-to-text provider.</p>
+// Configuration details specific to the Google speech-to-text provider.
 type S2TCloudProviderConfigGoogle struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Enables or disables <code>automatic_punctuation</code> feature of Google s2t to add punctuations to the resulted
@@ -1138,7 +1136,7 @@ func (x *S2TCloudProviderConfigGoogle) GetMaxAlternatives() int32 {
 	return 0
 }
 
-// <p>Configuration details specific to the Microsoft Azure speech-to-text provider.</p>
+// Configuration details specific to the Microsoft Azure speech-to-text provider.
 type S2TCloudProviderConfigMicrosoft struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Enables or disables the Microsoft Azure fast transcription API. It is faster than SDK but is in
@@ -1196,7 +1194,7 @@ func (x *S2TCloudProviderConfigMicrosoft) GetUseDetailedOutputFormat() bool {
 	return false
 }
 
-// <p>Configuration of the return values of a transcribe request</p>
+// Configuration of the return values of a transcribe request
 type TranscriptionReturnOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// should server make response indicating that the beginning of the speech was detected
@@ -1320,7 +1318,7 @@ func (x *TranscriptionReturnOptions) GetReturnEndOfSpeechCandidate() bool {
 	return false
 }
 
-// <p>Configuration of the options to detect utterances</p>
+// Configuration of the options to detect utterances
 type UtteranceDetectionOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Whether or not to transcribe unfinished utterances.
@@ -1466,7 +1464,7 @@ type UtteranceDetectionOptions_TurnDetection struct {
 
 func (*UtteranceDetectionOptions_TurnDetection) isUtteranceDetectionOptions_OneofTurnDetection() {}
 
-// <p>Configuration of the post-processing options</p>
+// Configuration of the post-processing options
 type PostProcessingOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Whether to use spelling correction
@@ -1540,7 +1538,7 @@ func (x *PostProcessingOptions) GetLlmPostProcessing() bool {
 	return false
 }
 
-// <p>The transcription message</p>
+// The transcription message
 type Transcription struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The transcribed text
@@ -1614,7 +1612,7 @@ func (x *Transcription) GetAlternatives() []*TranscriptionAlternative {
 	return nil
 }
 
-// <p>The alternative transcription message</p>
+// The alternative transcription message
 type TranscriptionAlternative struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The alternative transcribed text
@@ -1679,7 +1677,7 @@ func (x *TranscriptionAlternative) GetWords() []*WordDetail {
 	return nil
 }
 
-// <p>WordDetail provides word-specific information for recognized words.</p>
+// WordDetail provides word-specific information for recognized words.
 type WordDetail struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The start time of the spoken word relative to the beginning of the audio.
@@ -1763,7 +1761,7 @@ func (x *WordDetail) GetWordAlternatives() []*WordAlternative {
 	return nil
 }
 
-// <p>The word alternative message</p>
+// The word alternative message
 type WordAlternative struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The recognized word corresponding to this set of information.
@@ -1818,7 +1816,7 @@ func (x *WordAlternative) GetConfidence() float32 {
 	return 0
 }
 
-// <p>Request to transcribe an audio stream</p>
+// Request to transcribe an audio stream
 type TranscribeStreamRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// wav file to transcribe
@@ -1891,7 +1889,7 @@ func (x *TranscribeStreamRequest) GetMuteAudio() bool {
 	return false
 }
 
-// <p>The response message of a stream transcription</p>
+// The response message of a stream transcription
 type TranscribeStreamResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// List of transcriptions with confidence level
@@ -2045,7 +2043,7 @@ type TranscribeStreamResponse_Config struct {
 
 func (*TranscribeStreamResponse_Config) isTranscribeStreamResponse_OneofConfig() {}
 
-// <p>A request to transcribe an audio file</p>
+// A request to transcribe an audio file
 type TranscribeFileRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// wav file to transcribe
@@ -2100,7 +2098,7 @@ func (x *TranscribeFileRequest) GetConfig() *TranscribeRequestConfig {
 	return nil
 }
 
-// <p>The response message for a transcribe file request</p>
+// The response message for a transcribe file request
 type TranscribeFileResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// List of transcriptions with confidence level
@@ -2164,7 +2162,7 @@ func (x *TranscribeFileResponse) GetAudioUuid() string {
 	return ""
 }
 
-// <p>The pipeline id for a specific pipeline configuration</p>
+// The pipeline id for a specific pipeline configuration
 type S2TPipelineId struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// id of the model that will generate audio
@@ -2210,7 +2208,7 @@ func (x *S2TPipelineId) GetId() string {
 	return ""
 }
 
-// <p>Request to list all speech-to-text pipelines. Optionally also filter criteria can be set</p>
+// Request to list all speech-to-text pipelines. Optionally also filter criteria can be set
 type ListS2TPipelinesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Filter for languages
@@ -2284,7 +2282,7 @@ func (x *ListS2TPipelinesRequest) GetRegisteredOnly() bool {
 	return false
 }
 
-// <p>ListS2tPipelinesResponse is used to return a list of all speech-to-text pipelines.</p>
+// ListS2tPipelinesResponse is used to return a list of all speech-to-text pipelines.
 type ListS2TPipelinesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// A list of <code>Speech2TextConfig</code> message instances containing the configuration of each pipeline.
@@ -2332,7 +2330,7 @@ func (x *ListS2TPipelinesResponse) GetPipelineConfigs() []*Speech2TextConfig {
 	return nil
 }
 
-// <p>ListS2tLanguagesRequest is used to request a list of available languages. Optionally, filters can be set.</p>
+// ListS2tLanguagesRequest is used to request a list of available languages. Optionally, filters can be set.
 type ListS2TLanguagesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Filter for domains.  Example: [&quot;medical&quot;, &quot;finance&quot;]
@@ -2388,7 +2386,7 @@ func (x *ListS2TLanguagesRequest) GetPipelineOwners() []string {
 	return nil
 }
 
-// <p>Response message to list available languages</p>
+// Response message to list available languages
 type ListS2TLanguagesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// available languages
@@ -2434,7 +2432,7 @@ func (x *ListS2TLanguagesResponse) GetLanguages() []string {
 	return nil
 }
 
-// <p>Request message to list available domains. Optionally also filters can be set.</p>
+// Request message to list available domains. Optionally also filters can be set.
 type ListS2TDomainsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Filter for languages
@@ -2489,7 +2487,7 @@ func (x *ListS2TDomainsRequest) GetPipelineOwners() []string {
 	return nil
 }
 
-// <p>Response message to list available domains</p>
+// Response message to list available domains
 type ListS2TDomainsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// domains available. Example: [&quot;medical&quot;, &quot;finance&quot;]
@@ -2535,7 +2533,7 @@ func (x *ListS2TDomainsResponse) GetDomains() []string {
 	return nil
 }
 
-// <p>S2tGetServiceInfoResponse is used to return version information about the speech-to-text service.</p>
+// S2tGetServiceInfoResponse is used to return version information about the speech-to-text service.
 type S2TGetServiceInfoResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Version number based on semantic versioning, e.g. &quot;4.2.0&quot;.
@@ -2581,7 +2579,7 @@ func (x *S2TGetServiceInfoResponse) GetVersion() string {
 	return ""
 }
 
-// <p>Speech2TextConfig is a configuration message for the speech-to-text pipeline</p>
+// Speech2TextConfig is a configuration message for the speech-to-text pipeline
 type Speech2TextConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique identifier for the configuration.
@@ -2690,7 +2688,7 @@ func (x *Speech2TextConfig) GetLogging() *Logging {
 	return nil
 }
 
-// <p>S2tDescription contains descriptive information about the speech-to-text pipeline.</p>
+// S2tDescription contains descriptive information about the speech-to-text pipeline.
 type S2TDescription struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Language of the speech-to-text system.
@@ -2763,7 +2761,7 @@ func (x *S2TDescription) GetComments() string {
 	return ""
 }
 
-// <p>S2tInference contains information about inference models used in the speech-to-text pipeline.</p>
+// S2tInference contains information about inference models used in the speech-to-text pipeline.
 type S2TInference struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Configuration for the acoustic models.
@@ -2827,7 +2825,7 @@ func (x *S2TInference) GetInferenceBackend() InferenceBackend {
 	return InferenceBackend_INFERENCE_BACKEND_UNKNOWN
 }
 
-// <p>AcousticModels contains information about different types of acoustic models.</p>
+// AcousticModels contains information about different types of acoustic models.
 type AcousticModels struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Type of the acoustic model.
@@ -2954,7 +2952,7 @@ func (x *AcousticModels) GetParakeet() *Parakeet {
 	return nil
 }
 
-// <p>S2tCloudServiceAmazon message contains settings for the Amazon web service Cloud service inference.</p>
+// S2tCloudServiceAmazon message contains settings for the Amazon web service Cloud service inference.
 type S2TCloudServiceAmazon struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Language of the audio to transcribe by Amazon web service s2t cloud service. It should be 4-letter language code
@@ -3054,7 +3052,7 @@ func (x *S2TCloudServiceAmazon) GetVocabularyName() string {
 	return ""
 }
 
-// <p>S2tCloudServiceDeepgram message contains settings for the Deepgram Cloud service inference.</p>
+// S2tCloudServiceDeepgram message contains settings for the Deepgram Cloud service inference.
 type S2TCloudServiceDeepgram struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Model name from one of the speech-to-text models provided by Deepgram for the desired use-case.
@@ -3162,7 +3160,7 @@ func (x *S2TCloudServiceDeepgram) GetDictation() bool {
 	return false
 }
 
-// <p>S2tCloudServiceGoogle message contains settings for the Google Cloud service inference.</p>
+// S2tCloudServiceGoogle message contains settings for the Google Cloud service inference.
 type S2TCloudServiceGoogle struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Model name from one of the speech-to-text models provided by Google for the desired use-case.
@@ -3270,7 +3268,7 @@ func (x *S2TCloudServiceGoogle) GetMaxAlternatives() int32 {
 	return 0
 }
 
-// <p>S2tCloudServiceMicrosoft message contains settings for the Microsoft Azure Cloud service inference.</p>
+// S2tCloudServiceMicrosoft message contains settings for the Microsoft Azure Cloud service inference.
 type S2TCloudServiceMicrosoft struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Language of the audio to transcribe by Microsoft Azure s2t cloud service. It should be 4-letter language code
@@ -3337,7 +3335,7 @@ func (x *S2TCloudServiceMicrosoft) GetUseDetailedOutputFormat() bool {
 	return false
 }
 
-// <p>Whisper contains information about the Whisper model.</p>
+// Whisper contains information about the Whisper model.
 type Whisper struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the model.
@@ -3410,7 +3408,7 @@ func (x *Whisper) GetTask() string {
 	return ""
 }
 
-// <p>WhisperTriton contains information about the Whisper model using Triton.</p>
+// WhisperTriton contains information about the Whisper model using Triton.
 type WhisperTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the processor.
@@ -3519,7 +3517,7 @@ func (x *WhisperTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>Wav2Vec contains information about the Wav2Vec model.</p>
+// Wav2Vec contains information about the Wav2Vec model.
 type Wav2Vec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the model.
@@ -3574,7 +3572,7 @@ func (x *Wav2Vec) GetUseGpu() bool {
 	return false
 }
 
-// <p>Wav2VecTriton contains information about the Wav2Vec model using Triton.</p>
+// Wav2VecTriton contains information about the Wav2Vec model using Triton.
 type Wav2VecTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the processor.
@@ -3665,7 +3663,7 @@ func (x *Wav2VecTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>Parakeet contains information about the Parakeet model.</p>
+// Parakeet contains information about the Parakeet model.
 type Parakeet struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Name of the Triton model.
@@ -3747,7 +3745,7 @@ func (x *Parakeet) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>PtFiles contains information about PT files.</p>
+// PtFiles contains information about PT files.
 type PtFiles struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the PT files.
@@ -3802,7 +3800,7 @@ func (x *PtFiles) GetStep() string {
 	return ""
 }
 
-// <p>CkptFile contains information about checkpoint files.</p>
+// CkptFile contains information about checkpoint files.
 type CkptFile struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the checkpoint file.
@@ -3848,7 +3846,7 @@ func (x *CkptFile) GetPath() string {
 	return ""
 }
 
-// <p>LanguageModels contains information about language models.</p>
+// LanguageModels contains information about language models.
 type LanguageModels struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the directory of language models.
@@ -3930,7 +3928,7 @@ func (x *LanguageModels) GetBeamSearchScorerBeta() float32 {
 	return 0
 }
 
-// <p>StreamingServer contains information about the streaming server.</p>
+// StreamingServer contains information about the streaming server.
 type StreamingServer struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Hostname of the streaming server.
@@ -4003,7 +4001,7 @@ func (x *StreamingServer) GetStreamingSpeechRecognition() *StreamingSpeechRecogn
 	return nil
 }
 
-// <p>StreamingSpeechRecognition contains information about streaming speech recognition settings.</p>
+// StreamingSpeechRecognition contains information about streaming speech recognition settings.
 type StreamingSpeechRecognition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Indicates whether to transcribe non-final results for every stream of this pipeline. Unset: the server
@@ -4111,14 +4109,9 @@ func (x *StreamingSpeechRecognition) GetTranscribeNotFinalPeriodSeconds() float3
 	return 0
 }
 
-// <p>TurnDetectionOptions configures turn detection: deciding, at a pause of the caller, whether the caller has
-// finished the turn. Exactly one turn detector is chosen by <code>oneof_turn_detector</code>; the fields outside it
-// apply to every detector.</p>
-// <p>Precedence for every field: the request config's value
-// (<code>TranscribeRequestConfig.utterance_detection.turn_detection</code>), then the pipeline config's value
-// (<code>StreamingSpeechRecognition.turn_detection</code>), then the server's configured value. When the request
-// config chooses a different detector than the pipeline config, the request config's detector is used with only
-// its own fields: none of the pipeline config's detector fields carry over.</p>
+// TurnDetectionOptions configures turn detection: deciding, at a pause of the caller, whether the caller has finished the turn. Exactly one turn detector is chosen by <code>oneof_turn_detector</code>; the fields outside it apply to every detector.
+//
+// Precedence for every field: the request config's value (<code>TranscribeRequestConfig.utterance_detection.turn_detection</code>), then the pipeline config's value (<code>StreamingSpeechRecognition.turn_detection</code>), then the server's configured value. When the request config chooses a different detector than the pipeline config, the request config's detector is used with only its own fields: none of the pipeline config's detector fields carry over.
 type TurnDetectionOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if the turn-detection feature is active.
@@ -4358,8 +4351,7 @@ func (*TurnDetectionOptions_TurnDetectionOndewoDeFusionOptions) isTurnDetectionO
 func (*TurnDetectionOptions_TurnDetectionPipecatSmartTurnOptions) isTurnDetectionOptions_OneofTurnDetector() {
 }
 
-// <p>TurnDetectionChatLlmOptions configures a chat LLM as the turn detector: the LLM is asked, with the prompts
-// below and the transcription of the turn, whether the caller has finished.</p>
+// TurnDetectionChatLlmOptions configures a chat LLM as the turn detector: the LLM is asked, with the prompts below and the transcription of the turn, whether the caller has finished.
 type TurnDetectionChatLlmOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. The OpenAI-compatible endpoint and model of the chat LLM. Unset fields take the server's
@@ -4425,10 +4417,7 @@ func (x *TurnDetectionChatLlmOptions) GetUserPrompt() string {
 	return ""
 }
 
-// <p>TurnDetectionEndOfUtteranceLlmOptions configures an end-of-utterance LLM (LiveKit-shaped, e.g.
-// <code>livekit/turn-detector</code>) as the turn detector: the model scores the probability of the
-// end-of-utterance token after the turn's transcription and, when
-// <code>TurnDetectionOptions.turn_detection_conversation_context</code> is set, the turns before it.</p>
+// TurnDetectionEndOfUtteranceLlmOptions configures an end-of-utterance LLM (LiveKit-shaped, e.g. <code>livekit/turn-detector</code>) as the turn detector: the model scores the probability of the end-of-utterance token after the turn's transcription and, when <code>TurnDetectionOptions.turn_detection_conversation_context</code> is set, the turns before it.
 type TurnDetectionEndOfUtteranceLlmOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. The OpenAI-compatible endpoint and served model name. Unset fields take the server's configured
@@ -4521,8 +4510,7 @@ func (x *TurnDetectionEndOfUtteranceLlmOptions) GetExactProbability() bool {
 	return false
 }
 
-// <p>TurnDetectionOndewoDeOptions configures the ONDEWO German turn-detection model as the turn detector. It judges
-// the turn from its text and word timing and is served by vLLM.</p>
+// TurnDetectionOndewoDeOptions configures the ONDEWO German turn-detection model as the turn detector. It judges the turn from its text and word timing and is served by vLLM.
 type TurnDetectionOndewoDeOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. The vLLM deployment: <code>base_url</code>, <code>api_key</code> and <code>timeout</code> address
@@ -4583,9 +4571,7 @@ func (x *TurnDetectionOndewoDeOptions) GetEndOfTurnProbabilityThreshold() float3
 	return 0
 }
 
-// <p>TurnDetectionOndewoDeFusionOptions configures the ONDEWO German fusion turn detector. It combines the ONDEWO
-// German text model on vLLM, acoustic heads on Triton and signals computed from the stream into one end-of-turn
-// probability. The Triton heads, the text model's served name and the weights file are server settings.</p>
+// TurnDetectionOndewoDeFusionOptions configures the ONDEWO German fusion turn detector. It combines the ONDEWO German text model on vLLM, acoustic heads on Triton and signals computed from the stream into one end-of-turn probability. The Triton heads, the text model's served name and the weights file are server settings.
 type TurnDetectionOndewoDeFusionOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Addresses the vLLM deployment of the text model (<code>base_url</code>, <code>api_key</code>,
@@ -4643,9 +4629,9 @@ func (x *TurnDetectionOndewoDeFusionOptions) GetEndOfTurnProbabilityThreshold() 
 	return 0
 }
 
-// <p>TurnDetectionPipecatSmartTurnOptions configures pipecat Smart Turn v3.2 as the turn detector. It judges the
-// turn from the caller's audio alone and is served by Triton.</p>
-// <p>Model: <a href="https://github.com/pipecat-ai/smart-turn">pipecat Smart Turn</a></p>
+// TurnDetectionPipecatSmartTurnOptions configures pipecat Smart Turn v3.2 as the turn detector. It judges the turn from the caller's audio alone and is served by Triton.
+//
+// Model: <a href="https://github.com/pipecat-ai/smart-turn">pipecat Smart Turn</a>
 type TurnDetectionPipecatSmartTurnOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Full name of the Triton model. Unset = the server's configured value (default:
@@ -4749,9 +4735,7 @@ func (x *TurnDetectionPipecatSmartTurnOptions) GetEndOfTurnProbabilityThreshold(
 	return 0
 }
 
-// <p>TurnDetectionConversationContext carries the latest turns of the conversation for
-// <code>TurnDetectionEndOfUtteranceLlmOptions</code> (see
-// <code>TurnDetectionOptions.turn_detection_conversation_context</code>). No other detector reads it.</p>
+// TurnDetectionConversationContext carries the latest turns of the conversation for <code>TurnDetectionEndOfUtteranceLlmOptions</code> (see <code>TurnDetectionOptions.turn_detection_conversation_context</code>). No other detector reads it.
 type TurnDetectionConversationContext struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The turns of the conversation, oldest first. They EXCLUDE the caller's utterance under evaluation, which
@@ -4798,8 +4782,7 @@ func (x *TurnDetectionConversationContext) GetTurnDetectionContextTurns() []*Tur
 	return nil
 }
 
-// <p>One turn of the conversation context of the turn detection, read only by
-// <code>TurnDetectionEndOfUtteranceLlmOptions</code>.</p>
+// One turn of the conversation context of the turn detection, read only by <code>TurnDetectionEndOfUtteranceLlmOptions</code>.
 type TurnDetectionContextTurn struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Who spoke the turn.
@@ -4854,8 +4837,7 @@ func (x *TurnDetectionContextTurn) GetText() string {
 	return ""
 }
 
-// <p>TurnDetectionHoldBands carries the hold bands of <code>TurnDetectionEndOfUtteranceLlmOptions</code>. No other
-// detector reads them.</p>
+// TurnDetectionHoldBands carries the hold bands of <code>TurnDetectionEndOfUtteranceLlmOptions</code>. No other detector reads them.
 type TurnDetectionHoldBands struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The bands, each holding a turn judged finished with a probability below its upper bound: the first band,
@@ -4903,7 +4885,7 @@ func (x *TurnDetectionHoldBands) GetTurnDetectionHoldBands() []*TurnDetectionHol
 	return nil
 }
 
-// <p>One hold band of <code>TurnDetectionEndOfUtteranceLlmOptions</code>.</p>
+// One hold band of <code>TurnDetectionEndOfUtteranceLlmOptions</code>.
 type TurnDetectionHoldBand struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The exclusive upper bound of the end-of-utterance probabilities this band covers, valid range: 0 - 1.
@@ -4959,7 +4941,7 @@ func (x *TurnDetectionHoldBand) GetMaxSilenceSeconds() float32 {
 	return 0
 }
 
-// <p>Configuration options for OpenAI client chat completion requests used in turn detection and LLM post-processing.</p>
+// Configuration options for OpenAI client chat completion requests used in turn detection and LLM post-processing.
 type OpenaiLlmOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. The API key used to authenticate with the OpenAI API.
@@ -5345,7 +5327,7 @@ func (x *OpenaiLlmOptions) GetExtraBody() *structpb.Struct {
 	return nil
 }
 
-// <p>VoiceActivityDetection contains information about voice activity detection settings.</p>
+// VoiceActivityDetection contains information about voice activity detection settings.
 type VoiceActivityDetection struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Deprecated in favour of <code>vad_method</code>, but still honoured so that configurations
@@ -5452,8 +5434,9 @@ func (x *VoiceActivityDetection) GetTsdMethod() TsdMethod {
 	return TsdMethod_TSD_METHOD_UNSPECIFIED
 }
 
-// <p>Pyannote contains configuration for the Pyannote voice activity detection model.</p>
-// <p>Library: <a href="https://github.com/pyannote/pyannote-audio/blob/develop/tutorials/voice_activity_detection.ipynb">pyannote-audio</a></p>
+// Pyannote contains configuration for the Pyannote voice activity detection model.
+//
+// Library: <a href="https://github.com/pyannote/pyannote-audio/blob/develop/tutorials/voice_activity_detection.ipynb">pyannote-audio</a>
 type Pyannote struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Full name of the Pyannote model.
@@ -5546,11 +5529,11 @@ func (x *Pyannote) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>Silero contains configuration for the Silero voice activity detection model.</p>
-// <p>Unlike <code>Pyannote</code>, Silero is configured with its own parameters rather than
-// <code>(min_duration_on, min_duration_off)</code>. They carry exactly the meaning they have
-// upstream in <code>get_speech_timestamps</code> / <code>VADIterator</code>.</p>
-// <p>Library: <a href="https://github.com/snakers4/silero-vad">silero-vad</a></p>
+// Silero contains configuration for the Silero voice activity detection model.
+//
+// Unlike <code>Pyannote</code>, Silero is configured with its own parameters rather than <code>(min_duration_on, min_duration_off)</code>. They carry exactly the meaning they have upstream in <code>get_speech_timestamps</code> / <code>VADIterator</code>.
+//
+// Library: <a href="https://github.com/snakers4/silero-vad">silero-vad</a>
 type Silero struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Full name of the Silero model.
@@ -5669,11 +5652,9 @@ func (x *Silero) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>WespeakerTsd contains configuration for the WeSpeaker target-speaker detection (TSD)
-// model. Given a reference speaker embedding, it decides whether a newly detected utterance
-// was spoken by the same person, so that speech from a different speaker (e.g. background
-// noise, crosstalk, or a barge-in) can be rejected.</p>
-// <p>Library: <a href="https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM">wespeaker-voxceleb-resnet34-LM</a></p>
+// WespeakerTsd contains configuration for the WeSpeaker target-speaker detection (TSD) model. Given a reference speaker embedding, it decides whether a newly detected utterance was spoken by the same person, so that speech from a different speaker (e.g. background noise, crosstalk, or a barge-in) can be rejected.
+//
+// Library: <a href="https://huggingface.co/pyannote/wespeaker-voxceleb-resnet34-LM">wespeaker-voxceleb-resnet34-LM</a>
 type WespeakerTsd struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Indicates if target-speaker detection is active.
@@ -5780,7 +5761,7 @@ func (x *WespeakerTsd) GetReferenceMaxLength() float32 {
 	return 0
 }
 
-// <p>PostProcessing contains the configuration for post-processing.</p>
+// PostProcessing contains the configuration for post-processing.
 type PostProcessing struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// List of names of active post-processors.
@@ -5835,7 +5816,7 @@ func (x *PostProcessing) GetPostProcessors() *PostProcessors {
 	return nil
 }
 
-// <p>PostProcessors contains configurations for post-processors.</p>
+// PostProcessors contains configurations for post-processors.
 type PostProcessors struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Configuration of the SymSpell spelling correction.
@@ -5899,7 +5880,7 @@ func (x *PostProcessors) GetLlmPostProcessing() *S2TLlmPostProcessing {
 	return nil
 }
 
-// <p>SymSpell contains configuration for the SymSpell spelling correction.</p>
+// SymSpell contains configuration for the SymSpell spelling correction.
 type SymSpell struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Path to the dictionary used by symspell
@@ -5964,7 +5945,7 @@ func (x *SymSpell) GetPrefixLength() int64 {
 	return 0
 }
 
-// <p>S2tNormalization contains configuration for the speech-to-text normalization.</p>
+// S2tNormalization contains configuration for the speech-to-text normalization.
 type S2TNormalization struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Language for normalization of transcriptions.
@@ -6019,7 +6000,7 @@ func (x *S2TNormalization) GetPipeline() []string {
 	return nil
 }
 
-// <p>S2tLlmPostProcessing contains configuration for the speech-to-text postprocessing with LLM.</p>
+// S2tLlmPostProcessing contains configuration for the speech-to-text postprocessing with LLM.
 type S2TLlmPostProcessing struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Configuration options for the OpenAI client used for post-processing.
@@ -6164,7 +6145,7 @@ func (x *S2TLlmPostProcessing) GetS2TLlmPostProcessingUserPromptOptions() *S2TLl
 	return nil
 }
 
-// <p>Configuration of the options to translation task in LLM post-processing.</p>
+// Configuration of the options to translation task in LLM post-processing.
 type S2TLlmPostProcessingTranslationOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if the translation task of LLM post-processing is active.
@@ -6228,7 +6209,7 @@ func (x *S2TLlmPostProcessingTranslationOptions) GetPrompt() string {
 	return ""
 }
 
-// <p>Configuration of the options to inverse-normalization task in LLM post-processing.</p>
+// Configuration of the options to inverse-normalization task in LLM post-processing.
 type S2TLlmPostProcessingInverseNormalizationOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if the inverse-normalization task of LLM post-processing is active.
@@ -6328,7 +6309,7 @@ func (x *S2TLlmPostProcessingInverseNormalizationOptions) GetTimeZone() *S2TLlmP
 	return nil
 }
 
-// <p>Configuration of the options to normalization task in LLM post-processing.</p>
+// Configuration of the options to normalization task in LLM post-processing.
 type S2TLlmPostProcessingNormalizationOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if the normalization task of LLM post-processing is active.
@@ -6428,7 +6409,7 @@ func (x *S2TLlmPostProcessingNormalizationOptions) GetTimeZone() *S2TLlmPostProc
 	return nil
 }
 
-// <p>Configuration of the options to summarization task in LLM post-processing.</p>
+// Configuration of the options to summarization task in LLM post-processing.
 type S2TLlmPostProcessingSummarizationOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if the summarization task of LLM post-processing is active.
@@ -6501,9 +6482,7 @@ func (x *S2TLlmPostProcessingSummarizationOptions) GetMaxChars() int32 {
 	return 0
 }
 
-// <p>Common configuration for an individual LLM post-processing sub-task (e.g. email, phone number,
-// date and time, credit card number, social security number, time zone).
-// Used by both normalization and inverse-normalization tasks.</p>
+// Common configuration for an individual LLM post-processing sub-task (e.g. email, phone number, date and time, credit card number, social security number, time zone). Used by both normalization and inverse-normalization tasks.
 type S2TLlmPostProcessingSubTaskOptions struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Indicates if this sub-task is active.
@@ -6559,7 +6538,7 @@ func (x *S2TLlmPostProcessingSubTaskOptions) GetPrompt() string {
 	return ""
 }
 
-// <p>Logging contains configuration for logging.</p>
+// Logging contains configuration for logging.
 type Logging struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Type of logging.
@@ -6614,7 +6593,7 @@ func (x *Logging) GetPath() string {
 	return ""
 }
 
-// <p>ListS2tLanguageModelsRequest is used to request a list of available language models for specified pipelines.</p>
+// ListS2tLanguageModelsRequest is used to request a list of available language models for specified pipelines.
 type ListS2TLanguageModelsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// List of pipeline IDs to retrieve their available language models.
@@ -6661,7 +6640,7 @@ func (x *ListS2TLanguageModelsRequest) GetIds() []string {
 	return nil
 }
 
-// <p>LanguageModelPipelineId contains information about a pipeline and its available language models.</p>
+// LanguageModelPipelineId contains information about a pipeline and its available language models.
 type LanguageModelPipelineId struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// A pipeline ID. Example: &quot;pipeline_1&quot;
@@ -6716,7 +6695,7 @@ func (x *LanguageModelPipelineId) GetModelNames() []string {
 	return nil
 }
 
-// <p>ListS2tLanguageModelsResponse is used to return the available language models for specified pipelines.</p>
+// ListS2tLanguageModelsResponse is used to return the available language models for specified pipelines.
 type ListS2TLanguageModelsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Response is a list of <code>LanguageModelPipelineId</code>, where each element contains a pipeline ID and its associated
@@ -6765,7 +6744,7 @@ func (x *ListS2TLanguageModelsResponse) GetLmPipelineIds() []*LanguageModelPipel
 	return nil
 }
 
-// <p>CreateUserLanguageModelRequest is used to request the creation of a new user-specific language model.</p>
+// CreateUserLanguageModelRequest is used to request the creation of a new user-specific language model.
 type CreateUserLanguageModelRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Name of the language model to create. Example: &quot;user_lm_1&quot;
@@ -6811,7 +6790,7 @@ func (x *CreateUserLanguageModelRequest) GetLanguageModelName() string {
 	return ""
 }
 
-// <p>DeleteUserLanguageModelRequest is used to request the deletion of a user-specific language model.</p>
+// DeleteUserLanguageModelRequest is used to request the deletion of a user-specific language model.
 type DeleteUserLanguageModelRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Name of the language model to delete. Example: &quot;user_lm_1&quot;
@@ -6857,7 +6836,7 @@ func (x *DeleteUserLanguageModelRequest) GetLanguageModelName() string {
 	return ""
 }
 
-// <p>AddDataToUserLanguageModelRequest is used to request the addition of data to a user-specific language model.</p>
+// AddDataToUserLanguageModelRequest is used to request the addition of data to a user-specific language model.
 type AddDataToUserLanguageModelRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Name of the language model to which to add data. Example: &quot;user_lm_1&quot;
@@ -6913,7 +6892,7 @@ func (x *AddDataToUserLanguageModelRequest) GetZippedData() []byte {
 	return nil
 }
 
-// <p>TrainUserLanguageModelRequest is used to request the training of a user-specific language model.</p>
+// TrainUserLanguageModelRequest is used to request the training of a user-specific language model.
 type TrainUserLanguageModelRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Name of the language model to train. Example: &quot;user_lm_1&quot;
@@ -6968,8 +6947,9 @@ func (x *TrainUserLanguageModelRequest) GetOrder() int64 {
 	return 0
 }
 
-// <p>The request message for <code>ListS2tNormalizationPipelines</code>.</p>
-// <p>Filter pipelines by attributes in request.</p>
+// The request message for <code>ListS2tNormalizationPipelines</code>.
+//
+// Filter pipelines by attributes in request.
 type ListS2TNormalizationPipelinesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Define the language.
@@ -7015,7 +6995,7 @@ func (x *ListS2TNormalizationPipelinesRequest) GetLanguage() string {
 	return ""
 }
 
-// <p>The response message for <code>ListS2tNormalizationPipelines</code>.</p>
+// The response message for <code>ListS2tNormalizationPipelines</code>.
 type ListS2TNormalizationPipelinesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Representation of a list of normalization pipelines configurations.

@@ -1063,8 +1063,7 @@ func (x *Agent) GetWarmTransferSettings() *WarmTransferAgentSettings {
 	return nil
 }
 
-// The agent's settings of warm transfer intros. A text a <code>WarmTransferIntroConfig</code> leaves empty falls back
-// to the agent's text for the intro's language, then to the built-in default.
+// The agent's settings of warm transfer intros. A text a <code>WarmTransferIntroConfig</code> leaves empty falls back to the agent's text for the intro's language, then to the built-in default.
 type WarmTransferAgentSettings struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Whether warm transfer intros are enabled for the agent. Unset = enabled while the server's warm transfer
@@ -1140,8 +1139,7 @@ func (x *WarmTransferAgentSettings) GetExtraLexicon() map[string]*WarmTransferAg
 	return nil
 }
 
-// The default texts of warm transfer intros in one language. An empty text = the built-in default. The fields and
-// placeholders are those of the same-named fields of <code>WarmTransferIntroConfig</code>.
+// The default texts of warm transfer intros in one language. An empty text = the built-in default. The fields and placeholders are those of the same-named fields of <code>WarmTransferIntroConfig</code>.
 type WarmTransferAgentTexts struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The first question to the target (placeholder <code>{project}</code>).
@@ -1225,9 +1223,7 @@ func (x *WarmTransferAgentTexts) GetCallerUnreachableMessage() string {
 	return ""
 }
 
-// Additional entries of the closed decision lexicon of warm transfer intros in one language, matched before an LLM
-// classifies an answer. At most 50 entries in <code>accept_phrases</code> and <code>decline_phrases</code>
-// together.
+// Additional entries of the closed decision lexicon of warm transfer intros in one language, matched before an LLM classifies an answer. At most 50 entries in <code>accept_phrases</code> and <code>decline_phrases</code> together.
 type WarmTransferAgentLexicon struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Words and phrases that accept the call (and confirm the ready question), e.g. "übernehme".
@@ -6134,8 +6130,7 @@ func (x *CreateProjectTechnicalUserRequest) GetName() string {
 	return ""
 }
 
-// Response with the freshly minted technical user's credentials.
-// The password is returned ONCE and cannot be retrieved later.
+// Response with the freshly minted technical user's credentials. The password is returned ONCE and cannot be retrieved later.
 type CreateProjectTechnicalUserResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The technical user's id (Keycloak sub / UUID).
@@ -6496,8 +6491,7 @@ func (x *RotateProjectTechnicalUserPasswordRequest) GetUserId() string {
 	return ""
 }
 
-// Response with the rotated password.
-// The password is returned ONCE and cannot be retrieved later.
+// Response with the rotated password. The password is returned ONCE and cannot be retrieved later.
 type RotateProjectTechnicalUserPasswordResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The technical user's id (Keycloak sub / UUID).

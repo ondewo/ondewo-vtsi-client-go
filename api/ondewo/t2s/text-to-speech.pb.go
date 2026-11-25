@@ -37,7 +37,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// <p>Represents a pulse-code modulation technique.</p>
+// Represents a pulse-code modulation technique.
 type Pcm int32
 
 const (
@@ -106,7 +106,7 @@ func (Pcm) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_t2s_text_to_speech_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>AudioFormat enum represents various audio file formats for storing digital audio data.</p>
+// AudioFormat enum represents various audio file formats for storing digital audio data.
 type AudioFormat int32
 
 const (
@@ -175,8 +175,7 @@ func (AudioFormat) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_t2s_text_to_speech_proto_rawDescGZIP(), []int{1}
 }
 
-// The update method to be used.
-// UpdateMethod enum defines the method for updating custom phonemizers.
+// The update method to be used. UpdateMethod enum defines the method for updating custom phonemizers.
 type UpdateCustomPhonemizerRequest_UpdateMethod int32
 
 const (
@@ -229,8 +228,9 @@ func (UpdateCustomPhonemizerRequest_UpdateMethod) EnumDescriptor() ([]byte, []in
 	return file_ondewo_t2s_text_to_speech_proto_rawDescGZIP(), []int{57, 0}
 }
 
-// <p>Represents a Synthesize Request.</p>
-// <p>A Synthesize Request contains the information need to perform a text to speech conversion.</p>
+// Represents a Synthesize Request.
+//
+// A Synthesize Request contains the information need to perform a text to speech conversion.
 type SynthesizeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Represents the text that will be transformed to speech.
@@ -488,7 +488,7 @@ func (x *SynthesizeRequest) GetConfig() *RequestConfig {
 	return nil
 }
 
-// <p>BatchSynthesizeRequest message is used to send a batch request for synthesis.</p>
+// BatchSynthesizeRequest message is used to send a batch request for synthesis.
 type BatchSynthesizeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Repeated field holding individual synthesis requests that make up the batch request.
@@ -534,7 +534,7 @@ func (x *BatchSynthesizeRequest) GetBatchRequest() []*SynthesizeRequest {
 	return nil
 }
 
-// <p>StreamingSynthesizeRequest is used to perform streaming synthesize.</p>
+// StreamingSynthesizeRequest is used to perform streaming synthesize.
 type StreamingSynthesizeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Represents the text that will be transformed to speech.
@@ -590,7 +590,7 @@ func (x *StreamingSynthesizeRequest) GetConfig() *RequestConfig {
 	return nil
 }
 
-// <p>BatchSynthesizeResponse message is used to store the responses for a batch synthesis request.</p>
+// BatchSynthesizeResponse message is used to store the responses for a batch synthesis request.
 type BatchSynthesizeResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Repeated field holding individual synthesis responses that correspond to the input requests in the batch.
@@ -636,7 +636,7 @@ func (x *BatchSynthesizeResponse) GetBatchResponse() []*SynthesizeResponse {
 	return nil
 }
 
-// <p>Represents a Configuration for the text to speech conversion.</p>
+// Represents a Configuration for the text to speech conversion.
 type RequestConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Represents the pipeline id of the model configuration that will be used.
@@ -991,7 +991,7 @@ type RequestConfig_T2SNormalization struct {
 
 func (*RequestConfig_T2SNormalization) isRequestConfig_OneofT2SNormalization() {}
 
-// <p>Configuration for cloud provider settings for Text-to-Speech (T2S).</p>
+// Configuration for cloud provider settings for Text-to-Speech (T2S).
 type T2SCloudProviderConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Configuration for Eleven Labs text-to-speech provider.
@@ -1055,7 +1055,7 @@ func (x *T2SCloudProviderConfig) GetT2SCloudProviderConfigMicrosoft() *T2SCloudP
 	return nil
 }
 
-// <p>Configuration details specific to the Eleven Labs text-to-speech provider.</p>
+// Configuration details specific to the Eleven Labs text-to-speech provider.
 type T2SCloudProviderConfigElevenLabs struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Stability level for inference, influencing consistency of generated speech. It is in the range [0.0, 1.0].
@@ -1138,7 +1138,7 @@ func (x *T2SCloudProviderConfigElevenLabs) GetApplyTextNormalization() string {
 	return ""
 }
 
-// <p>Configuration details specific to the Microsoft text-to-speech provider.</p>
+// Configuration details specific to the Microsoft text-to-speech provider.
 type T2SCloudProviderConfigMicrosoft struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Determines whether to use the default speaker voice.
@@ -1184,7 +1184,7 @@ func (x *T2SCloudProviderConfigMicrosoft) GetUseDefaultSpeaker() bool {
 	return false
 }
 
-// <p>Configuration details specific to the Google text-to-speech provider.</p>
+// Configuration details specific to the Google text-to-speech provider.
 type T2SCloudProviderConfigGoogle struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Speaking rate for inference, controlling the speed of generated speech. It is in the range [0.25, 4.0].
@@ -1248,8 +1248,9 @@ func (x *T2SCloudProviderConfigGoogle) GetPitch() float32 {
 	return 0
 }
 
-// <p>Represents a Synthesize Response.</p>
-// <p>A Synthesize Response contains the generated audio, requested text and all other properties of this generated audio.</p>
+// Represents a Synthesize Response.
+//
+// A Synthesize Response contains the generated audio, requested text and all other properties of this generated audio.
 type SynthesizeResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The unique identifier (UUID) assigned to the generated audio.
@@ -1358,9 +1359,9 @@ func (x *SynthesizeResponse) GetSampleRate() float32 {
 	return 0
 }
 
-// <p>Represents a Streaming Synthesize Response.</p>
-// <p>A Streaming Synthesize Response contains the generated audio, requested text and and
-// all other properties of this generated audio.</p>
+// Represents a Streaming Synthesize Response.
+//
+// A Streaming Synthesize Response contains the generated audio, requested text and and all other properties of this generated audio.
 type StreamingSynthesizeResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The unique identifier (UUID) assigned to the generated audio.
@@ -1469,7 +1470,7 @@ func (x *StreamingSynthesizeResponse) GetSampleRate() float32 {
 	return 0
 }
 
-// <p>NormalizeTextRequest message is used to request text normalization.</p>
+// NormalizeTextRequest message is used to request text normalization.
 type NormalizeTextRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The ID of the text-to-speech pipeline.
@@ -1524,7 +1525,7 @@ func (x *NormalizeTextRequest) GetText() string {
 	return ""
 }
 
-// <p>NormalizeTextResponse message is used to store the normalized text response.</p>
+// NormalizeTextResponse message is used to store the normalized text response.
 type NormalizeTextResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The normalized text.
@@ -1570,7 +1571,7 @@ func (x *NormalizeTextResponse) GetNormalizedText() string {
 	return ""
 }
 
-// <p>Version information of the service</p>
+// Version information of the service
 type T2SGetServiceInfoResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// version number
@@ -1616,9 +1617,11 @@ func (x *T2SGetServiceInfoResponse) GetVersion() string {
 	return ""
 }
 
-// <p>Pipeline Request representation.</p>
-// <p>The request message for ListT2sPipelines.</p>
-// <p>Filter pipelines by attributed in request.</p>
+// Pipeline Request representation.
+//
+// The request message for ListT2sPipelines.
+//
+// Filter pipelines by attributed in request.
 type ListT2SPipelinesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Define the language/ languages.
@@ -1700,8 +1703,9 @@ func (x *ListT2SPipelinesRequest) GetDomains() []string {
 	return nil
 }
 
-// <p>Pipeline Response representation.</p>
-// <p>The response message for ListT2sPipelines.</p>
+// Pipeline Response representation.
+//
+// The response message for ListT2sPipelines.
 type ListT2SPipelinesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Representation of a list of pipelines configurations.
@@ -1749,9 +1753,11 @@ func (x *ListT2SPipelinesResponse) GetPipelines() []*Text2SpeechConfig {
 	return nil
 }
 
-// <p>Language Request representation.</p>
-// <p>The request message for ListT2sLanguages.</p>
-// <p>Filter languages of pipelines by attributed in request.</p>
+// Language Request representation.
+//
+// The request message for ListT2sLanguages.
+//
+// Filter languages of pipelines by attributed in request.
 type ListT2SLanguagesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Define the speaker sex.
@@ -1824,8 +1830,9 @@ func (x *ListT2SLanguagesRequest) GetDomains() []string {
 	return nil
 }
 
-// <p>Language Response representation.</p>
-// <p>The response message for ListT2sLanguages.</p>
+// Language Response representation.
+//
+// The response message for ListT2sLanguages.
 type ListT2SLanguagesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Define the language/ languages that satisfy/ies
@@ -1872,9 +1879,11 @@ func (x *ListT2SLanguagesResponse) GetLanguages() []string {
 	return nil
 }
 
-// <p>Domain Request representation.</p>
-// <p>The request message for ListT2sDomains.</p>
-// <p>Filter domains of pipelines by attributed in request.</p>
+// Domain Request representation.
+//
+// The request message for ListT2sDomains.
+//
+// Filter domains of pipelines by attributed in request.
 type ListT2SDomainsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Define the speaker sex.
@@ -1947,8 +1956,9 @@ func (x *ListT2SDomainsRequest) GetLanguages() []string {
 	return nil
 }
 
-// <p>Domains Response representation.</p>
-// <p>The response message for ListT2sDomains.</p>
+// Domains Response representation.
+//
+// The response message for ListT2sDomains.
 type ListT2SDomainsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Define the domain/ domains that satisfy/ies
@@ -1995,8 +2005,9 @@ func (x *ListT2SDomainsResponse) GetDomains() []string {
 	return nil
 }
 
-// <p>The request message for ListT2sNormalizationPipelines.</p>
-// <p>Filter pipelines by attributed in request.</p>
+// The request message for ListT2sNormalizationPipelines.
+//
+// Filter pipelines by attributed in request.
 type ListT2SNormalizationPipelinesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Define the language.
@@ -2042,8 +2053,9 @@ func (x *ListT2SNormalizationPipelinesRequest) GetLanguage() string {
 	return ""
 }
 
-// <p>Pipeline Response representation.</p>
-// <p>The response message for ListT2sNormalizationPipelines.</p>
+// Pipeline Response representation.
+//
+// The response message for ListT2sNormalizationPipelines.
 type ListT2SNormalizationPipelinesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Representation of a list of normalization pipelines configurations.
@@ -2091,8 +2103,9 @@ func (x *ListT2SNormalizationPipelinesResponse) GetT2SNormalizationPipelines() [
 	return nil
 }
 
-// <p>Pipeline Id representation.</p>
-// <p>Used in the creation, deletion and getter of pipelines.</p>
+// Pipeline Id representation.
+//
+// Used in the creation, deletion and getter of pipelines.
 type T2SPipelineId struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Defines the id of the pipeline.
@@ -2138,7 +2151,7 @@ func (x *T2SPipelineId) GetId() string {
 	return ""
 }
 
-// <p>Configuration of text-to-speech models representation.</p>
+// Configuration of text-to-speech models representation.
 type Text2SpeechConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Defines the id of the pipeline.
@@ -2229,7 +2242,7 @@ func (x *Text2SpeechConfig) GetPostprocessing() *Postprocessing {
 	return nil
 }
 
-// <p>T2SDescription message is used to describe the text-to-speech service.</p>
+// T2SDescription message is used to describe the text-to-speech service.
 type T2SDescription struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The language supported by the service.
@@ -2320,7 +2333,7 @@ func (x *T2SDescription) GetDomain() string {
 	return ""
 }
 
-// <p>T2SInference message is used to specify the text-to-speech inference settings.</p>
+// T2SInference message is used to specify the text-to-speech inference settings.
 type T2SInference struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The type of inference, selecting which of the settings below is applied:
@@ -2395,7 +2408,7 @@ func (x *T2SInference) GetCaching() *Caching {
 	return nil
 }
 
-// <p>CompositeInference message combines text-to-mel and mel-to-audio inference settings.</p>
+// CompositeInference message combines text-to-mel and mel-to-audio inference settings.
 type CompositeInference struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Text-to-mel inference settings.
@@ -2450,7 +2463,7 @@ func (x *CompositeInference) GetMel2Audio() *Mel2Audio {
 	return nil
 }
 
-// <p>SingleInference message inference settings of text2audio models.</p>
+// SingleInference message inference settings of text2audio models.
 type SingleInference struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Text-to-audio inference settings.
@@ -2496,7 +2509,7 @@ func (x *SingleInference) GetText2Audio() *Text2Audio {
 	return nil
 }
 
-// <p>Text2Mel message contains settings for text-to-mel inference.</p>
+// Text2Mel message contains settings for text-to-mel inference.
 type Text2Mel struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The type of text-to-mel inference, selecting which of the settings below is applied
@@ -2561,7 +2574,7 @@ func (x *Text2Mel) GetGlowTtsTriton() *GlowTTSTriton {
 	return nil
 }
 
-// <p>Text2Audio message contains settings for text-to-audio inference.</p>
+// Text2Audio message contains settings for text-to-audio inference.
 type Text2Audio struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The type of text-to-audio inference, selecting which of the settings below is applied:
@@ -2682,7 +2695,7 @@ func (x *Text2Audio) GetQwen3TtsBase() *Qwen3TtsBase {
 	return nil
 }
 
-// <p>GlowTTS message contains settings for the GlowTTS inference.</p>
+// GlowTTS message contains settings for the GlowTTS inference.
 type GlowTTS struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The batch size for inference.
@@ -2782,7 +2795,7 @@ func (x *GlowTTS) GetParamConfigPath() string {
 	return ""
 }
 
-// <p>GlowTTSTriton message contains settings for the GlowTTS Triton inference.</p>
+// GlowTTSTriton message contains settings for the GlowTTS Triton inference.
 type GlowTTSTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The batch size for inference.
@@ -2900,7 +2913,7 @@ func (x *GlowTTSTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>Vits message contains settings for the Vits inference.</p>
+// Vits message contains settings for the Vits inference.
 type Vits struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The batch size for inference.
@@ -3000,7 +3013,7 @@ func (x *Vits) GetParamConfigPath() string {
 	return ""
 }
 
-// <p>VitsTriton message contains settings for the Vits Triton inference.</p>
+// VitsTriton message contains settings for the Vits Triton inference.
 type VitsTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The batch size for inference.
@@ -3118,7 +3131,7 @@ func (x *VitsTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>T2sCloudServiceElevenLabs message contains settings for the ElevenLabs Cloud service inference.</p>
+// T2sCloudServiceElevenLabs message contains settings for the ElevenLabs Cloud service inference.
 type T2SCloudServiceElevenLabs struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Language of the generated audio. It should be 4-Letter language code.
@@ -3200,7 +3213,7 @@ func (x *T2SCloudServiceElevenLabs) GetApplyTextNormalization() string {
 	return ""
 }
 
-// <p>VoiceSettings message contains settings for ElevenLabs inference.</p>
+// VoiceSettings message contains settings for ElevenLabs inference.
 type VoiceSettings struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// stability value for elevenlabs inference
@@ -3273,7 +3286,7 @@ func (x *VoiceSettings) GetUseSpeakerBoost() bool {
 	return false
 }
 
-// <p>T2sCloudServiceAmazon message contains settings for the Amazon Cloud service inference.</p>
+// T2sCloudServiceAmazon message contains settings for the Amazon Cloud service inference.
 type T2SCloudServiceAmazon struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Voice ID indicating the speaker
@@ -3328,7 +3341,7 @@ func (x *T2SCloudServiceAmazon) GetModelId() string {
 	return ""
 }
 
-// <p>T2sCloudServiceGoogle message contains settings for the Google Cloud service inference.</p>
+// T2sCloudServiceGoogle message contains settings for the Google Cloud service inference.
 type T2SCloudServiceGoogle struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Voice ID indicating the speaker
@@ -3410,7 +3423,7 @@ func (x *T2SCloudServiceGoogle) GetSpeakerLanguage() string {
 	return ""
 }
 
-// <p>T2sCloudServiceMicrosoft message contains settings for the Microsoft Cloud service inference.</p>
+// T2sCloudServiceMicrosoft message contains settings for the Microsoft Cloud service inference.
 type T2SCloudServiceMicrosoft struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Voice ID indicating the speaker.
@@ -3465,7 +3478,7 @@ func (x *T2SCloudServiceMicrosoft) GetUseDefaultSpeaker() bool {
 	return false
 }
 
-// <p>Qwen3TtsCustomVoice message contains settings for inference of qwen3-TTS-CustomVoice model.</p>
+// Qwen3TtsCustomVoice message contains settings for inference of qwen3-TTS-CustomVoice model.
 type Qwen3TtsCustomVoice struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Voice id indicating the speaker name
@@ -3556,7 +3569,7 @@ func (x *Qwen3TtsCustomVoice) GetQwen3TtsServerHeader() *structpb.Struct {
 	return nil
 }
 
-// <p>Qwen3TtsBase message contains settings for inference of qwen3-TTS-Base model.</p>
+// Qwen3TtsBase message contains settings for inference of qwen3-TTS-Base model.
 type Qwen3TtsBase struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Model name for the inference server.
@@ -3647,7 +3660,7 @@ func (x *Qwen3TtsBase) GetQwen3TtsServerHeader() *structpb.Struct {
 	return nil
 }
 
-// <p>Mel2Audio message contains settings for mel-to-audio inference.</p>
+// Mel2Audio message contains settings for mel-to-audio inference.
 type Mel2Audio struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The type of mel-to-audio inference (vocoder), selecting which of the settings below is applied
@@ -3721,7 +3734,7 @@ func (x *Mel2Audio) GetHifiGanTriton() *HiFiGanTriton {
 	return nil
 }
 
-// <p>HiFiGan message contains settings for the HiFiGan inference.</p>
+// HiFiGan message contains settings for the HiFiGan inference.
 type HiFiGan struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Flag indicating whether to use GPU for inference.
@@ -3794,7 +3807,7 @@ func (x *HiFiGan) GetModelPath() string {
 	return ""
 }
 
-// <p>HiFiGanTriton message contains settings for the HiFiGan Triton inference.</p>
+// HiFiGanTriton message contains settings for the HiFiGan Triton inference.
 type HiFiGanTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The path to the HiFiGan Triton configuration.
@@ -3867,7 +3880,7 @@ func (x *HiFiGanTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>MbMelganTriton message contains settings for the MbMelgan Triton inference.</p>
+// MbMelganTriton message contains settings for the MbMelgan Triton inference.
 type MbMelganTriton struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The path to the MbMelgan Triton configuration.
@@ -3949,7 +3962,7 @@ func (x *MbMelganTriton) GetTritonServerPort() int64 {
 	return 0
 }
 
-// <p>Caching message contains settings for caching.</p>
+// Caching message contains settings for caching.
 type Caching struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Flag indicating whether caching is active.
@@ -4040,7 +4053,7 @@ func (x *Caching) GetCacheSaveDir() string {
 	return ""
 }
 
-// <p>Represents the configuration for text-to-speech normalization.</p>
+// Represents the configuration for text-to-speech normalization.
 type T2SNormalization struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The language for which the normalization is applied.
@@ -4149,7 +4162,7 @@ func (x *T2SNormalization) GetPhonemeCorrectionMapping() string {
 	return ""
 }
 
-// <p>Postprocessing message contains settings for postprocessing.</p>
+// Postprocessing message contains settings for postprocessing.
 type Postprocessing struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The duration of silence in seconds.
@@ -4231,7 +4244,7 @@ func (x *Postprocessing) GetApodization() *Apodization {
 	return nil
 }
 
-// <p>Logmnse message contains settings for Logmnse postprocessing.</p>
+// Logmnse message contains settings for Logmnse postprocessing.
 type Logmnse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The initial noise value.
@@ -4295,7 +4308,7 @@ func (x *Logmnse) GetNoiseThreshold() float32 {
 	return 0
 }
 
-// <p>Wiener message contains settings for Wiener postprocessing.</p>
+// Wiener message contains settings for Wiener postprocessing.
 type Wiener struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The frame length.
@@ -4377,7 +4390,7 @@ func (x *Wiener) GetThresh() float32 {
 	return 0
 }
 
-// <p>Apodization message contains settings for apodization postprocessing.</p>
+// Apodization message contains settings for apodization postprocessing.
 type Apodization struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The duration of apodization in seconds.
@@ -4423,7 +4436,7 @@ func (x *Apodization) GetApodizationSecs() float32 {
 	return 0
 }
 
-// <p>T2SCustomLengthScales message contains custom length scales for text types.</p>
+// T2SCustomLengthScales message contains custom length scales for text types.
 type T2SCustomLengthScales struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The custom length scale for general text.
@@ -4532,7 +4545,7 @@ func (x *T2SCustomLengthScales) GetCallsignShort() float32 {
 	return 0
 }
 
-// <p>PhonemizerId message represents the ID of a phonemizer.</p>
+// PhonemizerId message represents the ID of a phonemizer.
 type PhonemizerId struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The ID of the phonemizer.
@@ -4578,7 +4591,7 @@ func (x *PhonemizerId) GetId() string {
 	return ""
 }
 
-// <p>CustomPhonemizerProto message represents a custom phonemizer.</p>
+// CustomPhonemizerProto message represents a custom phonemizer.
 type CustomPhonemizerProto struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The ID of the custom phonemizer.
@@ -4633,7 +4646,7 @@ func (x *CustomPhonemizerProto) GetMaps() []*Map {
 	return nil
 }
 
-// <p>Map message represents a word-to-phoneme mapping in a custom phonemizer.</p>
+// Map message represents a word-to-phoneme mapping in a custom phonemizer.
 type Map struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The word to be mapped.
@@ -4688,7 +4701,7 @@ func (x *Map) GetPhonemeGroups() string {
 	return ""
 }
 
-// <p>ListCustomPhonemizerResponse message represents the response for listing custom phonemizers.</p>
+// ListCustomPhonemizerResponse message represents the response for listing custom phonemizers.
 type ListCustomPhonemizerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Repeated field of CustomPhonemizerProto messages representing the custom phonemizers.
@@ -4734,7 +4747,7 @@ func (x *ListCustomPhonemizerResponse) GetPhonemizers() []*CustomPhonemizerProto
 	return nil
 }
 
-// <p>ListCustomPhonemizerRequest message represents the request for listing custom phonemizers.</p>
+// ListCustomPhonemizerRequest message represents the request for listing custom phonemizers.
 type ListCustomPhonemizerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Repeated field of pipeline IDs to filter the list of custom phonemizers.
@@ -4780,7 +4793,7 @@ func (x *ListCustomPhonemizerRequest) GetPipelineIds() []string {
 	return nil
 }
 
-// <p>UpdateCustomPhonemizerRequest message represents the request for updating a custom phonemizer.</p>
+// UpdateCustomPhonemizerRequest message represents the request for updating a custom phonemizer.
 type UpdateCustomPhonemizerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The ID of the custom phonemizer to be updated.
@@ -4844,7 +4857,7 @@ func (x *UpdateCustomPhonemizerRequest) GetMaps() []*Map {
 	return nil
 }
 
-// <p>CreateCustomPhonemizerRequest message represents the request for creating a custom phonemizer.</p>
+// CreateCustomPhonemizerRequest message represents the request for creating a custom phonemizer.
 type CreateCustomPhonemizerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The prefix for the custom phonemizer ID.
@@ -4899,9 +4912,9 @@ func (x *CreateCustomPhonemizerRequest) GetMaps() []*Map {
 	return nil
 }
 
-// <p>VoiceCloningRequest message represents the request for cloning a voice.</p>
-// <p>A VoiceCloningRequest contains a sample audio of the speaker to be cloned together with
-// its transcription and the information about the speaker and the model to use for cloning.</p>
+// VoiceCloningRequest message represents the request for cloning a voice.
+//
+// A VoiceCloningRequest contains a sample audio of the speaker to be cloned together with its transcription and the information about the speaker and the model to use for cloning.
 type VoiceCloningRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The sample audio of the speaker whose voice should be cloned.

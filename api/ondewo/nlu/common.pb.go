@@ -1561,8 +1561,7 @@ func (x *DeleteNotificationsRequest) GetNotificationNames() []string {
 	return nil
 }
 
-// Message for streaming notifications in real time via
-// <a href="index.html#ondewo.nlu.Users.StreamNotifications">Users.StreamNotifications</a>.
+// Message for streaming notifications in real time via <a href="index.html#ondewo.nlu.Users.StreamNotifications">Users.StreamNotifications</a>.
 type StreamNotificationsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional filter to narrow the stream down to specific notifications (same semantics as

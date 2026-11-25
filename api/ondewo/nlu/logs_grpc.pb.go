@@ -45,33 +45,15 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>Reads, follows, exports and erases the logs ONDEWO CAI captures: the log records of the CAI gRPC server
-// processes themselves (every worker of every replica), the output of the docker containers that remote
-// operations run (build cache, training, RAG crawl, LLM evaluation and simulation, RAGFlow upload / removal /
-// re-parse) and of the short-lived helper containers that prepare them (hardware check, GPU pre-allocation).
-// Long-running operations that run inside a CAI worker (agent export, import, restore, re-index, ranking
-// optimization) are covered too: the server records they emit carry the operation&apos;s name.</p>
-// <p>Entries are served from the CAI database, not from the docker daemon, so the logs of a container that was
-// already removed, and of a server process that already exited, stay readable until retention or
-// <code>DeleteLogs</code> removes them.</p>
-// <p><b>Secrets are redacted server-side</b> when an entry is captured and again when it is read, so a
-// redaction rule added later also applies to entries captured before it.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter,
-// cursor, <code>resume_token</code>, <code>page_token</code> or <code>field_mask</code> (each naming the field);
-// <code>NOT_FOUND</code> for an unknown log stream or operation, and for one the caller may not read;
-// <code>RESOURCE_EXHAUSTED</code> when the server process already serves its maximum of concurrent streams or
-// exports; <code>UNAVAILABLE</code> when the logs API is disabled (<code>ONDEWO_NLU_CAI_LOG_API_ENABLED</code>)
-// or the database cannot be reached; <code>UNAUTHENTICATED</code> without a valid credential;
-// <code>PERMISSION_DENIED</code> when the caller may read no logs at all.</p>
-// <p>Authorization: entries that belong to no project (the server&apos;s own records outside any project RPC
-// or operation) require the server permission <code>ServerPermission.Logs.ReadServerLogs</code>, granted to
-// <code>SERVER_ADMIN</code> by default; a caller holding it reads every entry. Without it a caller reads only
-// the entries tagged with a project in which it holds <code>ProjectPermission.Logs.ReadProjectLogs</code>,
-// granted to <code>PROJECT_DEVELOPER</code> and above by default; entries of other projects are filtered out
-// and are never reported as existing. <code>DeleteLogs</code> requires
-// <code>ServerPermission.Logs.DeleteLogs</code>, granted to <code>SERVER_ADMIN</code> only. A long-running
-// <code>StreamLogs</code> or <code>ExportLogs</code> re-checks the caller periodically and ends when the access
-// was revoked or the credential expired.</p>
+// Reads, follows, exports and erases the logs ONDEWO CAI captures: the log records of the CAI gRPC server processes themselves (every worker of every replica), the output of the docker containers that remote operations run (build cache, training, RAG crawl, LLM evaluation and simulation, RAGFlow upload / removal / re-parse) and of the short-lived helper containers that prepare them (hardware check, GPU pre-allocation). Long-running operations that run inside a CAI worker (agent export, import, restore, re-index, ranking optimization) are covered too: the server records they emit carry the operation&apos;s name.
+//
+// Entries are served from the CAI database, not from the docker daemon, so the logs of a container that was already removed, and of a server process that already exited, stay readable until retention or <code>DeleteLogs</code> removes them.
+//
+// <b>Secrets are redacted server-side</b> when an entry is captured and again when it is read, so a redaction rule added later also applies to entries captured before it.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, cursor, <code>resume_token</code>, <code>page_token</code> or <code>field_mask</code> (each naming the field); <code>NOT_FOUND</code> for an unknown log stream or operation, and for one the caller may not read; <code>RESOURCE_EXHAUSTED</code> when the server process already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the logs API is disabled (<code>ONDEWO_NLU_CAI_LOG_API_ENABLED</code>) or the database cannot be reached; <code>UNAUTHENTICATED</code> without a valid credential; <code>PERMISSION_DENIED</code> when the caller may read no logs at all.
+//
+// Authorization: entries that belong to no project (the server&apos;s own records outside any project RPC or operation) require the server permission <code>ServerPermission.Logs.ReadServerLogs</code>, granted to <code>SERVER_ADMIN</code> by default; a caller holding it reads every entry. Without it a caller reads only the entries tagged with a project in which it holds <code>ProjectPermission.Logs.ReadProjectLogs</code>, granted to <code>PROJECT_DEVELOPER</code> and above by default; entries of other projects are filtered out and are never reported as existing. <code>DeleteLogs</code> requires <code>ServerPermission.Logs.DeleteLogs</code>, granted to <code>SERVER_ADMIN</code> only. A long-running <code>StreamLogs</code> or <code>ExportLogs</code> re-checks the caller periodically and ends when the access was revoked or the credential expired.
 type LogsClient interface {
 	// <p>Streams captured log entries as they are written, in the manner of <code>docker logs --follow</code>.
 	// The stream replays <code>tail_lines</code> historical entries and then follows. It stays open until the
@@ -258,33 +240,15 @@ func (c *logsClient) DeleteLogs(ctx context.Context, in *DeleteLogsRequest, opts
 // All implementations must embed UnimplementedLogsServer
 // for forward compatibility.
 //
-// <p>Reads, follows, exports and erases the logs ONDEWO CAI captures: the log records of the CAI gRPC server
-// processes themselves (every worker of every replica), the output of the docker containers that remote
-// operations run (build cache, training, RAG crawl, LLM evaluation and simulation, RAGFlow upload / removal /
-// re-parse) and of the short-lived helper containers that prepare them (hardware check, GPU pre-allocation).
-// Long-running operations that run inside a CAI worker (agent export, import, restore, re-index, ranking
-// optimization) are covered too: the server records they emit carry the operation&apos;s name.</p>
-// <p>Entries are served from the CAI database, not from the docker daemon, so the logs of a container that was
-// already removed, and of a server process that already exited, stay readable until retention or
-// <code>DeleteLogs</code> removes them.</p>
-// <p><b>Secrets are redacted server-side</b> when an entry is captured and again when it is read, so a
-// redaction rule added later also applies to entries captured before it.</p>
-// <p>Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter,
-// cursor, <code>resume_token</code>, <code>page_token</code> or <code>field_mask</code> (each naming the field);
-// <code>NOT_FOUND</code> for an unknown log stream or operation, and for one the caller may not read;
-// <code>RESOURCE_EXHAUSTED</code> when the server process already serves its maximum of concurrent streams or
-// exports; <code>UNAVAILABLE</code> when the logs API is disabled (<code>ONDEWO_NLU_CAI_LOG_API_ENABLED</code>)
-// or the database cannot be reached; <code>UNAUTHENTICATED</code> without a valid credential;
-// <code>PERMISSION_DENIED</code> when the caller may read no logs at all.</p>
-// <p>Authorization: entries that belong to no project (the server&apos;s own records outside any project RPC
-// or operation) require the server permission <code>ServerPermission.Logs.ReadServerLogs</code>, granted to
-// <code>SERVER_ADMIN</code> by default; a caller holding it reads every entry. Without it a caller reads only
-// the entries tagged with a project in which it holds <code>ProjectPermission.Logs.ReadProjectLogs</code>,
-// granted to <code>PROJECT_DEVELOPER</code> and above by default; entries of other projects are filtered out
-// and are never reported as existing. <code>DeleteLogs</code> requires
-// <code>ServerPermission.Logs.DeleteLogs</code>, granted to <code>SERVER_ADMIN</code> only. A long-running
-// <code>StreamLogs</code> or <code>ExportLogs</code> re-checks the caller periodically and ends when the access
-// was revoked or the credential expired.</p>
+// Reads, follows, exports and erases the logs ONDEWO CAI captures: the log records of the CAI gRPC server processes themselves (every worker of every replica), the output of the docker containers that remote operations run (build cache, training, RAG crawl, LLM evaluation and simulation, RAGFlow upload / removal / re-parse) and of the short-lived helper containers that prepare them (hardware check, GPU pre-allocation). Long-running operations that run inside a CAI worker (agent export, import, restore, re-index, ranking optimization) are covered too: the server records they emit carry the operation&apos;s name.
+//
+// Entries are served from the CAI database, not from the docker daemon, so the logs of a container that was already removed, and of a server process that already exited, stay readable until retention or <code>DeleteLogs</code> removes them.
+//
+// <b>Secrets are redacted server-side</b> when an entry is captured and again when it is read, so a redaction rule added later also applies to entries captured before it.
+//
+// Errors are reported as gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed name, filter, cursor, <code>resume_token</code>, <code>page_token</code> or <code>field_mask</code> (each naming the field); <code>NOT_FOUND</code> for an unknown log stream or operation, and for one the caller may not read; <code>RESOURCE_EXHAUSTED</code> when the server process already serves its maximum of concurrent streams or exports; <code>UNAVAILABLE</code> when the logs API is disabled (<code>ONDEWO_NLU_CAI_LOG_API_ENABLED</code>) or the database cannot be reached; <code>UNAUTHENTICATED</code> without a valid credential; <code>PERMISSION_DENIED</code> when the caller may read no logs at all.
+//
+// Authorization: entries that belong to no project (the server&apos;s own records outside any project RPC or operation) require the server permission <code>ServerPermission.Logs.ReadServerLogs</code>, granted to <code>SERVER_ADMIN</code> by default; a caller holding it reads every entry. Without it a caller reads only the entries tagged with a project in which it holds <code>ProjectPermission.Logs.ReadProjectLogs</code>, granted to <code>PROJECT_DEVELOPER</code> and above by default; entries of other projects are filtered out and are never reported as existing. <code>DeleteLogs</code> requires <code>ServerPermission.Logs.DeleteLogs</code>, granted to <code>SERVER_ADMIN</code> only. A long-running <code>StreamLogs</code> or <code>ExportLogs</code> re-checks the caller periodically and ends when the access was revoked or the credential expired.
 type LogsServer interface {
 	// <p>Streams captured log entries as they are written, in the manner of <code>docker logs --follow</code>.
 	// The stream replays <code>tail_lines</code> historical entries and then follows. It stays open until the

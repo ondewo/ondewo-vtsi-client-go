@@ -54,9 +54,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Represents the options for views of an intent.
-// An intent can be a sizable object. Therefore, we provide a resource view that
-// does not return training phrases in the response by default.
+// Represents the options for views of an intent. An intent can be a sizable object. Therefore, we provide a resource view that does not return training phrases in the response by default.
 type IntentView int32
 
 const (
@@ -627,8 +625,7 @@ func (IntentSorting_IntentSortingField) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_intent_proto_rawDescGZIP(), []int{11, 0}
 }
 
-// Represents an intent.
-// Intents convert a number of user expressions or patterns into an action. An action is an extraction of a user command or sentence semantics.
+// Represents an intent. Intents convert a number of user expressions or patterns into an action. An action is an extraction of a user command or sentence semantics.
 type Intent struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required for all methods except <code>create</code> (<code>create</code> populates the name
@@ -4319,8 +4316,7 @@ func (x *Intent_FollowupIntentInfo) GetParentFollowupIntentName() string {
 	return ""
 }
 
-// Represents an entity annotation in a training phrase. The entity can be annotated on the level of
-// entity type only or both entity type and entity value.
+// Represents an entity annotation in a training phrase. The entity can be annotated on the level of entity type only or both entity type and entity value.
 type Intent_TrainingPhrase_Entity struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. The unique entity type identifier in format

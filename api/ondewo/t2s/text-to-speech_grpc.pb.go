@@ -59,7 +59,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>Text2Speech service provides endpoints for text-to-speech generation.</p>
+// Text2Speech service provides endpoints for text-to-speech generation.
 type Text2SpeechClient interface {
 	// <p>Synthesizes a specific text sent in the request with the provided configuration requirements
 	// and retrieves a response that includes the synthesized text as audio and the requested configuration.</p>
@@ -311,7 +311,7 @@ func (c *text2SpeechClient) VoiceCloning(ctx context.Context, in *VoiceCloningRe
 // All implementations must embed UnimplementedText2SpeechServer
 // for forward compatibility.
 //
-// <p>Text2Speech service provides endpoints for text-to-speech generation.</p>
+// Text2Speech service provides endpoints for text-to-speech generation.
 type Text2SpeechServer interface {
 	// <p>Synthesizes a specific text sent in the request with the provided configuration requirements
 	// and retrieves a response that includes the synthesized text as audio and the requested configuration.</p>

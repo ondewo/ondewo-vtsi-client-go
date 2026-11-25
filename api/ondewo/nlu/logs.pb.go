@@ -150,8 +150,7 @@ func (CaiLogStreamChannel) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_logs_proto_rawDescGZIP(), []int{1}
 }
 
-// The state of CAI&apos;s capture of one log stream. This describes the CAPTURE, not the process or the
-// container.
+// The state of CAI&apos;s capture of one log stream. This describes the CAPTURE, not the process or the container.
 type CaiLogCaptureState int32
 
 const (
@@ -214,9 +213,7 @@ func (CaiLogCaptureState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_logs_proto_rawDescGZIP(), []int{2}
 }
 
-// Identifies a field of <a href="index.html#ondewo.nlu.CaiLogFilter">CaiLogFilter</a>. Used by
-// <a href="index.html#ondewo.nlu.ListLogsResponse">ListLogsResponse.scope_limited_filters</a> to declare which
-// filters could only be applied inside the returned window.
+// Identifies a field of <a href="index.html#ondewo.nlu.CaiLogFilter">CaiLogFilter</a>. Used by <a href="index.html#ondewo.nlu.ListLogsResponse">ListLogsResponse.scope_limited_filters</a> to declare which filters could only be applied inside the returned window.
 type CaiLogFilterField int32
 
 const (
@@ -285,9 +282,7 @@ func (CaiLogFilterField) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_logs_proto_rawDescGZIP(), []int{3}
 }
 
-// Why the SERVER ended a <code>StreamLogs</code> stream. Carried by the final
-// <a href="index.html#ondewo.nlu.StreamLogsResponse">StreamLogsResponse</a> beside the human-readable
-// <code>end_reason</code>. A stream ended by the client has no final message.
+// Why the SERVER ended a <code>StreamLogs</code> stream. Carried by the final <a href="index.html#ondewo.nlu.StreamLogsResponse">StreamLogsResponse</a> beside the human-readable <code>end_reason</code>. A stream ended by the client has no final message.
 type CaiLogStreamEndReason int32
 
 const (
@@ -356,8 +351,7 @@ func (CaiLogStreamEndReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_logs_proto_rawDescGZIP(), []int{4}
 }
 
-// File format of an <a href="index.html#ondewo.nlu.Logs.ExportLogs">ExportLogs</a> export. Every format is UTF-8
-// with <code>\n</code> line endings and one entry per record; a multi-line entry stays one record.
+// File format of an <a href="index.html#ondewo.nlu.Logs.ExportLogs">ExportLogs</a> export. Every format is UTF-8 with <code>\n</code> line endings and one entry per record; a multi-line entry stays one record.
 type CaiLogExportFormat int32
 
 const (
@@ -424,8 +418,7 @@ func (CaiLogExportFormat) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_logs_proto_rawDescGZIP(), []int{5}
 }
 
-// A single captured log record. One record may span several physical lines: a Python traceback, a protobuf
-// <code>str()</code> dump and a multi-line banner are all one record and are stored and returned as one entry.
+// A single captured log record. One record may span several physical lines: a Python traceback, a protobuf <code>str()</code> dump and a multi-line banner are all one record and are stored and returned as one entry.
 type CaiLogEntry struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Ordering cursor. Assigned by the database, monotonically increasing WITHIN ONE LOG STREAM. It is NOT
@@ -663,12 +656,9 @@ func (x *CaiLogEntry) GetPhase() string {
 	return ""
 }
 
-// Narrows a log query. Every field is optional; an empty repeated field means &quot;do not filter on
-// this&quot;. Fields are combined with AND; the values within one repeated field are combined with OR.
+// Narrows a log query. Every field is optional; an empty repeated field means &quot;do not filter on this&quot;. Fields are combined with AND; the values within one repeated field are combined with OR.
 //
-// <p>Filters fall into two groups. IDENTITY filters (fields 1 to 19) select which log streams, operations and
-// projects are of interest. CONTENT filters (fields 20 to 30) select which entries of those to return. The time
-// window (fields 31, 32) is neither.</p>
+// Filters fall into two groups. IDENTITY filters (fields 1 to 19) select which log streams, operations and projects are of interest. CONTENT filters (fields 20 to 30) select which entries of those to return. The time window (fields 31, 32) is neither.
 type CaiLogFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Log stream resource names, in either form of
@@ -915,8 +905,7 @@ func (x *CaiLogFilter) GetEndTime() *timestamppb.Timestamp {
 	return nil
 }
 
-// One capture of one server process or of one container. A server process that restarts, and a container
-// recreated under a new id, yield a NEW log stream.
+// One capture of one server process or of one container. A server process that restarts, and a container recreated under a new id, yield a NEW log stream.
 type CaiLogStream struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the log stream, in the form of
@@ -1242,9 +1231,7 @@ func (x *StreamLogsRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The response message for <a href="index.html#ondewo.nlu.Logs.StreamLogs">Logs.StreamLogs</a>. The stream
-// carries an envelope rather than a bare entry so that a viewer can tell a healthy quiet source from a capture
-// that has died.
+// The response message for <a href="index.html#ondewo.nlu.Logs.StreamLogs">Logs.StreamLogs</a>. The stream carries an envelope rather than a bare entry so that a viewer can tell a healthy quiet source from a capture that has died.
 type StreamLogsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The entries in this batch, oldest first. May be empty, e.g. on the final message.

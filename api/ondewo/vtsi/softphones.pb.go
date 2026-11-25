@@ -37,10 +37,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// How a softphone account secures its SIP signalling to the project&apos;s Asterisk. Both modes use TLS
-// for signalling, SRTP for media and SIP digest authentication with the account&apos;s own credentials;
-// they differ in which TLS port the softphone connects to and whether it must present a client
-// certificate.
+// How a softphone account secures its SIP signalling to the project&apos;s Asterisk. Both modes use TLS for signalling, SRTP for media and SIP digest authentication with the account&apos;s own credentials; they differ in which TLS port the softphone connects to and whether it must present a client certificate.
 type SoftphoneTransportSecurity int32
 
 const (
@@ -169,8 +166,7 @@ func (SoftphoneCertificateStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{1}
 }
 
-// Reachability of one registered contact of a softphone account, as the project&apos;s Asterisk
-// qualifies it (SIP <code>OPTIONS</code>).
+// Reachability of one registered contact of a softphone account, as the project&apos;s Asterisk qualifies it (SIP <code>OPTIONS</code>).
 type SoftphoneContactStatus int32
 
 const (
@@ -351,8 +347,7 @@ func (SoftphoneAccountSorting_SoftphoneAccountSortingField) EnumDescriptor() ([]
 	return file_ondewo_vtsi_softphones_proto_rawDescGZIP(), []int{6, 0}
 }
 
-// A SIP account on a VTSI project&apos;s Asterisk for a human using a softphone. Never carries a
-// secret.
+// A SIP account on a VTSI project&apos;s Asterisk for a human using a softphone. Never carries a secret.
 type SoftphoneAccount struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Output only. Resource name of the softphone account.
@@ -620,9 +615,7 @@ func (x *SoftphoneAccount) GetDescription() string {
 	return ""
 }
 
-// A client certificate issued to a softphone account by the project&apos;s SOFTPHONE certificate
-// authority. Carries public material only: the private key exists solely inside the PKCS#12 bundle that
-// was returned once when the certificate was issued. Every field is output only.
+// A client certificate issued to a softphone account by the project&apos;s SOFTPHONE certificate authority. Carries public material only: the private key exists solely inside the PKCS#12 bundle that was returned once when the certificate was issued. Every field is output only.
 type SoftphoneCertificate struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the certificate.
@@ -817,10 +810,7 @@ func (x *SoftphoneCertificate) GetRevocationReason() string {
 	return ""
 }
 
-// ONE-TIME secrets of a softphone account, returned only by <code>CreateSoftphoneAccount</code> and
-// <code>RotateSoftphoneCredentials</code>. VTSI keeps no copy of the private key or of
-// <code>pkcs12_password</code> and cannot return them again: store them now, or rotate later. Never log
-// this message.
+// ONE-TIME secrets of a softphone account, returned only by <code>CreateSoftphoneAccount</code> and <code>RotateSoftphoneCredentials</code>. VTSI keeps no copy of the private key or of <code>pkcs12_password</code> and cannot return them again: store them now, or rotate later. Never log this message.
 type SoftphoneCredentials struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The SIP digest password. Set on create and on every rotation (a certificate rotation rotates the
@@ -899,8 +889,7 @@ func (x *SoftphoneCredentials) GetCertificate() *SoftphoneCertificate {
 	return nil
 }
 
-// Everything needed to configure a softphone for one account, except the secrets. Every field is output
-// only.
+// Everything needed to configure a softphone for one account, except the secrets. Every field is output only.
 type SoftphoneProvisioning struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the softphone account this describes.
@@ -1140,9 +1129,7 @@ func (x *SoftphoneProvisioning) GetClientCertificateSupportNote() string {
 	return ""
 }
 
-// Narrows a softphone account listing. Every field is optional; an unset field or an empty repeated
-// field or map means &quot;do not filter on this&quot;. Fields are combined with AND; the values within
-// one repeated field are combined with OR; the entries of <code>labels</code> are combined with AND.
+// Narrows a softphone account listing. Every field is optional; an unset field or an empty repeated field or map means &quot;do not filter on this&quot;. Fields are combined with AND; the values within one repeated field are combined with OR; the entries of <code>labels</code> are combined with AND.
 type SoftphoneAccountFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Only accounts with one of these transport securities.
@@ -1259,8 +1246,7 @@ func (x *SoftphoneAccountFilter) GetLocked() bool {
 	return false
 }
 
-// Narrows a softphone certificate listing. Combined like
-// <a href="index.html#ondewo.vtsi.SoftphoneAccountFilter">SoftphoneAccountFilter</a>.
+// Narrows a softphone certificate listing. Combined like <a href="index.html#ondewo.vtsi.SoftphoneAccountFilter">SoftphoneAccountFilter</a>.
 type SoftphoneCertificateFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Only certificates with one of these statuses. Empty matches every status.
@@ -1381,8 +1367,7 @@ func (x *SoftphoneAccountSorting) GetSortingMode() VtsiProjectSortingMode {
 	return VtsiProjectSortingMode_ASCENDING
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.CreateSoftphoneAccount">Softphones.CreateSoftphoneAccount</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.CreateSoftphoneAccount">Softphones.CreateSoftphoneAccount</a>.
 type CreateSoftphoneAccountRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project in which to create the account.
@@ -1465,8 +1450,7 @@ func (x *CreateSoftphoneAccountRequest) GetIdempotencyKey() string {
 	return ""
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Softphones.CreateSoftphoneAccount">Softphones.CreateSoftphoneAccount</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Softphones.CreateSoftphoneAccount">Softphones.CreateSoftphoneAccount</a>.
 type CreateSoftphoneAccountResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The created account.
@@ -1523,8 +1507,7 @@ func (x *CreateSoftphoneAccountResponse) GetCredentials() *SoftphoneCredentials 
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneAccount">Softphones.GetSoftphoneAccount</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneAccount">Softphones.GetSoftphoneAccount</a>.
 type GetSoftphoneAccountRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the account.
@@ -1582,8 +1565,7 @@ func (x *GetSoftphoneAccountRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.UpdateSoftphoneAccount">Softphones.UpdateSoftphoneAccount</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.UpdateSoftphoneAccount">Softphones.UpdateSoftphoneAccount</a>.
 type UpdateSoftphoneAccountRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The account to update, identified by <code>softphone_account.name</code>, carrying the new values of
@@ -1655,8 +1637,7 @@ func (x *UpdateSoftphoneAccountRequest) GetUpdateMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.DeleteSoftphoneAccount">Softphones.DeleteSoftphoneAccount</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.DeleteSoftphoneAccount">Softphones.DeleteSoftphoneAccount</a>.
 type DeleteSoftphoneAccountRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the account to delete.
@@ -1703,8 +1684,7 @@ func (x *DeleteSoftphoneAccountRequest) GetName() string {
 	return ""
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Softphones.DeleteSoftphoneAccount">Softphones.DeleteSoftphoneAccount</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Softphones.DeleteSoftphoneAccount">Softphones.DeleteSoftphoneAccount</a>.
 type DeleteSoftphoneAccountResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the deleted account.
@@ -1759,8 +1739,7 @@ func (x *DeleteSoftphoneAccountResponse) GetRevokedCertificateCount() int32 {
 	return 0
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneAccounts">Softphones.ListSoftphoneAccounts</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneAccounts">Softphones.ListSoftphoneAccounts</a>.
 type ListSoftphoneAccountsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project whose accounts to list.
@@ -1855,8 +1834,7 @@ func (x *ListSoftphoneAccountsRequest) GetSoftphoneAccountSorting() *SoftphoneAc
 	return nil
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneAccounts">Softphones.ListSoftphoneAccounts</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneAccounts">Softphones.ListSoftphoneAccounts</a>.
 type ListSoftphoneAccountsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The accounts of this page.
@@ -1911,10 +1889,7 @@ func (x *ListSoftphoneAccountsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.RotateSoftphoneCredentials">Softphones.RotateSoftphoneCredentials</a>.
-// At least one of <code>rotate_sip_password</code> and <code>rotate_certificate</code> must be
-// <code>true</code>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.RotateSoftphoneCredentials">Softphones.RotateSoftphoneCredentials</a>. At least one of <code>rotate_sip_password</code> and <code>rotate_certificate</code> must be <code>true</code>.
 type RotateSoftphoneCredentialsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the account.
@@ -1980,8 +1955,7 @@ func (x *RotateSoftphoneCredentialsRequest) GetRotateCertificate() bool {
 	return false
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Softphones.RotateSoftphoneCredentials">Softphones.RotateSoftphoneCredentials</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Softphones.RotateSoftphoneCredentials">Softphones.RotateSoftphoneCredentials</a>.
 type RotateSoftphoneCredentialsResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The account after the rotation.
@@ -2037,8 +2011,7 @@ func (x *RotateSoftphoneCredentialsResponse) GetCredentials() *SoftphoneCredenti
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneCertificates">Softphones.ListSoftphoneCertificates</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneCertificates">Softphones.ListSoftphoneCertificates</a>.
 type ListSoftphoneCertificatesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Whose certificates to list.
@@ -2168,8 +2141,7 @@ func (*ListSoftphoneCertificatesRequest_VtsiProjectName) isListSoftphoneCertific
 func (*ListSoftphoneCertificatesRequest_SoftphoneAccountName) isListSoftphoneCertificatesRequest_Scope() {
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneCertificates">Softphones.ListSoftphoneCertificates</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Softphones.ListSoftphoneCertificates">Softphones.ListSoftphoneCertificates</a>.
 type ListSoftphoneCertificatesResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The certificates of this page, newest <code>created_at</code> first.
@@ -2224,8 +2196,7 @@ func (x *ListSoftphoneCertificatesResponse) GetNextPageToken() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneCertificate">Softphones.GetSoftphoneCertificate</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneCertificate">Softphones.GetSoftphoneCertificate</a>.
 type GetSoftphoneCertificateRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the certificate.
@@ -2282,8 +2253,7 @@ func (x *GetSoftphoneCertificateRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.RevokeSoftphoneCertificate">Softphones.RevokeSoftphoneCertificate</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.RevokeSoftphoneCertificate">Softphones.RevokeSoftphoneCertificate</a>.
 type RevokeSoftphoneCertificateRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the certificate to revoke.
@@ -2340,8 +2310,7 @@ func (x *RevokeSoftphoneCertificateRequest) GetReason() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneProvisioning">Softphones.GetSoftphoneProvisioning</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneProvisioning">Softphones.GetSoftphoneProvisioning</a>.
 type GetSoftphoneProvisioningRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the account to provision.
@@ -2388,8 +2357,7 @@ func (x *GetSoftphoneProvisioningRequest) GetName() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneRegistration">Softphones.GetSoftphoneRegistration</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Softphones.GetSoftphoneRegistration">Softphones.GetSoftphoneRegistration</a>.
 type GetSoftphoneRegistrationRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the account.
@@ -2448,8 +2416,7 @@ func (x *GetSoftphoneRegistrationRequest) GetFieldMask() *fieldmaskpb.FieldMask 
 	return nil
 }
 
-// The live registrations of one softphone account on its project&apos;s Asterisk. Every field is output
-// only. Never carries a secret.
+// The live registrations of one softphone account on its project&apos;s Asterisk. Every field is output only. Never carries a secret.
 type SoftphoneRegistration struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the softphone account.

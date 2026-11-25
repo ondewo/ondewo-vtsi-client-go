@@ -36,8 +36,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// Structure to set status of operation.
-// An operation may not be started if NOT_STARTED is set, in progress if IN_PROGRESS, finished if DONE, interrupted if CANCELED or failed if FAILED.
+// Structure to set status of operation. An operation may not be started if NOT_STARTED is set, in progress if IN_PROGRESS, finished if DONE, interrupted if CANCELED or failed if FAILED.
 type OperationMetadata_Status int32
 
 const (
@@ -102,8 +101,7 @@ func (OperationMetadata_Status) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_operation_metadata_proto_rawDescGZIP(), []int{0, 0}
 }
 
-// Type of operation.
-// It can be creating, importing, exporting, deleting, restoring, building cache, training or exporting benchmark an agent
+// Type of operation. It can be creating, importing, exporting, deleting, restoring, building cache, training or exporting benchmark an agent
 type OperationMetadata_OperationType int32
 
 const (
@@ -204,8 +202,7 @@ func (OperationMetadata_OperationType) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_operation_metadata_proto_rawDescGZIP(), []int{0, 1}
 }
 
-// Represents the metadata of the long-running operation that can be a parent operation for sub-operations or
-// can be a sub-operation itself
+// Represents the metadata of the long-running operation that can be a parent operation for sub-operations or can be a sub-operation itself
 type OperationMetadata struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// long-running operation status code

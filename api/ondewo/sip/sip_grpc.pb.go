@@ -55,7 +55,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO-SIP API available at <a href="https://github.com/ondewo/ondewo-sip-api">GitHub</a></p>
+// ONDEWO-SIP API available at <a href="https://github.com/ondewo/ondewo-sip-api">GitHub</a>
 type SipClient interface {
 	// <p>Starts a new SIP session for an account registered at a SIP server. <code>RegisterAccount</code> need to be called before.</p>
 	SipStartSession(ctx context.Context, in *SipStartSessionRequest, opts ...grpc.CallOption) (*SipStatus, error)
@@ -316,7 +316,7 @@ func (c *sipClient) SipSendDtmf(ctx context.Context, in *SipSendDtmfRequest, opt
 // All implementations must embed UnimplementedSipServer
 // for forward compatibility.
 //
-// <p>ONDEWO-SIP API available at <a href="https://github.com/ondewo/ondewo-sip-api">GitHub</a></p>
+// ONDEWO-SIP API available at <a href="https://github.com/ondewo/ondewo-sip-api">GitHub</a>
 type SipServer interface {
 	// <p>Starts a new SIP session for an account registered at a SIP server. <code>RegisterAccount</code> need to be called before.</p>
 	SipStartSession(context.Context, *SipStartSessionRequest) (*SipStatus, error)

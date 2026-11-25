@@ -655,12 +655,7 @@ func (LlmEvaluationAbExperimentStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_nlu_llm_evaluation_proto_rawDescGZIP(), []int{9}
 }
 
-// The metric an A/B rollout optimizes when comparing each variant against the
-// control. Each value maps to a quantity already produced by the per-variant
-// results rollup (see GetAbExperimentResults). Higher-is-better vs.
-// lower-is-better is implied by the metric (e.g. PASS_RATE / CRITERION_SCORE /
-// SAFETY_SCORE are higher-is-better; ERROR_RATE / MEAN_LATENCY are
-// lower-is-better) and applied server-side when picking the winner.
+// The metric an A/B rollout optimizes when comparing each variant against the control. Each value maps to a quantity already produced by the per-variant results rollup (see GetAbExperimentResults). Higher-is-better vs. lower-is-better is implied by the metric (e.g. PASS_RATE / CRITERION_SCORE / SAFETY_SCORE are higher-is-better; ERROR_RATE / MEAN_LATENCY are lower-is-better) and applied server-side when picking the winner.
 type LlmEvaluationAbOptimizeMetric int32
 
 const (
@@ -2150,8 +2145,7 @@ func (x *GetLlmEvaluationDatasetRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListDatasets. All fields are optional; multiple fields
-// set at the same time are combined via logical AND.
+// Filter conditions for ListDatasets. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationDatasetFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only datasets whose display name contains this substring
@@ -2787,8 +2781,7 @@ func (x *GetLlmEvaluationExampleRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListExamples. All fields are optional; multiple fields
-// set at the same time are combined via logical AND.
+// Filter conditions for ListExamples. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationExampleFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only examples whose display name contains this substring
@@ -3396,8 +3389,7 @@ func (x *GetLlmEvaluationExperimentRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListExperiments. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListExperiments. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationExperimentFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only experiments whose display name contains this substring
@@ -4020,8 +4012,7 @@ func (x *SubmitLlmEvaluationFeedbackRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListFeedback. All fields are optional; multiple fields
-// set at the same time are combined via logical AND.
+// Filter conditions for ListFeedback. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationFeedbackFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only feedback attached to this experiment (resource name).
@@ -4522,8 +4513,7 @@ func (x *LlmEvaluationTurnResult) GetDurationInS() float64 {
 	return 0
 }
 
-// Threshold set evaluated by a release gate. Nested in a dedicated message so
-// presence can be detected at the message level (proto3 scalars carry no presence).
+// Threshold set evaluated by a release gate. Nested in a dedicated message so presence can be detected at the message level (proto3 scalars carry no presence).
 type LlmEvaluationReleaseGateThresholds struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Minimum pass rate (0.0-1.0) the candidate experiment must reach.
@@ -4597,8 +4587,7 @@ func (x *LlmEvaluationReleaseGateThresholds) GetAcceptanceMustPass() bool {
 	return false
 }
 
-// Safety section of a release gate: a separate adversarial experiment scored
-// with safety evaluators.
+// Safety section of a release gate: a separate adversarial experiment scored with safety evaluators.
 type LlmEvaluationReleaseGateSafetyConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Whether the safety section is evaluated as part of gate runs.
@@ -4681,8 +4670,7 @@ func (x *LlmEvaluationReleaseGateSafetyConfig) GetMaxBias() float64 {
 	return 0
 }
 
-// A release gate: a named set of thresholds over evaluator scores, regression
-// deltas and telemetry that decides whether a candidate configuration ships.
+// A release gate: a named set of thresholds over evaluator scores, regression deltas and telemetry that decides whether a candidate configuration ships.
 type LlmEvaluationReleaseGate struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the release gate. Read-only; populated by the server.
@@ -5337,8 +5325,7 @@ func (x *GetLlmEvaluationReleaseGateRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListReleaseGates. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListReleaseGates. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationReleaseGateFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only gates whose display name contains this substring
@@ -5862,8 +5849,7 @@ func (x *GetLlmEvaluationReleaseGateRunRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListReleaseGateRuns. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListReleaseGateRuns. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationReleaseGateRunFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only runs of this gate (resource name).
@@ -6140,8 +6126,7 @@ func (x *LlmEvaluationScorecardComponent) GetEvaluatorName() string {
 	return ""
 }
 
-// A scorecard: a named weighted multi-criteria roll-up definition applied to
-// experiments for release reporting.
+// A scorecard: a named weighted multi-criteria roll-up definition applied to experiments for release reporting.
 type LlmEvaluationScorecard struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the scorecard. Read-only; populated by the server.
@@ -6410,8 +6395,7 @@ func (x *GetLlmEvaluationScorecardRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListScorecards. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListScorecards. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationScorecardFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only scorecards whose display name contains this substring
@@ -8183,8 +8167,7 @@ func (x *GetLlmEvaluationScheduleRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListSchedules. All fields are optional; multiple fields
-// set at the same time are combined via logical AND.
+// Filter conditions for ListSchedules. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationScheduleFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only schedules whose display name contains this substring
@@ -8547,8 +8530,7 @@ func (x *DeleteLlmEvaluationScheduleRequest) GetLanguageCode() string {
 	return ""
 }
 
-// An immutable persisted report artifact (release summaries, gate sign-offs,
-// exported evaluation snapshots).
+// An immutable persisted report artifact (release summaries, gate sign-offs, exported evaluation snapshots).
 type LlmEvaluationReport struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the report. Read-only; populated by the server.
@@ -8846,8 +8828,7 @@ func (x *GetLlmEvaluationReportRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListReports. All fields are optional; multiple fields
-// set at the same time are combined via logical AND.
+// Filter conditions for ListReports. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationReportFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only reports whose display name contains this substring
@@ -9177,13 +9158,7 @@ func (x *LlmEvaluationAbTrafficConfig) GetAssignmentSalt() string {
 	return ""
 }
 
-// RAGFlow variant override for an A/B experiment running on a RAG-classifier
-// project (<code>IntentRagflowClassifier</code>). Where an IntentAgent variant
-// overrides the LLM via <code>ccai_service_names</code>, a RAG variant overrides
-// the project's chat-assistant LLM CcaiService and the retrieval parameters used
-// when answering the assigned sessions. Override-or-inherit semantics apply per
-// field: an empty / zero value means "inherit the project's base
-// IntentRagflowClassifier config for this field".
+// RAGFlow variant override for an A/B experiment running on a RAG-classifier project (<code>IntentRagflowClassifier</code>). Where an IntentAgent variant overrides the LLM via <code>ccai_service_names</code>, a RAG variant overrides the project's chat-assistant LLM CcaiService and the retrieval parameters used when answering the assigned sessions. Override-or-inherit semantics apply per field: an empty / zero value means "inherit the project's base IntentRagflowClassifier config for this field".
 type RagVariantConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// CcaiService name whose LLM connection details back the chat-assistant LLM
@@ -9277,21 +9252,7 @@ func (x *RagVariantConfig) GetRerankModelCcaiServiceName() string {
 	return ""
 }
 
-// One routing variant of an A/B experiment. The variant overrides the model used
-// for the sessions assigned to it. A variant is one of two shapes depending on
-// the project's classifier:
-// <ul>
-//
-//	<li><b>IntentAgent projects</b> — the variant overrides the LLM connection
-//	    via <code>ccai_service_names</code> (+ optional <code>model_name</code> /
-//	    <code>prompt_version</code>).</li>
-//	<li><b>RAG projects</b> (<code>IntentRagflowClassifier</code>) — the variant
-//	    overrides the chat-assistant LLM CcaiService and retrieval parameters via
-//	    <code>rag_variant_config</code>.</li>
-//
-// </ul>
-// The two override shapes are mutually exclusive per variant; the server applies
-// whichever matches the project's classifier type.
+// One routing variant of an A/B experiment. The variant overrides the model used for the sessions assigned to it. A variant is one of two shapes depending on the project's classifier: <ul> <li><b>IntentAgent projects</b> — the variant overrides the LLM connection via <code>ccai_service_names</code> (+ optional <code>model_name</code> / <code>prompt_version</code>).</li> <li><b>RAG projects</b> (<code>IntentRagflowClassifier</code>) — the variant overrides the chat-assistant LLM CcaiService and retrieval parameters via <code>rag_variant_config</code>.</li> </ul> The two override shapes are mutually exclusive per variant; the server applies whichever matches the project's classifier type.
 type LlmEvaluationAbVariant struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Required. Stable slug identifying the variant within its experiment
@@ -9419,8 +9380,7 @@ func (x *LlmEvaluationAbVariant) GetRagVariantConfig() *RagVariantConfig {
 	return nil
 }
 
-// An A/B experiment: a set of routing variants split over live DetectIntent
-// traffic for a (project, language_code) scope.
+// An A/B experiment: a set of routing variants split over live DetectIntent traffic for a (project, language_code) scope.
 type LlmEvaluationAbExperiment struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the A/B experiment. Read-only; populated by the server.
@@ -9819,8 +9779,7 @@ func (x *GetLlmEvaluationAbExperimentRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListAbExperiments. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListAbExperiments. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationAbExperimentFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only experiments whose display name contains this substring
@@ -10428,12 +10387,7 @@ func (x *GetLlmEvaluationAbExperimentResultsResponse) GetVariantResults() []*Llm
 	return nil
 }
 
-// A computed, read-only rollout recommendation for an A/B experiment: which
-// variant currently wins against the control on the chosen optimize metric,
-// under the requested statistical guard-rails. Stateless — recomputed on demand
-// by <code>LlmEvaluationGetAbRolloutRecommendation</code> from the per-variant
-// results rollup; nothing is persisted and no traffic / config changes. The
-// operator decides whether to apply it via <code>LlmEvaluationApplyAbRollout</code>.
+// A computed, read-only rollout recommendation for an A/B experiment: which variant currently wins against the control on the chosen optimize metric, under the requested statistical guard-rails. Stateless — recomputed on demand by <code>LlmEvaluationGetAbRolloutRecommendation</code> from the per-variant results rollup; nothing is persisted and no traffic / config changes. The operator decides whether to apply it via <code>LlmEvaluationApplyAbRollout</code>.
 type LlmEvaluationAbRolloutRecommendation struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The metric the recommendation was computed against (echoed from the request).
@@ -10560,13 +10514,7 @@ func (x *LlmEvaluationAbRolloutRecommendation) GetReason() string {
 	return ""
 }
 
-// The persisted audit record of an A/B rollout that an operator explicitly
-// applied: it captures which variant's config was promoted to the project's
-// classifier default, on which metric, and the statistics at the moment of
-// application. Written + returned by <code>LlmEvaluationApplyAbRollout</code>;
-// read back via <code>LlmEvaluationGetAbRolloutDecision</code> /
-// <code>LlmEvaluationListAbRolloutDecisions</code>. There is no auto-rollout —
-// every decision row corresponds to an explicit operator action.
+// The persisted audit record of an A/B rollout that an operator explicitly applied: it captures which variant's config was promoted to the project's classifier default, on which metric, and the statistics at the moment of application. Written + returned by <code>LlmEvaluationApplyAbRollout</code>; read back via <code>LlmEvaluationGetAbRolloutDecision</code> / <code>LlmEvaluationListAbRolloutDecisions</code>. There is no auto-rollout — every decision row corresponds to an explicit operator action.
 type LlmEvaluationAbRolloutDecision struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the rollout decision. Read-only; populated by the server.
@@ -10732,10 +10680,7 @@ func (x *LlmEvaluationAbRolloutDecision) GetLanguageCode() string {
 	return ""
 }
 
-// Request to compute a rollout recommendation for an A/B experiment. Read-only /
-// stateless — computes the winner-vs-control statistics on demand under the
-// supplied guard-rails and returns a LlmEvaluationAbRolloutRecommendation
-// without mutating anything.
+// Request to compute a rollout recommendation for an A/B experiment. Read-only / stateless — computes the winner-vs-control statistics on demand under the supplied guard-rails and returns a LlmEvaluationAbRolloutRecommendation without mutating anything.
 type GetLlmEvaluationAbRolloutRecommendationRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the experiment to evaluate.
@@ -10842,10 +10787,7 @@ func (x *GetLlmEvaluationAbRolloutRecommendationRequest) GetLanguageCode() strin
 	return ""
 }
 
-// Request to apply an A/B rollout: promotes the chosen variant's config to the
-// project's classifier default, stops the experiment and writes the audit
-// decision. Idempotent — re-applying the same already-applied experiment returns
-// the existing decision rather than promoting twice.
+// Request to apply an A/B rollout: promotes the chosen variant's config to the project's classifier default, stops the experiment and writes the audit decision. Idempotent — re-applying the same already-applied experiment returns the existing decision rather than promoting twice.
 type ApplyLlmEvaluationAbRolloutRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the experiment to roll out.
@@ -10931,8 +10873,7 @@ func (x *ApplyLlmEvaluationAbRolloutRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Request to get a single A/B rollout decision (the applied audit record) for an
-// experiment.
+// Request to get a single A/B rollout decision (the applied audit record) for an experiment.
 type GetLlmEvaluationAbRolloutDecisionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the rollout decision to fetch.
@@ -11007,8 +10948,7 @@ func (x *GetLlmEvaluationAbRolloutDecisionRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListAbRolloutDecisions. All fields are optional;
-// multiple fields set at the same time are combined via logical AND.
+// Filter conditions for ListAbRolloutDecisions. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationAbRolloutDecisionFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only decisions applied to this A/B experiment (resource name).
@@ -11064,8 +11004,7 @@ func (x *LlmEvaluationAbRolloutDecisionFilter) GetAppliedBy() string {
 	return ""
 }
 
-// Request to list A/B rollout decisions within a project, optionally narrowed by
-// filter (typically by experiment).
+// Request to list A/B rollout decisions within a project, optionally narrowed by filter (typically by experiment).
 type ListLlmEvaluationAbRolloutDecisionsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Project owning the decisions.
@@ -11213,9 +11152,7 @@ func (x *ListLlmEvaluationAbRolloutDecisionsResponse) GetNextPageToken() string 
 	return ""
 }
 
-// Optional filter narrowing which already-persisted live session steps an
-// online-evaluation config samples. All fields are optional; multiple fields set
-// at the same time are combined via logical AND.
+// Optional filter narrowing which already-persisted live session steps an online-evaluation config samples. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationOnlineSessionFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only session steps whose session carries every one of these
@@ -11292,11 +11229,7 @@ func (x *LlmEvaluationOnlineSessionFilter) GetRequireTelemetry() bool {
 	return false
 }
 
-// An online-evaluation config: a per-(project, language_code) definition that a
-// swarm-safe background worker uses to sample already-persisted live session
-// steps, score the recorded answer with a reference-free evaluator set, and
-// enqueue failing steps into the annotation queue. Mirrors the LlmEvaluationSchedule
-// scoping / audit / enabled-flag shape.
+// An online-evaluation config: a per-(project, language_code) definition that a swarm-safe background worker uses to sample already-persisted live session steps, score the recorded answer with a reference-free evaluator set, and enqueue failing steps into the annotation queue. Mirrors the LlmEvaluationSchedule scoping / audit / enabled-flag shape.
 type LlmEvaluationOnlineConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the online config. Read-only; populated by the server.
@@ -11654,8 +11587,7 @@ func (x *GetLlmEvaluationOnlineConfigRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListOnlineConfigs. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListOnlineConfigs. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationOnlineConfigFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only configs whose display name contains this substring
@@ -12009,11 +11941,7 @@ func (x *DeleteLlmEvaluationOnlineConfigRequest) GetLanguageCode() string {
 	return ""
 }
 
-// A self-contained online-evaluation result: one row per scored session step.
-// Per-criterion feedbacks are stored as an embedded repeated LlmEvaluationFeedback
-// list (exactly like LlmEvaluationTurnResult.feedbacks — NOT persisted into the
-// experiment-scoped llm_feedback table). Produced by the online-evaluation worker;
-// read-only over the API.
+// A self-contained online-evaluation result: one row per scored session step. Per-criterion feedbacks are stored as an embedded repeated LlmEvaluationFeedback list (exactly like LlmEvaluationTurnResult.feedbacks — NOT persisted into the experiment-scoped llm_feedback table). Produced by the online-evaluation worker; read-only over the API.
 type LlmEvaluationOnlineResult struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the result. Read-only; populated by the server.
@@ -12241,8 +12169,7 @@ func (x *GetLlmEvaluationOnlineResultRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListOnlineResults. All fields are optional; multiple
-// fields set at the same time are combined via logical AND.
+// Filter conditions for ListOnlineResults. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationOnlineResultFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only results produced by this online config.
@@ -12456,9 +12383,7 @@ func (x *ListLlmEvaluationOnlineResultsResponse) GetNextPageToken() string {
 	return ""
 }
 
-// A human-review annotation-queue item: one per failing session step enqueued by
-// the online-evaluation worker. The reviewer annotates (status / reason) and may
-// promote the offending session into a regression dataset.
+// A human-review annotation-queue item: one per failing session step enqueued by the online-evaluation worker. The reviewer annotates (status / reason) and may promote the offending session into a regression dataset.
 type LlmEvaluationAnnotationQueueItem struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique resource name of the queue item. Read-only; populated by the server.
@@ -12703,8 +12628,7 @@ func (x *GetLlmEvaluationAnnotationQueueItemRequest) GetLanguageCode() string {
 	return ""
 }
 
-// Filter conditions for ListAnnotationQueueItems. All fields are optional;
-// multiple fields set at the same time are combined via logical AND.
+// Filter conditions for ListAnnotationQueueItems. All fields are optional; multiple fields set at the same time are combined via logical AND.
 type LlmEvaluationAnnotationQueueItemFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Match only items with this status.
@@ -12991,9 +12915,7 @@ func (x *UpdateLlmEvaluationAnnotationQueueItemRequest) GetLanguageCode() string
 	return ""
 }
 
-// Request to promote an annotation-queue item into a regression dataset. Thin
-// server-side composition over LlmEvaluationCreateExamplesFromSession; the item
-// status is flipped to PROMOTED and the dataset name stamped on success.
+// Request to promote an annotation-queue item into a regression dataset. Thin server-side composition over LlmEvaluationCreateExamplesFromSession; the item status is flipped to PROMOTED and the dataset name stamped on success.
 type PromoteLlmEvaluationAnnotationQueueItemRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the item to promote.

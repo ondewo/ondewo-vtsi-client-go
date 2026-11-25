@@ -40,30 +40,12 @@ const (
 )
 
 // Every event VTSI reports. Values are grouped by resource in blocks of 100; numbers are stable.
-// <p><b>Attributes.</b> <code>VtsiEventMessage.attributes</code> carries the event-specific values listed at
-// each value below; a key whose value is unknown is left out, and keys not listed are never sent. Formats:
-// counts and numbers are base-10 integers without separators (<code>3</code>); booleans are
-// <code>true</code> / <code>false</code>; times are RFC 3339 in UTC with a numeric offset
-// (<code>2026-10-11T12:00:00+00:00</code>, fractional seconds possible); resource names are complete
-// (<code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code>); <code>updated_fields</code> is a
-// comma-separated list of <code>update_mask</code> paths without spaces (<code>display_name,url</code>);
-// a campaign <code>state</code> / <code>previous_state</code> is the <code>CampaignState</code> name WITHOUT
-// its <code>CAMPAIGN_STATE_</code> prefix (<code>RUNNING</code>). An event carries at most 20 attributes and
-// a value at most 256 characters (longer values are cut); <code>description</code> and
-// <code>sip_status_description</code> at most 1024 characters.</p>
-// <p><b>Call status attributes</b>, on every event derived from a change of a call&apos;s SIP status (marked
-// "call status attributes" below): <code>caller_name</code>, <code>listener_name</code> or
-// <code>scheduled_caller_name</code> (the resource that owns the call, the one that applies) and
-// <code>phone_number</code> (the callee or caller number in clear, where recorded; treat it as personal
-// data). Such an event also sets <code>call_name</code>, <code>sip_status_type</code>,
-// <code>previous_sip_status_type</code> (unset for a new call record), <code>sip_status_description</code>
-// and <code>resource_sequence</code> (the call&apos;s status change number), and has a deterministic
-// <code>event_id</code>, so replicas observing the same change report one event.</p>
-// <p><b>Campaign call attributes</b>, on the <code>VTSI_EVENT_CAMPAIGN_CALL_*</code> events:
-// <code>attempt_number</code> (attempts started so far), <code>phone_number</code> (the callee in clear) and
-// <code>caller_name</code> (caller of the current or last attempt). They also set <code>call_name</code>,
-// <code>campaign_name</code>, <code>sip_status_type</code>, <code>sip_status_description</code> and
-// <code>resource_sequence</code>; never <code>campaign_statistics</code>.</p>
+//
+// <b>Attributes.</b> <code>VtsiEventMessage.attributes</code> carries the event-specific values listed at each value below; a key whose value is unknown is left out, and keys not listed are never sent. Formats: counts and numbers are base-10 integers without separators (<code>3</code>); booleans are <code>true</code> / <code>false</code>; times are RFC 3339 in UTC with a numeric offset (<code>2026-10-11T12:00:00+00:00</code>, fractional seconds possible); resource names are complete (<code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code>); <code>updated_fields</code> is a comma-separated list of <code>update_mask</code> paths without spaces (<code>display_name,url</code>); a campaign <code>state</code> / <code>previous_state</code> is the <code>CampaignState</code> name WITHOUT its <code>CAMPAIGN_STATE_</code> prefix (<code>RUNNING</code>). An event carries at most 20 attributes and a value at most 256 characters (longer values are cut); <code>description</code> and <code>sip_status_description</code> at most 1024 characters.
+//
+// <b>Call status attributes</b>, on every event derived from a change of a call&apos;s SIP status (marked "call status attributes" below): <code>caller_name</code>, <code>listener_name</code> or <code>scheduled_caller_name</code> (the resource that owns the call, the one that applies) and <code>phone_number</code> (the callee or caller number in clear, where recorded; treat it as personal data). Such an event also sets <code>call_name</code>, <code>sip_status_type</code>, <code>previous_sip_status_type</code> (unset for a new call record), <code>sip_status_description</code> and <code>resource_sequence</code> (the call&apos;s status change number), and has a deterministic <code>event_id</code>, so replicas observing the same change report one event.
+//
+// <b>Campaign call attributes</b>, on the <code>VTSI_EVENT_CAMPAIGN_CALL_*</code> events: <code>attempt_number</code> (attempts started so far), <code>phone_number</code> (the callee in clear) and <code>caller_name</code> (caller of the current or last attempt). They also set <code>call_name</code>, <code>campaign_name</code>, <code>sip_status_type</code>, <code>sip_status_description</code> and <code>resource_sequence</code>; never <code>campaign_statistics</code>.
 type VtsiEvent int32
 
 const (
@@ -712,10 +694,8 @@ func (VtsiEvent) EnumDescriptor() ([]byte, []int) {
 }
 
 // HTTP method of a webhook request.
-// <p>Note: the zero value <code>WEBHOOK_HTTP_METHOD_UNSPECIFIED</code> is not "no method" but means
-// <code>POST</code>, the default. It keeps its released name for wire and source compatibility; a webhook
-// written with it is stored and sent as POST, and <code>Webhook.http_method</code> then reads back
-// <code>WEBHOOK_HTTP_METHOD_POST</code>.</p>
+//
+// Note: the zero value <code>WEBHOOK_HTTP_METHOD_UNSPECIFIED</code> is not "no method" but means <code>POST</code>, the default. It keeps its released name for wire and source compatibility; a webhook written with it is stored and sent as POST, and <code>Webhook.http_method</code> then reads back <code>WEBHOOK_HTTP_METHOD_POST</code>.
 type WebhookHttpMethod int32
 
 const (
@@ -768,8 +748,7 @@ func (WebhookHttpMethod) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_events_proto_rawDescGZIP(), []int{1}
 }
 
-// One event. This is the body of a webhook request (proto3 JSON with the original field names)
-// and the unit of the <code>SubscribeVtsiEvents</code> stream.
+// One event. This is the body of a webhook request (proto3 JSON with the original field names) and the unit of the <code>SubscribeVtsiEvents</code> stream.
 type VtsiEventMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique id of the event (uuid). A retried webhook request carries the same id, and a call
@@ -1130,8 +1109,7 @@ func (x *VtsiEventSubscription) GetExcludedEvents() []VtsiEvent {
 	return nil
 }
 
-// Delivery counters of a webhook. Approximate: summed over every server replica and flushed every
-// few seconds.
+// Delivery counters of a webhook. Approximate: summed over every server replica and flushed every few seconds.
 type WebhookDeliveryStatistics struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Requests answered with a 2xx status.
@@ -1431,9 +1409,7 @@ func (x *Webhook) GetSigningSecret() string {
 	return ""
 }
 
-// Selects events for <code>SubscribeVtsiEvents</code> without a stored subscription, and narrows a
-// <code>RedeliverWebhookEvents</code> window. Every set field narrows the selection (AND); the entries of one
-// list are alternatives (OR).
+// Selects events for <code>SubscribeVtsiEvents</code> without a stored subscription, and narrows a <code>RedeliverWebhookEvents</code> window. Every set field narrows the selection (AND); the entries of one list are alternatives (OR).
 type VtsiEventFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Only these events. Empty means every event (unlike <code>VtsiEventSubscription.events</code>, where

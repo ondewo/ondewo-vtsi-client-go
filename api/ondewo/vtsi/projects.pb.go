@@ -37,21 +37,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// <p>Whether a project can run warm intros, and if not, why</p>
+// Whether a project can run warm intros, and if not, why. When several reasons apply, the first one in this order is reported: <code>DISABLED_BY_DEPLOYMENT</code>, <code>NEEDS_CALL_CONTROL_KEY</code>, <code>NEEDS_LOCAL_ASTERISK</code>, <code>NEEDS_LISTENER</code>.
 type WarmIntroAvailability int32
 
 const (
-	// Not computed (e.g. an older server)
+	// Not computed, e.g. by a server older than warm intros. Treat it as unknown, not as available.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_UNSPECIFIED WarmIntroAvailability = 0
-	// Warm intros can run
+	// Warm intros can run: a WARM transfer whose effective <code>WarmTransferConfig.enabled</code> is
+	// <code>true</code> runs one.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_AVAILABLE WarmIntroAvailability = 1
-	// The deployment switch <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED</code> is off
+	// The operator switched warm intros off for the whole deployment (<code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED</code>
+	// is <code>false</code>, its default). Writing <code>enabled=true</code> at any level is refused with
+	// <code>FAILED_PRECONDITION</code> <code>reason=warm-intro-disabled</code>.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_DISABLED_BY_DEPLOYMENT WarmIntroAvailability = 2
-	// The project&apos;s Asterisk is not run by this server (or is older than Asterisk 22)
+	// The deployment runs on several hosts, where the server cannot reach the
+	// project&apos;s Asterisk directly to run the intro.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_NEEDS_LOCAL_ASTERISK WarmIntroAvailability = 3
-	// The project has no listener to run the intro (a project with pooled callers only)
+	// The project cannot spare a listener to run the intro bot: its <code>max_listeners</code> is not above the
+	// number of listeners the deployment keeps free for customer calls (1 unless the operator changed it), and
+	// <code>warm_transfer_defaults.intro_listener_names</code> reserves none. A caller-only project
+	// (<code>max_listeners = 0</code>) is the typical case. Raise <code>max_listeners</code> or reserve intro
+	// listeners.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_NEEDS_LISTENER WarmIntroAvailability = 4
-	// The deployment has no call-control key (<code>ONDEWO_VTSI_CALL_CONTROL_KEY</code>)
+	// The operator has not configured in-call control for the deployment (no
+	// <code>ONDEWO_VTSI_CALL_CONTROL_KEY</code>), so the bot of a running call cannot be paused while the intro runs.
 	WarmIntroAvailability_WARM_INTRO_AVAILABILITY_NEEDS_CALL_CONTROL_KEY WarmIntroAvailability = 5
 )
 
@@ -102,17 +111,20 @@ func (WarmIntroAvailability) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>Whether a project can use IVR menus, and if not, why</p>
+// Whether a project can use IVR menus, and if not, why. The same for every project of a deployment.
 type IvrAvailability int32
 
 const (
-	// Not computed (e.g. an older server)
+	// Not computed, e.g. by a server older than IVR menus. Treat it as unknown, not as available.
 	IvrAvailability_IVR_AVAILABILITY_UNSPECIFIED IvrAvailability = 0
-	// IVR menus can be published and routed
+	// IVR menus can be published and route inbound numbers (unless the project switched its routes off with
+	// <code>VtsiProject.ivr_menus_enabled = false</code>).
 	IvrAvailability_IVR_AVAILABILITY_AVAILABLE IvrAvailability = 1
-	// The deployment switch <code>ONDEWO_VTSI_IVR_ACTIVE</code> is off
+	// The operator switched IVR menus off for the whole deployment (<code>ONDEWO_VTSI_IVR_ACTIVE</code> is
+	// <code>false</code>): no menu routes an inbound call.
 	IvrAvailability_IVR_AVAILABILITY_DISABLED_BY_DEPLOYMENT IvrAvailability = 2
-	// The project&apos;s Asterisk is not run by this server
+	// The deployment runs on several hosts, where the server cannot reach the
+	// project&apos;s Asterisk directly to apply the routes.
 	IvrAvailability_IVR_AVAILABILITY_NEEDS_LOCAL_ASTERISK IvrAvailability = 3
 )
 
@@ -225,10 +237,7 @@ func (TrunkRegistrationState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{2}
 }
 
-// Status of a VtsiProject.
-// Released with unprefixed value names, which are package scoped in proto3 (so no other enum of
-// <code>ondewo.vtsi</code> can declare e.g. <code>UNSPECIFIED</code>); kept for wire and source
-// compatibility.
+// Status of a VtsiProject. Released with unprefixed value names, which are package scoped in proto3 (so no other enum of <code>ondewo.vtsi</code> can declare e.g. <code>UNSPECIFIED</code>); kept for wire and source compatibility.
 type VtsiProjectStatus int32
 
 const (
@@ -368,11 +377,7 @@ func (SipTrunkTransport) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{4}
 }
 
-// Sorting mode.
-// Note: unlike most enums of this API the zero value is a real mode, <code>ASCENDING</code>, not an
-// <code>..._UNSPECIFIED</code> placeholder, so an unset mode means ascending. Released this way and kept
-// for wire and source compatibility (it is also reused by
-// <a href="index.html#ondewo.vtsi.SoftphoneAccountSorting">SoftphoneAccountSorting</a>).
+// Sorting mode. Note: unlike most enums of this API the zero value is a real mode, <code>ASCENDING</code>, not an <code>..._UNSPECIFIED</code> placeholder, so an unset mode means ascending. Released this way and kept for wire and source compatibility (it is also reused by <a href="index.html#ondewo.vtsi.SoftphoneAccountSorting">SoftphoneAccountSorting</a>).
 type VtsiProjectSortingMode int32
 
 const (
@@ -425,15 +430,7 @@ func (VtsiProjectSortingMode) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{5}
 }
 
-// Structure of VTSI_PROJECT view
-// <ul>
-//
-//	<li>CreateVTSI_PROJECT: VTSI_PROJECT_VIEW_SHALLOW</li>
-//	<li>UpdateVTSI_PROJECT: VTSI_PROJECT_VIEW_SHALLOW</li>
-//	<li>GetVTSI_PROJECT: VTSI_PROJECT_VIEW_FULL</li>
-//	<li>ListVTSI_PROJECTs: VTSI_PROJECT_VIEW_SHALLOW</li>
-//
-// </ul>
+// Structure of VTSI_PROJECT view <ul> <li>CreateVTSI_PROJECT: VTSI_PROJECT_VIEW_SHALLOW</li> <li>UpdateVTSI_PROJECT: VTSI_PROJECT_VIEW_SHALLOW</li> <li>GetVTSI_PROJECT: VTSI_PROJECT_VIEW_FULL</li> <li>ListVTSI_PROJECTs: VTSI_PROJECT_VIEW_SHALLOW</li> </ul>
 type VtsiProjectView int32
 
 const (
@@ -490,8 +487,7 @@ func (VtsiProjectView) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_projects_proto_rawDescGZIP(), []int{6}
 }
 
-// Enum to specify the sorting field for VTSI projects.
-// Enum defining the field by which VTSI projects can be sorted
+// Enum to specify the sorting field for VTSI projects. Enum defining the field by which VTSI projects can be sorted
 type VtsiProjectSorting_VtsiProjectSortingField int32
 
 const (
@@ -606,13 +602,47 @@ type VtsiProject struct {
 	DeployedCallers int32 `protobuf:"varint,15,opt,name=deployed_callers,json=deployedCallers,proto3" json:"deployed_callers,omitempty"`
 	// The number of deployed listeners in this project.
 	DeployedListeners int32 `protobuf:"varint,16,opt,name=deployed_listeners,json=deployedListeners,proto3" json:"deployed_listeners,omitempty"`
-	// OPTIONAL: Restricts the phone numbers a call of this project may be transferred to with
-	// <pre><code>TransferCall</code></pre> and a <pre><code>CallTarget.phone_number</code></pre>. Each entry is an E.164
-	// number or number prefix (<pre><code>^\+[1-9][0-9]{0,14}$</code></pre>), e.g. <pre><code>+43</code></pre> or
-	// <pre><code>+4312345678</code></pre>; a number is allowed when it starts with any entry. Empty: any valid E.164
-	// number is allowed. A refused number answers <pre><code>TRANSFER_OUTCOME_TARGET_INVALID</code></pre> with
-	// <pre><code>error_reason = number-not-allowed</code></pre> and nothing is sent.
-	// Updatable with the update mask path <pre><code>transfer_phone_number_allowlist</code></pre>.
+	// OPTIONAL: The project&apos;s transfer phone-number allowlist: the phone numbers any call of this project may be
+	// transferred to. Each entry is an E.164 number or a prefix of one (<code>+</code> and 1 to 15 digits, the first
+	// not <code>0</code>: <code>^\+[1-9][0-9]{0,14}$</code>), and a number is allowed when it STARTS WITH any
+	// entry.
+	// <p>Empty (the default): no project restriction. A <code>CallTarget.phone_number</code> target must still be a
+	// number the deployment accepts as dialable (by default <code>+</code> and 7 to 15 digits; the operator can
+	// change the accepted format). A legacy <code>transfer_id</code> and the bot&apos;s own transfers are not held to
+	// that format unless the operator changed it. There is no per-call setting and no deployment-wide list: the
+	// allowlist is the project&apos;s alone and applies to every listener, caller, campaign and scheduled caller of
+	// the project.</p>
+	// <p>Example: <code>[&quot;+43&quot;, &quot;+4930123456&quot;]</code> allows every Austrian number, the number
+	// <code>+4930123456</code> and every extension dialled behind it (<code>+4930123456789</code>), and refuses
+	// <code>+4989...</code>.</p>
+	// <p>What it is checked against:</p>
+	// <ul>
+	// <li><code>TransferCall</code> with a <code>CallTarget.phone_number</code> target, BLIND or WARM: a number
+	// outside the list answers <code>TRANSFER_OUTCOME_TARGET_INVALID</code> with
+	// <code>error_reason = number-not-allowed</code>; nothing is sent and the call stays as it was. Read at the
+	// moment of the transfer, so an edit applies to the next transfer of every running call.</li>
+	// <li>The legacy raw <code>transfer_id</code> of <code>TransferCall</code> when it is shaped like a phone number
+	// (<code>+</code> and digits, or 4 digits followed by more characters, e.g. <code>+4312345678</code>,
+	// <code>4312345678</code> or <code>12345</code>): its digits must pass the list, so the raw field is no way
+	// around it; while the list is non-empty such an id that carries anything but digits is refused too. A softphone
+	// user name routed in the project is not checked even when it looks like a number, nor is an id of any other
+	// shape.</li>
+	// <li>The bot&apos;s OWN transfers (a transfer the NLU agent asks for during the call): checked inside the call;
+	// there every phone-shaped target, a numeric softphone user name included, counts as a number. A listener or
+	// caller receives the list when it is DEPLOYED, so a running listener keeps the list it was started with until
+	// it is redeployed; a pooled (persistent) caller started before an edit is not
+	// reused afterwards, a new one is deployed with the new list. A listener or caller whose project allowlist cannot
+	// be read is not deployed (<code>FAILED_PRECONDITION</code>, <code>reason=transfer-allowlist-unreadable</code>),
+	// rather than started with no restriction.</li>
+	// <li>The phone-number keys of <code>transfer_target_directory</code> and the phone-number targets of IVR menu
+	// ROUTE nodes: an update that leaves a directory key outside the list is refused with
+	// <code>INVALID_ARGUMENT</code> (<code>reason=number-not-allowed</code>), and a menu routing to such a number
+	// does not validate.</li>
+	// </ul>
+	// <p>At most 256 entries; a malformed entry or a longer list is refused with <code>INVALID_ARGUMENT</code> naming
+	// it. Duplicates are dropped. Order does not matter. Withheld from <code>PROJECT_EXECUTOR</code> and
+	// <code>PROJECT_USER</code>. Updatable with the update mask path <code>transfer_phone_number_allowlist</code> (the
+	// whole list is replaced; an empty list removes the restriction); it touches no Asterisk and ends no call.</p>
 	TransferPhoneNumberAllowlist []string `protobuf:"bytes,17,rep,name=transfer_phone_number_allowlist,json=transferPhoneNumberAllowlist,proto3" json:"transfer_phone_number_allowlist,omitempty"`
 	// Output only. Human-readable detail of the current <code>vtsi_project_status</code>: the reason of a
 	// <code>DEPLOY_FAILED</code> project (the same text as the <code>description</code> of the
@@ -635,35 +665,81 @@ type VtsiProject struct {
 	// of the deployment. Empty when the project is not deployed. It can differ from what a new deployment
 	// would start, e.g. after the server default changed. Ignored on create and update.
 	AsteriskVersionEffective string `protobuf:"bytes,21,opt,name=asterisk_version_effective,json=asteriskVersionEffective,proto3" json:"asterisk_version_effective,omitempty"`
-	// OPTIONAL: The project&apos;s default warm intro of a WARM transfer (see
-	// <a href="index.html#ondewo.vtsi.WarmTransferConfig">WarmTransferConfig</a>): the level below a call&apos;s
-	// <code>VoiceInteractionConfig.warm_transfer_config</code> and a
-	// <code>TransferCallRequest.warm_transfer_config</code>. <code>enabled=true</code> while the deployment switch
-	// <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED</code> is off, or a phase-B field while phase B is off, is refused
-	// with <code>FAILED_PRECONDITION</code> (<code>reason=warm-intro-disabled</code> /
-	// <code>reason=phase-b-not-enabled</code>); an invalid field with <code>INVALID_ARGUMENT</code> naming it.
-	// Updatable with the update mask path <code>warm_transfer_defaults</code> or its leaf paths, e.g.
-	// <code>warm_transfer_defaults.enabled</code>. Touches no Asterisk.
+	// OPTIONAL: The project&apos;s defaults for the warm intro of a WARM transfer (see
+	// <a href="index.html#ondewo.vtsi.WarmTransferConfig">WarmTransferConfig</a>): before a human transfer target
+	// is joined, an ONDEWO bot greets the target, briefs them and asks whether they accept the call.
+	// <p>How it combines with the call: every field is resolved on its own, the most specific level that SETS it
+	// winning: <code>TransferCallRequest.warm_transfer_config</code> (one transfer) &gt; the call&apos;s
+	// <code>VoiceInteractionConfig.warm_transfer_config</code> (set when the listener, caller, campaign or scheduled
+	// caller was started) &gt; these project defaults &gt; the built-in default of the field. A field left unset here
+	// inherits the built-in default; a text left unset everywhere is the ONDEWO NLU agent&apos;s warm transfer text,
+	// else the built-in text in the intro&apos;s language.</p>
+	// <p>Example: set <code>enabled=true</code> and <code>decision_timeout_s=30</code> here to give every WARM
+	// transfer of the project an intro in which the target has 30 seconds to accept; a campaign that sets
+	// <code>enabled=false</code> in its own <code>warm_transfer_config</code> then joins its targets without an intro,
+	// and a single <code>TransferCall</code> may still switch it back on.</p>
+	// <p>When the deployment switch <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED</code> is off no intro runs, whatever any
+	// level says (a WARM transfer joins the target as before warm intros existed), and writing
+	// <code>enabled=true</code> here is refused with <code>FAILED_PRECONDITION</code>
+	// <code>reason=warm-intro-disabled</code>; defaults stored earlier are kept and apply again once it is on. A
+	// phase-B field (an LLM summary, hold music) while the deployment has not enabled phase B is refused with
+	// <code>FAILED_PRECONDITION</code> <code>reason=phase-b-not-enabled</code>. Check
+	// <code>feature_availability</code> first. A field out of its documented range is refused with
+	// <code>INVALID_ARGUMENT</code> naming it; <code>intro_listener_names</code> is valid on this level only.</p>
+	// <p>When it takes effect: the intro settings are read at the moment of each transfer, so an edit applies to the
+	// next transfer of every running call. Whether the bot&apos;s OWN transfers to a human can get an intro is fixed
+	// when a listener or caller is DEPLOYED: switching <code>apply_to_bot_transfers</code> (or <code>enabled</code>)
+	// on reaches a running listener, and a pooled caller deployed before the edit, only after they are redeployed.
+	// Switching it off applies to the next bot transfer of every running call, which is then sent without an
+	// intro.</p>
+	// <p>Unset: no project defaults; only the call&apos;s and the transfer&apos;s values and the built-in defaults
+	// apply (<code>enabled</code> unset everywhere is <code>false</code>). Withheld from
+	// <code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code>. Updatable with the update mask path
+	// <code>warm_transfer_defaults</code> or its leaf paths, e.g. <code>warm_transfer_defaults.enabled</code>. The
+	// update itself reloads no Asterisk and ends no call; a changed <code>intro_listener_names</code> reaches the
+	// project&apos;s Asterisk the next time its configuration is written, e.g. on the next deploy.</p>
 	WarmTransferDefaults *WarmTransferConfig `protobuf:"bytes,22,opt,name=warm_transfer_defaults,json=warmTransferDefaults,proto3" json:"warm_transfer_defaults,omitempty"`
-	// Output only. Which features can run in this project with the deployment, the Asterisk and the listeners it
-	// has now, computed on every <code>GetVtsiProject</code> / <code>ListVtsiProjects</code> (it costs no RPC).
-	// Read it instead of learning from a refusal. Ignored on create and update.
+	// Output only. Which optional call features can run in this project right now, given the deployment&apos;s
+	// switches, where the project&apos;s Asterisk runs and the project&apos;s listener capacity. Computed on every
+	// <code>GetVtsiProject</code>, <code>ListVtsiProjects</code> and <code>UpdateVtsiProject</code> answer at no extra
+	// cost. Read it before offering or configuring a feature instead of learning from a refusal: e.g. a
+	// <code>warm_intro</code> other than <code>WARM_INTRO_AVAILABILITY_AVAILABLE</code> means a warm intro cannot be
+	// expected to run in this project, whatever <code>warm_transfer_defaults</code> or a call configures.
+	// Withheld from <code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code>. Ignored on create and update.
 	FeatureAvailability *VtsiProjectFeatureAvailability `protobuf:"bytes,23,opt,name=feature_availability,json=featureAvailability,proto3" json:"feature_availability,omitempty"`
-	// OPTIONAL: Whether the project&apos;s published IVR menus route its inbound phone numbers. Unset means
-	// <code>true</code>. <code>false</code> switches every route off at once (every inbound number reaches the
-	// listener queue as without a menu) and keeps the menus and their phone number bindings, so <code>true</code>
-	// restores them. Updatable with the update mask path <code>ivr_menus_enabled</code>; it reloads no Asterisk and
-	// ends no call.
+	// OPTIONAL: The project&apos;s master switch for IVR menus: whether its PUBLISHED IVR menus answer the inbound
+	// phone numbers they are bound to. Unset means <code>true</code>.
+	// <p><code>false</code> switches every route of the project off at once: an inbound call to any number reaches
+	// the project&apos;s listener queue exactly as if no menu existed. The menus and their phone number bindings are
+	// kept and can still be edited and published, so setting <code>true</code> again restores every route as
+	// published. It does not change <code>feature_availability.ivr</code>, which is about the deployment, not
+	// this switch. There is no per-call setting.</p>
+	// <p>Withheld from <code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code>. Updatable with the update mask
+	// path <code>ivr_menus_enabled</code>; on a <code>DEPLOYED</code> project it only rewrites the inbound routes of
+	// the running Asterisk: no reload, and no call ends.</p>
 	IvrMenusEnabled *bool `protobuf:"varint,24,opt,name=ivr_menus_enabled,json=ivrMenusEnabled,proto3,oneof" json:"ivr_menus_enabled,omitempty"`
-	// OPTIONAL: Directory of the project&apos;s human transfer targets, keyed by the target: an E.164 phone number
-	// (<code>^\+[1-9][0-9]{6,14}$</code>, which must pass <code>transfer_phone_number_allowlist</code>) or the
-	// <code>sip_username</code> of a softphone account of the project. It names a target in a warm intro
-	// (<code>{callee_name}</code>) and describes it, below a transfer&apos;s own
-	// <code>WarmTransferConfig.callee_display_name</code> / <code>callee_description</code> and the softphone
-	// account&apos;s <code>display_name</code> / <code>description</code>. That is how the bot&apos;s own handover to
-	// a target names the right person. At most 200 entries; an invalid key or entry is refused with
-	// <code>INVALID_ARGUMENT</code> naming it. Updatable with the update mask path
-	// <code>transfer_target_directory</code> (the whole map is replaced). Touches no Asterisk.
+	// OPTIONAL: Directory of the project&apos;s HUMAN transfer targets: who a target is and what they do, so that a
+	// warm intro can name the target (<code>{callee_name}</code>) and brief the bot about them. It changes what the
+	// intro bot SAYS, never where a call is transferred to.
+	// <p>Keyed by the target: an E.164 phone number (<code>+</code> and 7 to 15 digits,
+	// <code>^\+[1-9][0-9]{6,14}$</code>, which must also pass <code>transfer_phone_number_allowlist</code>) or the
+	// <code>sip_username</code> of a softphone account of the project.</p>
+	// <p>How it combines: the name and the description are each taken from the first source that has one: the
+	// transfer&apos;s effective <code>WarmTransferConfig.callee_display_name</code> /
+	// <code>callee_description</code> (the transfer, the call, then <code>warm_transfer_defaults</code>), then the
+	// target softphone account&apos;s <code>display_name</code> / <code>description</code>, then this directory. With
+	// none, the intro speaks a variant without a name. This is how the bot&apos;s own handover to a target (the NLU
+	// agent naming a softphone user, e.g. <code>berger</code>) names the right person.</p>
+	// <p>Example (JSON):</p>
+	// <pre><code>{&quot;berger&quot;: {&quot;displayName&quot;: &quot;Frau Berger, Buchhaltung&quot;,
+	//   &quot;description&quot;: &quot;Handles invoices and reminders&quot;},
+	//  &quot;+4312345678&quot;: {&quot;displayName&quot;: &quot;Support hotline&quot;}}</code></pre>
+	// <p>Read at the moment of each warm intro, so an edit applies to the next transfer. At most 200 entries; a key
+	// that is neither an allowed phone number nor a softphone user name of the project, or an invalid entry (see
+	// <code>TransferTargetDirectoryItem</code>), is refused with <code>INVALID_ARGUMENT</code> naming it. Empty (the
+	// default): targets are named only by the transfer&apos;s settings and the softphone accounts. Withheld from
+	// <code>PROJECT_EXECUTOR</code> and <code>PROJECT_USER</code>. Updatable with the update mask path
+	// <code>transfer_target_directory</code> (the whole map is replaced). Touches no Asterisk and ends no call.</p>
 	TransferTargetDirectory map[string]*TransferTargetDirectoryItem `protobuf:"bytes,25,rep,name=transfer_target_directory,json=transferTargetDirectory,proto3" json:"transfer_target_directory,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields           protoimpl.UnknownFields
 	sizeCache               protoimpl.SizeCache
@@ -874,12 +950,14 @@ func (x *VtsiProject) GetTransferTargetDirectory() map[string]*TransferTargetDir
 	return nil
 }
 
-// <p>One human transfer target of <code>VtsiProject.transfer_target_directory</code>. Carries no secret</p>
+// One human transfer target of <code>VtsiProject.transfer_target_directory</code>: how a warm intro names and describes the person behind one phone number or softphone account. Both texts are given to the intro bot and may be spoken to the target; neither may contain SIP markup (<code>&lt;SIP:</code>), which is refused with <code>INVALID_ARGUMENT</code>. Carries no secret.
 type TransferTargetDirectoryItem struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Who the target is, e.g. <code>Frau Berger, Buchhaltung</code>. 1 to 128 characters
+	// Required. Who the target is, spoken as <code>{callee_name}</code> in a warm intro, e.g.
+	// <code>Frau Berger, Buchhaltung</code>. 1 to 128 characters, not blank.
 	DisplayName string `protobuf:"bytes,1,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	// The target&apos;s role and context, for a warm intro&apos;s briefing. At most 512 characters
+	// OPTIONAL: The target&apos;s role and context, given to the intro bot for its briefing, e.g.
+	// <code>Handles invoices and payment reminders</code>. At most 512 characters; empty: no description.
 	Description   string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -929,14 +1007,21 @@ func (x *TransferTargetDirectoryItem) GetDescription() string {
 	return ""
 }
 
-// <p>Which features can run in a VTSI project. Output only</p>
+// Which optional call features can run in a VTSI project, and if not, why. Output only; computed from the deployment&apos;s switches, where the project&apos;s Asterisk runs and the project&apos;s listener capacity, never from a single call&apos;s configuration.
 type VtsiProjectFeatureAvailability struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Whether a WARM transfer can run a warm intro
+	// Whether a WARM transfer of this project can run a warm intro. Anything but
+	// <code>WARM_INTRO_AVAILABILITY_AVAILABLE</code> means an intro cannot be expected to run, whatever
+	// <code>VtsiProject.warm_transfer_defaults</code>, a call or a transfer configures; with
+	// <code>WARM_INTRO_AVAILABILITY_DISABLED_BY_DEPLOYMENT</code> a WARM transfer joins its target without one.
 	WarmIntro WarmIntroAvailability `protobuf:"varint,1,opt,name=warm_intro,json=warmIntro,proto3,enum=ondewo.vtsi.WarmIntroAvailability" json:"warm_intro,omitempty"`
-	// Whether the phase-B fields of <code>WarmTransferConfig</code> (LLM summary, hold music) are accepted
+	// Whether the phase-B fields of <code>WarmTransferConfig</code> (an LLM-written summary, hold music for the
+	// caller) are accepted: <code>true</code> exactly when the deployment has enabled warm intros AND phase B. While
+	// <code>false</code>, setting one of them at any level is refused with <code>FAILED_PRECONDITION</code>
+	// <code>reason=phase-b-not-enabled</code>.
 	WarmIntroPhaseB bool `protobuf:"varint,2,opt,name=warm_intro_phase_b,json=warmIntroPhaseB,proto3" json:"warm_intro_phase_b,omitempty"`
-	// Whether the project can publish and route IVR menus
+	// Whether the project can publish IVR menus and route inbound numbers through them. Independent of the
+	// project&apos;s own switch <code>VtsiProject.ivr_menus_enabled</code>.
 	Ivr           IvrAvailability `protobuf:"varint,3,opt,name=ivr,proto3,enum=ondewo.vtsi.IvrAvailability" json:"ivr,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1588,8 +1673,7 @@ func (x *GetVtsiProjectRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// Request to list VTSI projects. The filters are combined with AND; the values within one repeated
-// field are combined with OR; an unset field or an empty repeated field does not filter.
+// Request to list VTSI projects. The filters are combined with AND; the values within one repeated field are combined with OR; an unset field or an empty repeated field does not filter.
 type ListVtsiProjectsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional. Specify the view of the returned VtsiProject (full view by default)
@@ -2029,9 +2113,7 @@ func (x *UpdateVtsiProjectResponse) GetVtsiProject() *VtsiProject {
 	return nil
 }
 
-// Request to delete a VTSI project
-// A deployed VTSI project is undeployed automatically before it is deleted (see
-// <a href="index.html#ondewo.vtsi.Projects.DeleteVtsiProject">DeleteVtsiProject</a>).
+// Request to delete a VTSI project A deployed VTSI project is undeployed automatically before it is deleted (see <a href="index.html#ondewo.vtsi.Projects.DeleteVtsiProject">DeleteVtsiProject</a>).
 type DeleteVtsiProjectRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>

@@ -51,40 +51,21 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Manages the IVR MENUS of a VTSI project: keypad (DTMF) menus that a caller dialling one of the project&apos;s
-// inbound phone numbers goes through BEFORE a bot or a person takes the call (&quot;press 1 for sales, 2 for
-// billing&quot;). A menu is a graph of nodes (<code>IvrNode</code>): MENU (a prompt and one key), PLAY (a prompt),
-// SCHEDULE (opening hours), ROUTE (to a listener, the listener queue, a softphone account or a phone number),
-// GOTO_MENU (into another menu of the project) and HANGUP. The project&apos;s Asterisk executes a menu as generated
-// dialplan: a menu keeps running while VTSI is down, and no user text ever reaches the dialplan.</p>
-// <p>Lifecycle: <code>CreateIvrMenu</code> / <code>UpdateIvrMenu</code> save a DRAFT revision (every save is
-// validated; <code>ValidateIvrMenu</code> returns every issue at once). Nothing routes until
-// <code>PublishIvrMenu</code> renders a revision into the project&apos;s Asterisk and switches the menu&apos;s
-// <code>inbound_phone_numbers</code> to it; a failed publish leaves the previous published revision live. A caller
-// inside a menu during a publish finishes on the revision they entered. <code>TestIvrMenu</code> runs a scripted
-// test call through the published revision inside the Asterisk, and <code>GetIvrMenuTest</code> reports it.</p>
-// <p>A bot reached through a menu learns the path: the headers <code>X-ondewo-ivr-menu</code> (the menu&apos;s
-// display name, sanitized), <code>X-ondewo-ivr-path</code> (the option labels taken, e.g.
-// <code>main:1&gt;billing:2</code>) and <code>X-ondewo-dialed-number</code> become parameters of the bot&apos;s
-// SIP context, and the call records them in <code>Call.ivr_menu_display_name</code> / <code>Call.ivr_path</code>,
-// and the menu&apos;s resource name in <code>Call.ivr_menu_name</code>.
-// Labels therefore must never carry a secret.</p>
-// <p>Deployment switch: with <code>ONDEWO_VTSI_IVR_ACTIVE=false</code> (the default) every RPC of this service
-// answers <code>UNIMPLEMENTED</code> with <code>reason=ivr-disabled</code>. <code>VtsiProject.ivr_menus_enabled</code>
-// switches the routes of one project off, and <code>VtsiProject.feature_availability.ivr</code> says whether a project
-// can use IVR menus at all (a project whose Asterisk is not run by this server cannot: Publish is refused with
-// <code>FAILED_PRECONDITION</code> <code>reason=asterisk-not-local</code>).</p>
-// <p>Limits: <code>ONDEWO_VTSI_IVR_MAX_NODES</code> nodes per menu (100),
-// <code>ONDEWO_VTSI_IVR_MAX_MENUS_PER_PROJECT</code> menus (50), <code>ONDEWO_VTSI_IVR_MAX_PROMPT_BYTES</code> per uploaded prompt (1048576),
-// <code>ONDEWO_VTSI_IVR_MAX_PROMPTS_TOTAL_BYTES</code> per menu (52428800), <code>ONDEWO_VTSI_IVR_MAX_HOPS</code> node
-// entries per call across menus (50; the call is then hung up).</p>
-// <p>Every RPC about ONE menu accepts its resource name; Get and Delete also accept its display name, unique within a
-// project and resolved within <code>vtsi_project_name</code>, which is then REQUIRED.</p>
-// <p>Authorization (Keycloak auth mode <code>ENFORCE</code>, as Campaigns): <code>PROJECT_DEVELOPER</code> or higher
-// for Create, Update, Delete, Publish, Clone and Test; <code>PROJECT_EXECUTOR</code> or higher for Get, List,
-// Validate, ListRevisions, GetDialplan and GetIvrMenuTest. Every change emits its <code>VTSI_EVENT_IVR_MENU_*</code>
-// event; a request with <code>validate_only</code> emits nothing.</p>
+// # ONDEWO VTSI API
+//
+// Manages the IVR MENUS of a VTSI project: keypad (DTMF) menus that a caller dialling one of the project&apos;s inbound phone numbers goes through BEFORE a bot or a person takes the call (&quot;press 1 for sales, 2 for billing&quot;). A menu is a graph of nodes (<code>IvrNode</code>): MENU (a prompt and one key), PLAY (a prompt), SCHEDULE (opening hours), ROUTE (to a listener, the listener queue, a softphone account or a phone number), GOTO_MENU (into another menu of the project) and HANGUP. The project&apos;s Asterisk executes a menu as generated dialplan: a menu keeps running while VTSI is down, and no user text ever reaches the dialplan.
+//
+// Lifecycle: <code>CreateIvrMenu</code> / <code>UpdateIvrMenu</code> save a DRAFT revision (every save is validated; <code>ValidateIvrMenu</code> returns every issue at once). Nothing routes until <code>PublishIvrMenu</code> renders a revision into the project&apos;s Asterisk and switches the menu&apos;s <code>inbound_phone_numbers</code> to it; a failed publish leaves the previous published revision live. A caller inside a menu during a publish finishes on the revision they entered. <code>TestIvrMenu</code> runs a scripted test call through the published revision inside the Asterisk, and <code>GetIvrMenuTest</code> reports it.
+//
+// A bot reached through a menu learns the path: the headers <code>X-ondewo-ivr-menu</code> (the menu&apos;s display name, sanitized), <code>X-ondewo-ivr-path</code> (the option labels taken, e.g. <code>main:1&gt;billing:2</code>) and <code>X-ondewo-dialed-number</code> become parameters of the bot&apos;s SIP context, and the call records them in <code>Call.ivr_menu_display_name</code> / <code>Call.ivr_path</code>, and the menu&apos;s resource name in <code>Call.ivr_menu_name</code>. Labels therefore must never carry a secret.
+//
+// Deployment switch: with <code>ONDEWO_VTSI_IVR_ACTIVE=false</code> (the default) every RPC of this service answers <code>UNIMPLEMENTED</code> with <code>reason=ivr-disabled</code>. <code>VtsiProject.ivr_menus_enabled</code> switches the routes of one project off, and <code>VtsiProject.feature_availability.ivr</code> says whether a project can use IVR menus at all (a project whose Asterisk is not run by this server cannot: Publish is refused with <code>FAILED_PRECONDITION</code> <code>reason=asterisk-not-local</code>).
+//
+// Limits: <code>ONDEWO_VTSI_IVR_MAX_NODES</code> nodes per menu (100), <code>ONDEWO_VTSI_IVR_MAX_MENUS_PER_PROJECT</code> menus (50), <code>ONDEWO_VTSI_IVR_MAX_PROMPT_BYTES</code> per uploaded prompt (1048576), <code>ONDEWO_VTSI_IVR_MAX_PROMPTS_TOTAL_BYTES</code> per menu (52428800), <code>ONDEWO_VTSI_IVR_MAX_HOPS</code> node entries per call across menus (50; the call is then hung up).
+//
+// Every RPC about ONE menu accepts its resource name; Get and Delete also accept its display name, unique within a project and resolved within <code>vtsi_project_name</code>, which is then REQUIRED.
+//
+// Authorization (Keycloak auth mode <code>ENFORCE</code>, as Campaigns): <code>PROJECT_DEVELOPER</code> or higher for Create, Update, Delete, Publish, Clone and Test; <code>PROJECT_EXECUTOR</code> or higher for Get, List, Validate, ListRevisions, GetDialplan and GetIvrMenuTest. Every change emits its <code>VTSI_EVENT_IVR_MENU_*</code> event; a request with <code>validate_only</code> emits nothing.
 type IvrMenusClient interface {
 	// <p>Creates an IVR menu as a DRAFT (revision 1). Nothing routes until it is published.</p>
 	// <p>Errors: <code>INVALID_ARGUMENT</code> with the code and path of the FIRST error issue (see
@@ -279,40 +260,21 @@ func (c *ivrMenusClient) GetIvrMenuDialplan(ctx context.Context, in *GetIvrMenuD
 // All implementations must embed UnimplementedIvrMenusServer
 // for forward compatibility.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Manages the IVR MENUS of a VTSI project: keypad (DTMF) menus that a caller dialling one of the project&apos;s
-// inbound phone numbers goes through BEFORE a bot or a person takes the call (&quot;press 1 for sales, 2 for
-// billing&quot;). A menu is a graph of nodes (<code>IvrNode</code>): MENU (a prompt and one key), PLAY (a prompt),
-// SCHEDULE (opening hours), ROUTE (to a listener, the listener queue, a softphone account or a phone number),
-// GOTO_MENU (into another menu of the project) and HANGUP. The project&apos;s Asterisk executes a menu as generated
-// dialplan: a menu keeps running while VTSI is down, and no user text ever reaches the dialplan.</p>
-// <p>Lifecycle: <code>CreateIvrMenu</code> / <code>UpdateIvrMenu</code> save a DRAFT revision (every save is
-// validated; <code>ValidateIvrMenu</code> returns every issue at once). Nothing routes until
-// <code>PublishIvrMenu</code> renders a revision into the project&apos;s Asterisk and switches the menu&apos;s
-// <code>inbound_phone_numbers</code> to it; a failed publish leaves the previous published revision live. A caller
-// inside a menu during a publish finishes on the revision they entered. <code>TestIvrMenu</code> runs a scripted
-// test call through the published revision inside the Asterisk, and <code>GetIvrMenuTest</code> reports it.</p>
-// <p>A bot reached through a menu learns the path: the headers <code>X-ondewo-ivr-menu</code> (the menu&apos;s
-// display name, sanitized), <code>X-ondewo-ivr-path</code> (the option labels taken, e.g.
-// <code>main:1&gt;billing:2</code>) and <code>X-ondewo-dialed-number</code> become parameters of the bot&apos;s
-// SIP context, and the call records them in <code>Call.ivr_menu_display_name</code> / <code>Call.ivr_path</code>,
-// and the menu&apos;s resource name in <code>Call.ivr_menu_name</code>.
-// Labels therefore must never carry a secret.</p>
-// <p>Deployment switch: with <code>ONDEWO_VTSI_IVR_ACTIVE=false</code> (the default) every RPC of this service
-// answers <code>UNIMPLEMENTED</code> with <code>reason=ivr-disabled</code>. <code>VtsiProject.ivr_menus_enabled</code>
-// switches the routes of one project off, and <code>VtsiProject.feature_availability.ivr</code> says whether a project
-// can use IVR menus at all (a project whose Asterisk is not run by this server cannot: Publish is refused with
-// <code>FAILED_PRECONDITION</code> <code>reason=asterisk-not-local</code>).</p>
-// <p>Limits: <code>ONDEWO_VTSI_IVR_MAX_NODES</code> nodes per menu (100),
-// <code>ONDEWO_VTSI_IVR_MAX_MENUS_PER_PROJECT</code> menus (50), <code>ONDEWO_VTSI_IVR_MAX_PROMPT_BYTES</code> per uploaded prompt (1048576),
-// <code>ONDEWO_VTSI_IVR_MAX_PROMPTS_TOTAL_BYTES</code> per menu (52428800), <code>ONDEWO_VTSI_IVR_MAX_HOPS</code> node
-// entries per call across menus (50; the call is then hung up).</p>
-// <p>Every RPC about ONE menu accepts its resource name; Get and Delete also accept its display name, unique within a
-// project and resolved within <code>vtsi_project_name</code>, which is then REQUIRED.</p>
-// <p>Authorization (Keycloak auth mode <code>ENFORCE</code>, as Campaigns): <code>PROJECT_DEVELOPER</code> or higher
-// for Create, Update, Delete, Publish, Clone and Test; <code>PROJECT_EXECUTOR</code> or higher for Get, List,
-// Validate, ListRevisions, GetDialplan and GetIvrMenuTest. Every change emits its <code>VTSI_EVENT_IVR_MENU_*</code>
-// event; a request with <code>validate_only</code> emits nothing.</p>
+// # ONDEWO VTSI API
+//
+// Manages the IVR MENUS of a VTSI project: keypad (DTMF) menus that a caller dialling one of the project&apos;s inbound phone numbers goes through BEFORE a bot or a person takes the call (&quot;press 1 for sales, 2 for billing&quot;). A menu is a graph of nodes (<code>IvrNode</code>): MENU (a prompt and one key), PLAY (a prompt), SCHEDULE (opening hours), ROUTE (to a listener, the listener queue, a softphone account or a phone number), GOTO_MENU (into another menu of the project) and HANGUP. The project&apos;s Asterisk executes a menu as generated dialplan: a menu keeps running while VTSI is down, and no user text ever reaches the dialplan.
+//
+// Lifecycle: <code>CreateIvrMenu</code> / <code>UpdateIvrMenu</code> save a DRAFT revision (every save is validated; <code>ValidateIvrMenu</code> returns every issue at once). Nothing routes until <code>PublishIvrMenu</code> renders a revision into the project&apos;s Asterisk and switches the menu&apos;s <code>inbound_phone_numbers</code> to it; a failed publish leaves the previous published revision live. A caller inside a menu during a publish finishes on the revision they entered. <code>TestIvrMenu</code> runs a scripted test call through the published revision inside the Asterisk, and <code>GetIvrMenuTest</code> reports it.
+//
+// A bot reached through a menu learns the path: the headers <code>X-ondewo-ivr-menu</code> (the menu&apos;s display name, sanitized), <code>X-ondewo-ivr-path</code> (the option labels taken, e.g. <code>main:1&gt;billing:2</code>) and <code>X-ondewo-dialed-number</code> become parameters of the bot&apos;s SIP context, and the call records them in <code>Call.ivr_menu_display_name</code> / <code>Call.ivr_path</code>, and the menu&apos;s resource name in <code>Call.ivr_menu_name</code>. Labels therefore must never carry a secret.
+//
+// Deployment switch: with <code>ONDEWO_VTSI_IVR_ACTIVE=false</code> (the default) every RPC of this service answers <code>UNIMPLEMENTED</code> with <code>reason=ivr-disabled</code>. <code>VtsiProject.ivr_menus_enabled</code> switches the routes of one project off, and <code>VtsiProject.feature_availability.ivr</code> says whether a project can use IVR menus at all (a project whose Asterisk is not run by this server cannot: Publish is refused with <code>FAILED_PRECONDITION</code> <code>reason=asterisk-not-local</code>).
+//
+// Limits: <code>ONDEWO_VTSI_IVR_MAX_NODES</code> nodes per menu (100), <code>ONDEWO_VTSI_IVR_MAX_MENUS_PER_PROJECT</code> menus (50), <code>ONDEWO_VTSI_IVR_MAX_PROMPT_BYTES</code> per uploaded prompt (1048576), <code>ONDEWO_VTSI_IVR_MAX_PROMPTS_TOTAL_BYTES</code> per menu (52428800), <code>ONDEWO_VTSI_IVR_MAX_HOPS</code> node entries per call across menus (50; the call is then hung up).
+//
+// Every RPC about ONE menu accepts its resource name; Get and Delete also accept its display name, unique within a project and resolved within <code>vtsi_project_name</code>, which is then REQUIRED.
+//
+// Authorization (Keycloak auth mode <code>ENFORCE</code>, as Campaigns): <code>PROJECT_DEVELOPER</code> or higher for Create, Update, Delete, Publish, Clone and Test; <code>PROJECT_EXECUTOR</code> or higher for Get, List, Validate, ListRevisions, GetDialplan and GetIvrMenuTest. Every change emits its <code>VTSI_EVENT_IVR_MENU_*</code> event; a request with <code>validate_only</code> emits nothing.
 type IvrMenusServer interface {
 	// <p>Creates an IVR menu as a DRAFT (revision 1). Nothing routes until it is published.</p>
 	// <p>Errors: <code>INVALID_ARGUMENT</code> with the code and path of the FIRST error issue (see

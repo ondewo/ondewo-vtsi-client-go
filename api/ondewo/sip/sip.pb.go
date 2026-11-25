@@ -37,17 +37,11 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// <p>How a <code>SipTransferCall</code> handles a transfer that the container parked in
-// <code>SipStatus.delegated_transfer</code> instead of sending it.</p>
-// <p>Every value other than <code>SIP_TRANSFER_DELEGATION_UNSPECIFIED</code> requires the
-// <code>x-ondewo-sip-call-control-token</code> metadatum (otherwise <code>CallControlUnauthenticated</code>) and the
-// <code>x-ondewo-expected-call-id</code> metadatum naming the ongoing call (missing or different:
-// <code>CallScopeMismatch</code>), plus <code>delegated_request_id</code> (otherwise
-// <code>DelegatedRequestMismatch</code>). Refusals are RETURNED in <code>exception_name</code> /
-// <code>description</code> and never assigned to the shared status.</p>
-// <p>A parked transfer that is neither claimed nor ended within <code>SIP_TRANSFER_DELEGATION_CLAIM_TIMEOUT_S</code> is
-// dropped WITHOUT a REFER, and the pipeline is told with <code>SIP_WARM_TRANSFER_OUTCOME_DELEGATION_EXPIRED</code>. A
-// claimed transfer never expires.</p>
+// How a <code>SipTransferCall</code> handles a transfer that the container parked in <code>SipStatus.delegated_transfer</code> instead of sending it.
+//
+// Every value other than <code>SIP_TRANSFER_DELEGATION_UNSPECIFIED</code> requires the <code>x-ondewo-sip-call-control-token</code> metadatum (otherwise <code>CallControlUnauthenticated</code>) and the <code>x-ondewo-expected-call-id</code> metadatum naming the ongoing call (missing or different: <code>CallScopeMismatch</code>), plus <code>delegated_request_id</code> (otherwise <code>DelegatedRequestMismatch</code>). Refusals are RETURNED in <code>exception_name</code> / <code>description</code> and never assigned to the shared status.
+//
+// A parked transfer that is neither claimed nor ended within <code>SIP_TRANSFER_DELEGATION_CLAIM_TIMEOUT_S</code> is dropped WITHOUT a REFER, and the pipeline is told with <code>SIP_WARM_TRANSFER_OUTCOME_DELEGATION_EXPIRED</code>. A claimed transfer never expires.
 type SipTransferDelegation int32
 
 const (
@@ -109,7 +103,7 @@ func (SipTransferDelegation) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>Desired setting of one media control flag</p>
+// Desired setting of one media control flag
 type MediaControlSetting int32
 
 const (
@@ -162,8 +156,7 @@ func (MediaControlSetting) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{1}
 }
 
-// <p>Owner of a media control hold. Each owner holds its own mute and pause; releasing one owner's hold never releases
-// another owner's</p>
+// Owner of a media control hold. Each owner holds its own mute and pause; releasing one owner's hold never releases another owner's
 type MediaControlOwner int32
 
 const (
@@ -218,7 +211,7 @@ func (MediaControlOwner) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2}
 }
 
-// <p>Outcome of a warm transfer that the bot tells the caller</p>
+// Outcome of a warm transfer that the bot tells the caller
 type SipWarmTransferOutcome int32
 
 const (
@@ -277,7 +270,7 @@ func (SipWarmTransferOutcome) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{3}
 }
 
-// <p>Answer of the speech-to-speech pipeline to a <code>SipWarmTransferOutcomeNotice</code></p>
+// Answer of the speech-to-speech pipeline to a <code>SipWarmTransferOutcomeNotice</code>
 type SipWarmTransferOutcomeNoticeStatus int32
 
 const (
@@ -343,7 +336,7 @@ func (SipWarmTransferOutcomeNoticeStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{4}
 }
 
-// <p>Mode of a <code>SipStreamCallAudio</code> stream</p>
+// Mode of a <code>SipStreamCallAudio</code> stream
 type SipCallAudioMode int32
 
 const (
@@ -396,7 +389,7 @@ func (SipCallAudioMode) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{5}
 }
 
-// <p>Why a <code>SipStreamCallAudio</code> stream ended</p>
+// Why a <code>SipStreamCallAudio</code> stream ended
 type SipCallAudioEndReason int32
 
 const (
@@ -465,7 +458,7 @@ func (SipCallAudioEndReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{6}
 }
 
-// <p>Why the call is being ended</p>
+// Why the call is being ended
 type SipEndCallRequest_EndCallReason int32
 
 const (
@@ -530,7 +523,7 @@ func (SipEndCallRequest_EndCallReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{0, 0}
 }
 
-// <p>Who or what answered the call</p>
+// Who or what answered the call
 type AnsweringMachineDetectionResult_Verdict int32
 
 const (
@@ -607,7 +600,7 @@ func (AnsweringMachineDetectionResult_Verdict) EnumDescriptor() ([]byte, []int) 
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2, 0}
 }
 
-// <p>Evidence that led to the verdict</p>
+// Evidence that led to the verdict
 type AnsweringMachineDetectionResult_Cause int32
 
 const (
@@ -684,7 +677,7 @@ func (AnsweringMachineDetectionResult_Cause) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{2, 1}
 }
 
-// <p>What was done because of the verdict</p>
+// What was done because of the verdict
 type AnsweringMachineDetectionResult_ActionTaken int32
 
 const (
@@ -885,7 +878,7 @@ func (SipStatus_StatusType) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_sip_sip_proto_rawDescGZIP(), []int{8, 0}
 }
 
-// <p>Ends an ongoing call of the active SIP session of the active SIP account</p>
+// Ends an ongoing call of the active SIP session of the active SIP account
 type SipEndCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Set to <code>True</code> to forcefully hang up the call
@@ -951,7 +944,7 @@ func (x *SipEndCallRequest) GetAmdResult() *AnsweringMachineDetectionResult {
 	return nil
 }
 
-// <p>Reports the verdict of the answering machine detection of the ongoing outgoing call</p>
+// Reports the verdict of the answering machine detection of the ongoing outgoing call
 type SipReportAnsweringMachineDetectedRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Result of the answering machine detection. Written to <code>SipStatus.amd_result</code> of the
@@ -998,8 +991,9 @@ func (x *SipReportAnsweringMachineDetectedRequest) GetAmdResult() *AnsweringMach
 	return nil
 }
 
-// <p>Result of the answering machine detection (AMD) of an outbound call</p>
-// <p>Carries identifiers from closed vocabularies only: never audio, transcript text or a phone number</p>
+// Result of the answering machine detection (AMD) of an outbound call
+//
+// Carries identifiers from closed vocabularies only: never audio, transcript text or a phone number
 type AnsweringMachineDetectionResult struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Who or what answered the call
@@ -1109,7 +1103,7 @@ func (x *AnsweringMachineDetectionResult) GetCallId() string {
 	return ""
 }
 
-// <p>Request to start the call with the active SIP session of the active SIP account</p>
+// Request to start the call with the active SIP session of the active SIP account
 type SipStartCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// SIP account name
@@ -1164,7 +1158,7 @@ func (x *SipStartCallRequest) GetHeaders() map[string]string {
 	return nil
 }
 
-// <p>Request for registering a SIP account at a SIP server</p>
+// Request for registering a SIP account at a SIP server
 type SipRegisterAccountRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Account name of the sip user. Usually something like <code>sip-user-1@mydomain.com</code> or <code>sip-user-1@192.168.123.123</code> which uses the default SIP port <code>5060</code>.
@@ -1238,7 +1232,7 @@ func (x *SipRegisterAccountRequest) GetOutboundProxy() string {
 	return ""
 }
 
-// <p>Request for starting a new SIP session for a specified account</p>
+// Request for starting a new SIP session for a specified account
 type SipStartSessionRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Account name of the sip user. Usually something like <code>sip-user-1@mydomain.com</code> or <code>sip-user-1@192.168.123.123</code> which uses the default SIP port <code>5060</code>.
@@ -1294,7 +1288,7 @@ func (x *SipStartSessionRequest) GetAutoAnswerInterval() int32 {
 	return 0
 }
 
-// <p>Request for transferring a call with or without headers</p>
+// Request for transferring a call with or without headers
 type SipTransferCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The account name or phone number to transfer the call to
@@ -1402,12 +1396,9 @@ func (x *SipTransferCallRequest) GetDelegatedRequestId() string {
 	return ""
 }
 
-// <p>A transfer that the in-container speech-to-speech pipeline asked for and the container handed to a client instead
-// of sending it (see <code>SipTransferDelegation</code>). Call-scoped: empty when no transfer is parked, when no call
-// is ongoing, and after the call ended.</p>
-// <p><code>SipGetSipStatus</code>, <code>SipGetSipStatusHistory</code> and every other response report only
-// <code>request_id</code>, <code>requested_at</code> and <code>target_is_phone_number</code>. The target and the headers
-// are filled ONLY in the response of a <code>SIP_TRANSFER_DELEGATION_CLAIM</code>.</p>
+// A transfer that the in-container speech-to-speech pipeline asked for and the container handed to a client instead of sending it (see <code>SipTransferDelegation</code>). Call-scoped: empty when no transfer is parked, when no call is ongoing, and after the call ended.
+//
+// <code>SipGetSipStatus</code>, <code>SipGetSipStatusHistory</code> and every other response report only <code>request_id</code>, <code>requested_at</code> and <code>target_is_phone_number</code>. The target and the headers are filled ONLY in the response of a <code>SIP_TRANSFER_DELEGATION_CLAIM</code>.
 type SipDelegatedTransfer struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifier of the parked transfer, a UUID minted by ONDEWO SIP. Sent back as
@@ -1494,7 +1485,7 @@ func (x *SipDelegatedTransfer) GetHeaders() map[string]string {
 	return nil
 }
 
-// <p>Status information for a SIP account, session, or call</p>
+// Status information for a SIP account, session, or call
 type SipStatus struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Account name of the sip user. Usually something like <code>sip-user-1@mydomain.com</code> or <code>sip-user-1@192.168.123.123</code> which uses the default SIP port <code>5060</code>.
@@ -1723,7 +1714,7 @@ func (x *SipStatus) GetWarmTransferOutcomeNoticeStatus() SipWarmTransferOutcomeN
 	return SipWarmTransferOutcomeNoticeStatus_SIP_WARM_TRANSFER_OUTCOME_NOTICE_STATUS_UNSPECIFIED
 }
 
-// <p>History of SIP status</p>
+// History of SIP status
 type SipStatusHistoryResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// History of SIP status
@@ -1769,7 +1760,7 @@ func (x *SipStatusHistoryResponse) GetStatusHistory() []*SipStatus {
 	return nil
 }
 
-// <p>Request of <code>SipSetCallMediaControl</code></p>
+// Request of <code>SipSetCallMediaControl</code>
 type SipSetCallMediaControlRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// <code>MEDIA_CONTROL_SETTING_ON</code>: the bot speaks. <code>MEDIA_CONTROL_SETTING_OFF</code>: the bot is muted
@@ -1867,8 +1858,7 @@ func (x *SipSetCallMediaControlRequest) GetWarmTransferOutcome() *SipWarmTransfe
 	return nil
 }
 
-// <p>One-shot notice of a warm-transfer outcome for the bot. The pipeline tells the caller at most once per
-// <code>request_id</code> and call. Carries no reason text the target gave</p>
+// One-shot notice of a warm-transfer outcome for the bot. The pipeline tells the caller at most once per <code>request_id</code> and call. Carries no reason text the target gave
 type SipWarmTransferOutcomeNotice struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifier of the transfer request of the client (ONDEWO VTSI). Required; the notice is delivered at most once
@@ -1963,7 +1953,7 @@ func (x *SipWarmTransferOutcomeNotice) GetFallbackText() string {
 	return ""
 }
 
-// <p>Request of <code>SipSendDtmf</code></p>
+// Request of <code>SipSendDtmf</code>
 type SipSendDtmfRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The keys to send, in order: <code>0</code>-<code>9</code>, <code>*</code>, <code>#</code>,
@@ -2011,7 +2001,7 @@ func (x *SipSendDtmfRequest) GetDigits() string {
 	return ""
 }
 
-// <p>Configuration of a <code>SipStreamCallAudio</code> stream. Must be the first request of the stream</p>
+// Configuration of a <code>SipStreamCallAudio</code> stream. Must be the first request of the stream
 type SipCallAudioConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Mode of the stream. Unspecified means LISTEN
@@ -2104,7 +2094,7 @@ func (x *SipCallAudioConfig) GetMaxDurationS() int32 {
 	return 0
 }
 
-// <p>One frame of call audio</p>
+// One frame of call audio
 type SipCallAudioFrame struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// LINEAR16 little-endian mono samples of one frame, i.e. <code>sample_rate_hz * frame_ms / 1000 * 2</code> bytes
@@ -2159,7 +2149,7 @@ func (x *SipCallAudioFrame) GetSequence() uint64 {
 	return 0
 }
 
-// <p>Request of <code>SipStreamCallAudio</code></p>
+// Request of <code>SipStreamCallAudio</code>
 type SipCallAudioRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// One of the following
@@ -2263,7 +2253,7 @@ func (*SipCallAudioRequest_Audio) isSipCallAudioRequest_Request() {}
 
 func (*SipCallAudioRequest_AgentMuted) isSipCallAudioRequest_Request() {}
 
-// <p>Sent once when a <code>SipStreamCallAudio</code> stream is connected</p>
+// Sent once when a <code>SipStreamCallAudio</code> stream is connected
 type SipCallAudioStarted struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifier of the stream
@@ -2336,7 +2326,7 @@ func (x *SipCallAudioStarted) GetMode() SipCallAudioMode {
 	return SipCallAudioMode_SIP_CALL_AUDIO_MODE_UNSPECIFIED
 }
 
-// <p>Counters of a <code>SipStreamCallAudio</code> stream, sent periodically</p>
+// Counters of a <code>SipStreamCallAudio</code> stream, sent periodically
 type SipCallAudioStats struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Frames sent to the client
@@ -2418,7 +2408,7 @@ func (x *SipCallAudioStats) GetFramesDiscarded() uint64 {
 	return 0
 }
 
-// <p>Sent once when a <code>SipStreamCallAudio</code> stream ends normally</p>
+// Sent once when a <code>SipStreamCallAudio</code> stream ends normally
 type SipCallAudioEnded struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Why the stream ended
@@ -2473,7 +2463,7 @@ func (x *SipCallAudioEnded) GetDetail() string {
 	return ""
 }
 
-// <p>Response of <code>SipStreamCallAudio</code></p>
+// Response of <code>SipStreamCallAudio</code>
 type SipCallAudioResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// One of the following
@@ -2594,7 +2584,7 @@ func (*SipCallAudioResponse_Stats) isSipCallAudioResponse_Response() {}
 
 func (*SipCallAudioResponse_Ended) isSipCallAudioResponse_Response() {}
 
-// <p>Plays a list of wav files</p>
+// Plays a list of wav files
 type SipPlayWavFilesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Wav files as bytes in a list that will be played

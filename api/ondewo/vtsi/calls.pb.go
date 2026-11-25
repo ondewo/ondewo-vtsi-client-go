@@ -104,7 +104,7 @@ func (ScheduledCallerStatus) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>How a call is transferred</p>
+// How a call is transferred
 type TransferMode int32
 
 const (
@@ -160,7 +160,7 @@ func (TransferMode) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{1}
 }
 
-// <p>Outcome of a transfer</p>
+// Outcome of a transfer
 type TransferOutcome int32
 
 const (
@@ -261,7 +261,7 @@ func (TransferOutcome) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{2}
 }
 
-// <p>Desired setting of one media control flag of a call</p>
+// Desired setting of one media control flag of a call
 type CallMediaSetting int32
 
 const (
@@ -314,7 +314,7 @@ func (CallMediaSetting) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{3}
 }
 
-// <p>How an invited participant takes part in a call</p>
+// How an invited participant takes part in a call
 type ParticipantMode int32
 
 const (
@@ -367,7 +367,7 @@ func (ParticipantMode) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{4}
 }
 
-// <p>What the bot does while a CONFERENCE participant is ringing or joined</p>
+// What the bot does while a CONFERENCE participant is ringing or joined
 type BotPolicyOnJoin int32
 
 const (
@@ -424,7 +424,7 @@ func (BotPolicyOnJoin) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{5}
 }
 
-// <p>State of an invited participant</p>
+// State of an invited participant
 type ParticipantState int32
 
 const (
@@ -485,9 +485,7 @@ func (ParticipantState) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{6}
 }
 
-// <p>Why an invited participant failed or left: the typed form of <code>CallParticipant.end_reason</code>, one value
-// per string that field documents. New values may be added; a client that meets a value it does not know reads
-// <code>CallParticipant.end_reason</code> instead.</p>
+// Why an invited participant failed or left: the typed form of <code>CallParticipant.end_reason</code>, one value per string that field documents. New values may be added; a client that meets a value it does not know reads <code>CallParticipant.end_reason</code> instead.
 type ParticipantEndReason int32
 
 const (
@@ -569,7 +567,7 @@ func (ParticipantEndReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{7}
 }
 
-// <p>Mode of a call audio stream</p>
+// Mode of a call audio stream
 type CallAudioMode int32
 
 const (
@@ -622,7 +620,7 @@ func (CallAudioMode) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{8}
 }
 
-// <p>Why a call audio stream ended</p>
+// Why a call audio stream ended
 type CallAudioEndReason int32
 
 const (
@@ -691,11 +689,7 @@ func (CallAudioEndReason) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_calls_proto_rawDescGZIP(), []int{9}
 }
 
-// How much of a <code>Call</code>, <code>Caller</code>, <code>Listener</code> or <code>ScheduledCaller</code> a read
-// RPC populates. The <code>call_view</code> fields that take it are <code>optional</code>, so an unset view can be
-// told apart from <code>MINIMUM</code>; each request documents what an unset view means. Quirk kept for wire
-// compatibility: the zero value is <code>MINIMUM</code>, not an <code>*_UNSPECIFIED</code> sentinel, so a client
-// that SETS the field to its zero value asks for the minimum view.
+// How much of a <code>Call</code>, <code>Caller</code>, <code>Listener</code> or <code>ScheduledCaller</code> a read RPC populates. The <code>call_view</code> fields that take it are <code>optional</code>, so an unset view can be told apart from <code>MINIMUM</code>; each request documents what an unset view means. Quirk kept for wire compatibility: the zero value is <code>MINIMUM</code>, not an <code>*_UNSPECIFIED</code> sentinel, so a client that SETS the field to its zero value asks for the minimum view.
 type CallView int32
 
 const (
@@ -803,10 +797,8 @@ func (CallStatus) EnumDescriptor() ([]byte, []int) {
 }
 
 // The kind of resource a call, a status or a statistics bucket belongs to.
-// <p>Quirk kept for wire compatibility: the zero value is <code>BOTH</code>, not an <code>*_UNSPECIFIED</code>
-// sentinel. It is never the type of a stored call: <code>Call.call_type</code> is <code>LISTENER</code>,
-// <code>CALLER</code> or, for a call placed by a scheduled caller, <code>SCHEDULED_CALLER</code>. In
-// <code>CallFilter.call_types</code> an empty list, or a list holding <code>BOTH</code>, matches every call.</p>
+//
+// Quirk kept for wire compatibility: the zero value is <code>BOTH</code>, not an <code>*_UNSPECIFIED</code> sentinel. It is never the type of a stored call: <code>Call.call_type</code> is <code>LISTENER</code>, <code>CALLER</code> or, for a call placed by a scheduled caller, <code>SCHEDULED_CALLER</code>. In <code>CallFilter.call_types</code> an empty list, or a list holding <code>BOTH</code>, matches every call.
 type CallType int32
 
 const (
@@ -961,9 +953,10 @@ func (x *AsteriskConfig) GetAsteriskBaseConfig() *BaseServiceConfig {
 }
 
 // Listener represents a listener instance that waits for incoming calls.
-// <p>A listener is persistent: its container takes one call after the other, and <code>call_name</code> names
-// the current call (or the record that waits for the next one). Listeners are never pooled, so a
-// <code>Listener</code> has no <code>pooled</code> field.</p>
+//
+// A listener is persistent: its container takes one call after the other, and <code>call_name</code> names the current call (or the record that waits for the next one). Listeners are never pooled, so a <code>Listener</code> has no <code>pooled</code> field.
+//
+// Its configuration (<code>sip_base_config</code>, <code>common_services_config</code>) is applied ONCE, when the listener&apos;s container is deployed, and then governs EVERY inbound call that container answers: the same agent, voices, turn taking, interruption handling and timing for the first call and for the hundredth. Each call still starts clean (its own NLU session, nothing carried over from the previous call); only the configuration is shared.
 type Listener struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the listener, of the form
@@ -974,11 +967,28 @@ type Listener struct {
 	// <pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// Output only.
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// SIP service configuration. Updatable with <code>UpdateListener</code> (stored configuration only, see
-	// there).
+	// SIP service configuration of the listener&apos;s container, i.e. which ondewo-sip image version
+	// (<code>sip_sim_version</code>) answers the listener&apos;s calls. As stored: a request that left
+	// <code>sip_sim_version</code> empty is stored (and returned) with the image tag the server deployed, the
+	// deployment setting <code>ONDEWO_VTSI_DEFAULT_SIP_IMAGE_TAG</code>. Applies to every call of the listener.
+	// Updatable with <code>UpdateListener</code>, which changes the STORED configuration only: the running
+	// container and every call it answers keep the configuration they were deployed with until the server
+	// recreates the listener (see <code>UpdateListener</code>).
 	SipBaseConfig *SipBaseConfig `protobuf:"bytes,3,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI. Updatable with <code>UpdateListener</code>
-	// (stored configuration only, see there).
+	// Service configuration of every call of the listener: speech-to-text, NLU agent, text-to-speech, CSI and,
+	// in <code>voice_interaction_config</code> and <code>sip_vtsi_config</code>, how the bot listens, takes turns,
+	// lets itself be interrupted, times its answers and handles the call&apos;s media. Populated in the
+	// <code>FULL</code> view only, and redacted by role: the whole configuration, credentials included, is
+	// returned only to a caller who may see the whole project; every other caller receives only the identity and
+	// routing fields (agent, language, service hosts and ports, ...) and <code>voice_interaction_config</code>,
+	// everything else left empty.
+	// <p>A field left unset here was left unset by the request, and the call INHERITS for it: the deployment-wide
+	// <code>ONDEWO_VTSI_*</code> setting where the server&apos;s operator configured one, otherwise the built-in
+	// default. A value set here wins over both. The returned configuration is what was requested, not the
+	// resolved values.</p>
+	// <p>Updatable with <code>UpdateListener</code> (stored configuration only, see there): a change reaches the
+	// listener&apos;s calls only once the server recreates the listener from it. To apply a new configuration to
+	// the calls right away, stop the listener (which hangs up its current call) and start a new one with it.</p>
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
 	// Output only. VTSI project of the listener, the project segment of <code>name</code>, of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -1086,6 +1096,8 @@ func (x *Listener) GetCreatedAt() *timestamppb.Timestamp {
 }
 
 // Caller represents a caller instance that initiates outbound calls
+//
+// Its configuration (<code>sip_caller_config</code>, <code>common_services_config</code>) is the configuration of the outbound call(s) it places. A ONE-SHOT caller is exactly one call: the configuration applies to that call and to nothing else. A POOLED caller (<code>pooled</code>, deployment setting <code>ONDEWO_VTSI_CALLER_PERSISTENT</code>, on by default) is kept warm after its call and reused for a later <code>StartCaller</code> only when that request asks for the IDENTICAL configuration: everything except <code>sip_caller_config.callee_id</code> and <code>sip_caller_config.sip_headers</code>, which are sent per call, must match, the SIP image version and the credentials included. A request that differs in any other field is served by a newly deployed caller, so a pooled caller never places a call with another request&apos;s configuration.
 type Caller struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Resource name of the caller, of the form
@@ -1096,11 +1108,24 @@ type Caller struct {
 	// <pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;/calls/&lt;call_uuid&gt;</code></pre>
 	// Output only.
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
-	// SIP service configuration. Updatable with <code>UpdateCaller</code> (stored configuration only, see
-	// there).
+	// SIP configuration of the caller&apos;s call: the callee it dials (<code>callee_id</code>), the SIP headers
+	// sent on the INVITE (<code>sip_headers</code>) and the ondewo-sip image version
+	// (<code>sip_base_config.sip_sim_version</code>; stored with the tag the server deployed, the deployment
+	// setting <code>ONDEWO_VTSI_DEFAULT_SIP_IMAGE_TAG</code>, when the request left it empty). Populated in the
+	// <code>SHALLOW</code> and
+	// <code>FULL</code> views. Updatable with <code>UpdateCaller</code>, which changes the STORED configuration
+	// only and never a running call (see there).
 	SipCallerConfig *SipCallerConfig `protobuf:"bytes,3,opt,name=sip_caller_config,json=sipCallerConfig,proto3" json:"sip_caller_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI. Updatable with <code>UpdateCaller</code>
-	// (stored configuration only, see there).
+	// Service configuration of the caller&apos;s call(s): speech-to-text, NLU agent, text-to-speech, CSI and, in
+	// <code>voice_interaction_config</code> and <code>sip_vtsi_config</code>, how the bot listens, takes turns,
+	// lets itself be interrupted, times its answers, detects answering machines and handles the call&apos;s media.
+	// Populated in the <code>FULL</code> view only, and redacted by role like
+	// <code>Listener.common_services_config</code>.
+	// <p>A field left unset here was left unset by the request, and the call INHERITS for it: the deployment-wide
+	// <code>ONDEWO_VTSI_*</code> setting where the server&apos;s operator configured one, otherwise the built-in
+	// default. A value set here wins over both.</p>
+	// <p>Updatable with <code>UpdateCaller</code> (stored configuration only, see there): no update ever changes a
+	// call that is running or was already placed.</p>
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
 	// Output only. VTSI project of the caller, the project segment of <code>name</code>, of the form
 	// <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -1235,13 +1260,31 @@ func (x *Caller) GetCampaignName() string {
 }
 
 // Request for starting a listener
+//
+// The listener&apos;s configuration is fixed when its container is deployed and then applies to EVERY inbound call the listener answers, one after the other, until the listener is stopped or the server recreates it (see <code>UpdateListener</code>). Example: to let callers of one hotline interrupt the bot, start its listeners with <code>common_services_config.voice_interaction_config.interruption_handling_config.enabled = true</code>; every call those listeners take then allows barge-in, while a listener started without the block keeps the default.
 type StartListenerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// SIP service configuration
+	// SIP service configuration of the listener&apos;s container. <code>sip_sim_version</code> picks the ondewo-sip
+	// image version; empty uses the server&apos;s default (deployment setting
+	// <code>ONDEWO_VTSI_DEFAULT_SIP_IMAGE_TAG</code>), and the tag actually deployed is what the listener stores
+	// and returns.
 	SipBaseConfig *SipBaseConfig `protobuf:"bytes,2,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
+	// Service configuration of every call this listener will answer: speech-to-text, NLU agent, text-to-speech,
+	// CSI, the voice interaction (<code>voice_interaction_config</code>: turn detection, interruptions, response
+	// timing, transfers, DTMF) and the call&apos;s media (<code>sip_vtsi_config</code>).
+	// <p>Validated as a whole before anything is started, including live checks against the configured NLU, S2T
+	// and T2S services (and RabbitMQ when configured); a refused configuration starts nothing and is answered
+	// with <code>INVALID_ARGUMENT</code>, an unreachable service with <code>UNAVAILABLE</code>. A value outside a
+	// field&apos;s documented range is refused with <code>INVALID_ARGUMENT</code>.
+	// <code>voice_interaction_config.answering_machine_detection_config</code> is refused on a listener
+	// (<code>INVALID_ARGUMENT</code>, <code>reason=amd-requires-persistent-caller</code>): a listener never dials
+	// out.</p>
+	// <p>Inheritance: every field left unset inherits the deployment-wide <code>ONDEWO_VTSI_*</code> setting
+	// where the server&apos;s operator configured one, otherwise the built-in default; a value set here wins
+	// over both for this listener&apos;s calls. A deployment setting is read when the listener&apos;s container is
+	// deployed, so a later change of it reaches a running listener only when the listener is recreated.</p>
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,3,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
 	// Optional. Partial response: the field paths to populate in <code>StartListenerResponse.listener</code>, relative to the
 	// <code>Listener</code> message (no <code>listener.</code> prefix), e.g. <code>call_name</code>, <code>common_services_config.nlu_vtsi_config.agent_name</code>. Nested paths through singular
@@ -1408,7 +1451,10 @@ type StartListenersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Listeners that should be started
+	// Listeners that should be started, each with its OWN configuration (<code>sip_base_config</code>,
+	// <code>common_services_config</code>), which applies to every inbound call that listener answers. Entries
+	// may carry different configurations, e.g. a group of listeners with interruptions enabled beside a group
+	// without; nothing is shared between the entries.
 	ListenerRequests []*StartListenerRequest `protobuf:"bytes,2,rep,name=listener_requests,json=listenerRequests,proto3" json:"listener_requests,omitempty"`
 	// Optional client idempotency key: at most 255 printable ASCII characters, no whitespace; empty means no
 	// deduplication. A retry carrying the same key returns the response of the first successful attempt instead
@@ -1577,13 +1623,38 @@ func (x *StartListenersResponse) GetErrorMessage() string {
 }
 
 // Request for starting a caller
+//
+// One request is one outbound call, and its configuration applies to that call only. Example: to place a call whose bot the callee may interrupt, set <code>common_services_config.voice_interaction_config.interruption_handling_config.enabled = true</code> (the other fields of <code>interruption_handling_config</code> then tune when speech counts as an interruption); the next request without that block places its call with the default, in which the callee&apos;s speech does not interrupt the bot.
+//
+// The same message is the entry of <code>StartCallersRequest</code>, of a scheduled caller (<code>StartScheduledCallerRequest.request</code>) and of a campaign (<code>AddCallersToCampaignRequest</code>), with the differences described at those fields.
 type StartCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// SIP service configuration
+	// SIP configuration of the call: <code>callee_id</code> (required: whom to dial), <code>sip_headers</code> (sent
+	// on the INVITE, at most 64) and <code>sip_base_config.sip_sim_version</code> (the ondewo-sip image version;
+	// empty uses the server&apos;s default, deployment setting <code>ONDEWO_VTSI_DEFAULT_SIP_IMAGE_TAG</code>). A
+	// missing <code>callee_id</code> or too many headers is <code>INVALID_ARGUMENT</code>. On a pooled caller the
+	// callee and the headers are sent per call, so two requests that differ only there can be served by the same
+	// warm caller.
 	SipCallerConfig *SipCallerConfig `protobuf:"bytes,2,opt,name=sip_caller_config,json=sipCallerConfig,proto3" json:"sip_caller_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
+	// Service configuration of the call: speech-to-text, NLU agent, text-to-speech, CSI, the voice interaction
+	// (<code>voice_interaction_config</code>: turn detection, interruptions, response timing, answering machine
+	// detection, transfers, DTMF) and the call&apos;s media (<code>sip_vtsi_config</code>).
+	// <p>Validated as a whole before anything is started, including live checks against the configured NLU, S2T
+	// and T2S services (and RabbitMQ when configured); a refused configuration places no call and is answered
+	// with <code>INVALID_ARGUMENT</code>, an unreachable service with <code>UNAVAILABLE</code>. A value outside a
+	// field&apos;s documented range is refused with <code>INVALID_ARGUMENT</code>.</p>
+	// <p>Inheritance: every field left unset inherits the deployment-wide <code>ONDEWO_VTSI_*</code> setting
+	// where the server&apos;s operator configured one, otherwise the built-in default; a value set here wins
+	// over both for this call.</p>
+	// <p>Pooled callers: the call is served by a warm pooled caller only when one runs exactly this
+	// configuration (credentials included); otherwise a new caller is deployed for it, which takes longer to
+	// connect but behaves the same. Answering machine detection
+	// (<code>voice_interaction_config.answering_machine_detection_config</code>) runs only on a pooled caller:
+	// while the deployment setting <code>ONDEWO_VTSI_CALLER_PERSISTENT</code> is off, and on every scheduled
+	// caller, a request carrying it is refused with <code>INVALID_ARGUMENT</code>
+	// (<code>reason=amd-requires-persistent-caller</code>).</p>
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,3,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
 	// Optional. Partial response: the field paths to populate in <code>StartCallerResponse.caller</code>, relative to the
 	// <code>Caller</code> message (no <code>caller.</code> prefix), e.g. <code>call_name</code>, <code>sip_caller_config.callee_id</code>. Nested paths through singular
@@ -1751,7 +1822,11 @@ type StartCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// Callers that should be started
+	// Callers that should be started, one outbound call each, each with its OWN configuration
+	// (<code>sip_caller_config</code>, <code>common_services_config</code>) that applies to its own call only.
+	// Entries may differ in any field; entries that share one <code>common_services_config</code> are validated
+	// against the upstream services once. Pooled callers are matched per entry (see
+	// <code>StartCallerRequest.common_services_config</code>).
 	CallerRequests []*StartCallerRequest `protobuf:"bytes,2,rep,name=caller_requests,json=callerRequests,proto3" json:"caller_requests,omitempty"`
 	// Optional client idempotency key: at most 255 printable ASCII characters, no whitespace; empty means no
 	// deduplication. A retry carrying the same key returns the response of the first successful attempt instead
@@ -3542,6 +3617,13 @@ type UpdateCallerRequest struct {
 	// The caller to update, identified by <code>caller.name</code>
 	// (<pre><code>projects/&lt;project_uuid&gt;/callers/&lt;caller_uuid&gt;</code></pre>), carrying the new values
 	// of the fields named in <code>update_mask</code>. Its fields that no path names are ignored.
+	// <p>What the new values change: the caller&apos;s STORED configuration, never a call. A call that is running
+	// or was already placed keeps the configuration its container was deployed with. A one-shot caller places
+	// no further call, so for it the update changes only what is stored and returned. A pooled caller is
+	// deployed from the stored configuration only when the server recycles the project&apos;s pooled callers
+	// (see <code>Calls.UpdateCaller</code>); until then it keeps running, and being matched by, the
+	// configuration it was deployed with. To place a call with a new configuration, start a new caller with
+	// it.</p>
 	Caller *Caller `protobuf:"bytes,1,opt,name=caller,proto3" json:"caller,omitempty"`
 	// Required. Paths relative to <code>Caller</code>, WITHOUT a <code>caller.</code> prefix. Updatable paths:
 	// <code>sip_caller_config</code> and <code>common_services_config</code>, each also as any nested sub-path
@@ -3560,6 +3642,12 @@ type UpdateCallerRequest struct {
 	//   <li>a path naming a scalar, repeated or map field replaces exactly that field; a repeated or map field is
 	//       replaced as a whole, never appended to; a named scalar left at its zero value writes what
 	//       <code>StartCaller</code> stores for that value (the create default);</li>
+	//   <li>a path naming an <code>optional</code> field (e.g.
+	//       <code>common_services_config.voice_interaction_config.interruption_handling_config.enabled</code>)
+	//       writes the value sent when the request&apos;s <code>caller</code> sets it, <code>false</code> and
+	//       <code>0</code> included, and CLEARS it when it does not, so that the configuration inherits that
+	//       setting again (the deployment-wide <code>ONDEWO_VTSI_*</code> setting, otherwise the built-in
+	//       default);</li>
 	//   <li>a field that no path names is left untouched;</li>
 	//   <li>a path naming a member of a <code>oneof</code> (e.g.
 	//       <code>common_services_config.nlu_vtsi_config.auth_token</code>) SETS that member, clearing the other
@@ -3660,8 +3748,7 @@ func (x *UpdateCallerRequest) GetValidateOnly() bool {
 	return false
 }
 
-// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCaller">Calls.UpdateCaller</a>, and one
-// entry of <code>UpdateCallersResponse</code>.
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCaller">Calls.UpdateCaller</a>, and one entry of <code>UpdateCallersResponse</code>.
 type UpdateCallerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the caller the request named, in the form
@@ -3732,21 +3819,15 @@ func (x *UpdateCallerResponse) GetErrorMessage() string {
 }
 
 // The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCallers">Calls.UpdateCallers</a>.
-// <p>Rejected as a whole, nothing being written, with: <code>INVALID_ARGUMENT</code> for a malformed
-// <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same caller, an entry
-// whose <code>caller.name</code> is malformed or whose project segment differs from
-// <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code> or <code>validate_only</code> set, or an unknown
-// <code>field_mask</code> path (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown
-// project; with authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on
-// or a role below the one <code>UpdateCaller</code> requires. Every other error is reported per entry, e.g. a
-// well-formed name of the right project that names no caller is that entry&apos;s
-// <code>NOT_FOUND</code>.</p>
+//
+// Rejected as a whole, nothing being written, with: <code>INVALID_ARGUMENT</code> for a malformed <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same caller, an entry whose <code>caller.name</code> is malformed or whose project segment differs from <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code> or <code>validate_only</code> set, or an unknown <code>field_mask</code> path (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown project; with authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on or a role below the one <code>UpdateCaller</code> requires. Every other error is reported per entry, e.g. a well-formed name of the right project that names no caller is that entry&apos;s <code>NOT_FOUND</code>.
 type UpdateCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of every caller of the request.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The updates, applied one by one and each like <code>UpdateCaller</code>.
+	// The updates, applied one by one and each like <code>UpdateCaller</code>: each changes the stored
+	// configuration of its caller only, and no running or placed call (see <code>UpdateCallerRequest.caller</code>).
 	UpdateCallerRequests []*UpdateCallerRequest `protobuf:"bytes,2,rep,name=update_caller_requests,json=updateCallerRequests,proto3" json:"update_caller_requests,omitempty"`
 	// Optional. Partial response: the field paths to populate in the <code>caller</code> of EVERY entry of
 	// <code>UpdateCallersResponse.update_caller_responses</code>, relative to the <code>Caller</code> message (no
@@ -3892,6 +3973,14 @@ type UpdateListenerRequest struct {
 	// The listener to update, identified by <code>listener.name</code>
 	// (<pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>), carrying the new
 	// values of the fields named in <code>update_mask</code>. Its fields that no path names are ignored.
+	// <p>What the new values change: the listener&apos;s STORED configuration. <code>UpdateListener</code> does NOT
+	// redeploy the listener: its running container answers its current call and every following inbound call
+	// with the configuration it was deployed with. The stored configuration takes effect only when the server
+	// recreates the listener from it, i.e. when it recycles the project&apos;s listeners onto its Asterisk (an
+	// <code>UpdateVtsiProject</code> of a deployed project, the recovery after the project&apos;s Asterisk
+	// restarted, a change of the project&apos;s TLS trust anchor); a restart of the same container keeps the old
+	// configuration. To make every following call use the new configuration at once, stop the listener and start
+	// a new one with it.</p>
 	Listener *Listener `protobuf:"bytes,1,opt,name=listener,proto3" json:"listener,omitempty"`
 	// Required. Paths relative to <code>Listener</code>, WITHOUT a <code>listener.</code> prefix. Updatable
 	// paths: <code>sip_base_config</code> and <code>common_services_config</code>, each also as any nested
@@ -3976,8 +4065,7 @@ func (x *UpdateListenerRequest) GetValidateOnly() bool {
 	return false
 }
 
-// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateListener">Calls.UpdateListener</a>, and
-// one entry of <code>UpdateListenersResponse</code>.
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateListener">Calls.UpdateListener</a>, and one entry of <code>UpdateListenersResponse</code>.
 type UpdateListenerResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the listener the request named, in the form
@@ -4045,15 +4133,16 @@ func (x *UpdateListenerResponse) GetErrorMessage() string {
 }
 
 // The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateListeners">Calls.UpdateListeners</a>.
-// <p>Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with listeners instead of callers and
-// <code>UpdateListener</code> as the role reference; every other error is reported per entry, e.g. a
-// well-formed name of the right project that names no listener is that entry&apos;s <code>NOT_FOUND</code>.</p>
+//
+// Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with listeners instead of callers and <code>UpdateListener</code> as the role reference; every other error is reported per entry, e.g. a well-formed name of the right project that names no listener is that entry&apos;s <code>NOT_FOUND</code>.
 type UpdateListenersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of every listener of the request.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
-	// The updates, applied one by one and each like <code>UpdateListener</code>.
+	// The updates, applied one by one and each like <code>UpdateListener</code>: each changes the stored
+	// configuration of its listener only, which its calls use once the server recreates the listener, never
+	// before (see <code>UpdateListenerRequest.listener</code>).
 	UpdateListenerRequests []*UpdateListenerRequest `protobuf:"bytes,2,rep,name=update_listener_requests,json=updateListenerRequests,proto3" json:"update_listener_requests,omitempty"`
 	// Optional. Partial response: the field paths to populate in the <code>listener</code> of EVERY entry of
 	// <code>UpdateListenersResponse.update_listener_responses</code>, relative to the <code>Listener</code>
@@ -4202,6 +4291,15 @@ type StartScheduledCallerRequest struct {
 	// <code>StartCaller</code> (the live checks of the configuration run when the call is started, not when it
 	// is scheduled). Its own <code>field_mask</code> and <code>validate_only</code> must be unset, otherwise the
 	// request is refused with <code>INVALID_ARGUMENT</code>.
+	// <p>Its <code>sip_caller_config</code> and <code>common_services_config</code> are stored now and are the
+	// configuration of the one call placed when the scheduled caller fires, with the same inheritance as
+	// <code>StartCallerRequest.common_services_config</code> (unset fields take the deployment-wide
+	// <code>ONDEWO_VTSI_*</code> setting in force at that time, otherwise the built-in default). After creation
+	// only <code>scheduled_time</code> and <code>sip_caller_config.sip_headers</code> can be changed
+	// (<code>UpdateScheduledCaller</code>); for any other change cancel it and create a new one. A scheduled
+	// caller is never served by a pooled caller: its call always gets a newly deployed caller, so answering
+	// machine detection (<code>voice_interaction_config.answering_machine_detection_config</code>) is refused
+	// with <code>INVALID_ARGUMENT</code> (<code>reason=amd-requires-persistent-caller</code>).</p>
 	Request *StartCallerRequest `protobuf:"bytes,2,opt,name=request,proto3" json:"request,omitempty"`
 	// Time at or after which the call is started, in UTC. The scheduler checks for due scheduled callers
 	// periodically, so the call starts at the first check at or after this time (typically within a few seconds),
@@ -4292,7 +4390,8 @@ type StartScheduledCallersRequest struct {
 	// The scheduled callers to create, 1 to 1000, each like <code>StartScheduledCaller</code> and on its own (not
 	// atomic: an entry that fails is reported in its <code>StartScheduledCallerResponse.error_message</code> and
 	// does not stop the others). Each entry&apos;s <code>vtsi_project_name</code> is overwritten with this
-	// request&apos;s; its <code>field_mask</code> must be unset.
+	// request&apos;s; its <code>field_mask</code> must be unset. Every entry carries its own configuration, which
+	// applies to its own call only (see <code>StartScheduledCallerRequest.request</code>).
 	ScheduledCallerRequests []*StartScheduledCallerRequest `protobuf:"bytes,2,rep,name=scheduled_caller_requests,json=scheduledCallerRequests,proto3" json:"scheduled_caller_requests,omitempty"`
 	// Optional client idempotency key: at most 255 printable ASCII characters, no whitespace; empty means no
 	// deduplication. A retry carrying the same key returns the response of the first successful attempt instead
@@ -4438,6 +4537,18 @@ type AddCallersToCampaignRequest struct {
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Callers to add, at least one. The project&apos;s caller limit is checked per started call, not for the request.
+	// <p>Each entry is one campaign call. Its configuration is merged OVER the campaign&apos;s call defaults
+	// (<code>Campaign.campaign_common_services_config</code> / <code>campaign_sip_caller_config</code>), the
+	// entry&apos;s own value winning, so an entry may leave out whatever the campaign supplies; the effective
+	// configuration must be one a <code>StartCallerRequest</code> would be accepted with. The campaign defaults
+	// are read again whenever the call is dispatched (its first attempt and every retry), so a campaign update
+	// reaches every attempt not yet dispatched; only the callee is fixed when the call is added (see
+	// <code>Campaign.campaign_sip_caller_config</code>). A field set neither by the entry nor by the campaign
+	// inherits the deployment-wide <code>ONDEWO_VTSI_*</code> setting, otherwise the built-in default. Example: set
+	// <code>voice_interaction_config</code> once in the campaign&apos;s defaults to give every call of the
+	// campaign the same turn taking, and set only <code>sip_caller_config.callee_id</code> per entry. Campaign
+	// calls are served by pooled callers like <code>StartCaller</code> requests with the same effective
+	// configuration.</p>
 	CallerRequests []*StartCallerRequest `protobuf:"bytes,2,rep,name=caller_requests,json=callerRequests,proto3" json:"caller_requests,omitempty"`
 	// Required. Which campaign, and whether it starts dialling.
 	CampaignAssignment *CampaignAssignment `protobuf:"bytes,3,opt,name=campaign_assignment,json=campaignAssignment,proto3" json:"campaign_assignment,omitempty"`
@@ -4580,8 +4691,7 @@ func (x *AddCallersToCampaignResponse) GetCampaignCallNames() []string {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>.
 type AddScheduledCallersToCampaignRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of the scheduled callers and the campaign.
@@ -4589,6 +4699,9 @@ type AddScheduledCallersToCampaignRequest struct {
 	VtsiProjectName string `protobuf:"bytes,1,opt,name=vtsi_project_name,json=vtsiProjectName,proto3" json:"vtsi_project_name,omitempty"`
 	// Scheduled callers to add, at least one. A scheduled caller of a campaign can be cancelled with
 	// <code>CancelScheduledCaller</code> only while its campaign call has no attempt dispatching or in progress.
+	// <p>Each entry&apos;s configuration (<code>request</code>) is merged over the campaign&apos;s call defaults at
+	// every dispatch, exactly as for <code>AddCallersToCampaignRequest.caller_requests</code>, and applies to that
+	// entry&apos;s call only. Like every scheduled caller, its calls are never served by a pooled caller.</p>
 	ScheduledCallerRequests []*StartScheduledCallerRequest `protobuf:"bytes,2,rep,name=scheduled_caller_requests,json=scheduledCallerRequests,proto3" json:"scheduled_caller_requests,omitempty"`
 	// Required. Which campaign, and whether it starts dialling.
 	CampaignAssignment *CampaignAssignment `protobuf:"bytes,3,opt,name=campaign_assignment,json=campaignAssignment,proto3" json:"campaign_assignment,omitempty"`
@@ -4664,8 +4777,7 @@ func (x *AddScheduledCallersToCampaignRequest) GetIdempotencyKey() string {
 	return ""
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Calls.AddScheduledCallersToCampaign">Calls.AddScheduledCallersToCampaign</a>.
 type AddScheduledCallersToCampaignResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of the scheduled callers and the campaign.
@@ -4820,14 +4932,23 @@ type ScheduledCaller struct {
 	// This is the sip_base_config half of sip_caller_config below and is kept for wire compatibility
 	// with clients built before field 6 existed
 	SipConfig *SipBaseConfig `protobuf:"bytes,3,opt,name=sip_config,json=sipConfig,proto3" json:"sip_config,omitempty"`
-	// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI
+	// Service configuration of the call this scheduled caller places when it fires (speech-to-text, NLU agent,
+	// text-to-speech, CSI, voice interaction and the call&apos;s media), as stored from
+	// <code>StartScheduledCallerRequest.request</code>. Fields left unset inherit, when the call is placed, the
+	// deployment-wide <code>ONDEWO_VTSI_*</code> setting, otherwise the built-in default; of a campaign&apos;s
+	// scheduled caller the campaign&apos;s call defaults are merged under it at every dispatch. Not updatable:
+	// cancel the scheduled caller and create a new one to change it. Redacted by role like
+	// <code>Caller.common_services_config</code>.
 	CommonServicesConfig *CommonServicesConfig `protobuf:"bytes,4,opt,name=common_services_config,json=commonServicesConfig,proto3" json:"common_services_config,omitempty"`
 	// Time at or after which the call is started, in UTC (see
 	// <code>StartScheduledCallerRequest.scheduled_time</code>). Updatable with <code>UpdateScheduledCaller</code>
 	// while the status is <code>SCHEDULED_CALLER_STATUS_PENDING</code>.
 	ScheduledTime *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=scheduled_time,json=scheduledTime,proto3" json:"scheduled_time,omitempty"`
 	// Full SIP caller configuration, including the callee_id that will be dialled and the sip_headers
-	// that will be sent. sip_config (field 3) carries only the sip_base_config half of this message
+	// that will be sent. sip_config (field 3) carries only the sip_base_config half of this message.
+	// Applies to the one call placed when the scheduled caller fires. Only <code>sip_headers</code> is updatable
+	// (<code>UpdateScheduledCaller</code>, while the status is <code>SCHEDULED_CALLER_STATUS_PENDING</code>); a
+	// header change is used by the call placed after it, never by a call already placed.
 	SipCallerConfig *SipCallerConfig `protobuf:"bytes,6,opt,name=sip_caller_config,json=sipCallerConfig,proto3" json:"sip_caller_config,omitempty"`
 	// Lifecycle state of this scheduled caller
 	Status ScheduledCallerStatus `protobuf:"varint,7,opt,name=status,proto3,enum=ondewo.vtsi.ScheduledCallerStatus" json:"status,omitempty"`
@@ -5443,15 +5564,9 @@ func (x *CancelScheduledCallerResponse) GetErrorMessage() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
-// <p>Rejected as a whole, nothing being cancelled, with: <code>INVALID_ARGUMENT</code> for a malformed
-// <code>vtsi_project_name</code>, no entry, more than 1000 entries, a name given twice, a name that is malformed or
-// whose project segment differs from <code>vtsi_project_name</code>, or an unknown <code>field_mask</code> path
-// (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown project; with authorization
-// enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on or a role below the one
-// <code>CancelScheduledCaller</code> requires. Every other error is reported per entry, e.g. a well-formed name of
-// the right project that names no scheduled caller is that entry&apos;s <code>NOT_FOUND</code>.</p>
+// The request message for <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
+//
+// Rejected as a whole, nothing being cancelled, with: <code>INVALID_ARGUMENT</code> for a malformed <code>vtsi_project_name</code>, no entry, more than 1000 entries, a name given twice, a name that is malformed or whose project segment differs from <code>vtsi_project_name</code>, or an unknown <code>field_mask</code> path (each naming the entry index or the path); <code>NOT_FOUND</code> for an unknown project; with authorization enforced <code>PERMISSION_DENIED</code> for a project the caller holds no role on or a role below the one <code>CancelScheduledCaller</code> requires. Every other error is reported per entry, e.g. a well-formed name of the right project that names no scheduled caller is that entry&apos;s <code>NOT_FOUND</code>.
 type CancelScheduledCallersRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of every scheduled caller of the request.
@@ -5522,8 +5637,7 @@ func (x *CancelScheduledCallersRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The response message for
-// <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
+// The response message for <a href="index.html#ondewo.vtsi.Calls.CancelScheduledCallers">Calls.CancelScheduledCallers</a>.
 type CancelScheduledCallersResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of the request.
@@ -5593,8 +5707,7 @@ func (x *CancelScheduledCallersResponse) GetErrorMessage() string {
 	return ""
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Calls.UpdateScheduledCaller">Calls.UpdateScheduledCaller</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateScheduledCaller">Calls.UpdateScheduledCaller</a>.
 type UpdateScheduledCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The scheduled caller to update, identified by <code>scheduled_caller.name</code>
@@ -5678,8 +5791,7 @@ func (x *UpdateScheduledCallerRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The request message for
-// <a href="index.html#ondewo.vtsi.Calls.RetryScheduledCaller">Calls.RetryScheduledCaller</a>.
+// The request message for <a href="index.html#ondewo.vtsi.Calls.RetryScheduledCaller">Calls.RetryScheduledCaller</a>.
 type RetryScheduledCallerRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of the scheduled caller. Redundant with the project segment of <code>name</code>: when set it
@@ -6032,8 +6144,7 @@ func (x *StopCallsResponse) GetErrorMessage() string {
 	return ""
 }
 
-// Request to stop all calls of a VTSI project (hang them up and release their listeners and callers), or, with
-// <code>call_filter</code>, those of them the filter matches.
+// Request to stop all calls of a VTSI project (hang them up and release their listeners and callers), or, with <code>call_filter</code>, those of them the filter matches.
 type StopAllCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project whose calls are stopped, of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -6111,6 +6222,10 @@ func (x *StopAllCallsRequest) GetCallFilter() *CallFilter {
 }
 
 // Request to transfer calls
+//
+// An operator-initiated transfer of ONE live call, the one <code>call_name</code> names. It configures this transfer only: nothing here changes the call&apos;s configuration, a later transfer, or the transfers the bot itself starts from the NLU agent (those follow the call&apos;s <code>VoiceInteractionConfig.bot_transfer_config</code>). The call must be connected. The project&apos;s <code>VtsiProject.transfer_phone_number_allowlist</code> applies to every phone-number target, typed or raw.
+//
+// Example, a warm handover (Asterisk 22 projects) to a human agent that first rings their phone for up to 45 seconds: <code>target.phone_number = &quot;+4312345678&quot;</code>, <code>mode = TRANSFER_MODE_WARM</code>, <code>ring_timeout_s = 45</code>. If the agent does not answer, the caller stays with the bot.
 type TransferCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name with which to perform the call of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -6121,19 +6236,39 @@ type TransferCallRequest struct {
 	CallName string `protobuf:"bytes,2,opt,name=call_name,json=callName,proto3" json:"call_name,omitempty"`
 	// LEGACY raw target: the dialplan extension, voip number or phone number to transfer the call to. Validated against
 	// <code>^\+?[A-Za-z0-9._-]{1,64}$</code>. Mutually exclusive with <code>target</code>: setting both is
-	// <code>INVALID_ARGUMENT</code>
+	// <code>INVALID_ARGUMENT</code>. Always a BLIND transfer: with <code>TRANSFER_MODE_WARM</code> it is refused
+	// with <code>INVALID_ARGUMENT</code> (<code>reason=warm-requires-typed-target</code>). A phone number spelled
+	// here is checked against the project&apos;s transfer allowlist like a typed one. A request that sets ONLY
+	// this field (no <code>mode</code>, <code>headers</code> or <code>ring_timeout_s</code>) is answered as
+	// before 9.0.0: a failure after the call was found is reported in
+	// <code>TransferCallResponse.error_message</code> rather than as a gRPC status.
 	TransferId string `protobuf:"bytes,3,opt,name=transfer_id,json=transferId,proto3" json:"transfer_id,omitempty"`
-	// Typed target of the transfer, resolved and validated by the server. Mutually exclusive with <code>transfer_id</code>
+	// Typed target of the transfer, resolved and validated by the server. Mutually exclusive with <code>transfer_id</code>.
+	// Exactly one of the two must be set; neither is <code>INVALID_ARGUMENT</code>.
+	// Required for a WARM transfer.
 	Target *CallTarget `protobuf:"bytes,4,opt,name=target,proto3" json:"target,omitempty"`
-	// How to transfer. Unspecified means <code>TRANSFER_MODE_BLIND</code>
+	// How to transfer. Unspecified means <code>TRANSFER_MODE_BLIND</code>: the call is handed to the dialplan, and a
+	// target that is busy or does not answer after the REFER was accepted loses the caller.
+	// <code>TRANSFER_MODE_WARM</code> rings the target first and keeps the caller with the bot when the target does
+	// not join; it needs a typed <code>target</code> other than an IVR menu. An unknown value is
+	// <code>INVALID_ARGUMENT</code> (<code>reason=invalid-mode</code>)
 	Mode TransferMode `protobuf:"varint,5,opt,name=mode,proto3,enum=ondewo.vtsi.TransferMode" json:"mode,omitempty"`
 	// Optional headers handed to the transfer target. Keys must match <code>X-ondewo-[A-Za-z0-9-]{1,64}</code>, at most 16
 	// entries, values at most 256 bytes. Merged over the call&apos;s own headers. They are delivered through the
 	// dialplan, not on the SIP REFER (Asterisk does not forward REFER headers to the target). Not delivered to a phone
-	// number target
+	// number target.
+	// <p>The call&apos;s own headers are the SIP headers it was started with; the merge ignores case, a header named
+	// here replacing the call&apos;s header of the same name, and the same name given twice in different case is
+	// refused. A key, count or value outside the limits, or a value with a control character, is refused before
+	// anything is sent (<code>error_reason</code> <code>invalid-header</code> / <code>too-many-headers</code>), and
+	// the call is untouched. Example:
+	// <code>{&quot;X-ondewo-customer-id&quot;: &quot;4711&quot;}</code> lets the receiving agent&apos;s
+	// softphone or listener see which customer is coming.</p>
 	Headers map[string]string `protobuf:"bytes,6,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// WARM only: how long the target may ring, in seconds, <code>5</code> to <code>120</code>. <code>0</code> means
-	// <code>30</code>
+	// <code>30</code>. When the target has not answered by then, the transfer ends with its no-answer outcome and the
+	// caller stays with the bot. Checked also on a BLIND transfer, where it has no effect: any other value is
+	// <code>INVALID_ARGUMENT</code> (<code>reason=invalid-ring-timeout</code>)
 	RingTimeoutS int32 `protobuf:"varint,7,opt,name=ring_timeout_s,json=ringTimeoutS,proto3" json:"ring_timeout_s,omitempty"`
 	// Optional idempotency key, with the semantics of <code>InviteToCallRequest.request_id</code>: 1 to 255 visible
 	// ASCII characters, scoped to <code>call_name</code>. A repeated request with the same <code>call_name</code>
@@ -6148,15 +6283,21 @@ type TransferCallRequest struct {
 	RequestId string `protobuf:"bytes,8,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	// WARM only: the warm intro of this transfer, merged field by field over the call&apos;s
 	// <code>VoiceInteractionConfig.warm_transfer_config</code> and the project&apos;s
-	// <code>VtsiProject.warm_transfer_defaults</code> (see <code>WarmTransferConfig</code>). Set with
+	// <code>VtsiProject.warm_transfer_defaults</code> (see <code>WarmTransferConfig</code>): a field set here wins
+	// for this transfer only, a field left unset takes the call&apos;s value, then the project&apos;s, then the
+	// built-in default documented at the field (for <code>ready_question</code>, <code>accept_question</code>,
+	// <code>decline_reason_question</code>, <code>caller_declined_message</code> and
+	// <code>caller_unreachable_message</code>, the NLU agent&apos;s warm transfer text comes before the built-in
+	// one). The deployment switch decides only whether warm intros can run at all. Unset as a whole, those levels
+	// alone decide whether the intro runs. Set with
 	// <code>TRANSFER_MODE_BLIND</code> it is refused with <code>INVALID_ARGUMENT</code>. When the effective config
 	// enables the intro, the target must be a human (<code>phone_number</code> or
 	// <code>softphone_account_name</code>; a listener, the listener queue or an IVR menu is refused with
 	// <code>INVALID_ARGUMENT</code> <code>reason=warm-intro-target-not-human</code>), and these preconditions are
 	// checked before anything rings, each refused with <code>FAILED_PRECONDITION</code> and the reason:
-	// <code>warm-intro-disabled</code> (the deployment switch is off), <code>asterisk-not-local</code>,
-	// <code>no-nlu-session</code> (the call has no live NLU session), <code>warm-intro-needs-listener</code> (the
-	// project has no listener to run the intro), <code>warm-intro-needs-session-from-sip-context</code>,
+	// <code>warm-intro-disabled</code> (the deployment switch is off), <code>asterisk-not-local</code> /
+	// <code>asterisk-version-unsupported</code>, <code>no-nlu-session</code> (the call has no live NLU session),
+	// <code>warm-intro-needs-listener</code> (the project has no listener to run the intro),
 	// <code>warm-intro-cross-project</code> (the listeners use another NLU project than the call),
 	// <code>warm-intro-notice-unsupported</code> (the call&apos;s SIP container cannot deliver the outcome to the
 	// caller), <code>call-control-disabled</code> and <code>phase-b-not-enabled</code>. The response is then
@@ -6260,7 +6401,7 @@ func (x *TransferCallRequest) GetWarmTransferConfig() *WarmTransferConfig {
 	return nil
 }
 
-// <p>Target of a transfer</p>
+// Target of a transfer
 type CallTarget struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// One of the following
@@ -6407,7 +6548,7 @@ func (*CallTarget_ListenerQueue) isCallTarget_Target() {}
 
 func (*CallTarget_IvrMenuName) isCallTarget_Target() {}
 
-// <p>The project&apos;s listener queue as a transfer target. Carries no fields</p>
+// The project&apos;s listener queue as a transfer target. Carries no fields
 type ListenerQueueTarget struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -6564,7 +6705,7 @@ func (x *TransferCallResponse) GetErrorReason() string {
 	return ""
 }
 
-// <p>Record of the last transfer attempt of a call</p>
+// Record of the last transfer attempt of a call
 type CallTransferRecord struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Requested typed target; unset for a legacy <code>transfer_id</code> transfer
@@ -6676,7 +6817,7 @@ func (x *CallTransferRecord) GetEffectiveWarmTransferConfig() *WarmTransferConfi
 	return nil
 }
 
-// <p>Effective media control state of a call</p>
+// Effective media control state of a call
 type CallMediaControlState struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The bot is muted (by an operator, a TALK take-over or a participant bot policy)
@@ -6749,7 +6890,7 @@ func (x *CallMediaControlState) GetJoinedParticipants() int32 {
 	return 0
 }
 
-// <p>A participant invited into a call</p>
+// A participant invited into a call
 type CallParticipant struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifier of the participant, 9 digits, unique among the project&apos;s live invites
@@ -6892,7 +7033,7 @@ func (x *CallParticipant) GetEndReasonType() ParticipantEndReason {
 	return ParticipantEndReason_PARTICIPANT_END_REASON_UNSPECIFIED
 }
 
-// <p>Request to invite a softphone account into a call</p>
+// Request to invite a softphone account into a call
 type InviteToCallRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7011,7 +7152,7 @@ func (x *InviteToCallRequest) GetRequestId() string {
 	return ""
 }
 
-// <p>Response of <code>InviteToCall</code></p>
+// Response of <code>InviteToCall</code>
 type InviteToCallResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7085,7 +7226,7 @@ func (x *InviteToCallResponse) GetErrorMessage() string {
 	return ""
 }
 
-// <p>Request of <code>SendCallDtmf</code></p>
+// Request of <code>SendCallDtmf</code>
 type SendCallDtmfRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7150,7 +7291,7 @@ func (x *SendCallDtmfRequest) GetDigits() string {
 	return ""
 }
 
-// <p>Response of <code>SendCallDtmf</code></p>
+// Response of <code>SendCallDtmf</code>
 type SendCallDtmfResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7214,7 +7355,7 @@ func (x *SendCallDtmfResponse) GetQueuedKeys() int32 {
 	return 0
 }
 
-// <p>Request to hang up a participant of a call</p>
+// Request to hang up a participant of a call
 type RemoveCallParticipantRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7280,7 +7421,7 @@ func (x *RemoveCallParticipantRequest) GetParticipantId() string {
 	return ""
 }
 
-// <p>Response of <code>RemoveCallParticipant</code></p>
+// Response of <code>RemoveCallParticipant</code>
 type RemoveCallParticipantResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7354,7 +7495,7 @@ func (x *RemoveCallParticipantResponse) GetErrorMessage() string {
 	return ""
 }
 
-// <p>Request to mute the bot of a call and/or stop it listening</p>
+// Request to mute the bot of a call and/or stop it listening
 type SetCallMediaControlRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7435,7 +7576,7 @@ func (x *SetCallMediaControlRequest) GetBotListening() CallMediaSetting {
 	return CallMediaSetting_CALL_MEDIA_SETTING_UNCHANGED
 }
 
-// <p>Response of <code>SetCallMediaControl</code></p>
+// Response of <code>SetCallMediaControl</code>
 type SetCallMediaControlResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7519,7 +7660,7 @@ func (x *SetCallMediaControlResponse) GetErrorMessage() string {
 	return ""
 }
 
-// <p>Configuration of a call audio stream. The first request of <code>StreamCallAudio</code></p>
+// Configuration of a call audio stream. The first request of <code>StreamCallAudio</code>
 type StreamCallAudioConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project name of the form <pre><code>projects/&lt;project_uuid&gt;/project</code></pre>
@@ -7611,7 +7752,7 @@ func (x *StreamCallAudioConfig) GetMaxDurationS() int32 {
 	return 0
 }
 
-// <p>One 20 ms frame of call audio</p>
+// One 20 ms frame of call audio
 type CallAudioFrame struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// LINEAR16 little-endian mono samples, <code>sample_rate_hz * 0.02 * 2</code> bytes
@@ -7666,7 +7807,7 @@ func (x *CallAudioFrame) GetSequence() uint64 {
 	return 0
 }
 
-// <p>Request of <code>StreamCallAudio</code></p>
+// Request of <code>StreamCallAudio</code>
 type StreamCallAudioRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// One of the following
@@ -7770,7 +7911,7 @@ func (*StreamCallAudioRequest_Audio) isStreamCallAudioRequest_Request() {}
 
 func (*StreamCallAudioRequest_AgentMuted) isStreamCallAudioRequest_Request() {}
 
-// <p>Sent once when a call audio stream is connected</p>
+// Sent once when a call audio stream is connected
 type CallAudioStarted struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Identifier of the stream (audit correlation)
@@ -7843,7 +7984,7 @@ func (x *CallAudioStarted) GetMode() CallAudioMode {
 	return CallAudioMode_CALL_AUDIO_MODE_UNSPECIFIED
 }
 
-// <p>Counters of a call audio stream, sent periodically</p>
+// Counters of a call audio stream, sent periodically
 type CallAudioStats struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Frames sent to the client
@@ -7925,7 +8066,7 @@ func (x *CallAudioStats) GetFramesDiscarded() uint64 {
 	return 0
 }
 
-// <p>Sent once when a call audio stream ends normally</p>
+// Sent once when a call audio stream ends normally
 type CallAudioEnded struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Why the stream ended
@@ -7980,7 +8121,7 @@ func (x *CallAudioEnded) GetDetail() string {
 	return ""
 }
 
-// <p>Response of <code>StreamCallAudio</code> and <code>ListenCallAudio</code></p>
+// Response of <code>StreamCallAudio</code> and <code>ListenCallAudio</code>
 type StreamCallAudioResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// One of the following
@@ -8101,7 +8242,7 @@ func (*StreamCallAudioResponse_Stats) isStreamCallAudioResponse_Response() {}
 
 func (*StreamCallAudioResponse_Ended) isStreamCallAudioResponse_Response() {}
 
-// <p>Request of <code>ListenCallAudio</code></p>
+// Request of <code>ListenCallAudio</code>
 type ListenCallAudioRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Configuration of the stream; <code>mode</code> must be LISTEN or unspecified and <code>take_over</code> false
@@ -8356,9 +8497,7 @@ func (x *GetCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// A call of a listener or caller: one record per call, kept after the call ended. Every field is output only
-// except <code>labels</code> (see <code>UpdateCall</code>). The WAITING record of a persistent listener or pooled
-// caller (status <code>NO_ONGOING_CALL</code>, not active, no start time) is a <code>Call</code> too.
+// A call of a listener or caller: one record per call, kept after the call ended. Every field is output only except <code>labels</code> (see <code>UpdateCall</code>). The WAITING record of a persistent listener or pooled caller (status <code>NO_ONGOING_CALL</code>, not active, no start time) is a <code>Call</code> too.
 type Call struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// call name
@@ -8462,7 +8601,14 @@ type Call struct {
 	// <code>ivr_menu_display_name</code> names, so a client can find the menu by id instead of by its label.
 	// The format is: <pre><code>projects/&lt;project_uuid&gt;/ivr_menus/&lt;ivr_menu_uuid&gt;</code></pre>
 	// Empty when the call did not pass an IVR menu. Set in the SHALLOW and FULL views
-	IvrMenuName   string `protobuf:"bytes,29,opt,name=ivr_menu_name,json=ivrMenuName,proto3" json:"ivr_menu_name,omitempty"`
+	IvrMenuName string `protobuf:"bytes,29,opt,name=ivr_menu_name,json=ivrMenuName,proto3" json:"ivr_menu_name,omitempty"`
+	// Output only. The inbound phone number the caller dialled, as the project&apos;s Asterisk received it from the
+	// carrier trunk (from <code>X-ondewo-dialed-number</code>, which the trunk&apos;s IVR entry hook sets on every
+	// inbound call), e.g. <code>+493052187211</code>: digits with an optional leading <code>+</code>, at most 32
+	// characters. It is the company&apos;s own number, not the caller&apos;s (that is <code>phone_number</code>).
+	// Empty when the call did not come in over the carrier trunk, or the dialled number was not numeric. Set in the
+	// SHALLOW and FULL views
+	DialedNumber  string `protobuf:"bytes,30,opt,name=dialed_number,json=dialedNumber,proto3" json:"dialed_number,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -8700,13 +8846,14 @@ func (x *Call) GetIvrMenuName() string {
 	return ""
 }
 
-// Narrows a set of calls of one project: the calls <code>ListCalls</code> lists, <code>GetCallStatistics</code>
-// counts and <code>StopAllCalls</code> stops. Every field is optional; an unset field, or an empty repeated field
-// or map, does not filter. Fields are combined with AND, the values within one repeated field with OR (except
-// <code>caller_names</code> and <code>listener_names</code>, which are OR-ed with each other), and the entries
-// of <code>labels</code> with AND. The project is the enclosing request&apos;s <code>vtsi_project_name</code>.
-// An invalid value is rejected with <code>INVALID_ARGUMENT</code> naming the field, before anything is read or
-// stopped.
+func (x *Call) GetDialedNumber() string {
+	if x != nil {
+		return x.DialedNumber
+	}
+	return ""
+}
+
+// Narrows a set of calls of one project: the calls <code>ListCalls</code> lists, <code>GetCallStatistics</code> counts and <code>StopAllCalls</code> stops. Every field is optional; an unset field, or an empty repeated field or map, does not filter. Fields are combined with AND, the values within one repeated field with OR (except <code>caller_names</code> and <code>listener_names</code>, which are OR-ed with each other), and the entries of <code>labels</code> with AND. The project is the enclosing request&apos;s <code>vtsi_project_name</code>. An invalid value is rejected with <code>INVALID_ARGUMENT</code> naming the field, before anything is read or stopped.
 type CallFilter struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Optional: Filter by call names (<code>Call.name</code>), exact match.
@@ -9365,8 +9512,7 @@ func (x *UpdateCallRequest) GetFieldMask() *fieldmaskpb.FieldMask {
 	return nil
 }
 
-// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCall">Calls.UpdateCall</a>, and one entry
-// of <code>UpdateCallsResponse</code>.
+// The response message for <a href="index.html#ondewo.vtsi.Calls.UpdateCall">Calls.UpdateCall</a>, and one entry of <code>UpdateCallsResponse</code>.
 type UpdateCallResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the call the request named. Always populated, also for a failed entry of
@@ -9432,14 +9578,8 @@ func (x *UpdateCallResponse) GetErrorMessage() string {
 }
 
 // The request message for <a href="index.html#ondewo.vtsi.Calls.UpdateCalls">Calls.UpdateCalls</a>.
-// <p>Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with calls instead of callers and
-// <code>UpdateCall</code> as the role reference (<code>INVALID_ARGUMENT</code> for a malformed
-// <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same call, an entry
-// whose <code>call.name</code> is malformed or whose project segment differs from
-// <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code>, an unknown
-// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project; <code>PERMISSION_DENIED</code>);
-// every other error is reported per entry, e.g. a well-formed name of the right project that names no call is
-// that entry&apos;s <code>NOT_FOUND</code>.</p>
+//
+// Rejected as a whole exactly like <code>UpdateCallersRequest</code>, with calls instead of callers and <code>UpdateCall</code> as the role reference (<code>INVALID_ARGUMENT</code> for a malformed <code>vtsi_project_name</code>, no entry, more than 1000 entries, two entries naming the same call, an entry whose <code>call.name</code> is malformed or whose project segment differs from <code>vtsi_project_name</code>, an entry with its own <code>field_mask</code>, an unknown <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project; <code>PERMISSION_DENIED</code>); every other error is reported per entry, e.g. a well-formed name of the right project that names no call is that entry&apos;s <code>NOT_FOUND</code>.
 type UpdateCallsRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of every call of the request.
@@ -9743,8 +9883,7 @@ func (x *CallTypeCount) GetCount() int32 {
 	return 0
 }
 
-// Number of calls with one answering machine detection verdict, an entry of
-// <code>CallStatistics.amd_verdict_counts</code>.
+// Number of calls with one answering machine detection verdict, an entry of <code>CallStatistics.amd_verdict_counts</code>.
 type AmdVerdictCount struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The verdict, read from <code>Call.sip_status.amd_result.verdict</code>.
@@ -9799,8 +9938,7 @@ func (x *AmdVerdictCount) GetCount() int32 {
 	return 0
 }
 
-// Number of calls whose last transfer attempt had one outcome, an entry of
-// <code>CallStatistics.transfer_outcome_counts</code>.
+// Number of calls whose last transfer attempt had one outcome, an entry of <code>CallStatistics.transfer_outcome_counts</code>.
 type TransferOutcomeCount struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The outcome of the call&apos;s last transfer attempt (<code>Call.last_transfer.outcome</code>).
@@ -9855,12 +9993,9 @@ func (x *TransferOutcomeCount) GetCount() int32 {
 	return 0
 }
 
-// Aggregate figures over the calls of a project that a <code>CallFilter</code> matches, as returned by
-// <a href="index.html#ondewo.vtsi.Calls.GetCallStatistics">Calls.GetCallStatistics</a>.
-// <p>Every figure is computed in ONE read of the call records, so the figures are consistent with each other at
-// the moment of that read (e.g. the entries of <code>sip_status_type_counts</code> add up to <code>total</code>).
-// Every <code>*_counts</code> list holds one entry per value that occurs at least once (a value with count 0 is
-// left out), ordered by the enum number, ascending.</p>
+// Aggregate figures over the calls of a project that a <code>CallFilter</code> matches, as returned by <a href="index.html#ondewo.vtsi.Calls.GetCallStatistics">Calls.GetCallStatistics</a>.
+//
+// Every figure is computed in ONE read of the call records, so the figures are consistent with each other at the moment of that read (e.g. the entries of <code>sip_status_type_counts</code> add up to <code>total</code>). Every <code>*_counts</code> list holds one entry per value that occurs at least once (a value with count 0 is left out), ordered by the enum number, ascending.
 type CallStatistics struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// VTSI project of the request.
@@ -11118,7 +11253,7 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\n" +
 	"field_mask\x18\x04 \x01(\v2\x1a.google.protobuf.FieldMaskR\tfieldMaskB\f\n" +
 	"\n" +
-	"_call_view\"\xb9\x0e\n" +
+	"_call_view\"\xde\x0e\n" +
 	"\x04Call\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vsip_account\x18\x02 \x01(\tR\n" +
@@ -11153,7 +11288,8 @@ const file_ondewo_vtsi_calls_proto_rawDesc = "" +
 	"\x06labels\x18\x1a \x03(\v2\x1d.ondewo.vtsi.Call.LabelsEntryR\x06labels\x121\n" +
 	"\x15ivr_menu_display_name\x18\x1b \x01(\tR\x12ivrMenuDisplayName\x12\x19\n" +
 	"\bivr_path\x18\x1c \x01(\tR\aivrPath\x12\"\n" +
-	"\rivr_menu_name\x18\x1d \x01(\tR\vivrMenuName\x1a9\n" +
+	"\rivr_menu_name\x18\x1d \x01(\tR\vivrMenuName\x12#\n" +
+	"\rdialed_number\x18\x1e \x01(\tR\fdialedNumber\x1a9\n" +
 	"\vLabelsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\r\n" +

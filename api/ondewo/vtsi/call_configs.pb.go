@@ -39,15 +39,18 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// <p>How the briefing of a warm intro is produced</p>
+// How the briefing of a warm intro is produced
 type WarmIntroTextSource int32
 
 const (
-	// See <code>WarmTransferConfig.intro_text_source</code>
+	// Chosen by the deployment: <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code> with phase B enabled, else
+	// <code>WARM_INTRO_TEXT_SOURCE_TEMPLATE</code> (see <code>WarmTransferConfig.intro_text_source</code>)
 	WarmIntroTextSource_WARM_INTRO_TEXT_SOURCE_UNSPECIFIED WarmIntroTextSource = 0
-	// <code>WarmTransferConfig.intro_prompt</code> as a template
+	// <code>WarmTransferConfig.intro_prompt</code> as a template with placeholders, else the built-in template.
+	// Predictable wording, no LLM
 	WarmIntroTextSource_WARM_INTRO_TEXT_SOURCE_TEMPLATE WarmIntroTextSource = 1
-	// An LLM summary of the call so far, instructed by <code>WarmTransferConfig.intro_prompt</code> (phase B)
+	// <i>Phase B</i>: an LLM summary of the call so far, instructed by <code>WarmTransferConfig.intro_prompt</code>;
+	// the built-in template when no summary can be written (<code>WarmIntroRecord.text_fell_back</code>)
 	WarmIntroTextSource_WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY WarmIntroTextSource = 2
 )
 
@@ -92,16 +95,19 @@ func (WarmIntroTextSource) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{0}
 }
 
-// <p>What a WARM transfer does when its warm intro cannot run</p>
+// What a WARM transfer does when its warm intro cannot run
 type WarmIntroUnavailablePolicy int32
 
 const (
 	// Same as <code>WARM_INTRO_UNAVAILABLE_POLICY_CONNECT_WITHOUT_INTRO</code>
 	WarmIntroUnavailablePolicy_WARM_INTRO_UNAVAILABLE_POLICY_UNSPECIFIED WarmIntroUnavailablePolicy = 0
-	// Join the target directly, as a WARM transfer without an intro
+	// Ring the target and join them directly, as a WARM transfer without an intro
+	// (<code>WarmIntroRecord.intro_started = false</code>, <code>cause</code> says why). The caller still reaches
+	// a person; the target is not briefed
 	WarmIntroUnavailablePolicy_WARM_INTRO_UNAVAILABLE_POLICY_CONNECT_WITHOUT_INTRO WarmIntroUnavailablePolicy = 1
-	// Hang up the target and keep the call with the bot, which tells the caller
-	// (<code>TRANSFER_OUTCOME_INTRO_UNAVAILABLE</code>)
+	// Hang up the target (or ring nothing) and keep the call with the bot, which tells the caller
+	// <code>caller_unreachable_message</code> (<code>TRANSFER_OUTCOME_INTRO_UNAVAILABLE</code>) and goes on with the
+	// conversation
 	WarmIntroUnavailablePolicy_WARM_INTRO_UNAVAILABLE_POLICY_RETURN_TO_CALLER WarmIntroUnavailablePolicy = 2
 )
 
@@ -146,17 +152,21 @@ func (WarmIntroUnavailablePolicy) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{1}
 }
 
-// <p>The target&apos;s decision in a warm intro</p>
+// The target&apos;s decision in a warm intro
 type WarmIntroDecision int32
 
 const (
-	// No decision yet (the intro runs, or it never started)
+	// No decision: the intro still runs, it never started, the target never answered or hung up before deciding
 	WarmIntroDecision_WARM_INTRO_DECISION_UNSPECIFIED WarmIntroDecision = 0
-	// The target accepted and was joined
+	// The target accepted and was joined; the bot leaves the call
 	WarmIntroDecision_WARM_INTRO_DECISION_ACCEPTED WarmIntroDecision = 1
-	// The target declined; the call stays with the bot
+	// The target declined and was hung up; the call stays with the bot, which tells the caller
+	// <code>caller_declined_message</code>
 	WarmIntroDecision_WARM_INTRO_DECISION_DECLINED WarmIntroDecision = 2
-	// The target answered but gave no decision in time (also a mailbox that answered)
+	// The target answered but gave no decision: no answer within <code>decision_timeout_s</code> or
+	// <code>max_intro_duration_s</code>, two unclear answers, or no yes to the <code>ready_question</code> (also a
+	// mailbox that answered). The call stays with the bot, which tells the caller
+	// <code>caller_unreachable_message</code>
 	WarmIntroDecision_WARM_INTRO_DECISION_NO_DECISION WarmIntroDecision = 3
 )
 
@@ -203,7 +213,7 @@ func (WarmIntroDecision) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{2}
 }
 
-// <p>How the decision of a warm intro was taken</p>
+// How the decision of a warm intro was taken
 type WarmIntroDecidedBy int32
 
 const (
@@ -260,17 +270,39 @@ func (WarmIntroDecidedBy) EnumDescriptor() ([]byte, []int) {
 	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{3}
 }
 
-// Mode of the turn detection
+// How the end of the caller&apos;s turn is detected
 type TurnDetectionConfig_TurnDetectionMode int32
 
 const (
-	// Unspecified turn detection mode defaults to SEMANTIC_MODEL
+	// No mode chosen: the speech-to-text side is configured as for <code>SEMANTIC_MODEL</code> (its turn
+	// detection model is used where the deployment provides one), and the interruption rules follow what the
+	// call actually got: those of <code>SEMANTIC_MODEL</code> when a turn detection model is active for the call,
+	// those of <code>VAD</code> otherwise. Every field of this message is valid with it
 	TurnDetectionConfig_TURN_DETECTION_MODE_UNSPECIFIED TurnDetectionConfig_TurnDetectionMode = 0
-	// Turn detection based on voice activity detection, i.e. pauses in the caller audio (fallback mode)
+	// The turn ends on silence alone: the speech-to-text service commits a final transcription once the caller
+	// was silent for its minimum silence (<code>min_endpointing_delay_seconds</code>). VTSI asks no turn
+	// detection model, not even a deployment-wide one; a turn detection block already in the call&apos;s
+	// <code>S2tVtsiConfig.s2t_transcribe_request_config</code> is passed on unchanged, so remove it there as
+	// well. With interruptions enabled, any caller speech that lasts the
+	// minimum interruption duration interrupts the bot. The fields read only by a turn detection model are
+	// refused with this mode
 	TurnDetectionConfig_VAD TurnDetectionConfig_TurnDetectionMode = 1
-	// Turn detection based on a semantic (LLM) turn detection model of the speech-to-text service (default)
+	// The speech-to-text service asks a turn detection model whether the words so far are a finished turn, so
+	// that a caller who pauses mid-sentence keeps the turn. The model must be provided by the deployment (a
+	// turn detection endpoint configured with <code>ONDEWO_VTSI_S2T_TURN_DETECTION_BASE_URL</code>, an audio
+	// Smart Turn model, or a turn detection block in the call&apos;s
+	// <code>S2tVtsiConfig.s2t_transcribe_request_config</code>); without one the call keeps silence-based
+	// endpointing and only the interruption rules below apply. With interruptions enabled, a final
+	// transcription with at least one meaningful word interrupts the bot, and a partial transcription needs
+	// <code>InterruptionHandlingConfig.min_interruption_words</code>, so a short &quot;mhm&quot; does not stop
+	// the bot
 	TurnDetectionConfig_SEMANTIC_MODEL TurnDetectionConfig_TurnDetectionMode = 2
-	// Turn detection based on an audio-native turn detection model
+	// Reserved for an audio-native turn detection model run by the speech-to-speech service on the caller
+	// audio. The released speech-to-speech service does not run such a model yet: a call in this mode ends its
+	// turns on the speech-to-text silence detection, as with <code>VAD</code>, and applies the interruption
+	// rules of <code>SEMANTIC_MODEL</code>. The fields read only by a turn detection model are refused with this
+	// mode. To use an audio turn model today, choose <code>SEMANTIC_MODEL</code> with a Smart Turn model in
+	// <code>semantic_model_name</code>
 	TurnDetectionConfig_AUDIO_MODEL TurnDetectionConfig_TurnDetectionMode = 3
 )
 
@@ -314,20 +346,21 @@ func (x TurnDetectionConfig_TurnDetectionMode) Number() protoreflect.EnumNumber 
 
 // Deprecated: Use TurnDetectionConfig_TurnDetectionMode.Descriptor instead.
 func (TurnDetectionConfig_TurnDetectionMode) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12, 0}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14, 0}
 }
 
-// Eagerness of the turn detection
+// How eagerly the bot takes the turn
 type TurnDetectionConfig_TurnEagerness int32
 
 const (
-	// Unspecified turn eagerness defaults to NORMAL
+	// No eagerness chosen: the same as <code>NORMAL</code>
 	TurnDetectionConfig_TURN_EAGERNESS_UNSPECIFIED TurnDetectionConfig_TurnEagerness = 0
-	// Patient turn taking: scales the endpointing delays by a factor of 1.7
+	// Patient turn taking, e.g. for collecting structured information: both endpointing delays are multiplied
+	// by 1.7
 	TurnDetectionConfig_PATIENT TurnDetectionConfig_TurnEagerness = 1
-	// Normal turn taking: keeps the endpointing delays unchanged (factor 1.0)
+	// Normal turn taking: both endpointing delays are used as set (factor 1.0)
 	TurnDetectionConfig_NORMAL TurnDetectionConfig_TurnEagerness = 2
-	// Eager turn taking: scales the endpointing delays by a factor of 0.6
+	// Eager turn taking, for quick exchanges: both endpointing delays are multiplied by 0.6
 	TurnDetectionConfig_EAGER TurnDetectionConfig_TurnEagerness = 3
 )
 
@@ -371,27 +404,36 @@ func (x TurnDetectionConfig_TurnEagerness) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use TurnDetectionConfig_TurnEagerness.Descriptor instead.
 func (TurnDetectionConfig_TurnEagerness) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12, 1}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14, 1}
 }
 
-// What to do once a non-human verdict is reached
+// What the call does once a verdict is reached that is not a person
 type AnsweringMachineDetectionConfig_AmdAction int32
 
 const (
-	// Unspecified action defaults to HANG_UP
+	// Not set explicitly. As a value of <code>action</code> it selects the built-in default
+	// <code>HANG_UP</code>; leave <code>action</code> unset instead to inherit the deployment setting
+	// <code>ONDEWO_VTSI_AMD_ACTION</code>
 	AnsweringMachineDetectionConfig_AMD_ACTION_UNSPECIFIED AnsweringMachineDetectionConfig_AmdAction = 0
-	// Hang up at once on a non-human verdict whose per-verdict hang-up switch is on
-	// (an answering machine is always hung up on) (default)
+	// Hang up at once on an answering machine, and on a fax, a network announcement, an IVR or a call
+	// screening assistant whose <code>hang_up_on_*</code> switch is on (default). The bot says nothing
+	// before the hangup
 	AnsweringMachineDetectionConfig_HANG_UP AnsweringMachineDetectionConfig_AmdAction = 1
-	// Only detect and record the verdict, never hang up: OUTGOING_CALL_ANSWERING_MACHINE_DETECTED is still
-	// set, then the far end is treated as a person and the call continues with the greeting and ends
-	// normally (shadow mode to calibrate the detection before enabling HANG_UP)
+	// Shadow mode: detect and report the verdict, never hang up.
+	// <code>OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> is still set for a verdict that would hang up, then
+	// the far end is treated as a person: the call continues with the greeting and ends normally. Use it to
+	// measure how the detection would decide on real calls before switching to <code>HANG_UP</code>
 	AnsweringMachineDetectionConfig_DETECT_ONLY AnsweringMachineDetectionConfig_AmdAction = 2
-	// Leave a voice message on a hang-up-eligible verdict, then hang up: the fulfillment of
-	// voice_message_intent is spoken once after the beep (or after the end of the machine greeting),
-	// and the call is hung up when it finished playing or when voice_message_timeout_ms elapsed,
-	// whichever comes first. A FAX verdict never gets a voice message; it is hung up on when
-	// hang_up_on_fax is on. See the compliance note above before enabling it
+	// Leave a voice message on an answering machine, then hang up. Only a MACHINE verdict gets a message: a
+	// fax, a network announcement, an IVR or a call screening assistant is not a mailbox and is hung up on at
+	// once, without a message, when its <code>hang_up_on_*</code> switch is on.
+	// <p>The fulfillment of <code>voice_message_intent</code> is prepared at the verdict and spoken once, when
+	// the first of these happens: the beep of the mailbox ended, the greeting ended in silence, or
+	// <code>voice_message_max_beep_wait_ms</code> passed. The call is hung up when the message finished
+	// playing or when <code>voice_message_timeout_ms</code> after the verdict elapsed, whichever comes first.
+	// If the NLU fails, no apology is spoken onto the mailbox. The voice message intent is triggered on the
+	// call&apos;s NLU session at the verdict, also when the machine hangs up before the message is played.
+	// See the compliance note above before enabling it</p>
 	AnsweringMachineDetectionConfig_LEAVE_VOICE_MESSAGE AnsweringMachineDetectionConfig_AmdAction = 3
 )
 
@@ -435,20 +477,25 @@ func (x AnsweringMachineDetectionConfig_AmdAction) Number() protoreflect.EnumNum
 
 // Deprecated: Use AnsweringMachineDetectionConfig_AmdAction.Descriptor instead.
 func (AnsweringMachineDetectionConfig_AmdAction) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{17, 0}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{19, 0}
 }
 
-// Sensitivity of the detection: selects the enabled detection rules and their internal thresholds
+// How readily the detection decides that a machine answered. It selects which detection rules may hang up; the timing fields below are not changed by it. Whatever the sensitivity, a person-like answer, silence and an undecided call are never hung up on
 type AnsweringMachineDetectionConfig_AmdSensitivity int32
 
 const (
-	// Unspecified sensitivity defaults to LOW
+	// Not set explicitly. As a value of <code>sensitivity</code> it selects the built-in default
+	// <code>LOW</code>; leave <code>sensitivity</code> unset instead to inherit the deployment setting
+	// <code>ONDEWO_VTSI_AMD_SENSITIVITY</code>
 	AnsweringMachineDetectionConfig_AMD_SENSITIVITY_UNSPECIFIED AnsweringMachineDetectionConfig_AmdSensitivity = 0
-	// Most conservative towards people: only strong machine evidence leads to a machine verdict (default)
+	// Most conservative towards people (default): a machine verdict needs one piece of strong evidence on its
+	// own, e.g. a clear mailbox beep or a mailbox phrase such as &quot;leave a message after the beep&quot;.
+	// Fewest people hung up on; some machines are missed and greeted
 	AnsweringMachineDetectionConfig_LOW AnsweringMachineDetectionConfig_AmdSensitivity = 1
-	// Balanced between missed machines and people classified as machines
+	// Balanced: in addition, a long greeting together with a weaker machine phrase is enough
 	AnsweringMachineDetectionConfig_MEDIUM AnsweringMachineDetectionConfig_AmdSensitivity = 2
-	// Most aggressive: detects more machines at a higher risk of hanging up on a person
+	// Most aggressive: in addition, a long greeting together with a weaker beep is enough. Detects the most
+	// machines, at the highest risk of hanging up on a person
 	AnsweringMachineDetectionConfig_HIGH AnsweringMachineDetectionConfig_AmdSensitivity = 3
 )
 
@@ -492,22 +539,31 @@ func (x AnsweringMachineDetectionConfig_AmdSensitivity) Number() protoreflect.En
 
 // Deprecated: Use AnsweringMachineDetectionConfig_AmdSensitivity.Descriptor instead.
 func (AnsweringMachineDetectionConfig_AmdSensitivity) EnumDescriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{17, 1}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{19, 1}
 }
 
-// Base configuration of services (ondewo-nlu, text-to-speech, speech-to-text, asterisk)
+// Address and server trust of one upstream service of a call: the speech-to-text (S2T), NLU and text-to-speech (T2S) services of a <code>CommonServicesConfig</code>, and the Asterisk of an <code>AsteriskConfig</code>.
+//
+// For S2T, NLU and T2S the request is checked LIVE when the caller or listener is started: VTSI connects to the service with these values (the S2T pipeline and the NLU agent are read), so an address that cannot be reached, or a certificate the service&apos;s certificate does not chain to, refuses the request instead of failing later inside the call.
 type BaseServiceConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Host name or IP address of the service. Required: an empty host is refused with
-	// <code>INVALID_ARGUMENT</code>.
+	// Host name or IP address of the service, as the call reaches it, e.g. <code>s2t.example.com</code>.
+	// Required: an empty host (or one of only whitespace) is refused with <code>INVALID_ARGUMENT</code>.
 	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
-	// TCP port of the service, 1 to 65535. A value of 0 or below (also an unset port) is refused with
-	// <code>INVALID_ARGUMENT</code>.
+	// TCP port of the service&apos;s gRPC server, 1 to 65535. A value of 0 or below (also an unset port) or above
+	// 65535 is refused with <code>INVALID_ARGUMENT</code>.
 	Port int32 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
-	// PEM certificate(s) the service&apos;s gRPC server certificate chains to (CA or self-signed leaf), with real or
-	// escaped newlines; never a private key. Required for the S2T, NLU and T2S configs of a call unless the VTSI
-	// server runs with ONDEWO_VTSI_ALLOW_INSECURE_UPSTREAM=True (lab and CI only); an empty value is otherwise
-	// refused with FAILED_PRECONDITION (UPSTREAM_TLS_REQUIRED).
+	// Optional: The PEM certificate(s) the service&apos;s gRPC server certificate chains to (its CA, or its
+	// self-signed certificate), with real or escaped (<code>\n</code>) newlines. Used for the S2T, NLU and T2S
+	// services: the connection to them is always TLS, and the server certificate and host name are always
+	// verified; there is no plaintext mode.
+	// <p>Empty (the default): the server is verified against the deployment&apos;s CA bundle,
+	// <code>ONDEWO_VTSI_CALL_UPSTREAM_CLIENT_CA_FILE</code>. Set: it is verified against these certificates
+	// instead.</p>
+	// <p>Only <code>-----BEGIN CERTIFICATE-----</code> blocks are accepted. A value carrying a private key, a
+	// file path, any other PEM block type or a certificate that cannot be parsed is refused with
+	// <code>INVALID_ARGUMENT</code>: the value is stored with the call and handed to the call, so it must
+	// never hold secret material.</p>
 	GrpcCert      string `protobuf:"bytes,3,opt,name=grpc_cert,json=grpcCert,proto3" json:"grpc_cert,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -564,12 +620,16 @@ func (x *BaseServiceConfig) GetGrpcCert() string {
 	return ""
 }
 
-// Credentials
+// User name and password the call logs in to the NLU service with (the NLU <code>credentials</code> of <code>NluVtsiConfig</code>), usually the project&apos;s technical user.
+//
+// They are checked when the caller or listener is started: VTSI reads the configured NLU agent with them, so credentials the NLU service (or its login server) refuses refuse the request. Where the deployment logs in through Keycloak, the same login also authorizes the S2T and T2S checks of that request. The password is never logged, and read responses may withhold it depending on the reader&apos;s role (see <code>GetCaller</code>).
+//
+// Pooled callers: credentials are not part of the configuration a pooled caller is matched by, but they are compared exactly before one is reused, so a changed password always gets a caller that logs in with it.
 type Credentials struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Account name - usually email address
+	// Account name the call logs in with, usually an email address, e.g. <code>technical-user@example.com</code>
 	AccountName string `protobuf:"bytes,1,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
-	// password of the account
+	// Password of <code>account_name</code>. Stored with the call and never logged
 	Password      string `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -619,41 +679,101 @@ func (x *Credentials) GetPassword() string {
 	return ""
 }
 
-// NLU Configuration
+// NLU configuration of a call: which NLU agent answers the caller, in which language, how the call authenticates to the NLU, how the conversation is opened, and how the bot behaves when the NLU is slow or unreachable.
+//
+// Scope: the configuration of a LISTENER applies to every inbound call that listener deployment serves; the configuration of a caller, a campaign or a scheduled caller applies to its own calls. A pooled (persistent) caller is only reused for a request whose configuration is identical (the credentials are compared exactly, so a changed password deploys a new caller).
+//
+// Unless a field says otherwise, an unset <code>optional</code> field means &quot;inherit&quot;: the call keeps the built-in default of the speech-to-speech service. A value set here wins for the calls this configuration serves.
+//
+// The request is validated before any call is placed: the NLU must be reachable and the agent must exist and be readable with the given credentials. A missing <code>agent_name</code>, an unknown agent or rejected credentials are refused with <code>INVALID_ARGUMENT</code>; an NLU that does not answer at all is <code>UNAVAILABLE</code> (retryable).
 type NluVtsiConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Base config
-	// Host, Port, and [Optional] GRPC cert
+	// Required: Address of the NLU gRPC server (host, port and the certificate its server certificate chains to).
+	// See <code>BaseServiceConfig</code> for what is refused
 	NluBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=nlu_base_config,json=nluBaseConfig,proto3" json:"nlu_base_config,omitempty"`
-	// authentication information (login information)
+	// How the call authenticates to the NLU. Set at most one of the two; setting the second replaces the first.
 	//
 	// Types that are valid to be assigned to Authentication:
 	//
 	//	*NluVtsiConfig_Credentials
 	//	*NluVtsiConfig_AuthToken
 	Authentication isNluVtsiConfig_Authentication `protobuf_oneof:"authentication"`
-	// The resource name of the agent.
+	// Required: Resource name of the NLU agent that answers the caller. An empty or unknown agent is refused with
+	// <code>INVALID_ARGUMENT</code>.
 	// Format: <pre><code>projects/&lt;uuid&gt;/agent</code></pre>
 	AgentName string `protobuf:"bytes,4,opt,name=agent_name,json=agentName,proto3" json:"agent_name,omitempty"`
 	// Language of the NLU requests of the call: an ISO 639-1 code (e.g. <code>de</code>, <code>en</code>) or a
-	// language tag the agent supports (e.g. <code>de-DE</code>). VTSI does not validate it: the NLU agent decides
-	// whether it supports the value, and an empty value is accepted (a warning is logged, and the agent&apos;s
-	// default language applies).
+	// language tag the agent supports (e.g. <code>de-DE</code>). It is sent with every NLU request of the call and
+	// also selects the language of the default <code>failure_apology_message</code>. VTSI does not check it against
+	// the agent. An empty value is accepted with a warning, but the call then asks the NLU in no language, the
+	// agent cannot answer and the bot stays silent: always set a language the agent supports
 	LanguageCode string `protobuf:"bytes,5,opt,name=language_code,json=languageCode,proto3" json:"language_code,omitempty"`
-	// name of intent to trigger at the start of a call
+	// Display name of the intent that opens the conversation, e.g. <code>Default Welcome Intent</code>. When the
+	// call is connected the bot triggers this intent before the caller says anything and speaks its answer (the
+	// greeting). Empty: the bot says nothing first and waits for the caller to speak. With answering machine
+	// detection active the intent is triggered only once the detector decided to greet
 	InitialIntent string `protobuf:"bytes,6,opt,name=initial_intent,json=initialIntent,proto3" json:"initial_intent,omitempty"`
-	// ondewo-nlu list of contexts
+	// Contexts created in the call&apos;s NLU session before the first NLU request, e.g. to hand the agent the
+	// customer number of an outbound call. Only the last segment of a context&apos;s <code>name</code> (the
+	// context id) is used: the context is created in the session of the call. A context without a name is skipped.
+	// Example: a context named <code>c-customer</code> with the parameter <code>customer_id</code> lets the agent
+	// greet a known customer by the data behind that id
 	Contexts []*nlu.Context `protobuf:"bytes,7,rep,name=contexts,proto3" json:"contexts,omitempty"`
-	// http basic auth token
+	// HTTP basic auth token. Kept for wire compatibility only: it is not forwarded to the call and has no effect
 	HttpBasicAuthToken string `protobuf:"bytes,8,opt,name=http_basic_auth_token,json=httpBasicAuthToken,proto3" json:"http_basic_auth_token,omitempty"`
-	// Return the message specified in Intent.Message.Platform platform to the user in the DetectIntentResponse
+	// Optional: Platform of the response messages the bot speaks. An NLU answer can carry messages for several
+	// platforms; the bot speaks only the text messages of this platform and skips every other one. Unset:
+	// <code>PLATFORM_UNSPECIFIED</code>, the messages without a platform. Set it to the platform the agent&apos;s
+	// voice answers are written for. A platform the agent&apos;s answers carry no text message for leaves the bot
+	// silent, so check the agent before changing it
 	Platform *nlu.Intent_Message_Platform `protobuf:"varint,9,opt,name=platform,proto3,enum=ondewo.nlu.Intent_Message_Platform,oneof" json:"platform,omitempty"`
-	// Optional: Bounds of the preemptive (speculative) NLU requests of the call. Unset keeps the deployment&apos;s
-	// values. Whether preemptive generation runs at all is set with
+	// Optional: Bounds of the preemptive (speculative) NLU requests of the call. Unset keeps the built-in
+	// defaults. The bounds only matter while preemptive generation is on, which is set with
 	// <code>CsiVtsiConfig.preemptive_generation_config.enabled</code>
 	PreemptiveGenerationConfig *NluPreemptiveGenerationConfig `protobuf:"bytes,10,opt,name=preemptive_generation_config,json=preemptiveGenerationConfig,proto3" json:"preemptive_generation_config,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	// Optional: Speak the filler sentences an AI Teams agent of the NLU sends while it is still working on a slow
+	// answer (e.g. &quot;One moment, I am checking that for you.&quot;), so the caller does not hear dead air. A
+	// filler is spoken before the answer of its turn, and a final answer that repeats a filler already spoken is not
+	// spoken a second time. <code>false</code>: every filler is dropped and only the answers are spoken. Only
+	// fillers the NLU marks as fillers are affected; agents that are not AI Teams agents send none. Default:
+	// <code>true</code>. There is no deployment-wide setting for it; a value set here wins for this call
+	AiTeamsFillersAudible *bool `protobuf:"varint,11,opt,name=ai_teams_fillers_audible,json=aiTeamsFillersAudible,proto3,oneof" json:"ai_teams_fillers_audible,omitempty"`
+	// Optional: Text the bot speaks when an NLU request of a turn still fails after its retries (the NLU is
+	// unreachable), so the caller hears a request to repeat instead of silence. Unset: a built-in apology in the
+	// language of <code>language_code</code>, German for <code>de</code> / <code>de-*</code> and English for every
+	// other language (&quot;Sorry, I didn&apos;t quite catch that. Could you please repeat that?&quot;). An empty
+	// text switches the apology off: the failed turn then stays unanswered. Leading and trailing spaces are removed.
+	// At most 500 characters and no control characters (a line break included); otherwise refused with
+	// <code>INVALID_ARGUMENT</code>. There is no deployment-wide setting for it; a value set here wins for this call
+	FailureApologyMessage *string `protobuf:"bytes,12,opt,name=failure_apology_message,json=failureApologyMessage,proto3,oneof" json:"failure_apology_message,omitempty"`
+	// Optional: Take the call&apos;s SIP context into the NLU session. <code>true</code> (default): the NLU session
+	// id of the call is derived from the SIP header <code>X-ondewo-phonesystem-call-id</code> when the call carries
+	// it (an <code>@</code> becomes <code>_at_</code>), so the conversation can be found by the phone system&apos;s
+	// own call id; and the session gets the context <code>c-sip-context</code>, whose parameters are the SIP
+	// account (<code>account_name</code>), the called party (<code>callee_id</code>) and the SIP headers of the
+	// call, so the agent can read e.g. a customer header the dialer added. <code>false</code>: the session id is
+	// the one generated for the call, no <code>c-sip-context</code> is created, and an agent that reads SIP headers
+	// from that context finds nothing. There is no deployment-wide setting for it; a value set here wins
+	SessionIdFromSipContext *bool `protobuf:"varint,13,opt,name=session_id_from_sip_context,json=sessionIdFromSipContext,proto3,oneof" json:"session_id_from_sip_context,omitempty"`
+	// Optional: Seconds a result an AI Teams agent delivers on its own (a push, e.g. the later result of a tool that
+	// ran in the background) may wait at most to be spoken. A push is held while the caller speaks or the bot is
+	// still answering, and spoken once the floor is free; a push that has waited longer than this by then is dropped
+	// without being spoken and reported as dropped with the reason <code>stale</code>, because a result the caller
+	// asked for long ago is confusing once the conversation has moved on. Unit: seconds. Default: 30. Valid range:
+	// 0 - 3600; 0 switches the age limit off (every held push is spoken, subject to
+	// <code>ai_teams_push_max_spoken</code>). Pushes only reach the call with
+	// <code>ResponseTimingConfig.nlu_call_stream_enabled</code>; agents that are not AI Teams agents send none. A set
+	// value wins over the deployment&apos;s <code>ONDEWO_VTSI_CSI_NLU_PUSH_MAX_AGE_SECONDS</code>
+	AiTeamsPushMaxAgeSeconds *float32 `protobuf:"fixed32,14,opt,name=ai_teams_push_max_age_seconds,json=aiTeamsPushMaxAgeSeconds,proto3,oneof" json:"ai_teams_push_max_age_seconds,omitempty"`
+	// Optional: Number of held pushes (see <code>ai_teams_push_max_age_seconds</code>) spoken at most when the floor
+	// becomes free: of the pushes still held after the age limit, only the NEWEST ones up to this number are spoken,
+	// oldest first; every older one is dropped without being spoken and reported as dropped with the reason
+	// <code>coalesced</code>. Example: three tool results arrived while the caller was talking; with 2 the caller
+	// hears the two latest. Default: 2. Valid range: 0 - 16; 0 switches the limit off (every held push is spoken).
+	// A set value wins over the deployment&apos;s <code>ONDEWO_VTSI_CSI_NLU_PUSH_MAX_SPOKEN</code>
+	AiTeamsPushMaxSpoken *int32 `protobuf:"varint,15,opt,name=ai_teams_push_max_spoken,json=aiTeamsPushMaxSpoken,proto3,oneof" json:"ai_teams_push_max_spoken,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *NluVtsiConfig) Reset() {
@@ -767,17 +887,58 @@ func (x *NluVtsiConfig) GetPreemptiveGenerationConfig() *NluPreemptiveGeneration
 	return nil
 }
 
+func (x *NluVtsiConfig) GetAiTeamsFillersAudible() bool {
+	if x != nil && x.AiTeamsFillersAudible != nil {
+		return *x.AiTeamsFillersAudible
+	}
+	return false
+}
+
+func (x *NluVtsiConfig) GetFailureApologyMessage() string {
+	if x != nil && x.FailureApologyMessage != nil {
+		return *x.FailureApologyMessage
+	}
+	return ""
+}
+
+func (x *NluVtsiConfig) GetSessionIdFromSipContext() bool {
+	if x != nil && x.SessionIdFromSipContext != nil {
+		return *x.SessionIdFromSipContext
+	}
+	return false
+}
+
+func (x *NluVtsiConfig) GetAiTeamsPushMaxAgeSeconds() float32 {
+	if x != nil && x.AiTeamsPushMaxAgeSeconds != nil {
+		return *x.AiTeamsPushMaxAgeSeconds
+	}
+	return 0
+}
+
+func (x *NluVtsiConfig) GetAiTeamsPushMaxSpoken() int32 {
+	if x != nil && x.AiTeamsPushMaxSpoken != nil {
+		return *x.AiTeamsPushMaxSpoken
+	}
+	return 0
+}
+
 type isNluVtsiConfig_Authentication interface {
 	isNluVtsiConfig_Authentication()
 }
 
 type NluVtsiConfig_Credentials struct {
-	// Credentials with classical username and password
+	// Account name and password of the NLU user the call talks to the NLU as (typically a technical user of
+	// the project). Used twice: once when the request is validated (the agent is read with these credentials)
+	// and once inside the call, which logs in with them. This is the authentication current deployments use.
+	// The values are never logged and can be withheld when the call configuration is read back
 	Credentials *Credentials `protobuf:"bytes,2,opt,name=credentials,proto3,oneof"`
 }
 
 type NluVtsiConfig_AuthToken struct {
-	// Authentication token
+	// Authentication token. Kept for wire compatibility only: VTSI does not validate the request with it, and
+	// the speech-to-speech service of current SIP images does not read it, so it has no effect there. It is
+	// still handed to the call, so a call running an older SIP image (<code>SipBaseConfig.sip_sim_version</code>)
+	// may still use it. Use <code>credentials</code> instead
 	AuthToken string `protobuf:"bytes,3,opt,name=auth_token,json=authToken,proto3,oneof"`
 }
 
@@ -785,20 +946,23 @@ func (*NluVtsiConfig_Credentials) isNluVtsiConfig_Authentication() {}
 
 func (*NluVtsiConfig_AuthToken) isNluVtsiConfig_Authentication() {}
 
-// Bounds of the preemptive (speculative) NLU requests: on a stable partial transcription the speech-to-speech
-// service asks the NLU for the answer of a draft BEFORE the final transcription arrives, and keeps it only when the
-// final transcription matches the draft. Every field is optional; an unset field keeps the deployment&apos;s value.
-// A value outside its range is refused with <code>INVALID_ARGUMENT</code>
+// Bounds of the preemptive (speculative) NLU requests. While preemptive generation is on (<code>CsiVtsiConfig.preemptive_generation_config.enabled</code>), the bot asks the NLU for the answer of a stable partial transcription BEFORE the caller&apos;s final transcription arrives, and uses that draft only when the final transcription matches it; otherwise the draft is discarded and the caller hears nothing of it. A draft never ends the caller&apos;s turn early; it only saves time when it matches. Every extra draft is an extra NLU request, and these bounds limit how many a turn may cost.
+//
+// Every field is optional; an unset field keeps the built-in default (there is no deployment-wide setting for these). A value outside its range is refused with <code>INVALID_ARGUMENT</code>.
+//
+// Example: <code>max_drafts_per_turn=1</code> and <code>min_stable_dwell_seconds=0.5</code> allow one draft per turn, started only after the partial transcription stayed unchanged for half a second: fewer extra NLU requests, less time saved.
 type NluPreemptiveGenerationConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Number of drafts one caller turn may start at most (default: 2, valid range: 0 - 5;
-	// 0 = no drafts)
+	// Optional: Number of drafts one caller turn may start at most. Unset: 2. Valid range: 0 - 5; 0 starts no draft
+	// at all, i.e. preemptive generation does nothing on this call
 	MaxDraftsPerTurn *int32 `protobuf:"varint,1,opt,name=max_drafts_per_turn,json=maxDraftsPerTurn,proto3,oneof" json:"max_drafts_per_turn,omitempty"`
-	// Optional: Seconds a partial transcription must stay unchanged before the first draft of a turn starts
-	// (default: 0.25, valid range: 0 - 2; 0 = no wait)
+	// Optional: Seconds a partial transcription must stay unchanged before the first draft of a turn starts. A
+	// longer wait drafts less often on a caller who only paused to breathe. Unset: 0.25. Valid range: 0 - 2;
+	// 0 = no wait
 	MinStableDwellSeconds *float32 `protobuf:"fixed32,2,opt,name=min_stable_dwell_seconds,json=minStableDwellSeconds,proto3,oneof" json:"min_stable_dwell_seconds,omitempty"`
-	// Optional: Minimum seconds between the starts of two drafts within one turn (default: 0.5,
-	// valid range: 0 - 5; 0 = no limit)
+	// Optional: Minimum seconds between the starts of two drafts within one turn, so a caller whose transcription
+	// keeps changing cannot use up <code>max_drafts_per_turn</code> at once. Unset: 0.5. Valid range: 0 - 5;
+	// 0 = no minimum interval
 	MinIntervalSeconds *float32 `protobuf:"fixed32,3,opt,name=min_interval_seconds,json=minIntervalSeconds,proto3,oneof" json:"min_interval_seconds,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -855,17 +1019,48 @@ func (x *NluPreemptiveGenerationConfig) GetMinIntervalSeconds() float32 {
 	return 0
 }
 
-// Text-2-Speech Configuration
+// Text-to-speech configuration of the call: which text-to-speech service and pipeline voices the bot, and how the answers of preemptive drafts are synthesized.
+//
+// Scope: the configuration of a listener applies to every inbound call that listener deployment serves; the configuration of a caller, a campaign or a scheduled caller applies to its own calls. A pooled persistent caller is reused only for a request with the identical configuration, so callers with different values are never shared.
+//
+// The service and the pipeline are checked when the request arrives: an empty <code>t2s_pipeline_id</code>, a pipeline the text-to-speech service does not know and an inactive pipeline are refused with <code>INVALID_ARGUMENT</code>; a text-to-speech service that does not answer is reported as <code>UNAVAILABLE</code> (a campaign then retries the call later).
 type T2SVtsiConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Host, Port, and [Optional] GRPC cert
+	// Host, port and trust anchor of the text-to-speech service the call uses. Required; see
+	// <code>BaseServiceConfig</code> for what is refused
 	T2SBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=t2s_base_config,json=t2sBaseConfig,proto3" json:"t2s_base_config,omitempty"`
-	// Configuration of Text-2-Speech
+	// Request configuration sent with the speech synthesis of the bot&apos;s utterances. <code>t2s_pipeline_id</code>
+	// is required and selects the text-to-speech pipeline, i.e. the voice the bot speaks with; the other fields
+	// (e.g. <code>length_scale</code>, the time stretching of the speech) are optional and keep the pipeline&apos;s
+	// defaults when unset.
+	// Example: <code>t2s_pipeline_id=&quot;my-german-voice&quot;</code> lets the bot speak with that pipeline
 	T2SRequestConfig *t2s.RequestConfig `protobuf:"bytes,2,opt,name=t2s_request_config,json=t2sRequestConfig,proto3" json:"t2s_request_config,omitempty"`
-	// Optional: Speech synthesis of preemptive (speculative) drafts. Unset keeps the deployment&apos;s values
+	// Optional: Whether and how the answer of a preemptive (speculative) draft is synthesized before the final
+	// transcription arrives. Unset keeps the built-in defaults listed in <code>T2sPreemptiveSynthesisConfig</code>.
+	// Only matters while preemptive generation is on (<code>CsiVtsiConfig.preemptive_generation_config.enabled</code>)
 	PreemptiveSynthesisConfig *T2SPreemptiveSynthesisConfig `protobuf:"bytes,3,opt,name=preemptive_synthesis_config,json=preemptiveSynthesisConfig,proto3" json:"preemptive_synthesis_config,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
+	// Optional: Seconds one speech synthesis request of the call may take before it is given up (default: 20, valid
+	// range: 1 - 120). A failed or timed-out request of an answer is retried, so a slow text-to-speech service can
+	// keep the caller waiting for several times this value; a lower value gives up sooner. The opening message of
+	// the call stops retrying when the time the caller is kept muted at the start of the call runs out, and an
+	// audible AI Teams filler gets one attempt of at most 1 s, never more than this value. There is no
+	// deployment-wide setting for it; a value set here wins
+	SynthesizeTimeoutSeconds *float32 `protobuf:"fixed32,4,opt,name=synthesize_timeout_seconds,json=synthesizeTimeoutSeconds,proto3,oneof" json:"synthesize_timeout_seconds,omitempty"`
+	// Optional: How long the synthesized audio of the bot&apos;s answers is kept for reuse (case-insensitive):
+	// <ul>
+	//   <li><code>call</code> (the default when unset): everything synthesized during a call is dropped when the
+	//       call ends. Audio synthesized when the speech-to-speech service starts (the greeting, the answers of
+	//       static intents, fillers) is kept, so the next call still starts without a synthesis wait.</li>
+	//   <li><code>process</code>: nothing is dropped; an utterance repeated in a later call served by the same
+	//       container is not synthesized again. The audio of one caller (e.g. a name or an amount the bot read
+	//       back) then stays in memory while later callers of a listener are served. The audio is reused only for
+	//       the identical request, so it is never played to another caller unless the bot says the same text.</li>
+	// </ul>
+	// Any other value is refused with <code>INVALID_ARGUMENT</code>. There is no deployment-wide setting for it; a
+	// value set here wins
+	CacheRetention *string `protobuf:"bytes,5,opt,name=cache_retention,json=cacheRetention,proto3,oneof" json:"cache_retention,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *T2SVtsiConfig) Reset() {
@@ -919,17 +1114,37 @@ func (x *T2SVtsiConfig) GetPreemptiveSynthesisConfig() *T2SPreemptiveSynthesisCo
 	return nil
 }
 
-// Speech synthesis of the answer of a preemptive (speculative) draft. Every field is optional; an unset field keeps
-// the deployment&apos;s value
+func (x *T2SVtsiConfig) GetSynthesizeTimeoutSeconds() float32 {
+	if x != nil && x.SynthesizeTimeoutSeconds != nil {
+		return *x.SynthesizeTimeoutSeconds
+	}
+	return 0
+}
+
+func (x *T2SVtsiConfig) GetCacheRetention() string {
+	if x != nil && x.CacheRetention != nil {
+		return *x.CacheRetention
+	}
+	return ""
+}
+
+// Speech synthesis of the answer of a preemptive (speculative) draft. With preemptive generation on, the NLU is asked for the answer of a stable partial transcription while the caller is still finishing the sentence; when the final transcription matches that draft, its answer is used instead of asking again, which shortens the pause before the bot speaks. These two switches decide how much of the speech synthesis is done ahead of time as well.
+//
+// Every field is optional; an unset field keeps the built-in default listed per field. Neither field has a value that is refused, and both are ignored while preemptive generation is off (<code>CsiVtsiConfig.preemptive_generation_config.enabled</code>).
 type T2SPreemptiveSynthesisConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Synthesize the answer of a draft before the final transcription arrives, so that a matching draft
-	// plays at once (default: true). <code>false</code> asks the NLU only and synthesizes at the commit
+	// Optional: Synthesize the answer of a draft already while the caller is still speaking (default: true).
+	// <code>true</code>: a matching draft is played at once, without waiting for its speech synthesis.
+	// <code>false</code>: drafts only ask the NLU; the answer of a matching draft is synthesized after the final
+	// transcription, like a normal answer. This saves the speech synthesis of every draft that is discarded, and
+	// gives back the part of the time saving that comes from synthesizing early
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
-	// Optional: Hand a matching draft&apos;s answer over chunk by chunk while it is still being synthesized, instead
-	// of waiting for the whole synthesis (default: false). Needs chunked text-to-speech streaming
-	// (<code>ResponseTimingConfig.t2s_chunked_streaming_enabled</code>) and is ignored without it.
-	// <code>chunked</code> has no effect when <code>enabled</code> is false
+	// Optional: Play the answer of a matching draft chunk by chunk while it is still being synthesized, instead of
+	// waiting until its whole speech synthesis has finished (default: false). Only takes effect when
+	// <code>enabled</code> is true (or unset) and chunked text-to-speech streaming is on
+	// (<code>ResponseTimingConfig.t2s_chunked_streaming_enabled</code>, true by default); otherwise it is ignored.
+	// Example: <code>enabled=true</code> and <code>chunked=true</code> give the shortest pause after the caller
+	// finished speaking for a long answer
 	Chunked       *bool `protobuf:"varint,2,opt,name=chunked,proto3,oneof" json:"chunked,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -979,15 +1194,41 @@ func (x *T2SPreemptiveSynthesisConfig) GetChunked() bool {
 	return false
 }
 
-// Speech-2-Text Configuration
+// Speech-to-text (S2T) configuration of a call: which S2T service and pipeline transcribe the caller, how each utterance is transcribed, and what happens when the S2T service becomes unreachable during the call.
+//
+// Checked when the caller or listener is started: the S2T service must be reachable and the pipeline named in <code>s2t_transcribe_request_config.s2t_pipeline_id</code> must exist and be active, otherwise the request is refused.
 type S2TVtsiConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Host, Port, and [Optional] GRPC cert
+	// Address and server trust of the S2T service (see <code>BaseServiceConfig</code>). Required
 	S2TBaseConfig *BaseServiceConfig `protobuf:"bytes,1,opt,name=s2t_base_config,json=s2tBaseConfig,proto3" json:"s2t_base_config,omitempty"`
-	// Configuration of Speech-2-Text
+	// The transcription request the call sends to the S2T service for the caller&apos;s audio, e.g. the pipeline,
+	// the voice activity detection and which results are returned. <code>s2t_pipeline_id</code> is required: an
+	// empty one is refused with <code>INVALID_ARGUMENT</code>, and one that does not exist or is not active
+	// refuses the request.
+	// <p>VTSI adds what the call&apos;s <code>VoiceInteractionConfig</code> needs and never overwrites a value set
+	// here: for example, with interruptions enabled, preemptive generation enabled or a
+	// <code>TurnDetectionConfig</code> present, partial (not final) transcripts and the start-of-speech signal are
+	// requested unless this config already says otherwise.
+	// <code>TurnDetectionConfig.min_endpointing_delay_seconds</code> is applied through the <code>pyannote</code>
+	// block of this config. Supply a <code>pyannote</code> block when you set it: without one the delay is applied
+	// only where the deployment supports creating the block, and is otherwise dropped with a warning in the server
+	// log.</p>
 	S2TTranscribeRequestConfig *s2t.TranscribeRequestConfig `protobuf:"bytes,2,opt,name=s2t_transcribe_request_config,json=s2tTranscribeRequestConfig,proto3" json:"s2t_transcribe_request_config,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	// Optional: What the call does when the S2T service stays unreachable after all retries, i.e. when the bot can
+	// no longer hear the caller:
+	// <ul>
+	//   <li><code>hangup</code> (the default when unset): the call is ended.</li>
+	//   <li><code>human_handover</code>: a handover to a human agent is requested. This trigger carries no
+	//       transfer target, so the call currently ends as with <code>hangup</code>.</li>
+	//   <li><code>none</code>: nothing is done; the call stays up, but nothing the caller says is transcribed or
+	//       answered any more.</li>
+	// </ul>
+	// Case-insensitive, e.g. <code>HANGUP</code> is accepted; any other value is refused with
+	// <code>INVALID_ARGUMENT</code>. There is no deployment-wide setting for it: unset always means
+	// <code>hangup</code>.
+	FailureSipTrigger *string `protobuf:"bytes,3,opt,name=failure_sip_trigger,json=failureSipTrigger,proto3,oneof" json:"failure_sip_trigger,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *S2TVtsiConfig) Reset() {
@@ -1034,19 +1275,50 @@ func (x *S2TVtsiConfig) GetS2TTranscribeRequestConfig() *s2t.TranscribeRequestCo
 	return nil
 }
 
-// Service Configs of Speech-2-Text, NLU, Text-2-Speech and CSI which are common for both listener and caller
+func (x *S2TVtsiConfig) GetFailureSipTrigger() string {
+	if x != nil && x.FailureSipTrigger != nil {
+		return *x.FailureSipTrigger
+	}
+	return ""
+}
+
+// The service configuration of a call: speech-to-text (S2T), NLU, text-to-speech (T2S), the speech-to-speech service (CSI), the voice interaction (turn-taking, interruptions, response timing, AMD, DTMF, transfers) and the media behaviour of the call&apos;s SIP container. The same message is used by callers, listeners, scheduled callers and campaigns.
+//
+// <b>Unset means inherit.</b> Every <code>optional</code> field and every message left unset sends nothing to the call, so the call runs with the deployment&apos;s setting where the operator configured one (an <code>ONDEWO_VTSI_*</code> setting of the VTSI server, named at the field) and otherwise with the built-in default documented at the field. A value set here always wins over both: per-call value &gt; deployment setting &gt; built-in default. A value outside its documented range is refused with <code>INVALID_ARGUMENT</code> and nothing is started.
+//
+// <b>Scope.</b>
+//
+// <ul> <li>A <b>listener</b>&apos;s configuration applies to every inbound call that listener deployment serves, one after the other, until it is stopped. <code>UpdateListener</code> changes the stored configuration only (see there).</li> <li>A <b>caller</b> or <b>scheduled caller</b> applies its configuration to its own call.</li> <li>A <b>campaign</b>&apos;s <code>campaign_common_services_config</code> is the default of every call of the campaign; each call&apos;s own configuration is merged over it, so a field the call sets wins (see <code>Campaign</code>).</li> <li>A <b>pooled persistent caller</b> is reused only for a request whose configuration is identical (only the callee and its SIP headers may differ), so a different value of any field here gets a different caller.</li> </ul>
+//
+// Example: to let the caller interrupt (barge in on) the bot, set <code>voice_interaction_config.interruption_handling_config.enabled = true</code> and leave everything else unset to keep the defaults; add e.g. <code>min_interruption_duration_seconds = 0.8</code> to let short noises pass. (How many words interrupt depends on the turn detection mode, see <code>InterruptionHandlingConfig</code>.)
 type CommonServicesConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// speech-to-text service configuration
+	// Speech-to-text configuration (see <code>S2tVtsiConfig</code>). Required
 	S2TVtsiConfig *S2TVtsiConfig `protobuf:"bytes,1,opt,name=s2t_vtsi_config,json=s2tVtsiConfig,proto3" json:"s2t_vtsi_config,omitempty"`
-	// ondewo-nlu configuration
+	// NLU configuration: the agent, its login and its language (see <code>NluVtsiConfig</code>). Required
 	NluVtsiConfig *NluVtsiConfig `protobuf:"bytes,2,opt,name=nlu_vtsi_config,json=nluVtsiConfig,proto3" json:"nlu_vtsi_config,omitempty"`
-	// text-to-speech service configuration
+	// Text-to-speech configuration (see <code>T2sVtsiConfig</code>). Required
 	T2SVtsiConfig *T2SVtsiConfig `protobuf:"bytes,3,opt,name=t2s_vtsi_config,json=t2sVtsiConfig,proto3" json:"t2s_vtsi_config,omitempty"`
-	// CSI service configuration
+	// Speech-to-speech service (CSI) configuration: callbacks, message broker, audio storage and preemptive
+	// generation (see <code>CsiVtsiConfig</code>)
 	CsiVtsiConfig *CsiVtsiConfig `protobuf:"bytes,4,opt,name=csi_vtsi_config,json=csiVtsiConfig,proto3" json:"csi_vtsi_config,omitempty"`
-	// Voice interaction configuration for turn detection, interruption (barge-in) handling and response timing
+	// Optional: How the bot talks with the caller: turn detection, interruption (barge-in) handling, response
+	// timing, answering machine detection, DTMF keys and transfers (see <code>VoiceInteractionConfig</code>).
+	// Unset: the call runs with the deployment&apos;s settings and the built-in defaults of every one of them
 	VoiceInteractionConfig *VoiceInteractionConfig `protobuf:"bytes,5,opt,name=voice_interaction_config,json=voiceInteractionConfig,proto3" json:"voice_interaction_config,omitempty"`
+	// Optional: Media and SIP behaviour of the call&apos;s SIP container: audio buffering, the media clock,
+	// statistics logging, hangup and dial timeouts, the SIP registration and live call audio streams (see
+	// <code>SipVtsiConfig</code>). Unset, or an unset field: the container&apos;s default applies
+	SipVtsiConfig *SipVtsiConfig `protobuf:"bytes,6,opt,name=sip_vtsi_config,json=sipVtsiConfig,proto3" json:"sip_vtsi_config,omitempty"`
+	// Optional: Seconds a call may last at most, counted from when it was connected; then VTSI hangs it up (an
+	// outbound call of a caller, and each inbound call of a listener). Valid range: 1 - 86400; 0 and any value
+	// outside the range are refused with <code>INVALID_ARGUMENT</code>. It can only shorten a call: the
+	// deployment&apos;s own cap on callers (<code>ONDEWO_VTSI_CALLER_MAX_CALL_DURATION_SEC</code>, default 1200 s,
+	// counted from the deployment of the caller; for a pooled caller with that cap off,
+	// <code>ONDEWO_VTSI_CALLER_POOLED_MAX_CALL_DURATION_SEC</code>) still applies, and whichever is reached first
+	// ends the call. Unset: only the deployment&apos;s cap applies, and an inbound call of a listener is not capped.
+	// Example: <code>max_call_duration_seconds=300</code> ends a survey call after five minutes
+	MaxCallDurationSeconds *uint32 `protobuf:"varint,7,opt,name=max_call_duration_seconds,json=maxCallDurationSeconds,proto3,oneof" json:"max_call_duration_seconds,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -1116,15 +1388,176 @@ func (x *CommonServicesConfig) GetVoiceInteractionConfig() *VoiceInteractionConf
 	return nil
 }
 
-// Configuration of the voice interaction behavior of a call:
-// turn detection, interruption (barge-in) handling and response timing
+func (x *CommonServicesConfig) GetSipVtsiConfig() *SipVtsiConfig {
+	if x != nil {
+		return x.SipVtsiConfig
+	}
+	return nil
+}
+
+func (x *CommonServicesConfig) GetMaxCallDurationSeconds() uint32 {
+	if x != nil && x.MaxCallDurationSeconds != nil {
+		return *x.MaxCallDurationSeconds
+	}
+	return 0
+}
+
+// Media and SIP behaviour of the SIP container that carries the call. A container serves one call, one listener deployment (all its inbound calls) or one pooled persistent caller, and a pooled caller is reused only for a request with the same configuration, so every field applies to the call(s) of exactly this configuration.
+//
+// Every field is <code>optional</code>. An unset field sends nothing, and the container&apos;s built-in default applies. <code>register_interval_seconds</code> has a deployment-wide setting (<code>ONDEWO_VTSI_SIP_REGISTER_INTERVAL_S</code>), which a set value wins over. For the two live call audio stream limits the deployment&apos;s own limit applies in addition, so the stricter of the two wins. A value outside its range (including NaN for a float field) is refused with <code>INVALID_ARGUMENT</code> naming the field.
+//
+// The defaults are the recommended values; most integrations leave this message unset.
+type SipVtsiConfig struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Optional: Milliseconds of audio the sound device&apos;s playback buffer holds for the caller&apos;s audio on
+	// its way to the speech-to-text service (and to a live LISTEN stream of the call). A smaller buffer lets the
+	// bot hear the caller sooner (faster turn ends and interruptions); a larger one rides out short stalls of the
+	// host better, at the price of that delay. Unit: milliseconds. Default: 60. Valid range: 40 - 1000; 140 is the
+	// previous default and the rollback value. Values below 60 save little and tolerate stalls worse.
+	PlaybackLatencyMs *uint32 `protobuf:"varint,1,opt,name=playback_latency_ms,json=playbackLatencyMs,proto3,oneof" json:"playback_latency_ms,omitempty"`
+	// Optional: Whether the call&apos;s media (sending RTP and reading the caller&apos;s audio) is clocked by a
+	// software clock instead of the sound device. The software clock keeps the call&apos;s audio running in real
+	// time when the sound device stalls; with the sound device&apos;s clock a stall delays or drops audio in both
+	// directions. Default: true; false is the rollback to the sound device&apos;s clock.
+	SoftwareClockEnabled *bool `protobuf:"varint,2,opt,name=software_clock_enabled,json=softwareClockEnabled,proto3,oneof" json:"software_clock_enabled,omitempty"`
+	// Optional: Seconds between two RTP statistics log lines (packets, loss, jitter per direction) of a live call.
+	// Diagnostics only: it changes nothing about the audio. Unit: seconds. Default: 10. Valid: 0 (no periodic
+	// lines; the statistics line at the end of each audio stream is still written) or 1 - 3600.
+	RtpStatsSampleIntervalSeconds *float32 `protobuf:"fixed32,3,opt,name=rtp_stats_sample_interval_seconds,json=rtpStatsSampleIntervalSeconds,proto3,oneof" json:"rtp_stats_sample_interval_seconds,omitempty"`
+	// Optional: Seconds a graceful hangup waits at most for audio files still playing into the call before it
+	// ends the call anyway. A hangup that ends the call at once does not wait. Unit: seconds. Default: 5.0. Valid
+	// range: 0 - 60; 0 hangs up without waiting.
+	HangupWaitForPlaybackTimeoutSeconds *float32 `protobuf:"fixed32,4,opt,name=hangup_wait_for_playback_timeout_seconds,json=hangupWaitForPlaybackTimeoutSeconds,proto3,oneof" json:"hangup_wait_for_playback_timeout_seconds,omitempty"`
+	// Optional: Seconds an outbound call of a pooled persistent caller may stay at
+	// <code>OUTGOING_CALL_INITIATED</code> with no SIP session behind it before the call is failed and the caller
+	// is made ready for its next call. It has no effect on listeners or on callers that are not pooled. Unit:
+	// seconds. Default: 45. Valid range: above 30 up to 600 (30 itself is refused): it must stay above the 30 s a
+	// lookup of the callee&apos;s address may take, or a slow but working dial would be cut short.
+	OutgoingDialWatchdogSeconds *float32 `protobuf:"fixed32,5,opt,name=outgoing_dial_watchdog_seconds,json=outgoingDialWatchdogSeconds,proto3,oneof" json:"outgoing_dial_watchdog_seconds,omitempty"`
+	// Optional: Seconds the container asks the Asterisk to keep its SIP registration; the Asterisk may grant less
+	// (it grants no less than 60 s and, by default, no more than 7200 s), and the registration is renewed 30 s
+	// before the GRANTED time expires. A listener can be reached by inbound calls only while it is registered.
+	// Unit: seconds. Default: 600. Valid range: 60 - 86400; a value above the Asterisk&apos;s maximum behaves like
+	// that maximum. A set value wins over the deployment&apos;s <code>ONDEWO_VTSI_SIP_REGISTER_INTERVAL_S</code>;
+	// unset, that setting applies when the operator set it above 0, else the default.
+	RegisterIntervalSeconds *uint32 `protobuf:"varint,6,opt,name=register_interval_seconds,json=registerIntervalSeconds,proto3,oneof" json:"register_interval_seconds,omitempty"`
+	// Optional: Live call audio streams (<code>StreamCallAudio</code>, <code>ListenCallAudio</code>) the call admits
+	// at the same time; at most one of them may TALK. A stream beyond the limit is refused with
+	// <code>RESOURCE_EXHAUSTED</code>. The deployment&apos;s own limit
+	// (<code>ONDEWO_VTSI_CALL_AUDIO_STREAM_MAX_CONCURRENT</code>) applies as well. Default: 2. Valid range:
+	// 1 - 2.
+	CallAudioStreamMaxConcurrent *uint32 `protobuf:"varint,7,opt,name=call_audio_stream_max_concurrent,json=callAudioStreamMaxConcurrent,proto3,oneof" json:"call_audio_stream_max_concurrent,omitempty"`
+	// Optional: Seconds a live call audio stream of the call may last at most; it then ends with
+	// <code>CALL_AUDIO_END_REASON_MAX_DURATION</code>. A stream&apos;s own <code>max_duration_s</code> can only
+	// lower it, and the deployment&apos;s limit (<code>ONDEWO_VTSI_CALL_AUDIO_STREAM_MAX_DURATION_S</code>)
+	// applies as well. Unit: seconds. Default: 3600. Valid range: 1 - 86400.
+	CallAudioStreamMaxDurationSeconds *uint32 `protobuf:"varint,8,opt,name=call_audio_stream_max_duration_seconds,json=callAudioStreamMaxDurationSeconds,proto3,oneof" json:"call_audio_stream_max_duration_seconds,omitempty"`
+	unknownFields                     protoimpl.UnknownFields
+	sizeCache                         protoimpl.SizeCache
+}
+
+func (x *SipVtsiConfig) Reset() {
+	*x = SipVtsiConfig{}
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SipVtsiConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SipVtsiConfig) ProtoMessage() {}
+
+func (x *SipVtsiConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SipVtsiConfig.ProtoReflect.Descriptor instead.
+func (*SipVtsiConfig) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *SipVtsiConfig) GetPlaybackLatencyMs() uint32 {
+	if x != nil && x.PlaybackLatencyMs != nil {
+		return *x.PlaybackLatencyMs
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetSoftwareClockEnabled() bool {
+	if x != nil && x.SoftwareClockEnabled != nil {
+		return *x.SoftwareClockEnabled
+	}
+	return false
+}
+
+func (x *SipVtsiConfig) GetRtpStatsSampleIntervalSeconds() float32 {
+	if x != nil && x.RtpStatsSampleIntervalSeconds != nil {
+		return *x.RtpStatsSampleIntervalSeconds
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetHangupWaitForPlaybackTimeoutSeconds() float32 {
+	if x != nil && x.HangupWaitForPlaybackTimeoutSeconds != nil {
+		return *x.HangupWaitForPlaybackTimeoutSeconds
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetOutgoingDialWatchdogSeconds() float32 {
+	if x != nil && x.OutgoingDialWatchdogSeconds != nil {
+		return *x.OutgoingDialWatchdogSeconds
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetRegisterIntervalSeconds() uint32 {
+	if x != nil && x.RegisterIntervalSeconds != nil {
+		return *x.RegisterIntervalSeconds
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetCallAudioStreamMaxConcurrent() uint32 {
+	if x != nil && x.CallAudioStreamMaxConcurrent != nil {
+		return *x.CallAudioStreamMaxConcurrent
+	}
+	return 0
+}
+
+func (x *SipVtsiConfig) GetCallAudioStreamMaxDurationSeconds() uint32 {
+	if x != nil && x.CallAudioStreamMaxDurationSeconds != nil {
+		return *x.CallAudioStreamMaxDurationSeconds
+	}
+	return 0
+}
+
+// How the bot of a call takes turns, lets the caller interrupt it, times its answers, reads the caller&apos;s keypad and transfers the call: turn detection, interruption (barge-in) handling, response timing, answering machine detection, DTMF keys, warm intros and the transfers the bot starts itself.
+//
+// Scope: set in the <code>CommonServicesConfig</code> of a listener, it applies to every inbound call that listener deployment serves; set for a caller, a campaign or a scheduled caller, it applies to each of its own calls. A pooled persistent caller is reused only for a request with an identical configuration, so two requests that differ here never share a caller.
+//
+// Precedence: every sub-message and every field is optional, and unset means inherit. A set per-call value wins over the deployment&apos;s <code>ONDEWO_VTSI_*</code> setting for the same behaviour (where one exists), which wins over the built-in default. A value outside its documented range is refused with <code>INVALID_ARGUMENT</code>.
 type VoiceInteractionConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Configuration of the turn detection
+	// When the caller&apos;s turn is over and the bot may answer: turn detection mode, endpointing delays, partial
+	// transcriptions and dictation holds (see <code>TurnDetectionConfig</code>). Unset keeps the defaults
 	TurnDetectionConfig *TurnDetectionConfig `protobuf:"bytes,1,opt,name=turn_detection_config,json=turnDetectionConfig,proto3" json:"turn_detection_config,omitempty"`
-	// Configuration of the interruption (barge-in) handling
+	// Whether and how the caller can interrupt (barge in on) the bot while it speaks, and what happens to the
+	// interrupted answer (see <code>InterruptionHandlingConfig</code>). Unset: speech never interrupts the bot; a
+	// DTMF key the bot asked for still does unless <code>DtmfConfig.barge_in</code> is false
 	InterruptionHandlingConfig *InterruptionHandlingConfig `protobuf:"bytes,2,opt,name=interruption_handling_config,json=interruptionHandlingConfig,proto3" json:"interruption_handling_config,omitempty"`
-	// Configuration of the response timing
+	// When and how the bot responds, e.g. after caller silence, with fillers while it is thinking, and how its
+	// answers are streamed (see <code>ResponseTimingConfig</code>). Unset keeps the defaults
 	ResponseTimingConfig *ResponseTimingConfig `protobuf:"bytes,3,opt,name=response_timing_config,json=responseTimingConfig,proto3" json:"response_timing_config,omitempty"`
 	// Configuration of the answering machine detection (AMD) of an outbound call.
 	// Only accepted for pooled persistent callers: a listener or a one-shot caller that carries it
@@ -1137,13 +1570,18 @@ type VoiceInteractionConfig struct {
 	// inherits the project default <code>VtsiProject.warm_transfer_defaults</code>; a
 	// <code>TransferCallRequest.warm_transfer_config</code> wins over it for that one transfer
 	WarmTransferConfig *WarmTransferConfig `protobuf:"bytes,6,opt,name=warm_transfer_config,json=warmTransferConfig,proto3" json:"warm_transfer_config,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	// How the transfers the bot starts itself behave: a transfer the NLU agent or an LLM agent decides on during
+	// the conversation, not one a client asks for with <code>TransferCall</code> (see
+	// <code>BotTransferConfig</code>). Unset keeps the defaults: wait up to 5 s for the outcome, and keep the
+	// call with the bot when the transfer fails
+	BotTransferConfig *BotTransferConfig `protobuf:"bytes,7,opt,name=bot_transfer_config,json=botTransferConfig,proto3" json:"bot_transfer_config,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *VoiceInteractionConfig) Reset() {
 	*x = VoiceInteractionConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[8]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1155,7 +1593,7 @@ func (x *VoiceInteractionConfig) String() string {
 func (*VoiceInteractionConfig) ProtoMessage() {}
 
 func (x *VoiceInteractionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[8]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1168,7 +1606,7 @@ func (x *VoiceInteractionConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VoiceInteractionConfig.ProtoReflect.Descriptor instead.
 func (*VoiceInteractionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{8}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *VoiceInteractionConfig) GetTurnDetectionConfig() *TurnDetectionConfig {
@@ -1213,34 +1651,175 @@ func (x *VoiceInteractionConfig) GetWarmTransferConfig() *WarmTransferConfig {
 	return nil
 }
 
-// Configuration of the DTMF keys a caller presses. A key reaches the bot only when the bot&apos;s last answer
-// declared a key menu or a key entry (ondewo-cai intent tags <code>ondewo-voice:dtmf-menu:&lt;id&gt;</code> /
-// <code>ondewo-voice:dtmf-digits:&lt;id&gt;</code>); it is then sent to the NLU as the turn text
-// <code>[DTMF:&lt;keys&gt;]</code>. Every field is <code>optional</code>; unset keeps the deployment&apos;s value
-// (the <code>ONDEWO_VTSI_CSI_DTMF_*</code> / <code>ONDEWO_VTSI_SIP_DTMF_FORWARD_ACTIVE</code> settings, else
-// the default).
+func (x *VoiceInteractionConfig) GetBotTransferConfig() *BotTransferConfig {
+	if x != nil {
+		return x.BotTransferConfig
+	}
+	return nil
+}
+
+// The transfers the bot of a call starts itself, i.e. a transfer the NLU agent or an LLM agent decides on during the conversation. A transfer a client requests with <code>TransferCall</code> is not affected (its wait is the deployment&apos;s <code>ONDEWO_VTSI_TRANSFER_OUTCOME_TIMEOUT_MS</code>).
+//
+// What the caller experiences: the bot sends the transfer to the phone system and waits up to <code>outcome_timeout_ms</code> for its answer. Accepted: the caller is handed over to the target and the bot leaves the call. Rejected (e.g. the target does not exist): the call stays up and <code>failed_action</code> decides what happens next. No answer in time: the call stays up as well (if the phone system accepts the transfer later, the caller is still handed over and the bot leaves); <code>continue</code> and <code>exit</code> then keep the call with the bot, <code>hangup</code> ends it. A transfer refused because invited participants are in the call always keeps the call, whatever <code>failed_action</code> says. When the call&apos;s warm transfer configuration asks for warm intros on the bot&apos;s transfers, the bot&apos;s transfer is handed to that warm intro instead and the call stays with the bot meanwhile.
+//
+// Scope and precedence as in <code>VoiceInteractionConfig</code>; these fields have no deployment setting, so unset means the built-in default. Every field is <code>optional</code>, and a value outside its range is refused with <code>INVALID_ARGUMENT</code>.
+//
+// Example: to send a caller whose transfer failed to the project&apos;s exit extension (e.g. a queue) rather than back to the bot, and to wait up to 8 s for the phone system: <code>outcome_timeout_ms: 8000, failed_action: &quot;exit&quot;</code>
+type BotTransferConfig struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Optional: Milliseconds a bot transfer waits for the phone system to accept or reject it before the call is
+	// treated as not transferred (default: 5000, valid range: 0 - 10000). <code>0</code> is the blind transfer:
+	// the bot leaves the call at once without waiting, so a rejection cannot be noticed and
+	// <code>failed_action</code> does not apply to it
+	OutcomeTimeoutMs *uint32 `protobuf:"varint,1,opt,name=outcome_timeout_ms,json=outcomeTimeoutMs,proto3,oneof" json:"outcome_timeout_ms,omitempty"`
+	// Optional: What happens when a transfer the bot started fails while the call is still up (default:
+	// <code>continue</code>). <code>continue</code>: the bot keeps the call and the conversation goes on.
+	// <code>hangup</code>: the call is ended. <code>exit</code>: the call is transferred once more, to the
+	// <code>exit</code> extension of the project&apos;s phone system, and ended if that fails too; while the first
+	// transfer is still waiting for its answer, the call is kept instead. The same action applies when a bot
+	// transfer that was handed to a warm intro is not taken up in time. Case-insensitive; any other value is refused
+	// with <code>INVALID_ARGUMENT</code>
+	FailedAction *string `protobuf:"bytes,2,opt,name=failed_action,json=failedAction,proto3,oneof" json:"failed_action,omitempty"`
+	// Optional: Only used with warm intros (<code>WarmTransferConfig</code>). After a warm transfer failed (the
+	// target declined or could not be reached, or a bot transfer handed to a warm intro was not taken up), the bot
+	// tells the caller. An NLU that answers warm transfer outcomes writes what the bot says; this is how many
+	// seconds the bot waits for that answer, and for a moment in which nobody speaks, before it speaks the
+	// notice&apos;s fallback text instead (<code>WarmTransferConfig.caller_declined_message</code> /
+	// <code>caller_unreachable_message</code>, else a built-in text) (default: 5.0, valid range: above 0 - 60).
+	// The notice is never dropped by this timeout
+	WarmTransferOutcomeCommitTimeoutSeconds *float32 `protobuf:"fixed32,3,opt,name=warm_transfer_outcome_commit_timeout_seconds,json=warmTransferOutcomeCommitTimeoutSeconds,proto3,oneof" json:"warm_transfer_outcome_commit_timeout_seconds,omitempty"`
+	unknownFields                           protoimpl.UnknownFields
+	sizeCache                               protoimpl.SizeCache
+}
+
+func (x *BotTransferConfig) Reset() {
+	*x = BotTransferConfig{}
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BotTransferConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BotTransferConfig) ProtoMessage() {}
+
+func (x *BotTransferConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BotTransferConfig.ProtoReflect.Descriptor instead.
+func (*BotTransferConfig) Descriptor() ([]byte, []int) {
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *BotTransferConfig) GetOutcomeTimeoutMs() uint32 {
+	if x != nil && x.OutcomeTimeoutMs != nil {
+		return *x.OutcomeTimeoutMs
+	}
+	return 0
+}
+
+func (x *BotTransferConfig) GetFailedAction() string {
+	if x != nil && x.FailedAction != nil {
+		return *x.FailedAction
+	}
+	return ""
+}
+
+func (x *BotTransferConfig) GetWarmTransferOutcomeCommitTimeoutSeconds() float32 {
+	if x != nil && x.WarmTransferOutcomeCommitTimeoutSeconds != nil {
+		return *x.WarmTransferOutcomeCommitTimeoutSeconds
+	}
+	return 0
+}
+
+// How the call treats the DTMF keys (the telephone keypad) the caller presses. Keys let a caller answer a menu (&quot;for sales press 1, for support press 2&quot;) or type a value such as a PIN or a customer number instead of speaking it.
+//
+// A key reaches the bot only when the bot&apos;s LAST answer asked for keys: a key menu or a key entry, declared in the ONDEWO NLU agent by the intent tags <code>ondewo-voice:dtmf-menu:&lt;id&gt;</code> / <code>ondewo-voice:dtmf-digits:&lt;id&gt;</code> (or by an AI team through its <code>c-voice-turn</code> context). The finished choice or entry is then sent to the NLU as the caller&apos;s turn, by default as the text <code>[DTMF:&lt;keys&gt;]</code> (<code>*</code> and <code>#</code> spelled <code>STAR</code> and <code>HASH</code>, an invalid entry as <code>[DTMF:INVALID]</code>), together with a one-turn context <code>c-dtmf</code>. A menu key is sent at once; a key entry is sent when the caller presses the terminator (<code>#</code> by default), reaches the declared maximum number of keys, or stops pressing for <code>inter_digit_timeout_ms</code>. Keys are never written to a log in clear.
+//
+// While a key entry is open, and shortly after a key turn, the caller&apos;s speech is not sent to the NLU: a key wins its turn. Keys are also ignored while answering machine detection is still deciding on an outbound call.
+//
+// Scope: applies to every call of the deployment it is set on: every inbound call a listener serves, every call of a caller, a campaign or a scheduled caller. A pooled persistent caller is only reused for a call with an identical configuration.
+//
+// Every field is <code>optional</code>. A field left unset inherits: the deployment&apos;s <code>ONDEWO_VTSI_CSI_DTMF_*</code> / <code>ONDEWO_VTSI_SIP_DTMF_FORWARD_ACTIVE</code> setting where one exists and is set, else the built-in default listed per field. A set value always wins over the deployment setting. Leaving the whole message unset keeps the deployment settings, and without them gives the built-in behaviour: keys on, a key interrupts the bot, keys the bot did not ask for are ignored.
+//
+// Example: a bot that must let the caller finish listening before keys count, and that treats every key as a menu choice even when no menu was declared:
+//
+// <pre><code>dtmf_config { barge_in: false undeclared_policy: &quot;COMMIT_SINGLE&quot; }</code></pre>
 type DtmfConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Whether a pressed key is forwarded to the bot at all (default true). <code>false</code> ignores every key of
-	// the call
+	// Optional: Whether the caller&apos;s keys are used at all (default: <code>true</code>; deployment setting
+	// <code>ONDEWO_VTSI_CSI_DTMF_ACTIVE</code> and <code>ONDEWO_VTSI_SIP_DTMF_FORWARD_ACTIVE</code>).
+	// <code>false</code> ignores every key of the call: no key interrupts the bot and no key turn reaches the NLU,
+	// also when the bot declared a menu or an entry. <code>true</code> switches keys on for this call even when
+	// the deployment switched them off. The other fields have no effect while this is <code>false</code>
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
-	// Whether a key pressed while the bot speaks stops the bot, like a spoken interruption (default true)
+	// Optional: Whether a key pressed while the bot speaks stops the bot at once, like a spoken interruption
+	// (default: <code>true</code>; deployment setting <code>ONDEWO_VTSI_CSI_DTMF_BARGE_IN_ACTIVE</code>).
+	// <p>A key interruption is always treated as a real one (a key is never mistaken for a cough), and it
+	// applies even when spoken interruptions are switched off for the call
+	// (<code>InterruptionHandlingConfig</code>): a key is the caller&apos;s deliberate choice. A key entry interrupts
+	// at its first key, a menu key when it is taken. Only a key the bot asked for interrupts; a key that is ignored
+	// (see <code>undeclared_policy</code>) never does.</p>
+	// <p><code>false</code> lets the bot finish its sentence first; the key is still collected and sent as the
+	// caller&apos;s next turn.</p>
 	BargeIn *bool `protobuf:"varint,2,opt,name=barge_in,json=bargeIn,proto3,oneof" json:"barge_in,omitempty"`
-	// Milliseconds after the last key of a key entry (e.g. a PIN) without a terminator before the entry is sent
-	// (default 2000, valid range 300 - 10000; a value outside the range is refused with
-	// <code>INVALID_ARGUMENT</code>)
+	// Optional: Milliseconds of no further key after which an open key entry (e.g. a PIN or a customer number) is
+	// considered finished and sent to the NLU, when the caller presses no terminator (default: 2000, valid range:
+	// 300 - 10000; deployment setting <code>ONDEWO_VTSI_CSI_DTMF_INTER_DIGIT_TIMEOUT_MS</code>). A value outside
+	// the range is refused with <code>INVALID_ARGUMENT</code>.
+	// <p>It applies to key entries only, never to a menu (a menu key is taken at once), and only to an entry
+	// whose declaration names no timeout of its own: the tag option <code>timeout_ms=N</code> of
+	// <code>ondewo-voice:dtmf-digits</code> wins. An entry ended by this timeout with fewer keys than the
+	// declared minimum is sent as <code>[DTMF:INVALID]</code>.</p>
+	// <p>Example: <code>4000</code> gives callers who type a long customer number slowly more time between two
+	// keys; a smaller value answers sooner after the last key.</p>
 	InterDigitTimeoutMs *uint32 `protobuf:"varint,3,opt,name=inter_digit_timeout_ms,json=interDigitTimeoutMs,proto3,oneof" json:"inter_digit_timeout_ms,omitempty"`
-	// What a key the bot declared nothing for does: <code>DROP</code> (default; the key is ignored and the bot is
-	// not interrupted) or <code>COMMIT_SINGLE</code> (the key is sent to the NLU as a one-key turn). Any other
-	// value is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: What a key does that the bot did not ask for, i.e. when the bot&apos;s last answer declared no menu
+	// and no entry, or the declared one was already used (default: <code>DROP</code>; deployment setting
+	// <code>ONDEWO_VTSI_CSI_DTMF_UNDECLARED_POLICY</code>). The values, written exactly in upper case:
+	// <ul>
+	// <li><code>DROP</code>: the key is ignored; it does not interrupt the bot and starts no turn, so a project
+	// that declares no keys sees no change</li>
+	// <li><code>COMMIT_SINGLE</code>: every such key is taken as a one-key menu choice: it interrupts a speaking bot
+	// (when <code>barge_in</code> is on) and is sent to the NLU as its own turn, e.g. <code>[DTMF:1]</code></li>
+	// </ul>
+	// Any other value (also <code>drop</code> in lower case) is refused with <code>INVALID_ARGUMENT</code>
 	UndeclaredPolicy *string `protobuf:"bytes,4,opt,name=undeclared_policy,json=undeclaredPolicy,proto3,oneof" json:"undeclared_policy,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// Optional: Milliseconds after a key turn was sent during which a spoken sentence of the caller is NOT sent to
+	// the NLU, so a word the caller says while pressing does not become a second turn (default: 300, valid range:
+	// 0 - 5000; no deployment setting). A value outside the range is refused with <code>INVALID_ARGUMENT</code>.
+	// <code>0</code> switches this guard off. It does not change that speech is ignored while a key entry is still
+	// open, nor while an entry declared with the tag option <code>nospeech</code> is asked for
+	SpeechGuardMs *uint32 `protobuf:"varint,5,opt,name=speech_guard_ms,json=speechGuardMs,proto3,oneof" json:"speech_guard_ms,omitempty"`
+	// Optional: The text a key choice or key entry is sent to the NLU as, with <code>{digits}</code> standing for
+	// the keys (default: <code>[DTMF:{digits}]</code>; no deployment setting). Example: <code>Taste {digits}</code>
+	// sends the entry 4711 as <code>Taste 4711</code> and an invalid entry as <code>Taste INVALID</code>.
+	// <p>Rules: 1 - 64 characters, no control character; <code>{digits}</code> must occur exactly once and no
+	// other placeholder may occur (write a literal brace twice: <code>{{</code> / <code>}}</code>, but not around
+	// the word <code>digits</code>). Otherwise refused with <code>INVALID_ARGUMENT</code>.</p>
+	// <p>Change it only together with the training phrases of the NLU agent: the ONDEWO NLU recognises a key turn
+	// by the default <code>[DTMF:...]</code> form only (it passes that form to intent detection unchanged,
+	// matches <code>[DTMF:ANY]</code> training phrases and stores masked entries masked). With another template
+	// the turn is handled like ordinary text.</p>
+	TextTemplate  *string `protobuf:"bytes,6,opt,name=text_template,json=textTemplate,proto3,oneof" json:"text_template,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DtmfConfig) Reset() {
 	*x = DtmfConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[9]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1252,7 +1831,7 @@ func (x *DtmfConfig) String() string {
 func (*DtmfConfig) ProtoMessage() {}
 
 func (x *DtmfConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[9]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1265,7 +1844,7 @@ func (x *DtmfConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DtmfConfig.ProtoReflect.Descriptor instead.
 func (*DtmfConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{9}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DtmfConfig) GetEnabled() bool {
@@ -1296,131 +1875,192 @@ func (x *DtmfConfig) GetUndeclaredPolicy() string {
 	return ""
 }
 
-// <p>Warm intro of a WARM transfer: after the human target answered and before the target is joined, an ONDEWO bot
-// (a free listener of the project, in an NLU session of its own) greets the target, confirms that a person is on
-// the line, briefs them (who calls and why), asks whether they accept the call and, on a decline, asks what to tell
-// the caller. Meanwhile the caller stays with the paused bot of the call. On accept the target is joined and the
-// bot leaves as in every WARM transfer; on a decline, no decision or an unreachable target the call stays with the
-// bot, which tells the caller (<code>caller_declined_message</code> / <code>caller_unreachable_message</code>).</p>
-// <p>Levels: unset fields inherit, the most specific level winning per field (protobuf <code>MergeFrom</code>):
-// <code>TransferCallRequest.warm_transfer_config</code> &gt; <code>VoiceInteractionConfig.warm_transfer_config</code>
-// of the call (listener, caller, campaign) &gt; <code>VtsiProject.warm_transfer_defaults</code> &gt; the
-// deployment&apos;s <code>ONDEWO_VTSI_WARM_TRANSFER_*</code> settings &gt; the ONDEWO NLU agent&apos;s warm transfer
-// settings (texts only) &gt; the built-in default. <code>enabled</code> unset at every level is
-// <code>false</code>: a WARM transfer then behaves exactly as before 9.5.0. An NLU agent whose warm transfer
-// settings switch warm intros off makes the intro unavailable, and <code>on_intro_unavailable</code> decides.</p>
-// <p>Requires the deployment switch <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED=true</code> (default
-// <code>false</code>); otherwise an explicit <code>enabled=true</code> is refused with
-// <code>FAILED_PRECONDITION</code> <code>reason=warm-intro-disabled</code>, at every level (also on
-// <code>UpdateVtsiProject</code>). <code>VtsiProject.feature_availability.warm_intro</code> says up front whether
-// warm intros can run in a project. Fields marked <i>phase B</i> are refused with <code>FAILED_PRECONDITION</code>
-// <code>reason=phase-b-not-enabled</code> while the deployment has not enabled phase B
-// (<code>VtsiProject.feature_availability.warm_intro_phase_b</code>).</p>
-// <p>Texts are spoken by text-to-speech in the language of the intro bot. The placeholders are
-// <code>{project}</code>, <code>{caller_name}</code>, <code>{callee_name}</code>, <code>{topic}</code>,
-// <code>{summary}</code> and <code>{reason}</code>, where a field lists them; an unknown placeholder is refused with
-// <code>INVALID_ARGUMENT</code>. A text must not contain SIP markup (<code>&lt;SIP:</code>): refused with
-// <code>INVALID_ARGUMENT</code>. No text of an intro (the briefing, the decline reason) is ever stored by VTSI,
-// logged, sent in an event or a SIP header: it lives only in the intro bot&apos;s NLU session.</p>
-// <p>Every scalar is <code>optional</code>: unset inherits, a set value (also <code>&quot;&quot;</code> or
-// <code>0</code>) is that level&apos;s value. Values outside a documented range are refused with
-// <code>INVALID_ARGUMENT</code>.</p>
+func (x *DtmfConfig) GetSpeechGuardMs() uint32 {
+	if x != nil && x.SpeechGuardMs != nil {
+		return *x.SpeechGuardMs
+	}
+	return 0
+}
+
+func (x *DtmfConfig) GetTextTemplate() string {
+	if x != nil && x.TextTemplate != nil {
+		return *x.TextTemplate
+	}
+	return ""
+}
+
+// Warm intro of a WARM transfer: after the human target answered and before the target is joined, an ONDEWO bot (a free listener of the project, in an NLU session of its own) greets the target, confirms that a person is on the line, briefs them (who calls and why), asks whether they accept the call and, on a decline, asks what to tell the caller. Meanwhile the caller stays with the paused bot of the call and hears only what <code>caller_disclosure_message</code>, <code>caller_hold_message</code> and <code>caller_hold_music</code> configure (silence by default). On accept the caller hears <code>caller_accepted_message</code>, the target is joined and the bot leaves as in every WARM transfer; on a decline, no decision or an unreachable target the target is hung up and the call stays with the bot, which tells the caller (<code>caller_declined_message</code> / <code>caller_unreachable_message</code>) and goes on with the conversation.
+//
+// The conversation with the target, step by step, with the default settings:
+//
+// <pre>&#10;1. ready_question   &quot;... Ich habe einen Anruf für Sie. Sind Sie am Apparat? Sagen Sie ja oder drücken&#10;                    Sie 1.&quot;&#10;                    yes / key 1: go on; anything else: asked once more; no answer within decision_timeout_s or&#10;                    a second unclear answer: NO_DECISION (a mailbox is suspected)&#10;2. briefing + accept_question&#10;                    &quot;{caller_name} möchte mit Ihnen sprechen. Es geht um {topic}. Möchten Sie das Gespräch&#10;                    übernehmen? Ja oder 1, nein oder 2.&quot;&#10;                    yes / key 1: ACCEPTED; no / key 2: step 3; unclear: asked once more, then NO_DECISION&#10;3. decline_reason_question  &quot;Was darf ich dem Anrufer ausrichten?&quot;&#10;                    whatever the target says next is the reason; silence: a decline without a reason&#10;</pre>
+//
+// Levels: unset fields inherit, the most specific level winning per field (protobuf <code>MergeFrom</code>): <code>TransferCallRequest.warm_transfer_config</code> (one transfer) &gt; <code>VoiceInteractionConfig.warm_transfer_config</code> of the call (listener, caller, campaign, scheduled caller) &gt; <code>VtsiProject.warm_transfer_defaults</code> &gt; the built-in defaults documented at each field. The texts <code>ready_question</code>, <code>accept_question</code>, <code>decline_reason_question</code>, <code>caller_declined_message</code> and <code>caller_unreachable_message</code> have one more level between the project and the built-in text: the warm transfer settings of the ONDEWO NLU agent, in the intro&apos;s language. The built-in texts exist in German and English; any other language gets the English one. The deployment settings <code>ONDEWO_VTSI_WARM_TRANSFER_*</code> are not field defaults: they switch the feature on and off and govern how many listeners are kept free (below). A LISTENER&apos;s config applies to every inbound call that listener serves, a caller&apos;s, campaign&apos;s or scheduled caller&apos;s config to its own calls; a pooled persistent caller is only reused for a call with an identical configuration.
+//
+// Example: the project sets <code>warm_transfer_defaults { enabled: true caller_hold_message: &quot;Einen Moment bitte, ich kündige Sie an.&quot; }</code>; one campaign sets <code>warm_transfer_config { decision_timeout_s: 30 }</code>. A WARM transfer of that campaign then runs an intro with the project&apos;s hold message and a 30 s decision timeout, and every other field at its default.
+//
+// Requires the deployment switch <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED=true</code> (default <code>false</code>); otherwise an explicit <code>enabled=true</code> is refused with <code>FAILED_PRECONDITION</code> <code>reason=warm-intro-disabled</code>, at every level (also on <code>UpdateVtsiProject</code>), and a value stored before the switch was turned off is ignored: every WARM transfer behaves exactly as before 9.5.0. <code>VtsiProject.feature_availability.warm_intro</code> says up front whether warm intros can run in a project. Fields marked <i>phase B</i> (<code>intro_text_source = WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code>, <code>caller_hold_music = true</code>, a non-empty <code>llm_ccai_service_name</code>) are refused with <code>FAILED_PRECONDITION</code> <code>reason=phase-b-not-enabled</code> while the deployment has not enabled phase B (<code>ONDEWO_VTSI_WARM_TRANSFER_PHASE_B</code>, <code>VtsiProject.feature_availability.warm_intro_phase_b</code>).
+//
+// A WARM transfer with an enabled intro is refused before anything rings when the target is not a person (<code>INVALID_ARGUMENT</code> <code>reason=warm-intro-target-not-human</code>: only a phone number or a softphone account can be briefed) and with <code>FAILED_PRECONDITION</code> when in-call control is not configured (<code>ONDEWO_VTSI_CALL_CONTROL_KEY</code>, <code>reason=call-control-disabled</code>), the call has no live NLU session (<code>no-nlu-session</code>), the project has no listener to spare (<code>warm-intro-needs-listener</code>), a listener the intro may reach uses another NLU project than the call (<code>warm-intro-cross-project</code>) or the call cannot tell the caller the outcome (<code>warm-intro-notice-unsupported</code>: an older component, or a listener or pooled caller deployed before warm intros were switched on in the deployment; such a container refuses warm intros until it is redeployed). What can only fail once the transfer runs (no listener free at that moment, the NLU agent has warm intros switched off, the intro could not be prepared within <code>ONDEWO_VTSI_WARM_TRANSFER_PREPARE_TIMEOUT_S</code>, default 6 s) makes the intro unavailable, and <code>on_intro_unavailable</code> decides.
+//
+// Texts are spoken by text-to-speech: what the target hears in the voice and language of the intro bot, what the caller hears (<code>caller_disclosure_message</code>, <code>caller_hold_message</code>, <code>caller_accepted_message</code>) in the voice and language of the call. The placeholders are <code>{project}</code>, <code>{caller_name}</code>, <code>{callee_name}</code>, <code>{topic}</code>, <code>{summary}</code> and <code>{reason}</code>, where a field lists them; any other placeholder is refused with <code>INVALID_ARGUMENT</code> <code>reason=unknown-placeholder</code>. A text must not contain SIP markup (<code>&lt;SIP:</code>): refused with <code>INVALID_ARGUMENT</code> <code>reason=sip-markup</code>. No text of an intro (the briefing, the decline reason) is ever stored by VTSI, logged, sent in an event or a SIP header: it lives only in the intro bot&apos;s NLU session.
+//
+// Every scalar is <code>optional</code>: unset inherits, a set value (also <code>&quot;&quot;</code> or <code>0</code>) is that level&apos;s value. Values outside a documented range are refused with <code>INVALID_ARGUMENT</code> (<code>reason=out-of-range</code>, <code>text-too-long</code>, ...), naming the field.
 type WarmTransferConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Master switch of the warm intro. Unset at every level means <code>false</code>
+	// Master switch of the warm intro: <code>true</code> turns every WARM transfer on this level into a WARM
+	// transfer with an intro. Unset at every level means <code>false</code>: the target is joined without an intro,
+	// as before 9.5.0. Only a WARM transfer gets an intro. <code>enabled=true</code> needs
+	// <code>ONDEWO_VTSI_WARM_TRANSFER_ENABLED=true</code> in the deployment, else <code>FAILED_PRECONDITION</code>
+	// <code>reason=warm-intro-disabled</code>. Set <code>false</code> on a <code>TransferCallRequest</code> to skip the
+	// intro for that one transfer while the project or the call enables it
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
-	// TEMPLATE: the briefing spoken to the target after the readiness answer, with the placeholders
-	// <code>{caller_name}</code>, <code>{callee_name}</code>, <code>{topic}</code> and <code>{summary}</code>
-	// (default e.g. &quot;Ich habe {caller_name} in der Leitung, es geht um {topic}.&quot;). LLM_SUMMARY
-	// (<i>phase B</i>): the instruction to the LLM that writes the briefing from the call so far. At most 4000
-	// characters
+	// With <code>WARM_INTRO_TEXT_SOURCE_TEMPLATE</code>: the briefing the target hears after the
+	// <code>ready_question</code>, with the placeholders <code>{caller_name}</code>, <code>{callee_name}</code>,
+	// and <code>{topic}</code> (what the call&apos;s NLU session knows of the caller and the topic; a value that is
+	// not known renders empty, an unknown caller as &quot;Ein Anrufer&quot; / &quot;A caller&quot;).
+	// <code>{summary}</code> is accepted but always renders empty with a TEMPLATE: only an LLM summary writes one.
+	// Unset or empty: the built-in template, (de) &quot;{caller_name} möchte mit Ihnen sprechen. Es
+	// geht um {topic}.&quot; (without the second sentence when no topic is known). Example: &quot;{caller_name} ruft
+	// wegen {topic} an.&quot; With <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code> (<i>phase B</i>): the instruction
+	// to the LLM that writes the briefing from the call so far; unset or empty, a built-in instruction asks for at
+	// most two short sentences on who calls and why. The briefing spoken is capped at 600 characters. At most 4000
+	// characters, else <code>INVALID_ARGUMENT</code>
 	IntroPrompt *string `protobuf:"bytes,2,opt,name=intro_prompt,json=introPrompt,proto3,oneof" json:"intro_prompt,omitempty"`
-	// How the briefing is produced. <code>WARM_INTRO_TEXT_SOURCE_UNSPECIFIED</code> means
-	// <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code> when phase B is enabled and the project has an LLM service,
-	// else <code>WARM_INTRO_TEXT_SOURCE_TEMPLATE</code>. <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code> is
-	// <i>phase B</i>; when the LLM fails or is too slow the TEMPLATE is used (<code>WarmIntroRecord.text_fell_back</code>)
+	// How the briefing is produced. <code>WARM_INTRO_TEXT_SOURCE_UNSPECIFIED</code> (default) means
+	// <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code> when the deployment has enabled phase B, else
+	// <code>WARM_INTRO_TEXT_SOURCE_TEMPLATE</code>. An LLM summary that cannot be written (the project has no LLM
+	// service, the LLM fails, is too slow or answers nothing) falls back to the built-in template, and
+	// <code>WarmIntroRecord.text_fell_back</code> says so. An explicit <code>WARM_INTRO_TEXT_SOURCE_LLM_SUMMARY</code>
+	// is <i>phase B</i>: refused with <code>FAILED_PRECONDITION</code> <code>reason=phase-b-not-enabled</code> while
+	// the deployment has not enabled phase B
 	IntroTextSource WarmIntroTextSource `protobuf:"varint,3,opt,name=intro_text_source,json=introTextSource,proto3,enum=ondewo.vtsi.WarmIntroTextSource" json:"intro_text_source,omitempty"`
-	// The first sentence the target hears, before anything about the caller (it carries no personal data, so a
-	// mailbox that answers records nothing about the caller). Placeholder <code>{project}</code>. Default (de):
-	// &quot;Hier ist der digitale Assistent von {project}. Ich habe einen Anruf für Sie. Sind Sie am Apparat? Sagen
-	// Sie ja oder drücken Sie 1.&quot; At most 1000 characters
+	// The first sentence the target hears, before anything about the caller: it carries no personal data, so a
+	// mailbox that answers records nothing about the caller. Placeholder <code>{project}</code> (the project&apos;s
+	// display name). Unset or empty: the NLU agent&apos;s text, else the built-in one, (de) &quot;Hier ist der
+	// digitale Assistent von {project}. Ich habe einen Anruf für Sie. Sind Sie am Apparat? Sagen Sie ja oder drücken
+	// Sie 1.&quot; (the effective <code>accept_dtmf</code> in place of 1). A configured text should name the accept
+	// key itself. At most 1000 characters
 	ReadyQuestion *string `protobuf:"bytes,4,opt,name=ready_question,json=readyQuestion,proto3,oneof" json:"ready_question,omitempty"`
-	// Whether the briefing is spoken only after the target answered the <code>ready_question</code> (by voice or
-	// <code>accept_dtmf</code>). Default <code>true</code>: the mailbox guard. <code>false</code> briefs the target
-	// right after the <code>ready_question</code>
+	// Whether the briefing is spoken only after the target confirmed being there, by saying yes or pressing
+	// <code>accept_dtmf</code> at the <code>ready_question</code>. Default <code>true</code>: the mailbox guard, so a
+	// voicemail that answers never records the briefing; an intro whose <code>ready_question</code> gets no yes ends
+	// with <code>WARM_INTRO_DECISION_NO_DECISION</code> (cause <code>voicemail-suspected</code>). <code>false</code>
+	// skips the <code>ready_question</code>: the target hears the briefing and the <code>accept_question</code> at
+	// once, which is faster but lets a mailbox record the briefing
 	ConfirmHumanBeforeIntro *bool `protobuf:"varint,5,opt,name=confirm_human_before_intro,json=confirmHumanBeforeIntro,proto3,oneof" json:"confirm_human_before_intro,omitempty"`
-	// The question after the briefing. Default (de): &quot;Möchten Sie das Gespräch übernehmen? Ja oder 1, nein oder
-	// 2.&quot; At most 1000 characters
+	// The question after the briefing. Unset or empty: the NLU agent&apos;s text, else the built-in one, (de)
+	// &quot;Möchten Sie das Gespräch übernehmen? Ja oder 1, nein oder 2.&quot; (the effective
+	// <code>accept_dtmf</code> / <code>decline_dtmf</code> in place of 1 / 2). A configured text should name the keys
+	// itself. An answer that is neither yes nor no is asked once more, a second one ends the intro with
+	// <code>WARM_INTRO_DECISION_NO_DECISION</code>. At most 1000 characters
 	AcceptQuestion *string `protobuf:"bytes,6,opt,name=accept_question,json=acceptQuestion,proto3,oneof" json:"accept_question,omitempty"`
-	// Asked after a decline, to learn what to tell the caller. Default (de): &quot;Was darf ich dem Anrufer
-	// ausrichten?&quot;, (en) &quot;What may I tell the caller?&quot;. <code>&quot;&quot;</code> means: do not ask,
-	// the caller hears the decline without a reason. The answer is relayed to the caller only through the bot&apos;s
-	// NLU (normalised: SIP markup removed, at most 300 characters, digit runs of 12 or more masked); VTSI never
-	// receives it. At most 1000 characters
+	// Asked after a decline, to learn what to tell the caller. Unset: the NLU agent&apos;s text, else the built-in
+	// one, (de) &quot;Was darf ich dem Anrufer ausrichten?&quot;, (en) &quot;What may I tell the caller?&quot;.
+	// <code>&quot;&quot;</code> means: do not ask; the intro bot thanks the target (&quot;Danke, ich richte es
+	// aus.&quot;) and hangs up, and the caller hears the decline without a reason. Whatever the target says next
+	// is the reason (a key press gives none; no answer within <code>decision_timeout_s</code> is a decline without a
+	// reason). The reason is relayed to the caller only
+	// through the bot&apos;s NLU (normalised: SIP markup removed, at most 300 characters, digit runs of 12 or more
+	// masked); VTSI never receives it. At most 1000 characters
 	DeclineReasonQuestion *string `protobuf:"bytes,7,opt,name=decline_reason_question,json=declineReasonQuestion,proto3,oneof" json:"decline_reason_question,omitempty"`
 	// What the caller hears after a decline, placeholders <code>{callee_name}</code> and <code>{reason}</code>.
-	// Default (de): &quot;{callee_name} kann das Gespräch gerade nicht übernehmen und lässt ausrichten:
-	// {reason}&quot;; without a reason a variant without the clause is spoken. At most 1000 characters
+	// Unset or empty: the NLU agent&apos;s text, else the built-in one, (de) &quot;{callee_name} kann das Gespräch
+	// gerade nicht übernehmen und lässt ausrichten: {reason}&quot;, or &quot;{callee_name} kann das Gespräch gerade
+	// nicht übernehmen.&quot; when the target gave no reason. A configured text that names <code>{reason}</code> is
+	// used only when a reason was given (else the built-in text without a reason is spoken); one without
+	// <code>{reason}</code> is always used. An unknown target is named &quot;Die gewünschte Person&quot; / &quot;The
+	// person you asked for&quot;. At most 1000 characters
 	CallerDeclinedMessage *string `protobuf:"bytes,8,opt,name=caller_declined_message,json=callerDeclinedMessage,proto3,oneof" json:"caller_declined_message,omitempty"`
-	// What the caller hears when the target was busy, did not answer, gave no decision, hung up during the intro or
-	// the intro could not run (with <code>WARM_INTRO_UNAVAILABLE_POLICY_RETURN_TO_CALLER</code>). Placeholder
-	// <code>{callee_name}</code>. At most 1000 characters
+	// What the caller hears when the target was busy, did not answer, gave no decision, hung up during the intro, or
+	// the intro could not run with <code>WARM_INTRO_UNAVAILABLE_POLICY_RETURN_TO_CALLER</code>. Placeholder
+	// <code>{callee_name}</code>. Unset or empty: the NLU agent&apos;s text, else the built-in one, (de)
+	// &quot;{callee_name} ist gerade nicht erreichbar.&quot;, (en) &quot;{callee_name} cannot be reached right
+	// now.&quot; At most 1000 characters
 	CallerUnreachableMessage *string `protobuf:"bytes,9,opt,name=caller_unreachable_message,json=callerUnreachableMessage,proto3,oneof" json:"caller_unreachable_message,omitempty"`
-	// The key that accepts (and answers the <code>ready_question</code>). Default <code>1</code>; exactly one of
-	// <code>0-9 * #</code>
+	// The key the target presses to accept, which also answers the <code>ready_question</code>. Default
+	// <code>1</code>; exactly one of <code>0-9 * #</code>, else <code>INVALID_ARGUMENT</code>
+	// <code>reason=invalid-dtmf-key</code>. A key is decisive at once; speech (&quot;ja&quot;, &quot;yes&quot;, the
+	// NLU agent&apos;s extra phrases) works as well
 	AcceptDtmf *string `protobuf:"bytes,10,opt,name=accept_dtmf,json=acceptDtmf,proto3,oneof" json:"accept_dtmf,omitempty"`
-	// The key that declines. Default <code>2</code>; exactly one of <code>0-9 * #</code>, different from the
-	// effective <code>accept_dtmf</code>
+	// The key the target presses to decline. Default <code>2</code>; exactly one of <code>0-9 * #</code> and
+	// different from the effective <code>accept_dtmf</code>: equal keys on one level, or after inheritance when the
+	// transfer starts (e.g. the project sets <code>accept_dtmf=&quot;2&quot;</code> and nothing overrides the default
+	// <code>decline_dtmf</code>), are refused with <code>INVALID_ARGUMENT</code> <code>reason=dtmf-keys-equal</code>
 	DeclineDtmf *string `protobuf:"bytes,11,opt,name=decline_dtmf,json=declineDtmf,proto3,oneof" json:"decline_dtmf,omitempty"`
-	// Seconds from a question to the target&apos;s decision before the intro ends with
-	// <code>WARM_INTRO_DECISION_NO_DECISION</code>. Default 20, valid range 5 - 60
+	// Seconds the target has to answer each question (<code>ready_question</code>, <code>accept_question</code>,
+	// <code>decline_reason_question</code>), counted from the moment the question is asked plus the time it takes to
+	// speak. No answer in time ends the intro: <code>WARM_INTRO_DECISION_NO_DECISION</code> at the first two
+	// questions, a decline without a reason at the third. Default 20, valid range 5 - 60
 	DecisionTimeoutS *uint32 `protobuf:"varint,12,opt,name=decision_timeout_s,json=decisionTimeoutS,proto3,oneof" json:"decision_timeout_s,omitempty"`
-	// Hard cap in seconds from the target&apos;s answer to the decision. Default 90, valid range 30 - 300. The caller
-	// waits at most the ring time plus this
+	// Hard cap in seconds from the moment the target answered the call to the decision, whatever the questions do.
+	// Past it the intro bot is hung up and the intro ends with <code>WARM_INTRO_DECISION_NO_DECISION</code> (cause
+	// <code>intro-timeout</code>). Default 90, valid range 30 - 300. The caller waits at most the ring time plus this
 	MaxIntroDurationS *uint32 `protobuf:"varint,13,opt,name=max_intro_duration_s,json=maxIntroDurationS,proto3,oneof" json:"max_intro_duration_s,omitempty"`
-	// Who the target is, spoken as <code>{callee_name}</code>, e.g. &quot;Frau Berger, Buchhaltung&quot;. Unset
-	// resolves from the target softphone account&apos;s <code>display_name</code>, then from
-	// <code>VtsiProject.transfer_target_directory</code>. At most 128 characters. Meaningful per transfer only
+	// Who the target is, spoken as <code>{callee_name}</code> to the target and to the caller, e.g. &quot;Frau
+	// Berger, Buchhaltung&quot;. Unset or empty: the target softphone account&apos;s <code>display_name</code>, then
+	// the target&apos;s entry in <code>VtsiProject.transfer_target_directory</code>, else no name (the texts then use
+	// a name-less wording). At most 128 characters. Meaningful per transfer only: set it on the
+	// <code>TransferCallRequest</code>, or let the directory name every target
 	CalleeDisplayName *string `protobuf:"bytes,14,opt,name=callee_display_name,json=calleeDisplayName,proto3,oneof" json:"callee_display_name,omitempty"`
-	// The target&apos;s role and context for the briefing (LLM_SUMMARY). Unset resolves from the target softphone
-	// account&apos;s <code>description</code>, then from <code>VtsiProject.transfer_target_directory</code>. At most
-	// 512 characters. Meaningful per transfer only
+	// The target&apos;s role and context, handed to the briefing (LLM_SUMMARY). Unset or empty: the target softphone
+	// account&apos;s <code>description</code>, then the target&apos;s entry in
+	// <code>VtsiProject.transfer_target_directory</code>. At most 512 characters. Meaningful per transfer only
 	CalleeDescription *string `protobuf:"bytes,15,opt,name=callee_description,json=calleeDescription,proto3,oneof" json:"callee_description,omitempty"`
-	// What happens when the intro cannot run (no free listener, the NLU could not prepare the intro).
-	// <code>WARM_INTRO_UNAVAILABLE_POLICY_UNSPECIFIED</code> means
-	// <code>WARM_INTRO_UNAVAILABLE_POLICY_CONNECT_WITHOUT_INTRO</code>
+	// What happens when the intro cannot run although the transfer was accepted: no listener free at that moment, the
+	// NLU agent has warm intros switched off, or the intro could not be prepared in time. Not consulted for the
+	// refusals before anything rings (see the message). <code>WARM_INTRO_UNAVAILABLE_POLICY_UNSPECIFIED</code>
+	// (default) means <code>WARM_INTRO_UNAVAILABLE_POLICY_CONNECT_WITHOUT_INTRO</code>; choose
+	// <code>WARM_INTRO_UNAVAILABLE_POLICY_RETURN_TO_CALLER</code> when a target must never be joined unannounced
 	OnIntroUnavailable WarmIntroUnavailablePolicy `protobuf:"varint,16,opt,name=on_intro_unavailable,json=onIntroUnavailable,proto3,enum=ondewo.vtsi.WarmIntroUnavailablePolicy" json:"on_intro_unavailable,omitempty"`
-	// Whether the bot&apos;s OWN transfers to a human (the NLU answer&apos;s transfer or human handover) get a warm
-	// intro too: the transfer is handed to VTSI instead of being sent by the bot. Default <code>false</code>. Valid
-	// on the call and project levels; set on a <code>TransferCallRequest</code> it is refused with
-	// <code>INVALID_ARGUMENT</code>
+	// Whether the bot&apos;s OWN transfers to a person (a transfer or human handover the NLU answer asks for, to a
+	// phone number or a softphone account) get a warm intro too: the bot does not send the transfer itself but hands
+	// it to VTSI, which runs it as a WARM transfer with an intro. Only when <code>enabled</code> is effectively
+	// <code>true</code> and <code>ONDEWO_VTSI_CALL_CONTROL_KEY</code> is set; any other bot transfer is sent exactly
+	// as the bot asked. Default <code>false</code>. Valid on the call and project levels; set on a
+	// <code>TransferCallRequest</code> it is refused with <code>INVALID_ARGUMENT</code>
+	// <code>reason=field-not-valid-on-level</code>
 	ApplyToBotTransfers *bool `protobuf:"varint,17,opt,name=apply_to_bot_transfers,json=applyToBotTransfers,proto3,oneof" json:"apply_to_bot_transfers,omitempty"`
 	// Spoken to the caller while the intro runs, after <code>caller_disclosure_message</code>, e.g. &quot;Einen
-	// Moment bitte, ich verbinde Sie.&quot; <code>&quot;&quot;</code> or unset: none (silence). At most 1000
-	// characters
+	// Moment bitte, ich verbinde Sie.&quot; <code>&quot;&quot;</code> or unset: none (silence, or the hold music).
+	// Repeated every <code>caller_reassure_interval_s</code>. At most 1000 characters
 	CallerHoldMessage *string `protobuf:"bytes,18,opt,name=caller_hold_message,json=callerHoldMessage,proto3,oneof" json:"caller_hold_message,omitempty"`
-	// <i>Phase B</i>: music on hold for the caller between the hold messages. Default <code>false</code> (silence)
+	// <i>Phase B</i>: music on hold for the caller between the hold messages while the intro runs. Default
+	// <code>false</code> (silence). <code>true</code> is refused with <code>FAILED_PRECONDITION</code>
+	// <code>reason=phase-b-not-enabled</code> while the deployment has not enabled phase B
 	CallerHoldMusic *bool `protobuf:"varint,19,opt,name=caller_hold_music,json=callerHoldMusic,proto3,oneof" json:"caller_hold_music,omitempty"`
-	// Repeat <code>caller_hold_message</code> every N seconds while the intro runs. <code>0</code> (default): never.
-	// Valid: 0 or 15 - 120
+	// Repeat <code>caller_hold_message</code> while the intro runs, with N seconds of silence between two
+	// repetitions. <code>0</code> (default): it is spoken once. Valid: 0 or 15 - 120, e.g. 20 to reassure a waiting
+	// caller about every 20 seconds. Without a <code>caller_hold_message</code> it has no effect
 	CallerReassureIntervalS *uint32 `protobuf:"varint,20,opt,name=caller_reassure_interval_s,json=callerReassureIntervalS,proto3,oneof" json:"caller_reassure_interval_s,omitempty"`
-	// The LLM service of the ONDEWO NLU agent that writes the briefing (LLM_SUMMARY, <i>phase B</i>). Empty: the
-	// agent&apos;s warm transfer setting, else the project&apos;s first LLM service
+	// <i>Phase B</i>: the resource name of the LLM service of the ONDEWO NLU project that writes the briefing of an
+	// LLM_SUMMARY intro (and decides a spoken answer to its <code>accept_question</code> that the built-in phrases
+	// leave unclear). Empty (default): the NLU agent&apos;s warm transfer setting, else the project&apos;s first LLM
+	// service of the intro&apos;s language. A name the project has no LLM service of for that language means no LLM:
+	// the built-in template is spoken (<code>WarmIntroRecord.text_fell_back</code>). A non-empty value is refused with
+	// <code>FAILED_PRECONDITION</code> <code>reason=phase-b-not-enabled</code> while the deployment has not enabled
+	// phase B
 	LlmCcaiServiceName *string `protobuf:"bytes,21,opt,name=llm_ccai_service_name,json=llmCcaiServiceName,proto3,oneof" json:"llm_ccai_service_name,omitempty"`
-	// Spoken to the caller FIRST when the intro starts, e.g. that the call is being announced to the target.
-	// Default empty: none. At most 1000 characters
+	// Spoken to the caller FIRST when the intro starts, e.g. that the call is being announced to the target:
+	// &quot;Ich kündige Sie jetzt bei der Kollegin an.&quot; Default empty: none. At most 1000 characters
 	CallerDisclosureMessage *string `protobuf:"bytes,22,opt,name=caller_disclosure_message,json=callerDisclosureMessage,proto3,oneof" json:"caller_disclosure_message,omitempty"`
 	// Spoken to the caller after the target accepted and before the target is joined, placeholder
 	// <code>{callee_name}</code>, e.g. &quot;Ich verbinde Sie jetzt mit {callee_name}.&quot; The target does not
-	// hear it. Default empty: none. At most 1000 characters
+	// hear it; the join waits until it has been spoken, at most
+	// <code>ONDEWO_VTSI_WARM_TRANSFER_ACCEPTED_CLIP_MAX_S</code> (default 6 s). Default empty: none, the target is
+	// joined at once. At most 1000 characters
 	CallerAcceptedMessage *string `protobuf:"bytes,23,opt,name=caller_accepted_message,json=callerAcceptedMessage,proto3,oneof" json:"caller_accepted_message,omitempty"`
-	// Whether the intro bot&apos;s NLU session stores the intro audio (the target&apos;s voice and the bot&apos;s).
-	// Default <code>false</code>: no audio is stored; the session&apos;s text follows the conversation retention
+	// Whether the intro bot&apos;s NLU session may store the intro audio (the target&apos;s voice and the
+	// bot&apos;s). Default <code>false</code>. This version validates and inherits the field but does not act on it
+	// yet: setting it to <code>true</code> changes nothing
 	StoreIntroAudio *bool `protobuf:"varint,24,opt,name=store_intro_audio,json=storeIntroAudio,proto3,oneof" json:"store_intro_audio,omitempty"`
 	// Project level only: listeners (<pre><code>projects/&lt;project_uuid&gt;/listeners/&lt;listener_uuid&gt;</code></pre>)
-	// reserved as intro bots. Empty (default): any free listener of the project, keeping at least one ready
-	// listener free for customer calls. At most 50 entries; set on another level it is refused with
-	// <code>INVALID_ARGUMENT</code>
+	// reserved as intro bots. Empty (default): any free listener of the project takes the intro, but only while more
+	// than <code>ONDEWO_VTSI_WARM_TRANSFER_RESERVED_LISTENERS</code> (default 1) listeners are ready, so customer calls
+	// keep that many. Listed: only these listeners take intros, and they no longer answer customer calls (no reserve
+	// is kept); a project whose listed listeners are none of them deployed refuses an intro with
+	// <code>FAILED_PRECONDITION</code> <code>reason=warm-intro-needs-listener</code>. At most 50 distinct listeners
+	// of this project; set on another level it is refused with <code>INVALID_ARGUMENT</code>
 	IntroListenerNames []string `protobuf:"bytes,25,rep,name=intro_listener_names,json=introListenerNames,proto3" json:"intro_listener_names,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
@@ -1428,7 +2068,7 @@ type WarmTransferConfig struct {
 
 func (x *WarmTransferConfig) Reset() {
 	*x = WarmTransferConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[10]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1440,7 +2080,7 @@ func (x *WarmTransferConfig) String() string {
 func (*WarmTransferConfig) ProtoMessage() {}
 
 func (x *WarmTransferConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[10]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1453,7 +2093,7 @@ func (x *WarmTransferConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WarmTransferConfig.ProtoReflect.Descriptor instead.
 func (*WarmTransferConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{10}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *WarmTransferConfig) GetEnabled() bool {
@@ -1631,8 +2271,7 @@ func (x *WarmTransferConfig) GetIntroListenerNames() []string {
 	return nil
 }
 
-// <p>Audit of one warm intro, in <code>CallTransferRecord.warm_intro</code>. Output only. Holds NO intro text and NO
-// decline reason text.</p>
+// Audit of one warm intro, in <code>CallTransferRecord.warm_intro</code>. Output only. Holds NO intro text and NO decline reason text.
 type WarmIntroRecord struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Id of the intro: the participant id of the target&apos;s leg (the <code>participant_id</code> of the events)
@@ -1641,7 +2280,8 @@ type WarmIntroRecord struct {
 	Decision WarmIntroDecision `protobuf:"varint,2,opt,name=decision,proto3,enum=ondewo.vtsi.WarmIntroDecision" json:"decision,omitempty"`
 	// How it was taken
 	DecidedBy WarmIntroDecidedBy `protobuf:"varint,3,opt,name=decided_by,json=decidedBy,proto3,enum=ondewo.vtsi.WarmIntroDecidedBy" json:"decided_by,omitempty"`
-	// Whether the target gave a reason for a decline (the reason itself never leaves the intro bot&apos;s NLU session)
+	// Whether the target gave a reason for a decline (the reason itself never leaves the intro bot&apos;s NLU
+	// session); <code>false</code> also when <code>decline_reason_question</code> is <code>&quot;&quot;</code>
 	DeclineReasonPresent bool `protobuf:"varint,4,opt,name=decline_reason_present,json=declineReasonPresent,proto3" json:"decline_reason_present,omitempty"`
 	// The intro bot&apos;s call, labelled <code>{&quot;purpose&quot;: &quot;warm_intro&quot;}</code>. Empty when no
 	// intro bot answered
@@ -1650,17 +2290,21 @@ type WarmIntroRecord struct {
 	RingDuration *durationpb.Duration `protobuf:"bytes,6,opt,name=ring_duration,json=ringDuration,proto3" json:"ring_duration,omitempty"`
 	// From the target&apos;s answer to the decision or the end of the intro
 	IntroDuration *durationpb.Duration `protobuf:"bytes,7,opt,name=intro_duration,json=introDuration,proto3" json:"intro_duration,omitempty"`
-	// The text source actually used
+	// The text source actually requested (UNSPECIFIED resolved); see <code>text_fell_back</code> for what was spoken
 	TextSource WarmIntroTextSource `protobuf:"varint,8,opt,name=text_source,json=textSource,proto3,enum=ondewo.vtsi.WarmIntroTextSource" json:"text_source,omitempty"`
-	// Whether the LLM summary failed or timed out and the TEMPLATE was used
+	// Whether the LLM summary could not be written (no LLM, failed, too slow, empty) and the built-in template was
+	// spoken instead
 	TextFellBack bool `protobuf:"varint,9,opt,name=text_fell_back,json=textFellBack,proto3" json:"text_fell_back,omitempty"`
 	// Bounded kebab-case token naming why the intro ended or did not run, e.g. <code>declined</code>,
-	// <code>voicemail-suspected</code>, <code>target-hung-up</code>, <code>no-free-listener</code>,
-	// <code>prepare-failed</code>, <code>intro-timeout</code>; empty on accept
+	// <code>no-decision</code>, <code>voicemail-suspected</code>, <code>intro-timeout</code>,
+	// <code>target-hung-up</code>, <code>busy</code>, <code>no-answer</code>, <code>no-free-listener</code>,
+	// <code>prepare-failed</code>; empty on accept. New tokens may be added: treat an unknown one as a failure
+	// without a known cause
 	Cause string `protobuf:"bytes,10,opt,name=cause,proto3" json:"cause,omitempty"`
 	// Whether the caller&apos;s bot queued the outcome notice (decline / unreachable) for the caller. Only meaningful
 	// when a notice was owed (every decision but <code>WARM_INTRO_DECISION_ACCEPTED</code>); <code>false</code> there
-	// goes with <code>VTSI_EVENT_CALL_WARM_TRANSFER_OUTCOME_NOTICE_UNDELIVERED</code>
+	// goes with <code>VTSI_EVENT_CALL_WARM_TRANSFER_OUTCOME_NOTICE_UNDELIVERED</code>: the caller may not have been
+	// told
 	NoticeDelivered bool `protobuf:"varint,11,opt,name=notice_delivered,json=noticeDelivered,proto3" json:"notice_delivered,omitempty"`
 	// Whether the intro started (an intro bot answered). <code>false</code> with
 	// <code>WARM_INTRO_UNAVAILABLE_POLICY_CONNECT_WITHOUT_INTRO</code> means the target was joined without an intro;
@@ -1672,7 +2316,7 @@ type WarmIntroRecord struct {
 
 func (x *WarmIntroRecord) Reset() {
 	*x = WarmIntroRecord{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[11]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1684,7 +2328,7 @@ func (x *WarmIntroRecord) String() string {
 func (*WarmIntroRecord) ProtoMessage() {}
 
 func (x *WarmIntroRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[11]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1697,7 +2341,7 @@ func (x *WarmIntroRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WarmIntroRecord.ProtoReflect.Descriptor instead.
 func (*WarmIntroRecord) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{11}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *WarmIntroRecord) GetIntroId() string {
@@ -1784,93 +2428,183 @@ func (x *WarmIntroRecord) GetIntroStarted() bool {
 	return false
 }
 
-// Configuration of the turn detection, i.e. deciding when the caller has finished speaking
+// Configuration of the turn detection of a call, i.e. how the bot decides that the caller has finished speaking and that it is its turn to answer. Too eager, and the bot answers a caller who only paused (&quot;Ich möchte ... einen Termin am Dienstag&quot; becomes two turns); too patient, and the caller waits in silence for every answer.
+//
+// Two services take part: the speech-to-text service ends an utterance after a silence (voice activity detection) and, with a turn detection model, judges whether the words so far are a finished turn; the speech-to-speech service of the call decides which final transcription becomes ONE turn for the NLU, and when the caller may interrupt the bot.
+//
+// Presence and precedence: every <code>optional</code> field is applied only when it is set; an unset field inherits, in this order, the deployment setting of the VTSI server (the <code>ONDEWO_VTSI_*</code> variable named at the field, where one exists), then the built-in default of the service that applies it. A set per-call value wins over the deployment setting. Leaving the whole message unset keeps the deployment&apos;s turn detection: the deployment-wide turn detection model when the operator switched it on (<code>ONDEWO_VTSI_S2T_TURN_DETECTION_ACTIVE</code>), else the speech-to-text pipeline&apos;s own silence detection. Setting the message at all also asks the speech-to-text service for partial transcriptions and the start of speech, which every timer of the turn detection needs.
+//
+// Scope: the configuration of a LISTENER applies to every inbound call that listener deployment serves; the one of a caller, a campaign or a scheduled caller to each of its own calls. A pooled persistent caller is only reused for a call with an identical configuration.
+//
+// Validation: a value outside its range, and a field that only the semantic turn detection model reads set together with the mode <code>VAD</code> or <code>AUDIO_MODEL</code>, are refused with <code>INVALID_ARGUMENT</code>.
+//
+// Example, a line that collects phone numbers and wants patient turn taking:
+//
+// <pre><code>mode: SEMANTIC_MODEL&#10;turn_eagerness: PATIENT&#10;final_merge_window_seconds: 0.7&#10;dictation_config { hold_max_seconds_by_category { key: &quot;phone&quot; value: 3.0 } }</code></pre>
 type TurnDetectionConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Mode of the turn detection. Defaults to SEMANTIC_MODEL if unspecified
+	// How the end of the caller&apos;s turn is detected (see <code>TurnDetectionMode</code>). Default:
+	// <code>TURN_DETECTION_MODE_UNSPECIFIED</code>
 	Mode TurnDetectionConfig_TurnDetectionMode `protobuf:"varint,1,opt,name=mode,proto3,enum=ondewo.vtsi.TurnDetectionConfig_TurnDetectionMode" json:"mode,omitempty"`
-	// Optional: Minimum delay in seconds before a confidently detected end of turn is committed
-	// (default: 0.5, valid range: 0 - 10). When both delays are set, it must not be larger than
-	// <code>max_endpointing_delay_seconds</code>; a request with min &gt; max, or a value outside the range, is
-	// refused with <code>INVALID_ARGUMENT</code>
+	// Optional: Seconds of caller silence after which the speech-to-text service ends an utterance and sends its
+	// final transcription (its minimum silence; valid range: 0 - 10). Applies in every mode and is scaled by
+	// <code>turn_eagerness</code> (e.g. 1.0 with <code>PATIENT</code> becomes 1.7 s, clamped to 10). Unset keeps
+	// the minimum silence of the call&apos;s speech-to-text pipeline. It is delivered only where the call&apos;s
+	// speech-to-text configuration can carry it: when <code>S2tVtsiConfig.s2t_transcribe_request_config</code>
+	// contains a <code>pyannote</code> block, or when the deployment declares a pyannote speech-to-text pipeline
+	// (<code>ONDEWO_VTSI_S2T_PYANNOTE_PARTIAL_BLOCK_SUPPORTED=True</code>); otherwise the value is not applied and
+	// the VTSI server logs a warning naming the call. A larger value lets a hesitant caller pause longer, at the
+	// cost of a longer wait before every answer. When both delays are set it must not be larger than
+	// <code>max_endpointing_delay_seconds</code>; min &gt; max, or a value outside the range, is refused with
+	// <code>INVALID_ARGUMENT</code>
 	MinEndpointingDelaySeconds *float32 `protobuf:"fixed32,2,opt,name=min_endpointing_delay_seconds,json=minEndpointingDelaySeconds,proto3,oneof" json:"min_endpointing_delay_seconds,omitempty"`
-	// Optional: Maximum delay in seconds to wait for an end of turn before the turn is committed
-	// from the latest stable partial transcription (default: 3.0, valid range: 0 - 10; at least
-	// <code>min_endpointing_delay_seconds</code> when both are set)
+	// Optional: Safety net for a slow end of turn: once the caller&apos;s partial transcription has stopped changing,
+	// the turn is committed from it after this many seconds even if the speech-to-text service has not sent its
+	// final transcription yet (valid range: 0 - 10; scaled by <code>turn_eagerness</code>). Default: 0 = off, the
+	// turn always waits for the final transcription. The risk is answering a caller who only paused longer than this
+	// mid-sentence; when the final transcription then differs, the bot answers again. Use a value above the usual
+	// end-of-turn latency, e.g. 3.0. When both delays are set it must be at least
+	// <code>min_endpointing_delay_seconds</code> (so 0 together with a minimum above 0 is refused); a value outside
+	// the range is refused with <code>INVALID_ARGUMENT</code>
 	MaxEndpointingDelaySeconds *float32 `protobuf:"fixed32,3,opt,name=max_endpointing_delay_seconds,json=maxEndpointingDelaySeconds,proto3,oneof" json:"max_endpointing_delay_seconds,omitempty"`
-	// Eagerness of the turn detection: scales both endpointing delays. Defaults to NORMAL if unspecified
+	// How eagerly the bot takes the turn: scales <code>min_endpointing_delay_seconds</code> and
+	// <code>max_endpointing_delay_seconds</code> (see <code>TurnEagerness</code>). It only scales delays set in this
+	// message: with neither delay set it has no effect. Default: <code>TURN_EAGERNESS_UNSPECIFIED</code>
+	// (<code>NORMAL</code>)
 	TurnEagerness TurnDetectionConfig_TurnEagerness `protobuf:"varint,4,opt,name=turn_eagerness,json=turnEagerness,proto3,enum=ondewo.vtsi.TurnDetectionConfig_TurnEagerness" json:"turn_eagerness,omitempty"`
-	// Optional: System prompt for the semantic (LLM) turn detection model of the speech-to-text service. Unset uses
-	// the model&apos;s built-in prompt. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set
-	// together with <code>VAD</code> or <code>AUDIO_MODEL</code> it is refused with <code>INVALID_ARGUMENT</code>.
-	// VTSI enforces no length limit; the speech-to-text service may refuse a prompt that exceeds its model&apos;s
-	// context
+	// Optional: System prompt for a chat-LLM turn detection model of the speech-to-text service (the model that
+	// answers yes or no to &quot;is this turn finished?&quot;). Unset uses the model&apos;s built-in prompt. Only a
+	// chat-LLM model reads it; the other turn detection models ignore it. Only valid with the mode
+	// <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or <code>AUDIO_MODEL</code>
+	// it is refused with <code>INVALID_ARGUMENT</code>. No length limit is enforced here; the speech-to-text
+	// service may refuse a prompt that exceeds its model&apos;s context. A value already set in the call&apos;s
+	// <code>S2tVtsiConfig.s2t_transcribe_request_config</code> wins
 	TurnDetectionSystemPrompt *string `protobuf:"bytes,5,opt,name=turn_detection_system_prompt,json=turnDetectionSystemPrompt,proto3,oneof" json:"turn_detection_system_prompt,omitempty"`
-	// Optional: User prompt for the semantic (LLM) turn detection model of the speech-to-text service, with the
-	// rules of <code>turn_detection_system_prompt</code>
+	// Optional: User prompt for a chat-LLM turn detection model of the speech-to-text service, with the rules of
+	// <code>turn_detection_system_prompt</code>
 	TurnDetectionUserPrompt *string `protobuf:"bytes,6,opt,name=turn_detection_user_prompt,json=turnDetectionUserPrompt,proto3,oneof" json:"turn_detection_user_prompt,omitempty"`
 	// Optional: Number of the latest conversation turns (the caller&apos;s committed turns and the bot&apos;s
-	// utterances as the caller heard them) handed to the semantic turn detection model of the speech-to-text
-	// service together with the utterance it judges (default: 0 = off, valid range: 0 - 10). Use it only where
-	// the speech-to-text service serves a turn detection model trained with conversation context. Used only by an
-	// end-of-utterance model; a chat model ignores it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or
-	// unspecified): a value above 0 together with <code>VAD</code> or <code>AUDIO_MODEL</code>, or a value outside
-	// the range, is refused with <code>INVALID_ARGUMENT</code>
+	// utterances as the caller heard them, cut where the caller interrupted) handed to the turn detection model
+	// together with the utterance it judges, so that a bare &quot;vierzehn&quot; is judged as the answer to
+	// &quot;Wie alt sind Sie?&quot; (valid range: 0 - 10; default: 0 = off). Use it only where the speech-to-text
+	// service serves a turn detection model trained with conversation context (an end-of-utterance model); a
+	// chat-LLM model and the audio Smart Turn model ignore it. Each turn sent adds up to 1000 characters to every
+	// speech-to-text request. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): a value above
+	// 0 together with <code>VAD</code> or <code>AUDIO_MODEL</code>, or a value outside the range, is refused with
+	// <code>INVALID_ARGUMENT</code>
 	ConversationContextTurns *uint32 `protobuf:"varint,7,opt,name=conversation_context_turns,json=conversationContextTurns,proto3,oneof" json:"conversation_context_turns,omitempty"`
-	// Optional: Name of the semantic turn detection model the speech-to-text service asks for this call. Unset uses
-	// the model configured in the speech-to-text pipeline. The model&apos;s endpoint is deliberately not
-	// configurable per call. Valid: 1 - 256 characters, no whitespace or control characters. Only valid with the
-	// mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
+	// Optional: Name of the turn detection model the speech-to-text service uses for this call; the name also
+	// selects the kind of model: <code>livekit/turn-detector</code> is an end-of-utterance model, a name starting
+	// with <code>pipecat-smart-turn</code> the audio Smart Turn model, a name starting with
+	// <code>ondewo-s2t-model-de-vad-tsd-ondewo-qwen3</code> or <code>ondewo-s2t-model-de-fusion-turn-detection</code>
+	// one of the ONDEWO German turn detection models, any other name a chat-LLM model. A model or a detector
+	// already named in the call&apos;s <code>S2tVtsiConfig.s2t_transcribe_request_config</code> wins over this value
+	// (it is then applied only when it selects the same kind of model). Unset uses that model, else the
+	// deployment&apos;s <code>ONDEWO_VTSI_S2T_TURN_DETECTION_MODEL</code>. The model must be served by the
+	// deployment: its endpoint is deliberately not configurable per call. Valid: 1 - 256 characters, no whitespace
+	// or control characters.
+	// Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
 	// <code>AUDIO_MODEL</code>, or invalid, it is refused with <code>INVALID_ARGUMENT</code>
 	SemanticModelName *string `protobuf:"bytes,8,opt,name=semantic_model_name,json=semanticModelName,proto3,oneof" json:"semantic_model_name,omitempty"`
-	// Optional: End-of-turn probability at or above which the semantic turn detection model takes the caller to
-	// have finished the turn (valid range: 0 - 1). Unset uses the speech-to-text service&apos;s configured threshold
-	// for the language of the call. Used only by an end-of-utterance model; a chat model ignores it. Only valid
-	// with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
-	// <code>AUDIO_MODEL</code>, or outside the range, it is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: End-of-turn probability at or above which the turn detection model takes the caller to have
+	// finished the turn (valid range: 0 - 1). Higher means more patient: a turn needs a more certain
+	// &quot;finished&quot; to be committed. Unset uses the speech-to-text service&apos;s configured threshold for
+	// the language of the call. Read by every turn detection model that computes a probability; a chat-LLM model,
+	// which answers yes or no, ignores it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified):
+	// set together with <code>VAD</code> or <code>AUDIO_MODEL</code>, or outside the range, it is refused with
+	// <code>INVALID_ARGUMENT</code>
 	EndOfTurnProbabilityThreshold *float32 `protobuf:"fixed32,9,opt,name=end_of_turn_probability_threshold,json=endOfTurnProbabilityThreshold,proto3,oneof" json:"end_of_turn_probability_threshold,omitempty"`
-	// Optional: Hold bands of the semantic turn detection model: how long a turn judged finished, but only with a
-	// probability below a band&apos;s upper bound, waits for further silence before it is committed. Set with no
-	// bands, a turn at or above the threshold is committed at once; unset uses the speech-to-text service&apos;s
-	// configured bands for the language of the call. At most 10 bands, with the ranges of
-	// <code>EndOfTurnHoldBand</code>. Used only by an end-of-utterance model; a chat model ignores it. Only valid
-	// with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
-	// <code>AUDIO_MODEL</code>, or invalid, it is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: Hold bands of an end-of-utterance turn detection model: a turn judged finished, but only with a
+	// probability below a band&apos;s upper bound, waits for that band&apos;s silence before it is committed, and is
+	// judged again if the caller speaks on. Unset uses the speech-to-text service&apos;s configured bands for the
+	// language of the call; set with NO bands, every turn at or above the threshold is committed without a hold.
+	// At most 10 bands, with the ranges of <code>EndOfTurnHoldBand</code>. Only an end-of-utterance model reads it;
+	// the other models ignore it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set
+	// together with <code>VAD</code> or <code>AUDIO_MODEL</code>, or invalid, it is refused with
+	// <code>INVALID_ARGUMENT</code>. Example: bands (0.7, 1.0 s) and (0.9, 0.4 s) hold a turn judged finished with
+	// 0.6 for 1.0 s and one with 0.8 for 0.4 s, and commit one with 0.95 at once
 	HoldBands *TurnDetectionConfig_EndOfTurnHoldBands `protobuf:"bytes,10,opt,name=hold_bands,json=holdBands,proto3" json:"hold_bands,omitempty"`
 	// Optional: Minimum number of words a turn needs before a hold band may hold it; a shorter turn judged finished
-	// is committed at once (default: 3, valid range: 0 - 20). Used only by an end-of-utterance model; a chat model
-	// ignores it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with
+	// is committed without the hold, so that short answers such as &quot;ja&quot; are answered quickly (valid
+	// range: 0 - 20; unset uses the speech-to-text service&apos;s default, 3). Only an end-of-utterance model reads
+	// it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code>
+	// or <code>AUDIO_MODEL</code>, or outside the range, it is refused with <code>INVALID_ARGUMENT</code>
+	UncertainMinWords *uint32 `protobuf:"varint,11,opt,name=uncertain_min_words,json=uncertainMinWords,proto3,oneof" json:"uncertain_min_words,omitempty"`
+	// Optional: Seconds of silence after which a turn the turn detection model judged NOT finished is committed
+	// anyway, so that a caller who really stopped is still answered (valid range: 0 - 4). Unset uses the
+	// speech-to-text service&apos;s configured value, else its minimum silence; the speech-to-text service raises a
+	// value below the minimum silence to it. It also caps every hold band. Read with every kind of turn detection
+	// model. Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with
 	// <code>VAD</code> or <code>AUDIO_MODEL</code>, or outside the range, it is refused with
 	// <code>INVALID_ARGUMENT</code>
-	UncertainMinWords *uint32 `protobuf:"varint,11,opt,name=uncertain_min_words,json=uncertainMinWords,proto3,oneof" json:"uncertain_min_words,omitempty"`
-	// Optional: Seconds of silence after a turn the semantic turn detection model (of either kind) judged NOT
-	// finished before it is committed anyway (default: the voice activity detection&apos;s minimum silence, valid
-	// range: 0 - 4; the speech-to-text service raises a value below that minimum silence to it). Only valid with
-	// the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
-	// <code>AUDIO_MODEL</code>, or outside the range, it is refused with <code>INVALID_ARGUMENT</code>
 	IncompleteMaxSilenceSeconds *float32 `protobuf:"fixed32,12,opt,name=incomplete_max_silence_seconds,json=incompleteMaxSilenceSeconds,proto3,oneof" json:"incomplete_max_silence_seconds,omitempty"`
 	// Optional: Compute the exact end-of-turn probability instead of reading it from the model&apos;s returned top
-	// log probabilities (default: false). Requires a deployment that returns prompt log probabilities (vLLM
+	// log probabilities (default: false). Requires a model deployment that returns prompt log probabilities (vLLM
 	// <code>prompt_logprobs</code>); on any other deployment every turn waits for
-	// <code>incomplete_max_silence_seconds</code>. Used only by an end-of-utterance model; a chat model ignores it.
-	// Only valid with the mode <code>SEMANTIC_MODEL</code> (or unspecified): set together with <code>VAD</code> or
-	// <code>AUDIO_MODEL</code> it is refused with <code>INVALID_ARGUMENT</code>
+	// <code>incomplete_max_silence_seconds</code>, so leave it unset unless the operator confirmed that support.
+	// Only an end-of-utterance model reads it. Only valid with the mode <code>SEMANTIC_MODEL</code> (or
+	// unspecified): set together with <code>VAD</code> or <code>AUDIO_MODEL</code> it is refused with
+	// <code>INVALID_ARGUMENT</code>
 	ExactProbability *bool `protobuf:"varint,13,opt,name=exact_probability,json=exactProbability,proto3,oneof" json:"exact_probability,omitempty"`
-	// Optional: Seconds a speech-to-text final that looks like half a sentence is held, to be merged with the
-	// caller&apos;s continuation into ONE turn (default: 0 = off, valid range: 0 - 2). Valid with every mode. A value
-	// outside the range is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: Seconds a final transcription that looks like half a sentence is held, so that it is sent to the NLU
+	// together with the caller&apos;s continuation as ONE turn instead of being answered on its own (valid range:
+	// 0 - 2; default: 0 = off). A final is held only when it ends on a continuation word (&quot;und&quot;,
+	// &quot;oder&quot;, &quot;and&quot;, ...), is a single short word that is not a complete answer, or was cut at
+	// the speech-to-text service&apos;s maximum utterance length; never while the bot is speaking. When the caller
+	// goes on inside the window, the held part waits for the next final (up to 4 s after the last sign of speech);
+	// otherwise it is sent alone when the window ends, so an answer such as &quot;ja&quot; is delayed by at most the
+	// window, never dropped. Every second is added latency on such finals; 0.5 - 1.0 is a typical value. Valid with
+	// every mode. A value outside the range is refused with <code>INVALID_ARGUMENT</code>
 	FinalMergeWindowSeconds *float32 `protobuf:"fixed32,14,opt,name=final_merge_window_seconds,json=finalMergeWindowSeconds,proto3,oneof" json:"final_merge_window_seconds,omitempty"`
-	// Configuration of the dictation hold, i.e. waiting for the rest of a dictated value (digits, phone or card
-	// number, IBAN, address, date, ...) instead of ending the turn at the caller&apos;s pause between its groups.
-	// Valid with every mode. Unset fields keep the defaults
+	// Optional: Configuration of the dictation hold: waiting for the rest of a dictated value (digits, a phone or
+	// card number, an IBAN, an address, a date, ...) instead of ending the turn at the caller&apos;s pause between
+	// its groups (see <code>DictationConfig</code>). Valid with every mode. Unset, and every unset field of it,
+	// keeps the deployment setting, else the default (a hold only for a turn whose NLU answer asks for a value)
 	DictationConfig *DictationConfig `protobuf:"bytes,15,opt,name=dictation_config,json=dictationConfig,proto3" json:"dictation_config,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	// Optional: Milliseconds of caller audio the call sends to the speech-to-text service per request (valid range:
+	// 20 - 1000; default: 40). Smaller values let the speech-to-text service react sooner at the cost of more
+	// requests; larger values bundle audio and add up to that much latency to every transcription. Unset keeps the
+	// deployment&apos;s <code>ONDEWO_VTSI_CSI_S2T_EMIT_MS</code>, else 40; a set value wins. A value outside the
+	// range is refused with <code>INVALID_ARGUMENT</code>
+	S2TEmitMs *uint32 `protobuf:"varint,16,opt,name=s2t_emit_ms,json=s2tEmitMs,proto3,oneof" json:"s2t_emit_ms,omitempty"`
+	// Optional: Ask the speech-to-text service for partial transcriptions and the start of speech wherever the
+	// call&apos;s speech-to-text configuration says nothing about them (default: true). The interruption noise
+	// gate, <code>max_endpointing_delay_seconds</code>, the merge window and the dictation hold&apos;s early commit
+	// all depend on them. Note that a call carrying this message already asks for both in its speech-to-text
+	// configuration (see the message comment), so <code>false</code> here does not switch them off; to switch
+	// partial transcriptions off, set <code>utterance_detection.transcribe_not_final=false</code> explicitly in
+	// <code>S2tVtsiConfig.s2t_transcribe_request_config</code>, which always wins
+	S2TRequestPartials *bool `protobuf:"varint,17,opt,name=s2t_request_partials,json=s2tRequestPartials,proto3,oneof" json:"s2t_request_partials,omitempty"`
+	// Optional: Ask the speech-to-text service for an early end-of-speech candidate while preemptive generation is
+	// active, so that the bot can start preparing its answer while the turn detection model still holds the
+	// caller&apos;s turn open, before the final transcription (default: true). The candidate is sent only with a
+	// speech-to-text turn detection model and never shortens the turn: a prepared answer is only used when the
+	// final transcription confirms it. <code>false</code> saves one speech-to-text response per pause; it has no
+	// effect while preemptive generation is off
+	S2TRequestEndOfSpeechCandidate *bool `protobuf:"varint,18,opt,name=s2t_request_end_of_speech_candidate,json=s2tRequestEndOfSpeechCandidate,proto3,oneof" json:"s2t_request_end_of_speech_candidate,omitempty"`
+	// Optional: End-of-turn probability threshold of the audio-native turn detection of the mode
+	// <code>AUDIO_MODEL</code> (valid range: 0 - 1; default: 0.5). The released speech-to-speech service does not
+	// run that model yet (see <code>AUDIO_MODEL</code>), so today the value does not change the call. The threshold
+	// of the speech-to-text service&apos;s turn detection model, the audio Smart Turn model included, is
+	// <code>end_of_turn_probability_threshold</code>. A value outside the range is refused with
+	// <code>INVALID_ARGUMENT</code>
+	SmartTurnThreshold *float32 `protobuf:"fixed32,19,opt,name=smart_turn_threshold,json=smartTurnThreshold,proto3,oneof" json:"smart_turn_threshold,omitempty"`
+	// Optional: Phantom-turn guard after the bot stops speaking (valid range: 0 - 1; default: 0.3; 0 = off). While
+	// the caller&apos;s audio is muted during the bot&apos;s speech (interruptions disabled and
+	// <code>InterruptionHandlingConfig.transcribe_on_disabled_interruptions</code> off), the speech-to-text service
+	// can open an utterance right after the audio is unmuted although the caller says nothing, and the bot would
+	// answer words nobody said. A final transcription whose speech started within this many seconds after the
+	// unmute is dropped when no voiced caller audio arrived since the unmute; a caller who really starts speaking
+	// as the bot stops always keeps the turn. It has no effect while the caller&apos;s audio is not muted. A value
+	// outside the range is refused with <code>INVALID_ARGUMENT</code>
+	PostUnmutePhantomWindowSeconds *float32 `protobuf:"fixed32,20,opt,name=post_unmute_phantom_window_seconds,json=postUnmutePhantomWindowSeconds,proto3,oneof" json:"post_unmute_phantom_window_seconds,omitempty"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *TurnDetectionConfig) Reset() {
 	*x = TurnDetectionConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[12]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1882,7 +2616,7 @@ func (x *TurnDetectionConfig) String() string {
 func (*TurnDetectionConfig) ProtoMessage() {}
 
 func (x *TurnDetectionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[12]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1895,7 +2629,7 @@ func (x *TurnDetectionConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TurnDetectionConfig.ProtoReflect.Descriptor instead.
 func (*TurnDetectionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *TurnDetectionConfig) GetMode() TurnDetectionConfig_TurnDetectionMode {
@@ -2003,44 +2737,123 @@ func (x *TurnDetectionConfig) GetDictationConfig() *DictationConfig {
 	return nil
 }
 
-// Configuration of the dictation hold of a call: a final transcription whose dictated value is not complete yet is
-// held until the caller continues, so that the groups of the value reach the NLU as ONE turn. Every unset field
-// keeps its default; a field that is out of range is refused with <code>INVALID_ARGUMENT</code>
+func (x *TurnDetectionConfig) GetS2TEmitMs() uint32 {
+	if x != nil && x.S2TEmitMs != nil {
+		return *x.S2TEmitMs
+	}
+	return 0
+}
+
+func (x *TurnDetectionConfig) GetS2TRequestPartials() bool {
+	if x != nil && x.S2TRequestPartials != nil {
+		return *x.S2TRequestPartials
+	}
+	return false
+}
+
+func (x *TurnDetectionConfig) GetS2TRequestEndOfSpeechCandidate() bool {
+	if x != nil && x.S2TRequestEndOfSpeechCandidate != nil {
+		return *x.S2TRequestEndOfSpeechCandidate
+	}
+	return false
+}
+
+func (x *TurnDetectionConfig) GetSmartTurnThreshold() float32 {
+	if x != nil && x.SmartTurnThreshold != nil {
+		return *x.SmartTurnThreshold
+	}
+	return 0
+}
+
+func (x *TurnDetectionConfig) GetPostUnmutePhantomWindowSeconds() float32 {
+	if x != nil && x.PostUnmutePhantomWindowSeconds != nil {
+		return *x.PostUnmutePhantomWindowSeconds
+	}
+	return 0
+}
+
+// Configuration of the dictation hold of a call. A caller who dictates a value often pauses 1 - 2.5 s between its groups (&quot;null sechs sechs vier ... eins zwei drei ...&quot;), and the speech-to-text service ends an utterance at every such pause, so without the hold the bot answers half a phone number. With the hold, a final transcription whose dictated value is not complete yet is held until the caller continues, and the groups reach the NLU as ONE turn; a complete value is released at once (a value that is only weakly complete is held at most <code>hold_generic_max_seconds</code>). The value recognition is German (number words, spelled letters, months); the hold is never applied while the bot speaks, and a caller who is not dictating costs no latency.
+//
+// The hold is ON by default, but only for a turn whose NLU answer asks for a dictated value (an expected slot, read with <code>expected_input_enabled</code>, also on by default): a turn that asks for no value is never held, so the default adds no latency there. How long a value is held depends on what the bot asked for: the expected value&apos;s category cap applies. The generic rule, a hold WITHOUT an expected value (a trailing digit group after a lead-in such as &quot;Kundennummer&quot;, or a trailing &quot;Stiege&quot;, &quot;Stock&quot;, &quot;Tür&quot;, &quot;am&quot;, &quot;um&quot;, ...), is a guess and stays off unless <code>hold_enabled</code> is set to true.
+//
+// Presence and precedence: every field is applied only when it is set; an unset field keeps the deployment setting (the <code>ONDEWO_VTSI_CSI_DICTATION_*</code> variable named at the field), else the default. A set per-call value wins over the deployment setting. A field that is out of range, and an unknown category, are refused with <code>INVALID_ARGUMENT</code>.
+//
+// Example, a line that collects IBANs from an agent whose prompts ask for them and gives an IBAN 4 s (the hold under the expected value is on by default):
+//
+// <pre><code>hold_max_seconds_by_category { key: &quot;iban&quot; value: 4.0 }</code></pre>
 type DictationConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Hold a final transcription whose dictated value is unfinished (default: false)
+	// Optional: Hold a final transcription whose dictated value is unfinished, up to the cap of its category (or
+	// the generic cap), instead of committing the turn at the caller&apos;s pause. Unset (the default): the hold
+	// applies only to a turn whose NLU answer asks for a value (an expected slot, see
+	// <code>expected_input_enabled</code>), and a turn that asks for none is never held. True: the generic rule
+	// (<code>hold_generic_max_seconds</code>) holds turns without an expected value too. False: the master switch is
+	// off, and nothing else in this message holds a turn. Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_HOLD_ACTIVE</code>
 	HoldEnabled *bool `protobuf:"varint,1,opt,name=hold_enabled,json=holdEnabled,proto3,oneof" json:"hold_enabled,omitempty"`
-	// Optional: Read the expected value (slot) from the NLU answer, so that the hold applies the rule of the value
-	// the bot asked for (default: false; without it only the generic rule holds)
+	// Optional: Read the expected value (slot) from every NLU answer, so that the hold applies the rule and cap of
+	// the value the bot asked for (default: true; false leaves the default hold nothing to hold under, and with
+	// <code>hold_enabled</code> true only the generic rule holds). The slot comes from a
+	// slot-filling prompt for a required parameter, a read-back intent, or an AI Team&apos;s expected input; every
+	// answer replaces it, so a slot never leaks into a later turn. Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_EXPECTED_INPUT_ACTIVE</code>
 	ExpectedInputEnabled *bool `protobuf:"varint,2,opt,name=expected_input_enabled,json=expectedInputEnabled,proto3,oneof" json:"expected_input_enabled,omitempty"`
 	// Optional: With <code>expected_input_enabled</code>, take a bot answer that reads a complete value back and asks
-	// for confirmation as asking for a confirmation of that value (default: false)
+	// for confirmation (&quot;Ich wiederhole: 0664 1234567. Ist das korrekt?&quot;) as asking to confirm that value,
+	// also when the NLU answer carries no read-back marker (default: false). After such a read-back (from the marker
+	// or from this text rule) and while the hold is on, a lone &quot;nein&quot; is held up to the
+	// <code>confirm_value</code> cap for the correction that usually follows (&quot;Nein, die letzte ist
+	// sieben&quot;), and a lone &quot;ja&quot; for 0.6 s. Recognises digit, phone, card, IBAN, BIC and social
+	// security numbers read back in German; dates, times, addresses and e-mail addresses are not recognised. No
+	// deployment setting exists for it
 	ReadBackFromBotTextEnabled *bool `protobuf:"varint,3,opt,name=read_back_from_bot_text_enabled,json=readBackFromBotTextEnabled,proto3,oneof" json:"read_back_from_bot_text_enabled,omitempty"`
-	// Optional: Seconds the generic rule (no expected value) holds at most (default: 1.5, valid range: 0 - 2;
-	// 0 switches the generic rule off)
+	// Optional: Seconds the generic rule (no expected value; only with <code>hold_enabled</code> true) holds at most,
+	// and the longest hold of an expected value that is only weakly complete (e.g. an address with only the street
+	// line, a date with only day and month) (valid range: 0 - 2; default: 1.5; 0 switches both off). The generic
+	// rule holds on a guess, which is why its ceiling is lower than a category&apos;s. Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_HOLD_GENERIC_MAX_SECONDS</code>
 	HoldGenericMaxSeconds *float32 `protobuf:"fixed32,4,opt,name=hold_generic_max_seconds,json=holdGenericMaxSeconds,proto3,oneof" json:"hold_generic_max_seconds,omitempty"`
-	// Optional: Seconds an unfinished value of a category is held at most, keyed by the category: <code>digits</code>,
-	// <code>phone</code>, <code>card</code>, <code>expiry_cvc</code>, <code>iban</code>, <code>bic</code>,
-	// <code>svnr</code>, <code>address</code>, <code>date</code>, <code>time</code>, <code>email</code> or
-	// <code>confirm_value</code> (valid range: 0 - 4 each). The rule without an expected value is not a category: it
-	// is set with <code>hold_generic_max_seconds</code>. An unknown category, <code>generic</code> included, is
-	// refused with <code>INVALID_ARGUMENT</code>. The map is ONE field: a non-empty map replaces the whole
-	// replica-wide table of the deployment, so a category not listed here keeps the speech-to-speech service's
-	// default cap, not a cap the replica-wide table set; an empty map keeps the replica-wide table
+	// Optional: Seconds an unfinished value of a category is held at most, keyed by the category (valid range: 0 - 4
+	// each; 0 = no hold for that category). Categories and their defaults: <code>digits</code> 2.5,
+	// <code>phone</code> 2.5, <code>card</code> 3.0, <code>expiry_cvc</code> 2.0, <code>iban</code> 3.5,
+	// <code>bic</code> 2.5, <code>svnr</code> 2.5, <code>address</code> 3.0, <code>date</code> 2.0,
+	// <code>time</code> 1.5, <code>email</code> 2.5 and <code>confirm_value</code> 2.5 (the correction after a
+	// read-back). The rule without an expected value is not a category: it is set with
+	// <code>hold_generic_max_seconds</code>. An unknown category, <code>generic</code> included, is refused with
+	// <code>INVALID_ARGUMENT</code>. The map is ONE field: a non-empty map replaces the whole table of the
+	// deployment setting <code>ONDEWO_VTSI_CSI_DICTATION_HOLD_MAX_SECONDS</code>, so a category not listed here
+	// keeps its default above, not a cap the deployment setting chose; an empty map keeps the deployment setting
 	HoldMaxSecondsByCategory map[string]float32 `protobuf:"bytes,5,rep,name=hold_max_seconds_by_category,json=holdMaxSecondsByCategory,proto3" json:"hold_max_seconds_by_category,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"fixed32,2,opt,name=value"`
-	// Optional: Seconds a full-length value whose checksum fails is held, so that the bot can ask again
-	// (default: 1.5, valid range: 0 - 4)
+	// Optional: Seconds a full-length value whose checksum fails (an IBAN, a card number, ...) is held at most, so
+	// that the caller can still correct it but the bot soon gets the turn to ask again instead of waiting out the
+	// category&apos;s cap (valid range: 0 - 4; default: 1.5; never longer than the category&apos;s cap). Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_HOLD_INVALID_CHECKSUM_SECONDS</code>
 	HoldInvalidChecksumSeconds *float32 `protobuf:"fixed32,6,opt,name=hold_invalid_checksum_seconds,json=holdInvalidChecksumSeconds,proto3,oneof" json:"hold_invalid_checksum_seconds,omitempty"`
-	// Optional: Commit the turn on a partial transcription as soon as the expected value is complete; needs
-	// <code>hold_enabled</code> and <code>expected_input_enabled</code> (default: false)
+	// Optional: Commit the turn as soon as a stable partial transcription shows the expected value complete (and its
+	// checksum valid, where it has one), instead of waiting for the speech-to-text service&apos;s end-of-utterance
+	// silence (default: false). Saves the silence wait after a dictated value. Needs the hold (not
+	// <code>hold_enabled</code> false), <code>expected_input_enabled</code> and partial transcriptions; without an
+	// expected value it does nothing.
+	// Deployment setting: <code>ONDEWO_VTSI_CSI_DICTATION_EARLY_COMMIT_ON_COMPLETE_VALUE</code>
 	EarlyCommitOnCompleteValue *bool `protobuf:"varint,7,opt,name=early_commit_on_complete_value,json=earlyCommitOnCompleteValue,proto3,oneof" json:"early_commit_on_complete_value,omitempty"`
 	// Optional: Minimum silence in seconds the speech-to-text service waits before it ends an utterance while a value
-	// is expected (default: 0 = off, valid range: 0 or 0.5 - 4). Only takes effect when a value to restore after the
-	// turn is known: <code>s2t_slot_min_duration_off_restore_seconds</code> or the minimum silence of the
-	// speech-to-text configuration
+	// is expected, so that the speech-to-text service itself stops cutting between the groups (valid: 0 = off, or
+	// 0.5 - 4; default: 0). Applies while an expected value other than a read-back confirmation is known, so it
+	// needs <code>expected_input_enabled</code> (not <code>hold_enabled</code>); after the turn the minimum silence
+	// is set back to <code>s2t_slot_min_duration_off_restore_seconds</code>. It only takes effect when the call&apos;s
+	// speech-to-text configuration carries a <code>pyannote</code> block (supplied in
+	// <code>S2tVtsiConfig.s2t_transcribe_request_config</code>, or created from
+	// <code>TurnDetectionConfig.min_endpointing_delay_seconds</code> on a deployment that supports creating it) and
+	// the restore value is known (set, or a minimum silence in that block), and it needs a speech-to-text service
+	// that accepts the change mid-call. A value between 0 and 0.5 is refused with
+	// <code>INVALID_ARGUMENT</code>. Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_S2T_SLOT_MIN_DURATION_OFF_SECONDS</code>
 	S2TSlotMinDurationOffSeconds *float32 `protobuf:"fixed32,8,opt,name=s2t_slot_min_duration_off_seconds,json=s2tSlotMinDurationOffSeconds,proto3,oneof" json:"s2t_slot_min_duration_off_seconds,omitempty"`
 	// Optional: Minimum silence in seconds restored on the speech-to-text service after a turn with an expected value
-	// (default: the minimum silence of the speech-to-text configuration, valid range: 0.05 - 4)
+	// (valid range: 0.05 - 4; default: the minimum silence of the call&apos;s speech-to-text configuration). Set it to
+	// the pipeline&apos;s normal minimum silence when the speech-to-text configuration carries none; without any
+	// restore value, <code>s2t_slot_min_duration_off_seconds</code> stays off. Deployment setting:
+	// <code>ONDEWO_VTSI_CSI_DICTATION_S2T_SLOT_MIN_DURATION_OFF_RESTORE_SECONDS</code>
 	S2TSlotMinDurationOffRestoreSeconds *float32 `protobuf:"fixed32,9,opt,name=s2t_slot_min_duration_off_restore_seconds,json=s2tSlotMinDurationOffRestoreSeconds,proto3,oneof" json:"s2t_slot_min_duration_off_restore_seconds,omitempty"`
 	unknownFields                       protoimpl.UnknownFields
 	sizeCache                           protoimpl.SizeCache
@@ -2048,7 +2861,7 @@ type DictationConfig struct {
 
 func (x *DictationConfig) Reset() {
 	*x = DictationConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[13]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2060,7 +2873,7 @@ func (x *DictationConfig) String() string {
 func (*DictationConfig) ProtoMessage() {}
 
 func (x *DictationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[13]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2073,7 +2886,7 @@ func (x *DictationConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DictationConfig.ProtoReflect.Descriptor instead.
 func (*DictationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{13}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *DictationConfig) GetHoldEnabled() bool {
@@ -2139,43 +2952,138 @@ func (x *DictationConfig) GetS2TSlotMinDurationOffRestoreSeconds() float32 {
 	return 0
 }
 
-// Configuration of the interruption (barge-in) handling, i.e. the caller speaking while the bot is speaking
+// Interruption (barge-in) handling: what happens when the caller speaks while the bot is speaking. Off by default: the caller is not listened to while the bot speaks, and speech never stops the bot. A DTMF key the bot asked for still stops it (<code>DtmfConfig.barge_in</code>, on by default; set it to false as well for a disclaimer that must be heard in full).
+//
+// With <code>enabled=true</code>, caller speech over the bot goes through these steps:
+//
+// (1) Is it an interruption? Speech within <code>first_message_protected_seconds</code> after the greeting started, speech shorter than <code>min_interruption_duration_seconds</code> and sounds without words (&quot;hmm&quot;, &quot;mhm&quot;) are ignored. Otherwise, with the turn detection mode <code>VAD</code> (and whenever no semantic turn detection runs for the call), any recognised speech interrupts; with <code>SEMANTIC_MODEL</code> or <code>AUDIO_MODEL</code> a final transcription with at least one word interrupts at once, and a partial transcription interrupts once it has <code>min_interruption_words</code> words. Speech that does not interrupt is dropped: the bot keeps talking and the speech is not answered. One exception: a final transcription with at least one word that is refused only because it was shorter than <code>min_interruption_duration_seconds</code> does not stop the bot either, but it is kept and answered as the caller&apos;s next turn once the bot has finished speaking.
+//
+// (2) The bot pauses: its voice fades out over <code>interruption_fade_out_ms</code>, and the rest of its answer is kept.
+//
+// (3) Real or false? If the caller&apos;s speech becomes a complete turn (a final transcription) within <code>false_interruption_timeout_seconds</code>, the interruption is REAL: the rest of the answer is discarded, the bot stays silent for <code>backoff_seconds</code> and then answers what the caller said. Its synthesis is cancelled (<code>t2s_cancel_on_barge_in</code>), and an NLU that supports it is told which turn was cut and what the caller heard of it (<code>nlu_turn_control_enabled</code>, <code>heard_report_enabled</code>). If no turn is committed in time, the interruption is FALSE (a cough, a short noise): with <code>resume_after_false_interruption</code> the bot continues where its fade-out ended, so nothing is heard twice, else the rest of the answer is dropped, and then, as after a real one, its synthesis is cancelled and a call action it carries is dropped (<code>t2s_cancel_on_barge_in</code>). The window waits for a caller who is still speaking: each partial transcription that changes what the caller said extends it, up to twice <code>false_interruption_timeout_seconds</code> (at most 9 s) after the interruption.
+//
+// Example: let the caller interrupt, ignore anything shorter than 0.6 s, and never interrupt the first 3 s of the greeting: <code>enabled: true, min_interruption_duration_seconds: 0.6, first_message_protected_seconds: 3</code>
+//
+// Scope and precedence as in <code>VoiceInteractionConfig</code>: unset means inherit, i.e. the deployment&apos;s <code>ONDEWO_VTSI_*</code> setting where a field names one, else the default given at the field. A value outside a field&apos;s range is refused with <code>INVALID_ARGUMENT</code>.
 type InterruptionHandlingConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Enable interruption (barge-in) handling, i.e. the caller can interrupt the bot while it is speaking
-	// (default: false, i.e. the bot cannot be interrupted)
+	// Optional: Let the caller interrupt (barge in on) the bot by speaking while it speaks (default: false). False:
+	// the caller&apos;s speech is not heard while the bot speaks, and speech never stops the bot. A DTMF key the bot
+	// asked for still stops it (see <code>DtmfConfig.barge_in</code>, on by default; set it to false as well for a
+	// disclaimer that must be heard in full). The speech-related fields of this message only matter when this is
+	// true. Exceptions: <code>transcribe_on_disabled_interruptions</code> and
+	// <code>cancel_on_speech_while_thinking</code>, plus <code>interruption_fade_out_ms</code>,
+	// <code>t2s_cancel_on_barge_in</code>, <code>nlu_turn_control_enabled</code>, <code>heard_report_enabled</code>,
+	// <code>heard_text_alignment_enabled</code> and <code>ai_teams_cancel_pending_on_interrupt</code>, which also
+	// apply when a key stops the bot, when an operator mutes it and when a turn is replaced
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
-	// Optional: Minimum duration in seconds of caller speech while the bot is speaking
-	// to trigger an interruption (noise gate) (default: 0.5)
+	// Optional: Minimum duration in seconds the caller must have been speaking over the bot before it counts as an
+	// interruption, measured from the start of the caller&apos;s speech (noise gate) (default: 0.5, valid range:
+	// 0 - 10). Raise it (e.g. 0.8) to let short noises pass without stopping the bot. A final transcription with
+	// at least one word that is too short to interrupt is not lost: it is answered as the caller&apos;s next turn
+	// once the bot has finished speaking
 	MinInterruptionDurationSeconds *float32 `protobuf:"fixed32,2,opt,name=min_interruption_duration_seconds,json=minInterruptionDurationSeconds,proto3,oneof" json:"min_interruption_duration_seconds,omitempty"`
-	// Optional: Minimum number of transcribed words of caller speech while the bot is speaking
-	// to trigger an interruption (default: 2)
+	// Optional: Minimum number of words a PARTIAL transcription of caller speech over the bot needs to interrupt
+	// it early (default: 2, valid range: 0 - 10; 0 and 1 both let one word interrupt). Only used with the turn
+	// detection modes <code>SEMANTIC_MODEL</code> and <code>AUDIO_MODEL</code>: a FINAL transcription with at
+	// least one word always interrupts, so a short &quot;no&quot; still stops the bot, and with <code>VAD</code>
+	// any recognised speech interrupts. Higher values keep the bot talking over short remarks until the caller has
+	// said more
 	MinInterruptionWords *int32 `protobuf:"varint,3,opt,name=min_interruption_words,json=minInterruptionWords,proto3,oneof" json:"min_interruption_words,omitempty"`
-	// Optional: Time in seconds after an interruption trigger without a committed transcription
-	// after which the interruption is classified as a false interruption (default: 2.0)
+	// Optional: Seconds after an interruption within which the caller&apos;s speech must become a complete turn for
+	// the interruption to be REAL; otherwise it is FALSE (a cough, brief noise) and
+	// <code>resume_after_false_interruption</code> decides (default: 2.0, valid: 0 or more). Each partial
+	// transcription that changes what the caller said re-arms the window. The window lasts at most twice this value
+	// after the interruption, and never more than 9 s (a window of 9 s or more is not extended). The paused rest of
+	// an answer is kept for at most 10 s, so a longer window cannot resume it
 	FalseInterruptionTimeoutSeconds *float32 `protobuf:"fixed32,4,opt,name=false_interruption_timeout_seconds,json=falseInterruptionTimeoutSeconds,proto3,oneof" json:"false_interruption_timeout_seconds,omitempty"`
-	// Optional: Resume the paused bot response after a false interruption,
-	// e.g. a cough or brief background noise (default: true)
+	// Optional: After a FALSE interruption, continue the paused answer where the bot&apos;s fade-out ended, with a
+	// short fade-in, so nothing the caller already heard is played twice, whatever
+	// <code>interruption_fade_out_ms</code> is (default: true). False: the rest of the answer is dropped
 	ResumeAfterFalseInterruption *bool `protobuf:"varint,5,opt,name=resume_after_false_interruption,json=resumeAfterFalseInterruption,proto3,oneof" json:"resume_after_false_interruption,omitempty"`
-	// Optional: Silence in seconds after a real interruption before the next bot response is played (default: 1.0)
+	// Optional: Seconds of silence after a REAL interruption before the bot&apos;s next answer plays, so the caller
+	// keeps the floor for a moment (default: 1.0, valid: 0 or more)
 	BackoffSeconds *float32 `protobuf:"fixed32,6,opt,name=backoff_seconds,json=backoffSeconds,proto3,oneof" json:"backoff_seconds,omitempty"`
-	// Optional: Protect the first bot message from interruptions
-	// for the given number of seconds (default: 0 = no protection)
+	// Optional: Seconds, counted from the start of the greeting, during which caller speech never interrupts the
+	// bot (default: 0 = no protection, valid: 0 or more). Speech in that window is ignored, not answered. Example:
+	// 5 makes sure the first 5 s of a greeting are heard
 	FirstMessageProtectedSeconds *float32 `protobuf:"fixed32,7,opt,name=first_message_protected_seconds,json=firstMessageProtectedSeconds,proto3,oneof" json:"first_message_protected_seconds,omitempty"`
-	// Optional: Transcribe caller speech while the bot is speaking even if interruptions are disabled
-	// (default: false, i.e. caller speech during bot speech is not transcribed while <code>enabled</code> is false)
+	// Optional: Transcribe the caller while the bot speaks although interruptions are disabled (default: false).
+	// The speech neither stops the bot nor is answered. Only matters when <code>enabled</code> is false
 	TranscribeOnDisabledInterruptions *bool `protobuf:"varint,8,opt,name=transcribe_on_disabled_interruptions,json=transcribeOnDisabledInterruptions,proto3,oneof" json:"transcribe_on_disabled_interruptions,omitempty"`
-	// Optional: Duration in milliseconds over which the bot&apos;s voice fades out (raised cosine) when the caller
-	// interrupts it, instead of stopping abruptly (default: 100, valid range: 0 - 500; 0 = stop at once).
-	// A value outside the range is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: Milliseconds over which the bot&apos;s voice fades out (raised cosine) when the caller interrupts it,
+	// so the bot trails off like a person instead of stopping with a click (default: 100, valid range: 0 - 500;
+	// 0 = stop at once). Any value above 0 also gives every other stop of the bot&apos;s voice a 5 ms ramp and fades
+	// a resumed answer back in over 20 ms. A set value wins over the deployment&apos;s
+	// <code>ONDEWO_VTSI_INTERRUPTION_FADE_OUT_MS</code>
 	InterruptionFadeOutMs *int32 `protobuf:"varint,9,opt,name=interruption_fade_out_ms,json=interruptionFadeOutMs,proto3,oneof" json:"interruption_fade_out_ms,omitempty"`
-	unknownFields         protoimpl.UnknownFields
-	sizeCache             protoimpl.SizeCache
+	// <p>Optional: Let the caller replace a turn the bot is still thinking about (default: false). When a caller turn
+	// is committed while the bot is still working on the previous one (its answer is being generated and nothing of
+	// it plays yet), that answer is cancelled and never spoken, and the new turn is answered at once; the earlier
+	// turn stays in the conversation history. Example: the caller says &quot;I need a taxi&quot; and, before the bot
+	// answers, &quot;for tomorrow morning&quot;: with true the bot answers only the second turn; with false it first
+	// speaks its answer to &quot;I need a taxi&quot;, then answers the second.</p>
+	// <p>Trade-off: a caller who says one sentence in two parts with a pause gets only the second part answered.
+	// Works whether or not <code>enabled</code> is set; has no effect with
+	// <code>ResponseTimingConfig.streaming_enabled=false</code>. The greeting and DTMF key entries are never
+	// replaced. An NLU that supports turn control is told to cancel the replaced turn
+	// (<code>nlu_turn_control_enabled</code>); another NLU still finishes it, but its answer is not spoken. A set
+	// value wins over the deployment&apos;s <code>ONDEWO_VTSI_CSI_CANCEL_ON_SPEECH_WHILE_THINKING</code></p>
+	CancelOnSpeechWhileThinking *bool `protobuf:"varint,10,opt,name=cancel_on_speech_while_thinking,json=cancelOnSpeechWhileThinking,proto3,oneof" json:"cancel_on_speech_while_thinking,omitempty"`
+	// <p>Optional: Whether a turn that was cut cancels the AI Teams asynchronous tool calls it dispatched that have
+	// not started yet. A turn is cut by a caller&apos;s interruption, by a turn replaced through
+	// <code>cancel_on_speech_while_thinking</code>, by an operator mute or takeover, or by the end of the call while
+	// its answer is still being generated (default: unset = the NLU deployment&apos;s own setting, which is
+	// on unless its operator turned it off). True or false decides it for this call alone, also against the
+	// deployment&apos;s setting.</p>
+	// <p>Only tools, agents or members whose team document declares <code>async.on_interrupt: cancel_pending</code>
+	// are ever cancelled (one declaring <code>keep</code> never is), only while the task is still pending (a task
+	// already running is delivered as usual), and only when the caller did not hear the dispatch acknowledged. Needs
+	// an NLU with turn control, <code>nlu_turn_control_enabled</code> and the call-length NLU request
+	// (<code>ResponseTimingConfig.nlu_call_stream_enabled</code>); without them nothing is cancelled and this value
+	// never reaches the NLU. Example:
+	// false keeps a callback the caller asked for even when they talked over the bot&apos;s confirmation</p>
+	AiTeamsCancelPendingOnInterrupt *bool `protobuf:"varint,11,opt,name=ai_teams_cancel_pending_on_interrupt,json=aiTeamsCancelPendingOnInterrupt,proto3,oneof" json:"ai_teams_cancel_pending_on_interrupt,omitempty"`
+	// Optional: When an interruption discards the rest of the bot&apos;s answer, stop producing it (default: true).
+	// That is a REAL interruption, or a FALSE one while <code>resume_after_false_interruption</code> is false. In
+	// that case the answer&apos;s speech synthesis is cancelled at once, and a call action the answer carries (e.g. a
+	// transfer or hangup the answer would have triggered) is dropped. While a false interruption may still resume
+	// the answer, a further message of it is held until that is decided instead of starting. False restores the
+	// previous behaviour: the interrupted answer is synthesised to its end unheard, nothing is held and its call
+	// actions still run. A set value wins over the deployment&apos;s
+	// <code>ONDEWO_VTSI_CSI_T2S_CANCEL_ON_BARGE_IN</code>
+	T2SCancelOnBargeIn *bool `protobuf:"varint,12,opt,name=t2s_cancel_on_barge_in,json=t2sCancelOnBargeIn,proto3,oneof" json:"t2s_cancel_on_barge_in,omitempty"`
+	// Optional: Tell an NLU that supports turn control which turn was cancelled (default: true): the turn a real
+	// interruption cut, a turn replaced by <code>cancel_on_speech_while_thinking</code>, and a turn still being
+	// generated when the call ends. The NLU then stops generating it and stores it as an interrupted turn. An NLU
+	// without turn control is sent nothing either way. An operator mute or takeover through call control also tells
+	// the NLU that the current turn was cut. Turn control rides the call-length NLU request, so it needs
+	// <code>ResponseTimingConfig.streaming_enabled</code> and <code>nlu_call_stream_enabled</code> (both true by
+	// default); without them nothing is sent. <code>heard_report_enabled</code> and
+	// <code>ai_teams_cancel_pending_on_interrupt</code> depend on it. A set value wins over the deployment&apos;s
+	// <code>ONDEWO_VTSI_CSI_NLU_TURN_CONTROL_ACTIVE</code>
+	NluTurnControlEnabled *bool `protobuf:"varint,13,opt,name=nlu_turn_control_enabled,json=nluTurnControlEnabled,proto3,oneof" json:"nlu_turn_control_enabled,omitempty"`
+	// Optional: Report to an NLU that supports turn control what the caller actually heard of an interrupted
+	// answer, so the conversation history and the agent&apos;s memory hold what was said rather than everything that
+	// was generated (default: true). Example: the bot is cut after &quot;Your appointment is on Monday&quot; of a
+	// longer answer; the agent&apos;s next turn knows the caller heard only that much. Needs
+	// <code>nlu_turn_control_enabled</code> and the call-length NLU request
+	// (<code>ResponseTimingConfig.nlu_call_stream_enabled</code>). A set value wins over the deployment&apos;s
+	// <code>ONDEWO_VTSI_CSI_HEARD_REPORT_ACTIVE</code>
+	HeardReportEnabled *bool `protobuf:"varint,14,opt,name=heard_report_enabled,json=heardReportEnabled,proto3,oneof" json:"heard_report_enabled,omitempty"`
+	// Optional: Place the cut of an interrupted answer on the sentence or word it fell in, using the timings the
+	// text-to-speech service returns, instead of estimating it proportionally over the whole message (default:
+	// true). Makes the heard report (<code>heard_report_enabled</code>) more precise and only matters with it; with
+	// a text-to-speech service that returns no timings nothing changes. A set value wins over the deployment&apos;s
+	// <code>ONDEWO_VTSI_CSI_HEARD_TEXT_ALIGNMENT_ACTIVE</code>
+	HeardTextAlignmentEnabled *bool `protobuf:"varint,15,opt,name=heard_text_alignment_enabled,json=heardTextAlignmentEnabled,proto3,oneof" json:"heard_text_alignment_enabled,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *InterruptionHandlingConfig) Reset() {
 	*x = InterruptionHandlingConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[14]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2187,7 +3095,7 @@ func (x *InterruptionHandlingConfig) String() string {
 func (*InterruptionHandlingConfig) ProtoMessage() {}
 
 func (x *InterruptionHandlingConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[14]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2200,7 +3108,7 @@ func (x *InterruptionHandlingConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InterruptionHandlingConfig.ProtoReflect.Descriptor instead.
 func (*InterruptionHandlingConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *InterruptionHandlingConfig) GetEnabled() bool {
@@ -2266,32 +3174,137 @@ func (x *InterruptionHandlingConfig) GetInterruptionFadeOutMs() int32 {
 	return 0
 }
 
-// Configuration of the response timing, i.e. when and how the bot responds
+func (x *InterruptionHandlingConfig) GetCancelOnSpeechWhileThinking() bool {
+	if x != nil && x.CancelOnSpeechWhileThinking != nil {
+		return *x.CancelOnSpeechWhileThinking
+	}
+	return false
+}
+
+func (x *InterruptionHandlingConfig) GetAiTeamsCancelPendingOnInterrupt() bool {
+	if x != nil && x.AiTeamsCancelPendingOnInterrupt != nil {
+		return *x.AiTeamsCancelPendingOnInterrupt
+	}
+	return false
+}
+
+func (x *InterruptionHandlingConfig) GetT2SCancelOnBargeIn() bool {
+	if x != nil && x.T2SCancelOnBargeIn != nil {
+		return *x.T2SCancelOnBargeIn
+	}
+	return false
+}
+
+func (x *InterruptionHandlingConfig) GetNluTurnControlEnabled() bool {
+	if x != nil && x.NluTurnControlEnabled != nil {
+		return *x.NluTurnControlEnabled
+	}
+	return false
+}
+
+func (x *InterruptionHandlingConfig) GetHeardReportEnabled() bool {
+	if x != nil && x.HeardReportEnabled != nil {
+		return *x.HeardReportEnabled
+	}
+	return false
+}
+
+func (x *InterruptionHandlingConfig) GetHeardTextAlignmentEnabled() bool {
+	if x != nil && x.HeardTextAlignmentEnabled != nil {
+		return *x.HeardTextAlignmentEnabled
+	}
+	return false
+}
+
+// Response timing of the call: what the bot does while the caller stays silent, how it bridges a slow answer, and how an answer is requested from the NLU and streamed to the caller.
+//
+// Every scalar is <code>optional</code>: an unset field inherits, i.e. the call keeps the deployment&apos;s value where a replica-wide <code>ONDEWO_VTSI_*</code> setting exists for it (named per field), and the built-in default listed per field otherwise. A set value always wins over the deployment setting. A value outside its range is refused with <code>INVALID_ARGUMENT</code>.
+//
+// Scope: the configuration of a listener applies to every inbound call that listener deployment serves; the configuration of a caller, a campaign or a scheduled caller applies to its own calls. A pooled persistent caller is reused only for a request with the identical configuration.
+//
+// The caller-silence windows (<code>turn_timeout_seconds</code>, <code>silence_end_call_timeout_seconds</code>) restart whenever the caller speaks, presses a key or the bot plays audio, and never elapse while the bot is speaking, an answer is being prepared or an interruption is being decided. While listening is paused through call control, neither window and no soft-timeout filler fires.
 type ResponseTimingConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Seconds of caller silence after a bot response until a follow-up event
-	// is triggered (default: 20.0, valid range: 1.0 - 30.0)
+	// Optional: Seconds of caller silence after which the bot re-engages the caller by triggering
+	// <code>turn_timeout_intent</code> (default: 20.0, valid range: 1.0 - 30.0). Has no effect unless
+	// <code>turn_timeout_intent</code> is set. As long as the caller stays silent, the re-engagement repeats every
+	// <code>turn_timeout_seconds</code>.
+	// Example: <code>turn_timeout_seconds=8</code> with <code>turn_timeout_intent=&quot;i.still.there&quot;</code>
+	// plays the answer of the intent <code>i.still.there</code> (e.g. &quot;Are you still there?&quot;) after 8 s of
+	// silence
 	TurnTimeoutSeconds *float32 `protobuf:"fixed32,1,opt,name=turn_timeout_seconds,json=turnTimeoutSeconds,proto3,oneof" json:"turn_timeout_seconds,omitempty"`
-	// Optional: Seconds of caller silence until the call is ended.
-	// Unset = off (-1 is also accepted as explicit off)
+	// Optional: Seconds of caller silence after which the bot hangs up (default: off). Any value above 0 is
+	// accepted; -1 is also accepted as an explicit off, and 0 or any other negative value is refused with
+	// <code>INVALID_ARGUMENT</code>. The hangup happens at once, without a closing message. Every bot utterance
+	// restarts this window, a turn-timeout re-engagement included: with <code>turn_timeout_intent</code> set, the
+	// call only ends on silence when this value is below <code>turn_timeout_seconds</code>.
+	// Example: <code>silence_end_call_timeout_seconds=30</code> without a <code>turn_timeout_intent</code> ends a
+	// call after 30 s in which neither the caller nor the bot said anything
 	SilenceEndCallTimeoutSeconds *float32 `protobuf:"fixed32,2,opt,name=silence_end_call_timeout_seconds,json=silenceEndCallTimeoutSeconds,proto3,oneof" json:"silence_end_call_timeout_seconds,omitempty"`
-	// Configuration of the soft timeout filler messages
+	// Optional: Filler messages the bot speaks while an answer takes long to prepare (default: off). See
+	// <code>SoftTimeoutConfig</code>
 	SoftTimeoutConfig *SoftTimeoutConfig `protobuf:"bytes,3,opt,name=soft_timeout_config,json=softTimeoutConfig,proto3" json:"soft_timeout_config,omitempty"`
-	// Optional, DEPRECATED: use <code>CsiVtsiConfig.preemptive_generation_config.enabled</code>.
-	// Enable preemptive response generation on an eagerly detected end of turn (default: the deployment&apos;s
-	// setting, which is true unless changed). Still honoured when it is set alone; set together with
-	// <code>CsiVtsiConfig.preemptive_generation_config.enabled</code> to a different value, the request is refused
-	// with <code>INVALID_ARGUMENT</code>
+	// Optional, DEPRECATED: use <code>CsiVtsiConfig.preemptive_generation_config.enabled</code>, which does the same.
+	// Ask the NLU for the answer of a stable partial transcription before the caller finished speaking, so that a
+	// matching answer is ready sooner (default: the deployment&apos;s
+	// <code>ONDEWO_VTSI_CSI_PREEMPTIVE_GENERATION_ACTIVE</code>, which is true unless changed). Still honoured when
+	// it is set alone; set together with <code>CsiVtsiConfig.preemptive_generation_config.enabled</code> to the same
+	// value it is accepted, to a different value the request is refused with <code>INVALID_ARGUMENT</code>
 	PreemptiveGenerationEnabled *bool `protobuf:"varint,4,opt,name=preemptive_generation_enabled,json=preemptiveGenerationEnabled,proto3,oneof" json:"preemptive_generation_enabled,omitempty"`
-	// Optional: Enable chunked text-to-speech streaming for a lower time to first audio (default: false)
+	// Optional: Start playing an answer as soon as its first audio chunk is synthesized, instead of waiting until the
+	// speech synthesis of the whole answer has finished (default: true). Shortens the pause before the bot answers,
+	// the more the longer the answer. <code>false</code> waits for the whole synthesis of every answer. Applies to
+	// the answers of caller turns while <code>streaming_enabled</code> is on (its default); the opening message of
+	// the call and the turn-timeout re-engagement are always synthesized whole
 	T2SChunkedStreamingEnabled *bool `protobuf:"varint,5,opt,name=t2s_chunked_streaming_enabled,json=t2sChunkedStreamingEnabled,proto3,oneof" json:"t2s_chunked_streaming_enabled,omitempty"`
-	unknownFields              protoimpl.UnknownFields
-	sizeCache                  protoimpl.SizeCache
+	// Optional: Ask the NLU for each answer with its streaming request instead of the unary one (default: the
+	// deployment&apos;s <code>ONDEWO_VTSI_CSI_STREAMING_ACTIVE</code>, and true when that is not set).
+	// <code>false</code> asks every caller turn with the unary request, and the caller is not transcribed while an
+	// answer is being prepared, so speech in that time is lost. It also turns off <code>nlu_call_stream_enabled</code>
+	// (and with it turn control, heard reports and results the NLU delivers on its own), the chunked playback of
+	// answers (<code>t2s_chunked_streaming_enabled</code>) and
+	// <code>InterruptionHandlingConfig.cancel_on_speech_while_thinking</code>
+	StreamingEnabled *bool `protobuf:"varint,6,opt,name=streaming_enabled,json=streamingEnabled,proto3,oneof" json:"streaming_enabled,omitempty"`
+	// Optional: Keep ONE streaming NLU request open for the whole call instead of opening one per caller turn
+	// (default: the deployment&apos;s <code>ONDEWO_VTSI_CSI_NLU_CALL_STREAM_ACTIVE</code>, and true when that is not
+	// set). Only takes effect while <code>streaming_enabled</code> is on. It is the only way an NLU can deliver a
+	// result on its own, e.g. the later result of an AI Teams tool that ran in the background: with
+	// <code>false</code> such results never reach the call
+	NluCallStreamEnabled *bool `protobuf:"varint,7,opt,name=nlu_call_stream_enabled,json=nluCallStreamEnabled,proto3,oneof" json:"nlu_call_stream_enabled,omitempty"`
+	// Optional: Display name of the NLU intent the bot triggers to re-engage a silent caller after
+	// <code>turn_timeout_seconds</code>; the bot speaks the answer of that intent (default: none, i.e. silence never
+	// triggers a re-engagement). Name an intent of the NLU agent of the call. 1 - 256 characters, not blank, no
+	// control characters; any other value is refused with <code>INVALID_ARGUMENT</code>.
+	// Example: <code>&quot;i.still.there&quot;</code>
+	TurnTimeoutIntent *string `protobuf:"bytes,8,opt,name=turn_timeout_intent,json=turnTimeoutIntent,proto3,oneof" json:"turn_timeout_intent,omitempty"`
+	// Optional: Milliseconds of silence kept at most at the start and at the end of every synthesized bot utterance;
+	// longer silence at the edges is cut off, so the bot starts speaking sooner and the caller is not kept waiting
+	// after it (default: 40, valid range: -1 - 1000). Silence inside an utterance is never changed. 0 keeps no edge
+	// silence at all; -1 turns the trimming off and plays the audio exactly as synthesized. A value outside the range
+	// is refused with <code>INVALID_ARGUMENT</code>
+	T2SMaxEdgeSilenceMs *int32 `protobuf:"varint,9,opt,name=t2s_max_edge_silence_ms,json=t2sMaxEdgeSilenceMs,proto3,oneof" json:"t2s_max_edge_silence_ms,omitempty"`
+	// Optional: Seconds a caller turn waits at most for the first answer of the NLU on the call-length NLU request
+	// (<code>nlu_call_stream_enabled</code>); past it the turn is treated as a failed NLU request, i.e. the bot
+	// speaks <code>NluVtsiConfig.failure_apology_message</code> (default: 120, valid range: 5 - 600). A lower value
+	// keeps a caller whose NLU hangs from waiting in silence for two minutes, but cuts off an agent that
+	// legitimately thinks longer. Only matters with <code>streaming_enabled</code> and
+	// <code>nlu_call_stream_enabled</code> on; the per-turn request has its own deadline. There is no
+	// deployment-wide setting for it; a value set here wins
+	NluCallStreamTurnTimeoutSeconds *float32 `protobuf:"fixed32,10,opt,name=nlu_call_stream_turn_timeout_seconds,json=nluCallStreamTurnTimeoutSeconds,proto3,oneof" json:"nlu_call_stream_turn_timeout_seconds,omitempty"`
+	// Optional: Seconds of silence on the call-length NLU request after a turn was already answered that end the turn
+	// when the NLU never marks it finished (default: 5, valid range: 1 - 60). While a turn is open the next caller
+	// turn waits behind it, so a lower value frees it sooner; it must stay above the longest pause the agent makes
+	// between two parts of one answer, or the rest of the answer is lost. Only matters with
+	// <code>streaming_enabled</code> and <code>nlu_call_stream_enabled</code> on. There is no deployment-wide
+	// setting for it; a value set here wins
+	NluCallStreamTurnQuietSeconds *float32 `protobuf:"fixed32,11,opt,name=nlu_call_stream_turn_quiet_seconds,json=nluCallStreamTurnQuietSeconds,proto3,oneof" json:"nlu_call_stream_turn_quiet_seconds,omitempty"`
+	unknownFields                 protoimpl.UnknownFields
+	sizeCache                     protoimpl.SizeCache
 }
 
 func (x *ResponseTimingConfig) Reset() {
 	*x = ResponseTimingConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[15]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2303,7 +3316,7 @@ func (x *ResponseTimingConfig) String() string {
 func (*ResponseTimingConfig) ProtoMessage() {}
 
 func (x *ResponseTimingConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[15]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2316,7 +3329,7 @@ func (x *ResponseTimingConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResponseTimingConfig.ProtoReflect.Descriptor instead.
 func (*ResponseTimingConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{15}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ResponseTimingConfig) GetTurnTimeoutSeconds() float32 {
@@ -2354,16 +3367,66 @@ func (x *ResponseTimingConfig) GetT2SChunkedStreamingEnabled() bool {
 	return false
 }
 
-// Configuration of the soft timeout, i.e. filler messages played
-// when the response generation takes longer than the timeout
+func (x *ResponseTimingConfig) GetStreamingEnabled() bool {
+	if x != nil && x.StreamingEnabled != nil {
+		return *x.StreamingEnabled
+	}
+	return false
+}
+
+func (x *ResponseTimingConfig) GetNluCallStreamEnabled() bool {
+	if x != nil && x.NluCallStreamEnabled != nil {
+		return *x.NluCallStreamEnabled
+	}
+	return false
+}
+
+func (x *ResponseTimingConfig) GetTurnTimeoutIntent() string {
+	if x != nil && x.TurnTimeoutIntent != nil {
+		return *x.TurnTimeoutIntent
+	}
+	return ""
+}
+
+func (x *ResponseTimingConfig) GetT2SMaxEdgeSilenceMs() int32 {
+	if x != nil && x.T2SMaxEdgeSilenceMs != nil {
+		return *x.T2SMaxEdgeSilenceMs
+	}
+	return 0
+}
+
+func (x *ResponseTimingConfig) GetNluCallStreamTurnTimeoutSeconds() float32 {
+	if x != nil && x.NluCallStreamTurnTimeoutSeconds != nil {
+		return *x.NluCallStreamTurnTimeoutSeconds
+	}
+	return 0
+}
+
+func (x *ResponseTimingConfig) GetNluCallStreamTurnQuietSeconds() float32 {
+	if x != nil && x.NluCallStreamTurnQuietSeconds != nil {
+		return *x.NluCallStreamTurnQuietSeconds
+	}
+	return 0
+}
+
+// Soft timeout of the call: filler messages (e.g. &quot;One moment please.&quot;) the bot speaks while the answer to a caller turn takes longer than <code>timeout_seconds</code> to prepare, so that the caller does not hear a silent line. The timer starts when the NLU is asked for the answer and is stopped as soon as the answer starts playing; a filler is never played after the answer. With interruptions enabled, the caller can interrupt a filler like any other bot utterance.
+//
+// Example: <code>timeout_seconds=3</code>, <code>messages=[&quot;One moment please.&quot;, &quot;Let me check that.&quot;]</code> and <code>max_per_generation=1</code> speak &quot;One moment please.&quot; when an answer is not ready after 3 s, &quot;Let me check that.&quot; the next time it happens in the call, and then start over.
 type SoftTimeoutConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Seconds after which a filler message is played while the response is still being generated.
-	// Unset = off (-1 is also accepted as explicit off). Recommended: 3.0
+	// Optional: Seconds an answer may take before a filler message is played (default: off; valid range:
+	// 0.5 - 8.0, and -1 as an explicit off). Any other value is refused with <code>INVALID_ARGUMENT</code>.
+	// Fillers are only played while this is set. Recommended: 3.0
 	TimeoutSeconds *float32 `protobuf:"fixed32,1,opt,name=timeout_seconds,json=timeoutSeconds,proto3,oneof" json:"timeout_seconds,omitempty"`
-	// Filler messages, rotated per soft timeout (maximum 7 messages, each 1 - 200 characters)
+	// Filler messages, spoken one per filler in the order given and starting over after the last one; the rotation
+	// runs over the whole call. At most 7 messages, each 1 - 200 characters and not blank; anything else is refused
+	// with <code>INVALID_ARGUMENT</code>. Write them in the language of the call: when the list is empty, a short
+	// built-in filler is used
 	Messages []string `protobuf:"bytes,2,rep,name=messages,proto3" json:"messages,omitempty"`
-	// Optional: Maximum number of filler messages per response generation (default: 1)
+	// Optional: Maximum number of filler messages played while one answer is prepared (default: 1; 0 or more, a
+	// negative value is refused with <code>INVALID_ARGUMENT</code>; 0 plays no filler at all). With a value above 1,
+	// the next filler follows about <code>timeout_seconds</code> after the previous one while the answer is still
+	// not ready
 	MaxPerGeneration *int32 `protobuf:"varint,3,opt,name=max_per_generation,json=maxPerGeneration,proto3,oneof" json:"max_per_generation,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -2371,7 +3434,7 @@ type SoftTimeoutConfig struct {
 
 func (x *SoftTimeoutConfig) Reset() {
 	*x = SoftTimeoutConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[16]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2383,7 +3446,7 @@ func (x *SoftTimeoutConfig) String() string {
 func (*SoftTimeoutConfig) ProtoMessage() {}
 
 func (x *SoftTimeoutConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[16]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2396,7 +3459,7 @@ func (x *SoftTimeoutConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SoftTimeoutConfig.ProtoReflect.Descriptor instead.
 func (*SoftTimeoutConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{16}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SoftTimeoutConfig) GetTimeoutSeconds() float32 {
@@ -2420,93 +3483,147 @@ func (x *SoftTimeoutConfig) GetMaxPerGeneration() int32 {
 	return 0
 }
 
-// Configuration of the answering machine detection (AMD) of an outbound call, i.e. deciding in the first
-// seconds after the callee answered whether a person, an answering machine, a fax, an IVR or a network
-// announcement picked up, and hanging up on the non-human ones.
-// Detection listens first: the bot stays silent until the verdict is reached or the decision window ends.
-// Every field is optional: an unset field takes the default of the CSI container (listed per field below).
-// Only accepted for pooled persistent callers; the settings are part of the caller container configuration,
-// so callers with different AMD settings are never pooled together.
-// The verdict of a call is reported as ondewo.sip.SipStatus.amd_result. Reaching a hang-up-eligible verdict sets
-// the non-terminal status ondewo.sip.SipStatus.StatusType.OUTGOING_CALL_ANSWERING_MACHINE_DETECTED (the call is
-// still up), and a call ended by AMD reaches the terminal status OUTGOING_CALL_FINISHED with one of these
-// descriptions:
-// <ul>
-// <li>"Answering machine detected with hang up": the caller hung up without leaving a voice message</li>
-// <li>"Answering machine detected with left voice message and hang up": the caller hung up after starting the
-// voice message</li>
-// <li>"Answering machine detected, call ended by the answering machine": the far end hung up before a voice
-// message was started</li>
-// <li>"Answering machine detected, call ended by the answering machine after leaving a voice message": the far
-// end hung up after the voice message was started</li>
-// </ul>
-// The description is also recorded on the call as Call.answering_machine_detection_end_description.
-// Compliance: leaving a recorded message on a consumer's mailbox for marketing purposes requires the consent of
-// the callee in many jurisdictions (e.g. in Germany § 7 UWG). HANG_UP is therefore the default action.
+// Answering machine detection (AMD) of an outbound call: in the first seconds after the callee answered, the call decides who or what picked up (a person, an answering machine, a fax, an automated menu (IVR), a call screening assistant or a network announcement such as &quot;the number is not reachable&quot;) and can hang up on the ones that are not a person, or leave a voice message on a mailbox.
+//
+// How the call behaves while AMD decides: detection LISTENS first. The bot stays silent and nothing the callee says reaches the NLU until a verdict is reached or the decision window ends; the bot&apos;s greeting therefore starts only after the verdict. The possible verdicts and what happens with each:
+//
+// <ul> <li>a person, no speech at all (<code>initial_silence_ms</code>) or no verdict in time (UNKNOWN): the call continues with the bot&apos;s greeting like any other call; it is never hung up</li> <li>an answering machine (MACHINE): hung up under <code>HANG_UP</code>; under <code>LEAVE_VOICE_MESSAGE</code> a voice message is spoken first</li> <li>a fax, a network announcement, an IVR or a call screening assistant: hung up (also under <code>LEAVE_VOICE_MESSAGE</code>, without a message) only when its switch <code>hang_up_on_fax</code> / <code>hang_up_on_network_announcement</code> / <code>hang_up_on_ivr</code> / <code>hang_up_on_call_screening</code> is on; otherwise the call continues like a call to a person</li> <li>under <code>DETECT_ONLY</code> nothing is ever hung up</li> </ul>
+//
+// Reporting: the verdict is reported as <code>ondewo.sip.SipStatus.amd_result</code>. A verdict that would hang up (MACHINE, or a verdict whose <code>hang_up_on_*</code> switch is on) sets the non-terminal status <code>ondewo.sip.SipStatus.StatusType.OUTGOING_CALL_ANSWERING_MACHINE_DETECTED</code> (the call is still up), also under <code>DETECT_ONLY</code>. A call ended by AMD reaches the terminal status <code>OUTGOING_CALL_FINISHED</code> exactly once, with one of these descriptions, also recorded on the call as <code>Call.answering_machine_detection_end_description</code>:
+//
+// <ul> <li>&quot;Answering machine detected with hang up&quot;: the caller hung up without leaving a voice message</li> <li>&quot;Answering machine detected with left voice message and hang up&quot;: the caller hung up after starting the voice message</li> <li>&quot;Answering machine detected, call ended by the answering machine&quot;: the far end hung up before a voice message was started</li> <li>&quot;Answering machine detected, call ended by the answering machine after leaving a voice message&quot;: the far end hung up after the voice message was started</li> </ul>
+//
+// Where it is accepted: only on a caller served by the caller pool (a pooled persistent caller), i.e. <code>StartCaller</code> / <code>StartCallers</code> and the callers of a campaign while the deployment setting <code>ONDEWO_VTSI_CALLER_PERSISTENT</code> is on (the default). On a listener (also in <code>UpdateListener</code>), a scheduled caller, an <code>UpdateCaller</code> of a caller that is not pooled, or while <code>ONDEWO_VTSI_CALLER_PERSISTENT</code> is off the request is refused with <code>INVALID_ARGUMENT</code> (<code>reason=amd-requires-persistent-caller</code>) instead of placing calls that are silently not screened. The settings are part of the pooled caller&apos;s configuration: callers with different AMD settings are never pooled together, so a pooled caller is only reused for calls with identical settings.
+//
+// Defaults and precedence: every scalar is <code>optional</code>. A field left unset inherits the deployment&apos;s <code>ONDEWO_VTSI_AMD_&lt;FIELD&gt;</code> setting when the operator set one (e.g. <code>ONDEWO_VTSI_AMD_SENSITIVITY</code>), else the built-in default listed per field. A set value always wins over the deployment setting. Leaving the whole message unset runs no detection unless the deployment switched it on with <code>ONDEWO_VTSI_AMD_ACTIVE</code>. A value outside a documented range is refused with <code>INVALID_ARGUMENT</code>.
+//
+// Example: screen a campaign and hang up on mailboxes and faxes, with the built-in tuning:
+//
+// <pre><code>answering_machine_detection_config { active: true action: HANG_UP }</code></pre>
+//
+// To calibrate first, run the same campaign with <code>action: DETECT_ONLY</code>: every call is detected and reported but every callee is greeted.
+//
+// Compliance: leaving a recorded message on a consumer&apos;s mailbox for marketing purposes requires the consent of the callee in many jurisdictions (e.g. in Germany § 7 UWG). <code>HANG_UP</code> is therefore the default action.
 type AnsweringMachineDetectionConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Master switch of the answering machine detection (default: false)
+	// Optional: Master switch: <code>true</code> runs the detection on every outbound call of this caller
+	// (default: <code>false</code>; deployment setting <code>ONDEWO_VTSI_AMD_ACTIVE</code>). While it is
+	// <code>false</code> no other field of this message has an effect and calls behave exactly as without AMD
 	Active *bool `protobuf:"varint,1,opt,name=active,proto3,oneof" json:"active,omitempty"`
-	// Optional: Action on a non-human verdict (default: HANG_UP)
+	// Optional: What the call does on a verdict that is not a person (default: <code>HANG_UP</code>; deployment
+	// setting <code>ONDEWO_VTSI_AMD_ACTION</code>). See <code>AmdAction</code>
 	Action *AnsweringMachineDetectionConfig_AmdAction `protobuf:"varint,2,opt,name=action,proto3,enum=ondewo.vtsi.AnsweringMachineDetectionConfig_AmdAction,oneof" json:"action,omitempty"`
-	// Optional: Sensitivity of the detection (default: LOW)
+	// Optional: How readily a machine is detected (default: <code>LOW</code>; deployment setting
+	// <code>ONDEWO_VTSI_AMD_SENSITIVITY</code>). See <code>AmdSensitivity</code>
 	Sensitivity *AnsweringMachineDetectionConfig_AmdSensitivity `protobuf:"varint,3,opt,name=sensitivity,proto3,enum=ondewo.vtsi.AnsweringMachineDetectionConfig_AmdSensitivity,oneof" json:"sensitivity,omitempty"`
-	// Optional: Maximum time in milliseconds after the callee answered to reach a verdict when no
-	// machine-leaning evidence was seen; the verdict is UNKNOWN when it is reached
-	// (default: 4000, valid range: 1500 - 10000)
+	// Optional: Milliseconds after the callee answered by which a verdict must be reached when nothing so far
+	// pointed to a machine (default: 4000, valid range: 1500 - 10000; deployment setting
+	// <code>ONDEWO_VTSI_AMD_MAX_DECISION_TIME_MS</code>). When it is reached the verdict is UNKNOWN and the call
+	// continues with the greeting. It is roughly the longest a person waits for the bot when nothing pointed to a
+	// machine; a smaller value greets sooner, a larger one gives the detection more time
 	MaxDecisionTimeMs *int32 `protobuf:"varint,4,opt,name=max_decision_time_ms,json=maxDecisionTimeMs,proto3,oneof" json:"max_decision_time_ms,omitempty"`
-	// Optional: Maximum time in milliseconds after the callee answered to reach a verdict once
-	// machine-leaning evidence extended the decision window (default: 11000, valid range: 4000 - 20000)
+	// Optional: Milliseconds after the callee answered by which a verdict must be reached once something pointed
+	// to a machine, e.g. a long greeting, a weaker machine phrase or beep, or continuous music (default: 11000,
+	// valid range: 4000 - 20000; deployment setting <code>ONDEWO_VTSI_AMD_MAX_MACHINE_WAIT_MS</code>). Such
+	// evidence extends the decision window from <code>max_decision_time_ms</code> to this value, because a
+	// mailbox greeting can be long. When it is reached without a decision the verdict is UNKNOWN and the call
+	// continues with the greeting
 	MaxMachineWaitMs *int32 `protobuf:"varint,5,opt,name=max_machine_wait_ms,json=maxMachineWaitMs,proto3,oneof" json:"max_machine_wait_ms,omitempty"`
-	// Optional: Time in milliseconds to wait for a beep after a long greeting ended
-	// (default: 1500, valid range: 0 - 4000)
+	// Optional: Milliseconds to keep listening for a mailbox beep after a long greeting ended (default: 1500, valid
+	// range: 0 - 4000; deployment setting <code>ONDEWO_VTSI_AMD_BEEP_WAIT_AFTER_GREETING_MS</code>). Under
+	// <code>LEAVE_VOICE_MESSAGE</code> it is also the shortest silence after the greeting before the voice message
+	// may start without a beep, so a message does not talk over a late beep
 	BeepWaitAfterGreetingMs *int32 `protobuf:"varint,6,opt,name=beep_wait_after_greeting_ms,json=beepWaitAfterGreetingMs,proto3,oneof" json:"beep_wait_after_greeting_ms,omitempty"`
-	// Optional: Silence in milliseconds after the callee answered without any speech, after which the verdict
-	// is NO_SPEECH, which is treated like a person (default: 3500, valid range: 1000 - 10000)
+	// Optional: Milliseconds of silence after the callee answered, without any speech, after which the verdict is
+	// NO_SPEECH (default: 3500, valid range: 1000 - 10000; deployment setting
+	// <code>ONDEWO_VTSI_AMD_INITIAL_SILENCE_MS</code>). NO_SPEECH is treated like a person: the bot greets, the call
+	// is not hung up. Needs <code>cadence_detection_active</code>; without it a silent line ends as UNKNOWN at
+	// <code>max_decision_time_ms</code>
 	InitialSilenceMs *int32 `protobuf:"varint,7,opt,name=initial_silence_ms,json=initialSilenceMs,proto3,oneof" json:"initial_silence_ms,omitempty"`
-	// Optional: Continuous speech in milliseconds beyond which a greeting is machine-leaning
-	// (default: 2400, valid range: 1000 - 6000)
+	// Optional: Milliseconds of continuous speech beyond which a greeting points to a machine (default: 2400,
+	// valid range: 1000 - 6000; deployment setting <code>ONDEWO_VTSI_AMD_MAX_HUMAN_GREETING_MS</code>). People
+	// answer briefly (&quot;Hello?&quot;), mailboxes talk longer. A long greeting alone never hangs up; it extends
+	// the window to <code>max_machine_wait_ms</code> and, from sensitivity <code>MEDIUM</code>, can decide together
+	// with other evidence. A larger value treats long-winded people more safely and recognises fewer machines by
+	// their greeting length
 	MaxHumanGreetingMs *int32 `protobuf:"varint,8,opt,name=max_human_greeting_ms,json=maxHumanGreetingMs,proto3,oneof" json:"max_human_greeting_ms,omitempty"`
-	// Optional: Silence in milliseconds after the first speech burst that ends a human greeting
-	// (default: 900, valid range: 300 - 3000)
+	// Optional: Milliseconds of silence after the callee&apos;s first words that end a short, person-like greeting
+	// (default: 900, valid range: 300 - 3000; deployment setting
+	// <code>ONDEWO_VTSI_AMD_GREETING_END_SILENCE_MS</code>). Under <code>LEAVE_VOICE_MESSAGE</code> it is also a
+	// lower bound of the silence after the machine greeting before the voice message may start
 	GreetingEndSilenceMs *int32 `protobuf:"varint,9,opt,name=greeting_end_silence_ms,json=greetingEndSilenceMs,proto3,oneof" json:"greeting_end_silence_ms,omitempty"`
-	// Optional: Enable the tone detector for the beep of an answering machine (default: true)
+	// Optional: Whether the tone detector listens for the beep of an answering machine (default: <code>true</code>;
+	// deployment setting <code>ONDEWO_VTSI_AMD_BEEP_DETECTION_ACTIVE</code>). With <code>false</code> a beep is no
+	// evidence, and under <code>LEAVE_VOICE_MESSAGE</code> the message starts when the greeting ended in silence or
+	// at <code>voice_message_max_beep_wait_ms</code> instead of after the beep
 	BeepDetectionActive *bool `protobuf:"varint,10,opt,name=beep_detection_active,json=beepDetectionActive,proto3,oneof" json:"beep_detection_active,omitempty"`
-	// Additional phrases that indicate an answering machine, added to the built-in de and en phrase lists
-	// (maximum 50 phrases, each 1 - 80 characters)
+	// Phrases that indicate an answering machine, added to the built-in German and English phrase lists (at most
+	// 50 phrases, each 1 - 80 characters and not blank; otherwise refused with <code>INVALID_ARGUMENT</code>; no
+	// deployment setting). Hearing one of them in the callee&apos;s greeting is strong evidence: it alone decides
+	// MACHINE, at every sensitivity. Phrases are matched word by word against the transcribed greeting, ignoring
+	// case, punctuation and the spelling of umlauts and tolerating small transcription differences. Empty (the
+	// default) adds nothing.
+	// Example: <code>&quot;mailbox von&quot;</code>, the wording of a carrier&apos;s mailbox the built-in lists do
+	// not know. Needs <code>keyword_detection_active</code>
 	AdditionalMachinePhrases []string `protobuf:"bytes,11,rep,name=additional_machine_phrases,json=additionalMachinePhrases,proto3" json:"additional_machine_phrases,omitempty"`
-	// Additional phrases that indicate a person, added to the built-in de and en phrase lists
-	// (maximum 50 phrases, each 1 - 80 characters)
+	// Phrases that indicate a person, added to the built-in German and English phrase lists (at most 50 phrases,
+	// each 1 - 80 characters and not blank; otherwise refused with <code>INVALID_ARGUMENT</code>; no deployment
+	// setting). Hearing one of them counts as evidence of a person, matched like
+	// <code>additional_machine_phrases</code>, e.g. the way the people you call usually answer the phone. Empty
+	// (the default) adds nothing. Needs <code>keyword_detection_active</code>
 	AdditionalHumanPhrases []string `protobuf:"bytes,12,rep,name=additional_human_phrases,json=additionalHumanPhrases,proto3" json:"additional_human_phrases,omitempty"`
-	// Optional: Hang up on a FAX verdict when the action is HANG_UP (default: true)
+	// Optional: Hang up on a FAX verdict (default: <code>true</code>; deployment setting
+	// <code>ONDEWO_VTSI_AMD_HANG_UP_ON_FAX</code>). Applies under <code>HANG_UP</code> and
+	// <code>LEAVE_VOICE_MESSAGE</code> (a fax never gets a voice message); <code>false</code> lets the call continue
+	// with the greeting
 	HangUpOnFax *bool `protobuf:"varint,13,opt,name=hang_up_on_fax,json=hangUpOnFax,proto3,oneof" json:"hang_up_on_fax,omitempty"`
-	// Optional: Hang up on a NETWORK_ANNOUNCEMENT verdict, e.g. "the number is not reachable",
-	// when the action is HANG_UP (default: true)
+	// Optional: Hang up on a NETWORK_ANNOUNCEMENT verdict, e.g. &quot;the number is not reachable&quot; or a special
+	// information tone (default: <code>true</code>; deployment setting
+	// <code>ONDEWO_VTSI_AMD_HANG_UP_ON_NETWORK_ANNOUNCEMENT</code>). Applies under <code>HANG_UP</code> and
+	// <code>LEAVE_VOICE_MESSAGE</code> (no voice message is left); <code>false</code> lets the call continue with
+	// the greeting
 	HangUpOnNetworkAnnouncement *bool `protobuf:"varint,14,opt,name=hang_up_on_network_announcement,json=hangUpOnNetworkAnnouncement,proto3,oneof" json:"hang_up_on_network_announcement,omitempty"`
-	// Optional: Hang up on an IVR verdict, i.e. an automated menu, when the action is HANG_UP (default: false)
+	// Optional: Hang up on an IVR verdict, i.e. an automated menu such as &quot;press 1 for ...&quot; (default:
+	// <code>false</code>; deployment setting <code>ONDEWO_VTSI_AMD_HANG_UP_ON_IVR</code>). With the default the bot
+	// greets the IVR. Applies under <code>HANG_UP</code> and <code>LEAVE_VOICE_MESSAGE</code> (no voice message is
+	// left)
 	HangUpOnIvr *bool `protobuf:"varint,15,opt,name=hang_up_on_ivr,json=hangUpOnIvr,proto3,oneof" json:"hang_up_on_ivr,omitempty"`
-	// Optional: Hang up on a CALL_SCREENING verdict, i.e. a call screening assistant asking for the reason of
-	// the call, when the action is HANG_UP (default: false)
+	// Optional: Hang up on a CALL_SCREENING verdict, i.e. a call screening assistant asking for the reason of the
+	// call (default: <code>false</code>; deployment setting <code>ONDEWO_VTSI_AMD_HANG_UP_ON_CALL_SCREENING</code>).
+	// With the default the bot greets the assistant, which may then put the call through to the person. Applies
+	// under <code>HANG_UP</code> and <code>LEAVE_VOICE_MESSAGE</code> (no voice message is left)
 	HangUpOnCallScreening *bool `protobuf:"varint,16,opt,name=hang_up_on_call_screening,json=hangUpOnCallScreening,proto3,oneof" json:"hang_up_on_call_screening,omitempty"`
-	// Optional: Name of the NLU intent whose fulfillment is the voice message when the action is
-	// LEAVE_VOICE_MESSAGE; it is triggered once (default: the welcome intent of the NLU project,
-	// 1 - 200 characters when set)
+	// Optional: Name of the NLU intent whose fulfillment is the voice message under
+	// <code>LEAVE_VOICE_MESSAGE</code>; it is triggered once per call (default: the welcome intent of the NLU
+	// project; 1 - 200 characters and not blank when set, otherwise refused with <code>INVALID_ARGUMENT</code>;
+	// deployment setting <code>ONDEWO_VTSI_AMD_VOICE_MESSAGE_INTENT</code>). Ignored under the other actions.
+	// Example: an intent <code>i.voice_message</code> whose response is &quot;Hello, this is ... Please call us back
+	// at ...&quot;
 	VoiceMessageIntent *string `protobuf:"bytes,17,opt,name=voice_message_intent,json=voiceMessageIntent,proto3,oneof" json:"voice_message_intent,omitempty"`
-	// Optional: Maximum time in milliseconds after the verdict to wait for the beep, or for the end of the
-	// machine greeting, before the voice message is spoken when the action is LEAVE_VOICE_MESSAGE;
-	// 0 speaks immediately (default: 10000, valid range: 0 - 30000)
+	// Optional: Under <code>LEAVE_VOICE_MESSAGE</code>, the longest time in milliseconds after the verdict to wait
+	// for the beep, or for the machine greeting to end in silence, before the voice message is spoken anyway
+	// (default: 10000, valid range: 0 - 30000; deployment setting
+	// <code>ONDEWO_VTSI_AMD_VOICE_MESSAGE_MAX_BEEP_WAIT_MS</code>). <code>0</code> speaks it immediately at the
+	// verdict, possibly over the rest of the greeting. Ignored under the other actions
 	VoiceMessageMaxBeepWaitMs *int32 `protobuf:"varint,18,opt,name=voice_message_max_beep_wait_ms,json=voiceMessageMaxBeepWaitMs,proto3,oneof" json:"voice_message_max_beep_wait_ms,omitempty"`
-	// Optional: Maximum time in milliseconds after the verdict until the call is hung up when the action is
-	// LEAVE_VOICE_MESSAGE, also when the voice message has not finished playing
-	// (default: 30000, valid range: 5000 - 120000)
+	// Optional: Under <code>LEAVE_VOICE_MESSAGE</code>, the time in milliseconds after the verdict at which the call
+	// is hung up at the latest, also when the voice message has not finished playing (default: 30000, valid range:
+	// 5000 - 120000; deployment setting <code>ONDEWO_VTSI_AMD_VOICE_MESSAGE_TIMEOUT_MS</code>). It bounds the wait
+	// for the beep plus the message itself, so choose it above <code>voice_message_max_beep_wait_ms</code> plus
+	// the length of the message, or the message is cut off. Ignored under the other actions
 	VoiceMessageTimeoutMs *int32 `protobuf:"varint,19,opt,name=voice_message_timeout_ms,json=voiceMessageTimeoutMs,proto3,oneof" json:"voice_message_timeout_ms,omitempty"`
-	// Optional: Enable the detection of machine and person phrases in the transcribed greeting, i.e. the
-	// built-in phrase lists plus additional_machine_phrases and additional_human_phrases; turning it off
-	// removes this evidence and the detection rules that need it (default: true)
+	// Optional: Whether the words of the transcribed greeting are used as evidence, i.e. the built-in phrase lists
+	// plus <code>additional_machine_phrases</code> and <code>additional_human_phrases</code> (default:
+	// <code>true</code>; deployment setting <code>ONDEWO_VTSI_AMD_KEYWORD_DETECTION_ACTIVE</code>). With
+	// <code>false</code> the call is decided on tones and the rhythm of speech and silence alone: a mailbox phrase
+	// can no longer lead to a hangup, and the two phrase lists have no effect
 	KeywordDetectionActive *bool `protobuf:"varint,20,opt,name=keyword_detection_active,json=keywordDetectionActive,proto3,oneof" json:"keyword_detection_active,omitempty"`
-	// Optional: Enable the detection based on the speech and silence cadence of the greeting, e.g. its
-	// length and the silence after it; turning it off removes this evidence and the detection rules that
-	// need it (default: true)
+	// Optional: Whether the rhythm of speech and silence of the greeting is used as evidence, e.g. its length and
+	// the silence after it (default: <code>true</code>; deployment setting
+	// <code>ONDEWO_VTSI_AMD_CADENCE_DETECTION_ACTIVE</code>). With <code>false</code> the call is decided on tones and
+	// phrases alone; <code>max_human_greeting_ms</code>, <code>greeting_end_silence_ms</code> and
+	// <code>initial_silence_ms</code> then no longer decide the verdict, and a silent line ends as UNKNOWN at
+	// <code>max_decision_time_ms</code> instead of NO_SPEECH. The start of a voice message is still timed
 	CadenceDetectionActive *bool `protobuf:"varint,21,opt,name=cadence_detection_active,json=cadenceDetectionActive,proto3,oneof" json:"cadence_detection_active,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -2514,7 +3631,7 @@ type AnsweringMachineDetectionConfig struct {
 
 func (x *AnsweringMachineDetectionConfig) Reset() {
 	*x = AnsweringMachineDetectionConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[17]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2526,7 +3643,7 @@ func (x *AnsweringMachineDetectionConfig) String() string {
 func (*AnsweringMachineDetectionConfig) ProtoMessage() {}
 
 func (x *AnsweringMachineDetectionConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[17]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2539,7 +3656,7 @@ func (x *AnsweringMachineDetectionConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnsweringMachineDetectionConfig.ProtoReflect.Descriptor instead.
 func (*AnsweringMachineDetectionConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{17}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *AnsweringMachineDetectionConfig) GetActive() bool {
@@ -2689,11 +3806,18 @@ func (x *AnsweringMachineDetectionConfig) GetCadenceDetectionActive() bool {
 	return false
 }
 
-// The base config is for both the listener and caller. If you only provide it you will get a listener
-// You will need to provide <code>SipCallerConfig</code> for the caller
+// SIP side of a listener or caller: which version of the SIP container image carries the call. A listener is started with this message alone (<code>StartListenerRequest.sip_base_config</code>); a caller needs the callee as well and carries it inside <code>SipCallerConfig</code>.
 type SipBaseConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// version of sip to use for call, semantic versioning e.g., 1.0.0, 1.1.0-pre-release, etc.
+	// Optional: Tag of the SIP container image the call runs in, e.g. a semantic version (<code>5.1.0</code>,
+	// <code>1.1.0-pre-release</code>), a moving tag (<code>latest</code>, <code>develop</code>) or a build tag.
+	// Empty (the default): the deployment&apos;s <code>ONDEWO_VTSI_DEFAULT_SIP_IMAGE_TAG</code> is filled in and
+	// stored with the call. A valid tag is up to 128 letters, digits, <code>.</code>, <code>_</code> or
+	// <code>-</code>, starting with a letter, digit or <code>_</code>; anything else (a <code>/</code>, a
+	// <code>:</code>, whitespace, a leading <code>.</code> or <code>-</code>) is refused with
+	// <code>INVALID_ARGUMENT</code>. A host that already has the image runs its copy at once and refreshes it in
+	// the background, so after a moving tag was re-pointed a call may still run the previous image. Pin a version
+	// to know exactly which image a call ran. Part of the configuration a pooled persistent caller is matched by.
 	SipSimVersion string `protobuf:"bytes,1,opt,name=sip_sim_version,json=sipSimVersion,proto3" json:"sip_sim_version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2701,7 +3825,7 @@ type SipBaseConfig struct {
 
 func (x *SipBaseConfig) Reset() {
 	*x = SipBaseConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[18]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2713,7 +3837,7 @@ func (x *SipBaseConfig) String() string {
 func (*SipBaseConfig) ProtoMessage() {}
 
 func (x *SipBaseConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[18]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2726,7 +3850,7 @@ func (x *SipBaseConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipBaseConfig.ProtoReflect.Descriptor instead.
 func (*SipBaseConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{18}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *SipBaseConfig) GetSipSimVersion() string {
@@ -2736,10 +3860,12 @@ func (x *SipBaseConfig) GetSipSimVersion() string {
 	return ""
 }
 
-// Configuration of the SIP caller
+// SIP side of an outbound call: the SIP container image, whom to dial and the SIP headers of the INVITE. Used by <code>StartCaller</code>, scheduled callers and campaigns (<code>Campaign.campaign_sip_caller_config</code>, merged under each call&apos;s own value).
+//
+// Pooled persistent callers: <code>callee_id</code> and <code>sip_headers</code> are sent with each call and are NOT part of the configuration a pooled caller is matched by, so calls to different callees, or with different headers, can reuse the same caller; <code>sip_base_config</code> is part of it.
 type SipCallerConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// SIP configuration
+	// SIP container image of the call (see <code>SipBaseConfig</code>)
 	SipBaseConfig *SipBaseConfig `protobuf:"bytes,1,opt,name=sip_base_config,json=sipBaseConfig,proto3" json:"sip_base_config,omitempty"`
 	// The callee to dial: a phone number, e.g. <code>+4365012345678</code>, or a SIP / VoIP id, e.g.
 	// <code>ondewo0001@ondewo.com</code> or a dialplan extension of the project&apos;s Asterisk. Required, at most
@@ -2754,10 +3880,11 @@ type SipCallerConfig struct {
 	// SIP headers sent on the outbound INVITE, header name to value, e.g.
 	// <code>{"X-ondewo-phonesystem-call-id": "4711"}</code>. At most 64 entries, otherwise
 	// <code>INVALID_ARGUMENT</code>. Keys are sent as SIP header names, so they should be valid header names (by
-	// convention <code>X-</code> headers); VTSI does not restrict them further, and a header the SIP stack or the
-	// Asterisk cannot send is dropped by them. Unlike <code>TransferCallRequest.headers</code>, which only takes
-	// <code>X-ondewo-*</code> keys because it is delivered through the dialplan, these are sent by the caller&apos;s
-	// own SIP stack. Updatable on a scheduled caller with <code>UpdateScheduledCaller</code>.
+	// convention <code>X-</code> headers). <code>X-ondewo-vtsi-caller-call-id</code> is reserved: on a pooled
+	// persistent caller VTSI replaces it with the id of the call. VTSI does not restrict the other keys; a header
+	// the SIP stack or the Asterisk cannot send is dropped by them. Unlike <code>TransferCallRequest.headers</code>,
+	// which only takes <code>X-ondewo-*</code> keys because it is delivered through the dialplan, these are sent by
+	// the caller&apos;s own SIP stack. Updatable on a scheduled caller with <code>UpdateScheduledCaller</code>.
 	SipHeaders    map[string]string `protobuf:"bytes,3,rep,name=sip_headers,json=sipHeaders,proto3" json:"sip_headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2765,7 +3892,7 @@ type SipCallerConfig struct {
 
 func (x *SipCallerConfig) Reset() {
 	*x = SipCallerConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[19]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2777,7 +3904,7 @@ func (x *SipCallerConfig) String() string {
 func (*SipCallerConfig) ProtoMessage() {}
 
 func (x *SipCallerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[19]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2790,7 +3917,7 @@ func (x *SipCallerConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SipCallerConfig.ProtoReflect.Descriptor instead.
 func (*SipCallerConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{19}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *SipCallerConfig) GetSipBaseConfig() *SipBaseConfig {
@@ -2814,32 +3941,40 @@ func (x *SipCallerConfig) GetSipHeaders() map[string]string {
 	return nil
 }
 
-// CSI configuration
+// Configuration of the speech-to-speech service of a call (the service that streams the caller&apos;s audio to speech-to-text, sends the transcriptions to the NLU and plays the synthesized answers): control messages, preemptive generation, storage of the call audio and publishing of call events to a RabbitMQ message broker.
+//
+// Scope: the configuration of a LISTENER applies to every inbound call that listener deployment serves; the configuration of a caller, a campaign or a scheduled caller applies to its own calls. A pooled (persistent) caller is only reused for a request whose configuration is identical.
+//
+// Unset fields inherit: the deployment-wide <code>ONDEWO_VTSI_*</code> setting where a field names one, else the built-in default. A value set here wins over both for this call.
 type CsiVtsiConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback for the Speech-2-Text platform
+	// Speech-to-text callbacks. Accepted and validated, but they have no effect: see <code>S2tVtsiCallbacks</code>
 	S2TVtsiCallbacks *S2TVtsiCallbacks `protobuf:"bytes,1,opt,name=s2t_vtsi_callbacks,json=s2tVtsiCallbacks,proto3" json:"s2t_vtsi_callbacks,omitempty"`
-	// Callback for the NLU platform
+	// NLU callbacks. Accepted and validated, but they have no effect: see <code>NluVtsiCallbacks</code>
 	NluVtsiCallbacks *NluVtsiCallbacks `protobuf:"bytes,2,opt,name=nlu_vtsi_callbacks,json=nluVtsiCallbacks,proto3" json:"nlu_vtsi_callbacks,omitempty"`
-	// Callback for the Text-2-Speech platform
+	// Text-to-speech callbacks. Accepted and validated, but they have no effect: see <code>T2sVtsiCallbacks</code>
 	T2SVtsiCallbacks *T2SVtsiCallbacks `protobuf:"bytes,3,opt,name=t2s_vtsi_callbacks,json=t2sVtsiCallbacks,proto3" json:"t2s_vtsi_callbacks,omitempty"`
-	// Configuration of the Minio Audio Object Store
+	// Optional: Store the audio of the call (what the caller said and what the bot said) as audio files of the
+	// call&apos;s NLU session. Unset: nothing is stored. See <code>AudioObjectStorageConfig</code>
 	AudioObjectStoreConfig *AudioObjectStorageConfig `protobuf:"bytes,4,opt,name=audio_object_store_config,json=audioObjectStoreConfig,proto3" json:"audio_object_store_config,omitempty"`
-	// Configuration of the RabbitMQ Message Broker
+	// Optional: Publish the events of the call (transcriptions, NLU answers, synthesized answers, SIP status) to a
+	// RabbitMQ message broker and receive control messages for the call from it. Unset: nothing is published. See
+	// <code>MessageBrokerConfig</code>
 	MessageBrokerConfig *MessageBrokerConfig `protobuf:"bytes,5,opt,name=message_broker_config,json=messageBrokerConfig,proto3" json:"message_broker_config,omitempty"`
-	// Setting to activate if it is possible to send control messages
-	// <ul>
-	//   <li>via RabbitMQ to remote control the system</li>
-	//   <li>via embeddings in NLU text responses</li>
-	// </ul>
-	// Explicitly optional: leaving the field unset means the caller expresses no preference and the
-	// server keeps its own configured default. That is NOT the same as sending
-	// <pre><code>false</code></pre>, which is a request to switch control messages off. A
-	// presence-less bool cannot tell the two apart, so an unset field arrived as
-	// <pre><code>false</code></pre> and silently disabled control messages for callers that never
-	// mentioned them.
+	// Optional: Execute the control messages the NLU agent returns with an answer. A control message is an
+	// intent&apos;s webhook payload that names a <code>service</code> (<code>ondewo_nlu</code>,
+	// <code>ondewo_s2t</code>, <code>ondewo_t2s</code> or <code>ondewo_sip</code>), a <code>method</code> and its
+	// <code>parameters</code>; with this switch on, the bot performs that action in the call when the intent
+	// answers (e.g. a SIP action of the call or a change of the speech settings). <code>false</code>: payloads are
+	// ignored and the answers are only spoken. Control messages that arrive over RabbitMQ are not governed by this
+	// switch but by <code>message_broker_config</code>.
+	// <p>Unset is NOT the same as <code>false</code>: unset keeps the deployment-wide setting
+	// <code>ONDEWO_VTSI_CSI_SERVER_ACTIVATE_CONTROL_MESSAGES</code> (default <code>true</code>), while
+	// <code>false</code> switches control messages off for this call.</p>
 	ActivateControlMessages *bool `protobuf:"varint,6,opt,name=activate_control_messages,json=activateControlMessages,proto3,oneof" json:"activate_control_messages,omitempty"`
-	// Optional: Preemptive (speculative) generation of the answer. Unset keeps the deployment&apos;s values
+	// Optional: Preemptive (speculative) generation of the answer: whether it runs on this call and how long a
+	// matching draft may still take. Unset keeps the deployment&apos;s setting. See
+	// <code>CsiPreemptiveGenerationConfig</code>
 	PreemptiveGenerationConfig *CsiPreemptiveGenerationConfig `protobuf:"bytes,7,opt,name=preemptive_generation_config,json=preemptiveGenerationConfig,proto3" json:"preemptive_generation_config,omitempty"`
 	unknownFields              protoimpl.UnknownFields
 	sizeCache                  protoimpl.SizeCache
@@ -2847,7 +3982,7 @@ type CsiVtsiConfig struct {
 
 func (x *CsiVtsiConfig) Reset() {
 	*x = CsiVtsiConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[20]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2859,7 +3994,7 @@ func (x *CsiVtsiConfig) String() string {
 func (*CsiVtsiConfig) ProtoMessage() {}
 
 func (x *CsiVtsiConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[20]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2872,7 +4007,7 @@ func (x *CsiVtsiConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CsiVtsiConfig.ProtoReflect.Descriptor instead.
 func (*CsiVtsiConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{20}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CsiVtsiConfig) GetS2TVtsiCallbacks() *S2TVtsiCallbacks {
@@ -2924,22 +4059,24 @@ func (x *CsiVtsiConfig) GetPreemptiveGenerationConfig() *CsiPreemptiveGeneration
 	return nil
 }
 
-// Preemptive (speculative) generation of the answer: on a stable partial transcription a draft answer is generated
-// before the final transcription arrives, and played only when the final transcription matches it; a draft that
-// does not match is discarded and the caller hears nothing of it. Every field is optional; an unset field keeps
-// the deployment&apos;s value. A value outside its range is refused with <code>INVALID_ARGUMENT</code>.
-// The NLU bounds are set with <code>NluVtsiConfig.preemptive_generation_config</code>, the speech synthesis of a
-// draft with <code>T2sVtsiConfig.preemptive_synthesis_config</code>
+// Preemptive (speculative) generation of the answer: on a stable partial transcription a draft answer is generated before the caller&apos;s final transcription arrives, and played only when the final transcription matches it; a draft that does not match is discarded and the caller hears nothing of it. A matching draft answers the caller sooner; every draft costs an extra NLU request (and, unless switched off, a speech synthesis), also when it is discarded. It never ends the caller&apos;s turn early.
+//
+// Every field is optional. An unset <code>enabled</code> keeps the deployment&apos;s setting (see the field); an unset <code>commit_wait_timeout_seconds</code> keeps the built-in default given at the field. A value outside its range is refused with <code>INVALID_ARGUMENT</code>. The NLU bounds (how many drafts a turn may start) are set with <code>NluVtsiConfig.preemptive_generation_config</code>, the speech synthesis of a draft with <code>T2sVtsiConfig.preemptive_synthesis_config</code>.
+//
+// Example: <code>enabled=false</code> switches speculation off for this call, e.g. to save NLU requests on an agent whose answers are expensive.
 type CsiPreemptiveGenerationConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Optional: Enable preemptive generation (default: the deployment&apos;s setting, which is true unless changed).
-	// Replaces the deprecated <code>ResponseTimingConfig.preemptive_generation_enabled</code>; set together with it
-	// to a different value, the request is refused with <code>INVALID_ARGUMENT</code>
+	// Optional: Enable preemptive generation on this call. Precedence: this field, else the deprecated
+	// <code>ResponseTimingConfig.preemptive_generation_enabled</code>, else the deployment-wide setting
+	// <code>ONDEWO_VTSI_CSI_PREEMPTIVE_GENERATION_ACTIVE</code> (default <code>true</code>). Set together with the
+	// deprecated field to a different value, the request is refused with <code>INVALID_ARGUMENT</code>; the same
+	// value in both is accepted
 	Enabled *bool `protobuf:"varint,1,opt,name=enabled,proto3,oneof" json:"enabled,omitempty"`
 	// Optional: Seconds a draft that matches the final transcription may still take before it is discarded and the
-	// turn is answered normally (default: 3.0, valid range: 0 - 3). While
-	// <code>T2sPreemptiveSynthesisConfig.chunked</code> is off the commit waits for the whole draft; while it is on,
-	// only for the draft&apos;s first chunk
+	// turn is answered normally. While the bot waits here the caller hears nothing, so a long wait on a slow draft
+	// adds to the silence instead of saving time. Unset: 3.0. Valid range: 0 - 3. While
+	// <code>T2sPreemptiveSynthesisConfig.chunked</code> is off the wait is for the whole draft; while it is on, only
+	// for the draft&apos;s first chunk. Only matters while preemptive generation is on
 	CommitWaitTimeoutSeconds *float32 `protobuf:"fixed32,2,opt,name=commit_wait_timeout_seconds,json=commitWaitTimeoutSeconds,proto3,oneof" json:"commit_wait_timeout_seconds,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
@@ -2947,7 +4084,7 @@ type CsiPreemptiveGenerationConfig struct {
 
 func (x *CsiPreemptiveGenerationConfig) Reset() {
 	*x = CsiPreemptiveGenerationConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[21]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2959,7 +4096,7 @@ func (x *CsiPreemptiveGenerationConfig) String() string {
 func (*CsiPreemptiveGenerationConfig) ProtoMessage() {}
 
 func (x *CsiPreemptiveGenerationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[21]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2972,7 +4109,7 @@ func (x *CsiPreemptiveGenerationConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CsiPreemptiveGenerationConfig.ProtoReflect.Descriptor instead.
 func (*CsiPreemptiveGenerationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{21}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CsiPreemptiveGenerationConfig) GetEnabled() bool {
@@ -2989,12 +4126,20 @@ func (x *CsiPreemptiveGenerationConfig) GetCommitWaitTimeoutSeconds() float32 {
 	return 0
 }
 
-// Minio Audio Object Store
+// Storage of the call audio: the caller&apos;s audio of every final transcription and the bot&apos;s audio of every answer as it was played (an answer the caller interrupted is stored as far as it played) are stored as audio files of the call&apos;s NLU session, next to the session&apos;s text.
+//
+// Nothing is stored unless <code>activate_audio_object_storage</code> AND the flag of the side are <code>true</code>. Every unset flag counts as <code>false</code>; there is no deployment-wide default for these flags.
+//
+// Example: <code>activate_audio_object_storage=true</code>, <code>audio_object_storage_services_activation_config.activate_s2t=true</code> and <code>activate_t2s=true</code> store both sides of the conversation. With only <code>activate_audio_object_storage=true</code> nothing is stored.
+//
+// The audio of a warm-transfer intro call is governed by <code>WarmTransferConfig.store_intro_audio</code> instead.
 type AudioObjectStorageConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Audio storage should be activated or not
+	// Optional: Master switch of the audio storage of the call. Unset or <code>false</code>: no audio of the call
+	// is stored, whatever the per-side flags say
 	ActivateAudioObjectStorage *bool `protobuf:"varint,1,opt,name=activate_audio_object_storage,json=activateAudioObjectStorage,proto3,oneof" json:"activate_audio_object_storage,omitempty"`
-	// Configuration of the Minio Audio Object Store
+	// Which side of the conversation is stored while <code>activate_audio_object_storage</code> is
+	// <code>true</code>
 	AudioObjectStorageServicesActivationConfig *AudioObjectStorageServicesActivationConfig `protobuf:"bytes,2,opt,name=audio_object_storage_services_activation_config,json=audioObjectStorageServicesActivationConfig,proto3" json:"audio_object_storage_services_activation_config,omitempty"`
 	unknownFields                              protoimpl.UnknownFields
 	sizeCache                                  protoimpl.SizeCache
@@ -3002,7 +4147,7 @@ type AudioObjectStorageConfig struct {
 
 func (x *AudioObjectStorageConfig) Reset() {
 	*x = AudioObjectStorageConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[22]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3014,7 +4159,7 @@ func (x *AudioObjectStorageConfig) String() string {
 func (*AudioObjectStorageConfig) ProtoMessage() {}
 
 func (x *AudioObjectStorageConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[22]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3027,7 +4172,7 @@ func (x *AudioObjectStorageConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AudioObjectStorageConfig.ProtoReflect.Descriptor instead.
 func (*AudioObjectStorageConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{22}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *AudioObjectStorageConfig) GetActivateAudioObjectStorage() bool {
@@ -3044,12 +4189,13 @@ func (x *AudioObjectStorageConfig) GetAudioObjectStorageServicesActivationConfig
 	return nil
 }
 
-// Configuration of the Minio Audio Object Store
+// Which side of the conversation is stored. Only takes effect while <code>AudioObjectStorageConfig.activate_audio_object_storage</code> is <code>true</code>; every unset flag counts as <code>false</code>
 type AudioObjectStorageServicesActivationConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Should audio object store save audio sent to the Speech-2-Text platform
+	// Optional: Store the caller&apos;s audio (the audio sent to speech-to-text), one file per final transcription.
+	// Unset: <code>false</code>
 	ActivateS2T *bool `protobuf:"varint,1,opt,name=activate_s2t,json=activateS2t,proto3,oneof" json:"activate_s2t,omitempty"`
-	// Should audio object store save audio generated from the Text-2-Speech platform
+	// Optional: Store the bot&apos;s audio (the synthesized answers as they were played). Unset: <code>false</code>
 	ActivateT2S   *bool `protobuf:"varint,2,opt,name=activate_t2s,json=activateT2s,proto3,oneof" json:"activate_t2s,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3057,7 +4203,7 @@ type AudioObjectStorageServicesActivationConfig struct {
 
 func (x *AudioObjectStorageServicesActivationConfig) Reset() {
 	*x = AudioObjectStorageServicesActivationConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[23]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3069,7 +4215,7 @@ func (x *AudioObjectStorageServicesActivationConfig) String() string {
 func (*AudioObjectStorageServicesActivationConfig) ProtoMessage() {}
 
 func (x *AudioObjectStorageServicesActivationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[23]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3082,7 +4228,7 @@ func (x *AudioObjectStorageServicesActivationConfig) ProtoReflect() protoreflect
 
 // Deprecated: Use AudioObjectStorageServicesActivationConfig.ProtoReflect.Descriptor instead.
 func (*AudioObjectStorageServicesActivationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{23}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *AudioObjectStorageServicesActivationConfig) GetActivateS2T() bool {
@@ -3099,12 +4245,19 @@ func (x *AudioObjectStorageServicesActivationConfig) GetActivateT2S() bool {
 	return false
 }
 
-// Configuration of the RabbitMQ Message Broker
+// Publishing of call events to a RabbitMQ message broker, and receiving control messages for the call from it.
+//
+// While <code>activate_message_broker</code> is <code>true</code>, the call publishes its NLU project and session with every NLU answer, starts listening for control messages addressed to its session after the first final transcription (they are executed in the call), and publishes the events of every service whose flag in <code>message_broker_services_activation_config</code> is <code>true</code>. Every unset flag counts as <code>false</code>; there is no deployment-wide default for these flags.
+//
+// Activating the broker requires a complete <code>rabbit_mq_config</code>: host, both ports, user and password must be set. When the request is validated the broker must be reachable over TLS, present a certificate for <code>host</code> that the deployment trusts, accept VTSI&apos;s client certificate and accept the credentials; otherwise the request is refused with <code>INVALID_ARGUMENT</code>. The call connects to the broker over TLS as well.
+//
+// Example: <code>activate_message_broker=true</code> with <code>message_broker_services_activation_config.activate_s2t=true</code> publishes every final transcription of the call, e.g. for a live transcript in another application.
 type MessageBrokerConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Should the broker be activated or not
+	// Optional: Master switch of the message broker for the call. Unset or <code>false</code>: nothing is published,
+	// no control message is received over RabbitMQ, and <code>rabbit_mq_config</code> is not validated
 	ActivateMessageBroker *bool `protobuf:"varint,1,opt,name=activate_message_broker,json=activateMessageBroker,proto3,oneof" json:"activate_message_broker,omitempty"`
-	// Configuration of the Broker service activation
+	// Which services publish their events while <code>activate_message_broker</code> is <code>true</code>
 	MessageBrokerServicesActivationConfig *MessageBrokerServicesActivationConfig `protobuf:"bytes,2,opt,name=message_broker_services_activation_config,json=messageBrokerServicesActivationConfig,proto3" json:"message_broker_services_activation_config,omitempty"`
 	// Types that are valid to be assigned to MessageBrokerConfig:
 	//
@@ -3116,7 +4269,7 @@ type MessageBrokerConfig struct {
 
 func (x *MessageBrokerConfig) Reset() {
 	*x = MessageBrokerConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[24]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3128,7 +4281,7 @@ func (x *MessageBrokerConfig) String() string {
 func (*MessageBrokerConfig) ProtoMessage() {}
 
 func (x *MessageBrokerConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[24]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3141,7 +4294,7 @@ func (x *MessageBrokerConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageBrokerConfig.ProtoReflect.Descriptor instead.
 func (*MessageBrokerConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{24}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *MessageBrokerConfig) GetActivateMessageBroker() bool {
@@ -3179,22 +4332,23 @@ type isMessageBrokerConfig_MessageBrokerConfig interface {
 }
 
 type MessageBrokerConfig_RabbitMqConfig struct {
-	// Configuration of the RabbitMQ Message Broker
+	// Address and credentials of the RabbitMQ server. Required while <code>activate_message_broker</code> is
+	// <code>true</code>
 	RabbitMqConfig *RabbitMqConfig `protobuf:"bytes,3,opt,name=rabbit_mq_config,json=rabbitMqConfig,proto3,oneof"`
 }
 
 func (*MessageBrokerConfig_RabbitMqConfig) isMessageBrokerConfig_MessageBrokerConfig() {}
 
-// Configuration of the RabbitMQ Message Broker
+// Which services of the call publish their events to RabbitMQ. Only takes effect while <code>MessageBrokerConfig.activate_message_broker</code> is <code>true</code>; every unset flag counts as <code>false</code>
 type MessageBrokerServicesActivationConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// should RabbitMQ Message Broker be activated for Speech-2-Text platform
+	// Optional: Publish every final transcription of the caller. Unset: <code>false</code>
 	ActivateS2T *bool `protobuf:"varint,1,opt,name=activate_s2t,json=activateS2t,proto3,oneof" json:"activate_s2t,omitempty"`
-	// should RabbitMQ Message Broker be activated for NLU platform
+	// Optional: Publish every NLU answer. Unset: <code>false</code>
 	ActivateNlu *bool `protobuf:"varint,2,opt,name=activate_nlu,json=activateNlu,proto3,oneof" json:"activate_nlu,omitempty"`
-	// should RabbitMQ Message Broker be activated for Text-2-Speech platform
+	// Optional: Publish every synthesized answer. Unset: <code>false</code>
 	ActivateT2S *bool `protobuf:"varint,3,opt,name=activate_t2s,json=activateT2s,proto3,oneof" json:"activate_t2s,omitempty"`
-	// should RabbitMQ Message Broker be activated for SIP platform
+	// Optional: Publish the SIP information of the call with every NLU answer. Unset: <code>false</code>
 	ActivateSip   *bool `protobuf:"varint,4,opt,name=activate_sip,json=activateSip,proto3,oneof" json:"activate_sip,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3202,7 +4356,7 @@ type MessageBrokerServicesActivationConfig struct {
 
 func (x *MessageBrokerServicesActivationConfig) Reset() {
 	*x = MessageBrokerServicesActivationConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[25]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3214,7 +4368,7 @@ func (x *MessageBrokerServicesActivationConfig) String() string {
 func (*MessageBrokerServicesActivationConfig) ProtoMessage() {}
 
 func (x *MessageBrokerServicesActivationConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[25]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3227,7 +4381,7 @@ func (x *MessageBrokerServicesActivationConfig) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use MessageBrokerServicesActivationConfig.ProtoReflect.Descriptor instead.
 func (*MessageBrokerServicesActivationConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{25}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *MessageBrokerServicesActivationConfig) GetActivateS2T() bool {
@@ -3258,21 +4412,24 @@ func (x *MessageBrokerServicesActivationConfig) GetActivateSip() bool {
 	return false
 }
 
-// Configuration of the RabbitMQ Message Broker
+// Address and credentials of the RabbitMQ server the call publishes to. Validated only while <code>MessageBrokerConfig.activate_message_broker</code> is <code>true</code>: then every field is required, and the server is contacted with these credentials when the request is validated
 type RabbitMqConfig struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// host where the rabbit mq server runs
+	// Host name or IP address of the RabbitMQ server. Required while the broker is activated; empty is
+	// <code>INVALID_ARGUMENT</code>
 	Host string `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
 	// AMQP port of the RabbitMQ server (typically <code>5672</code>), 1 to 65535; used for the messages and for the
 	// connectivity check at start. 0 or below is <code>INVALID_ARGUMENT</code>
 	Port int32 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
-	// Management (HTTP API) port of the RabbitMQ server (typically <code>15672</code>), 1 to 65535. It is passed to
-	// the call&apos;s CSI process as <code>RABBIT_PORT_2</code> and is not used for the connectivity check. 0 or below
-	// is <code>INVALID_ARGUMENT</code>
+	// Management (HTTP API) port of the RabbitMQ server (typically <code>15672</code>), 1 to 65535. Required while
+	// the broker is activated (0 or below is <code>INVALID_ARGUMENT</code>), but currently not used: neither the
+	// connectivity check nor the call connects to it
 	Port_2 int32 `protobuf:"varint,3,opt,name=port_2,json=port2,proto3" json:"port_2,omitempty"`
-	// user of server
+	// User name on the RabbitMQ server. Required while the broker is activated; empty is
+	// <code>INVALID_ARGUMENT</code>
 	User string `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
-	// password of server
+	// Password of <code>user</code>. Required while the broker is activated; empty is <code>INVALID_ARGUMENT</code>.
+	// Never logged, and can be withheld when the call configuration is read back
 	Password      string `protobuf:"bytes,5,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3280,7 +4437,7 @@ type RabbitMqConfig struct {
 
 func (x *RabbitMqConfig) Reset() {
 	*x = RabbitMqConfig{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[26]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3292,7 +4449,7 @@ func (x *RabbitMqConfig) String() string {
 func (*RabbitMqConfig) ProtoMessage() {}
 
 func (x *RabbitMqConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[26]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3305,7 +4462,7 @@ func (x *RabbitMqConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RabbitMqConfig.ProtoReflect.Descriptor instead.
 func (*RabbitMqConfig) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{26}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RabbitMqConfig) GetHost() string {
@@ -3344,15 +4501,13 @@ func (x *RabbitMqConfig) GetPassword() string {
 }
 
 // Callbacks for the Speech-2-Text platform.
-// <p>Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The
-// callbacks are accepted and validated but currently NOT executed: no component of the call consumes them. The
-// field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be
-// documented then; do not rely on any effect.</p>
+//
+// Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The callbacks are accepted and validated but currently NOT executed: no component of the call consumes them, and a call behaves exactly the same with or without them. The field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be documented then; do not rely on any effect.
 type S2TVtsiCallbacks struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the Speech-2-Text will be called
+	// Names of callbacks to run before the audio is sent to speech-to-text. No effect (see the message comment)
 	PreS2TCallbacks []string `protobuf:"bytes,1,rep,name=pre_s2t_callbacks,json=preS2tCallbacks,proto3" json:"pre_s2t_callbacks,omitempty"`
-	// Callback executed after the Speech-2-Text has been called
+	// Names of callbacks to run after speech-to-text returned a transcription. No effect (see the message comment)
 	PostS2TCallbacks []string `protobuf:"bytes,2,rep,name=post_s2t_callbacks,json=postS2tCallbacks,proto3" json:"post_s2t_callbacks,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -3360,7 +4515,7 @@ type S2TVtsiCallbacks struct {
 
 func (x *S2TVtsiCallbacks) Reset() {
 	*x = S2TVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[27]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3372,7 +4527,7 @@ func (x *S2TVtsiCallbacks) String() string {
 func (*S2TVtsiCallbacks) ProtoMessage() {}
 
 func (x *S2TVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[27]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3385,7 +4540,7 @@ func (x *S2TVtsiCallbacks) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use S2TVtsiCallbacks.ProtoReflect.Descriptor instead.
 func (*S2TVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{27}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *S2TVtsiCallbacks) GetPreS2TCallbacks() []string {
@@ -3403,15 +4558,13 @@ func (x *S2TVtsiCallbacks) GetPostS2TCallbacks() []string {
 }
 
 // Callbacks for the NLU platform.
-// <p>Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The
-// callbacks are accepted and validated but currently NOT executed: no component of the call consumes them. The
-// field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be
-// documented then; do not rely on any effect.</p>
+//
+// Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The callbacks are accepted and validated but currently NOT executed: no component of the call consumes them, and a call behaves exactly the same with or without them. The field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be documented then; do not rely on any effect.
 type NluVtsiCallbacks struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the NLU will be called
+	// Names of callbacks to run before a request is sent to the NLU. No effect (see the message comment)
 	PreNluCallbacks []string `protobuf:"bytes,1,rep,name=pre_nlu_callbacks,json=preNluCallbacks,proto3" json:"pre_nlu_callbacks,omitempty"`
-	// Callback executed after the NLU has been called
+	// Names of callbacks to run after the NLU answered. No effect (see the message comment)
 	PostNluCallbacks []string `protobuf:"bytes,2,rep,name=post_nlu_callbacks,json=postNluCallbacks,proto3" json:"post_nlu_callbacks,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -3419,7 +4572,7 @@ type NluVtsiCallbacks struct {
 
 func (x *NluVtsiCallbacks) Reset() {
 	*x = NluVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[28]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3431,7 +4584,7 @@ func (x *NluVtsiCallbacks) String() string {
 func (*NluVtsiCallbacks) ProtoMessage() {}
 
 func (x *NluVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[28]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3444,7 +4597,7 @@ func (x *NluVtsiCallbacks) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NluVtsiCallbacks.ProtoReflect.Descriptor instead.
 func (*NluVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{28}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *NluVtsiCallbacks) GetPreNluCallbacks() []string {
@@ -3462,15 +4615,13 @@ func (x *NluVtsiCallbacks) GetPostNluCallbacks() []string {
 }
 
 // Callbacks for the Text-2-Speech platform.
-// <p>Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The
-// callbacks are accepted and validated but currently NOT executed: no component of the call consumes them. The
-// field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be
-// documented then; do not rely on any effect.</p>
+//
+// Each entry is a non-empty string (an empty entry is <code>INVALID_ARGUMENT</code>) naming a callback. The callbacks are accepted and validated but currently NOT executed: no component of the call consumes them, and a call behaves exactly the same with or without them. The field is kept for wire compatibility and reserved for a future callback mechanism, whose naming scheme will be documented then; do not rely on any effect.
 type T2SVtsiCallbacks struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Callback executed before the Text-2-Speech will be called
+	// Names of callbacks to run before a text is synthesized. No effect (see the message comment)
 	PreT2SCallbacks []string `protobuf:"bytes,1,rep,name=pre_t2s_callbacks,json=preT2sCallbacks,proto3" json:"pre_t2s_callbacks,omitempty"`
-	// Callback executed after the Text-2-Speech has been called
+	// Names of callbacks to run after a text was synthesized. No effect (see the message comment)
 	PostT2SCallbacks []string `protobuf:"bytes,2,rep,name=post_t2s_callbacks,json=postT2sCallbacks,proto3" json:"post_t2s_callbacks,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
@@ -3478,7 +4629,7 @@ type T2SVtsiCallbacks struct {
 
 func (x *T2SVtsiCallbacks) Reset() {
 	*x = T2SVtsiCallbacks{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[29]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3490,7 +4641,7 @@ func (x *T2SVtsiCallbacks) String() string {
 func (*T2SVtsiCallbacks) ProtoMessage() {}
 
 func (x *T2SVtsiCallbacks) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[29]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3503,7 +4654,7 @@ func (x *T2SVtsiCallbacks) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use T2SVtsiCallbacks.ProtoReflect.Descriptor instead.
 func (*T2SVtsiCallbacks) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{29}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *T2SVtsiCallbacks) GetPreT2SCallbacks() []string {
@@ -3520,11 +4671,12 @@ func (x *T2SVtsiCallbacks) GetPostT2SCallbacks() []string {
 	return nil
 }
 
-// Hold bands of the semantic turn detection model
+// Hold bands of an end-of-utterance turn detection model (see <code>hold_bands</code>). The message is a wrapper so that &quot;no bands&quot; can be told apart from &quot;unset&quot;
 type TurnDetectionConfig_EndOfTurnHoldBands struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The bands (at most 10). The first band, sorted by <code>upper_probability</code>, whose upper probability
-	// exceeds the end-of-turn probability decides the hold; a probability above every band is committed at once
+	// The bands (at most 10, in any order). They are sorted by <code>upper_probability</code>, and the first
+	// band whose upper probability is above the end-of-turn probability decides the hold; a probability at or
+	// above every band&apos;s upper bound is committed without a hold. Empty: no turn is held
 	Bands         []*TurnDetectionConfig_EndOfTurnHoldBand `protobuf:"bytes,1,rep,name=bands,proto3" json:"bands,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3532,7 +4684,7 @@ type TurnDetectionConfig_EndOfTurnHoldBands struct {
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBands) Reset() {
 	*x = TurnDetectionConfig_EndOfTurnHoldBands{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[30]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3544,7 +4696,7 @@ func (x *TurnDetectionConfig_EndOfTurnHoldBands) String() string {
 func (*TurnDetectionConfig_EndOfTurnHoldBands) ProtoMessage() {}
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBands) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[30]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3557,7 +4709,7 @@ func (x *TurnDetectionConfig_EndOfTurnHoldBands) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use TurnDetectionConfig_EndOfTurnHoldBands.ProtoReflect.Descriptor instead.
 func (*TurnDetectionConfig_EndOfTurnHoldBands) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12, 0}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14, 0}
 }
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBands) GetBands() []*TurnDetectionConfig_EndOfTurnHoldBand {
@@ -3567,13 +4719,15 @@ func (x *TurnDetectionConfig_EndOfTurnHoldBands) GetBands() []*TurnDetectionConf
 	return nil
 }
 
-// One hold band of the semantic turn detection model
+// One hold band of an end-of-utterance turn detection model
 type TurnDetectionConfig_EndOfTurnHoldBand struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Exclusive upper bound of the end-of-turn probabilities the band covers (valid range: 0 - 1)
+	// Exclusive upper bound of the end-of-turn probabilities the band covers (valid range: 0 - 1); the lower
+	// bound is the next lower band&apos;s upper bound, or the end-of-turn threshold
 	UpperProbability float32 `protobuf:"fixed32,1,opt,name=upper_probability,json=upperProbability,proto3" json:"upper_probability,omitempty"`
-	// Seconds of silence a turn in the band waits before it is committed (valid range: 0 - 4; never longer than
-	// <code>incomplete_max_silence_seconds</code>)
+	// Seconds of silence a turn in the band waits before it is committed; speech inside it resumes the turn
+	// (valid range: 0 - 4, and at most <code>incomplete_max_silence_seconds</code> when that is set in the same
+	// message)
 	MaxSilenceSeconds float32 `protobuf:"fixed32,2,opt,name=max_silence_seconds,json=maxSilenceSeconds,proto3" json:"max_silence_seconds,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -3581,7 +4735,7 @@ type TurnDetectionConfig_EndOfTurnHoldBand struct {
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBand) Reset() {
 	*x = TurnDetectionConfig_EndOfTurnHoldBand{}
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[31]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3593,7 +4747,7 @@ func (x *TurnDetectionConfig_EndOfTurnHoldBand) String() string {
 func (*TurnDetectionConfig_EndOfTurnHoldBand) ProtoMessage() {}
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBand) ProtoReflect() protoreflect.Message {
-	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[31]
+	mi := &file_ondewo_vtsi_call_configs_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3606,7 +4760,7 @@ func (x *TurnDetectionConfig_EndOfTurnHoldBand) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use TurnDetectionConfig_EndOfTurnHoldBand.ProtoReflect.Descriptor instead.
 func (*TurnDetectionConfig_EndOfTurnHoldBand) Descriptor() ([]byte, []int) {
-	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{12, 1}
+	return file_ondewo_vtsi_call_configs_proto_rawDescGZIP(), []int{14, 1}
 }
 
 func (x *TurnDetectionConfig_EndOfTurnHoldBand) GetUpperProbability() float32 {
@@ -3634,7 +4788,7 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\tgrpc_cert\x18\x03 \x01(\tR\bgrpcCert\"L\n" +
 	"\vCredentials\x12!\n" +
 	"\faccount_name\x18\x01 \x01(\tR\vaccountName\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xd8\x04\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xb1\b\n" +
 	"\rNluVtsiConfig\x12F\n" +
 	"\x0fnlu_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rnluBaseConfig\x12<\n" +
 	"\vcredentials\x18\x02 \x01(\v2\x18.ondewo.vtsi.CredentialsH\x00R\vcredentials\x12\x1f\n" +
@@ -3648,36 +4802,72 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x15http_basic_auth_token\x18\b \x01(\tR\x12httpBasicAuthToken\x12D\n" +
 	"\bplatform\x18\t \x01(\x0e2#.ondewo.nlu.Intent.Message.PlatformH\x01R\bplatform\x88\x01\x01\x12l\n" +
 	"\x1cpreemptive_generation_config\x18\n" +
-	" \x01(\v2*.ondewo.vtsi.NluPreemptiveGenerationConfigR\x1apreemptiveGenerationConfigB\x10\n" +
+	" \x01(\v2*.ondewo.vtsi.NluPreemptiveGenerationConfigR\x1apreemptiveGenerationConfig\x12<\n" +
+	"\x18ai_teams_fillers_audible\x18\v \x01(\bH\x02R\x15aiTeamsFillersAudible\x88\x01\x01\x12;\n" +
+	"\x17failure_apology_message\x18\f \x01(\tH\x03R\x15failureApologyMessage\x88\x01\x01\x12A\n" +
+	"\x1bsession_id_from_sip_context\x18\r \x01(\bH\x04R\x17sessionIdFromSipContext\x88\x01\x01\x12D\n" +
+	"\x1dai_teams_push_max_age_seconds\x18\x0e \x01(\x02H\x05R\x18aiTeamsPushMaxAgeSeconds\x88\x01\x01\x12;\n" +
+	"\x18ai_teams_push_max_spoken\x18\x0f \x01(\x05H\x06R\x14aiTeamsPushMaxSpoken\x88\x01\x01B\x10\n" +
 	"\x0eauthenticationB\v\n" +
-	"\t_platform\"\x96\x02\n" +
+	"\t_platformB\x1b\n" +
+	"\x19_ai_teams_fillers_audibleB\x1a\n" +
+	"\x18_failure_apology_messageB\x1e\n" +
+	"\x1c_session_id_from_sip_contextB \n" +
+	"\x1e_ai_teams_push_max_age_secondsB\x1b\n" +
+	"\x19_ai_teams_push_max_spoken\"\x96\x02\n" +
 	"\x1dNluPreemptiveGenerationConfig\x122\n" +
 	"\x13max_drafts_per_turn\x18\x01 \x01(\x05H\x00R\x10maxDraftsPerTurn\x88\x01\x01\x12<\n" +
 	"\x18min_stable_dwell_seconds\x18\x02 \x01(\x02H\x01R\x15minStableDwellSeconds\x88\x01\x01\x125\n" +
 	"\x14min_interval_seconds\x18\x03 \x01(\x02H\x02R\x12minIntervalSeconds\x88\x01\x01B\x16\n" +
 	"\x14_max_drafts_per_turnB\x1b\n" +
 	"\x19_min_stable_dwell_secondsB\x17\n" +
-	"\x15_min_interval_seconds\"\x8b\x02\n" +
+	"\x15_min_interval_seconds\"\xaf\x03\n" +
 	"\rT2sVtsiConfig\x12F\n" +
 	"\x0ft2s_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rt2sBaseConfig\x12G\n" +
 	"\x12t2s_request_config\x18\x02 \x01(\v2\x19.ondewo.t2s.RequestConfigR\x10t2sRequestConfig\x12i\n" +
-	"\x1bpreemptive_synthesis_config\x18\x03 \x01(\v2).ondewo.vtsi.T2sPreemptiveSynthesisConfigR\x19preemptiveSynthesisConfig\"t\n" +
+	"\x1bpreemptive_synthesis_config\x18\x03 \x01(\v2).ondewo.vtsi.T2sPreemptiveSynthesisConfigR\x19preemptiveSynthesisConfig\x12A\n" +
+	"\x1asynthesize_timeout_seconds\x18\x04 \x01(\x02H\x00R\x18synthesizeTimeoutSeconds\x88\x01\x01\x12,\n" +
+	"\x0fcache_retention\x18\x05 \x01(\tH\x01R\x0ecacheRetention\x88\x01\x01B\x1d\n" +
+	"\x1b_synthesize_timeout_secondsB\x12\n" +
+	"\x10_cache_retention\"t\n" +
 	"\x1cT2sPreemptiveSynthesisConfig\x12\x1d\n" +
 	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12\x1d\n" +
 	"\achunked\x18\x02 \x01(\bH\x01R\achunked\x88\x01\x01B\n" +
 	"\n" +
 	"\b_enabledB\n" +
 	"\n" +
-	"\b_chunked\"\xbf\x01\n" +
+	"\b_chunked\"\x8c\x02\n" +
 	"\rS2tVtsiConfig\x12F\n" +
 	"\x0fs2t_base_config\x18\x01 \x01(\v2\x1e.ondewo.vtsi.BaseServiceConfigR\rs2tBaseConfig\x12f\n" +
-	"\x1ds2t_transcribe_request_config\x18\x02 \x01(\v2#.ondewo.s2t.TranscribeRequestConfigR\x1as2tTranscribeRequestConfig\"\x85\x03\n" +
+	"\x1ds2t_transcribe_request_config\x18\x02 \x01(\v2#.ondewo.s2t.TranscribeRequestConfigR\x1as2tTranscribeRequestConfig\x123\n" +
+	"\x13failure_sip_trigger\x18\x03 \x01(\tH\x00R\x11failureSipTrigger\x88\x01\x01B\x16\n" +
+	"\x14_failure_sip_trigger\"\xa7\x04\n" +
 	"\x14CommonServicesConfig\x12B\n" +
 	"\x0fs2t_vtsi_config\x18\x01 \x01(\v2\x1a.ondewo.vtsi.S2tVtsiConfigR\rs2tVtsiConfig\x12B\n" +
 	"\x0fnlu_vtsi_config\x18\x02 \x01(\v2\x1a.ondewo.vtsi.NluVtsiConfigR\rnluVtsiConfig\x12B\n" +
 	"\x0ft2s_vtsi_config\x18\x03 \x01(\v2\x1a.ondewo.vtsi.T2sVtsiConfigR\rt2sVtsiConfig\x12B\n" +
 	"\x0fcsi_vtsi_config\x18\x04 \x01(\v2\x1a.ondewo.vtsi.CsiVtsiConfigR\rcsiVtsiConfig\x12]\n" +
-	"\x18voice_interaction_config\x18\x05 \x01(\v2#.ondewo.vtsi.VoiceInteractionConfigR\x16voiceInteractionConfig\"\xba\x04\n" +
+	"\x18voice_interaction_config\x18\x05 \x01(\v2#.ondewo.vtsi.VoiceInteractionConfigR\x16voiceInteractionConfig\x12B\n" +
+	"\x0fsip_vtsi_config\x18\x06 \x01(\v2\x1a.ondewo.vtsi.SipVtsiConfigR\rsipVtsiConfig\x12>\n" +
+	"\x19max_call_duration_seconds\x18\a \x01(\rH\x00R\x16maxCallDurationSeconds\x88\x01\x01B\x1c\n" +
+	"\x1a_max_call_duration_seconds\"\xf1\x06\n" +
+	"\rSipVtsiConfig\x123\n" +
+	"\x13playback_latency_ms\x18\x01 \x01(\rH\x00R\x11playbackLatencyMs\x88\x01\x01\x129\n" +
+	"\x16software_clock_enabled\x18\x02 \x01(\bH\x01R\x14softwareClockEnabled\x88\x01\x01\x12M\n" +
+	"!rtp_stats_sample_interval_seconds\x18\x03 \x01(\x02H\x02R\x1drtpStatsSampleIntervalSeconds\x88\x01\x01\x12Z\n" +
+	"(hangup_wait_for_playback_timeout_seconds\x18\x04 \x01(\x02H\x03R#hangupWaitForPlaybackTimeoutSeconds\x88\x01\x01\x12H\n" +
+	"\x1eoutgoing_dial_watchdog_seconds\x18\x05 \x01(\x02H\x04R\x1boutgoingDialWatchdogSeconds\x88\x01\x01\x12?\n" +
+	"\x19register_interval_seconds\x18\x06 \x01(\rH\x05R\x17registerIntervalSeconds\x88\x01\x01\x12K\n" +
+	" call_audio_stream_max_concurrent\x18\a \x01(\rH\x06R\x1ccallAudioStreamMaxConcurrent\x88\x01\x01\x12V\n" +
+	"&call_audio_stream_max_duration_seconds\x18\b \x01(\rH\aR!callAudioStreamMaxDurationSeconds\x88\x01\x01B\x16\n" +
+	"\x14_playback_latency_msB\x19\n" +
+	"\x17_software_clock_enabledB$\n" +
+	"\"_rtp_stats_sample_interval_secondsB+\n" +
+	")_hangup_wait_for_playback_timeout_secondsB!\n" +
+	"\x1f_outgoing_dial_watchdog_secondsB\x1c\n" +
+	"\x1a_register_interval_secondsB#\n" +
+	"!_call_audio_stream_max_concurrentB)\n" +
+	"'_call_audio_stream_max_duration_seconds\"\x8a\x05\n" +
 	"\x16VoiceInteractionConfig\x12T\n" +
 	"\x15turn_detection_config\x18\x01 \x01(\v2 .ondewo.vtsi.TurnDetectionConfigR\x13turnDetectionConfig\x12i\n" +
 	"\x1cinterruption_handling_config\x18\x02 \x01(\v2'.ondewo.vtsi.InterruptionHandlingConfigR\x1ainterruptionHandlingConfig\x12W\n" +
@@ -3685,18 +4875,30 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\"answering_machine_detection_config\x18\x04 \x01(\v2,.ondewo.vtsi.AnsweringMachineDetectionConfigR\x1fansweringMachineDetectionConfig\x128\n" +
 	"\vdtmf_config\x18\x05 \x01(\v2\x17.ondewo.vtsi.DtmfConfigR\n" +
 	"dtmfConfig\x12Q\n" +
-	"\x14warm_transfer_config\x18\x06 \x01(\v2\x1f.ondewo.vtsi.WarmTransferConfigR\x12warmTransferConfig\"\x81\x02\n" +
+	"\x14warm_transfer_config\x18\x06 \x01(\v2\x1f.ondewo.vtsi.WarmTransferConfigR\x12warmTransferConfig\x12N\n" +
+	"\x13bot_transfer_config\x18\a \x01(\v2\x1e.ondewo.vtsi.BotTransferConfigR\x11botTransferConfig\"\xae\x02\n" +
+	"\x11BotTransferConfig\x121\n" +
+	"\x12outcome_timeout_ms\x18\x01 \x01(\rH\x00R\x10outcomeTimeoutMs\x88\x01\x01\x12(\n" +
+	"\rfailed_action\x18\x02 \x01(\tH\x01R\ffailedAction\x88\x01\x01\x12b\n" +
+	",warm_transfer_outcome_commit_timeout_seconds\x18\x03 \x01(\x02H\x02R'warmTransferOutcomeCommitTimeoutSeconds\x88\x01\x01B\x15\n" +
+	"\x13_outcome_timeout_msB\x10\n" +
+	"\x0e_failed_actionB/\n" +
+	"-_warm_transfer_outcome_commit_timeout_seconds\"\xfe\x02\n" +
 	"\n" +
 	"DtmfConfig\x12\x1d\n" +
 	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12\x1e\n" +
 	"\bbarge_in\x18\x02 \x01(\bH\x01R\abargeIn\x88\x01\x01\x128\n" +
 	"\x16inter_digit_timeout_ms\x18\x03 \x01(\rH\x02R\x13interDigitTimeoutMs\x88\x01\x01\x120\n" +
-	"\x11undeclared_policy\x18\x04 \x01(\tH\x03R\x10undeclaredPolicy\x88\x01\x01B\n" +
+	"\x11undeclared_policy\x18\x04 \x01(\tH\x03R\x10undeclaredPolicy\x88\x01\x01\x12+\n" +
+	"\x0fspeech_guard_ms\x18\x05 \x01(\rH\x04R\rspeechGuardMs\x88\x01\x01\x12(\n" +
+	"\rtext_template\x18\x06 \x01(\tH\x05R\ftextTemplate\x88\x01\x01B\n" +
 	"\n" +
 	"\b_enabledB\v\n" +
 	"\t_barge_inB\x19\n" +
 	"\x17_inter_digit_timeout_msB\x14\n" +
-	"\x12_undeclared_policy\"\x84\x0f\n" +
+	"\x12_undeclared_policyB\x12\n" +
+	"\x10_speech_guard_msB\x10\n" +
+	"\x0e_text_template\"\x84\x0f\n" +
 	"\x12WarmTransferConfig\x12\x1d\n" +
 	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12&\n" +
 	"\fintro_prompt\x18\x02 \x01(\tH\x01R\vintroPrompt\x88\x01\x01\x12L\n" +
@@ -3764,7 +4966,7 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x05cause\x18\n" +
 	" \x01(\tR\x05cause\x12)\n" +
 	"\x10notice_delivered\x18\v \x01(\bR\x0fnoticeDelivered\x12#\n" +
-	"\rintro_started\x18\f \x01(\bR\fintroStarted\"\x83\x0e\n" +
+	"\rintro_started\x18\f \x01(\bR\fintroStarted\"\xca\x11\n" +
 	"\x13TurnDetectionConfig\x12F\n" +
 	"\x04mode\x18\x01 \x01(\x0e22.ondewo.vtsi.TurnDetectionConfig.TurnDetectionModeR\x04mode\x12F\n" +
 	"\x1dmin_endpointing_delay_seconds\x18\x02 \x01(\x02H\x00R\x1aminEndpointingDelaySeconds\x88\x01\x01\x12F\n" +
@@ -3783,7 +4985,12 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x11exact_probability\x18\r \x01(\bH\tR\x10exactProbability\x88\x01\x01\x12@\n" +
 	"\x1afinal_merge_window_seconds\x18\x0e \x01(\x02H\n" +
 	"R\x17finalMergeWindowSeconds\x88\x01\x01\x12G\n" +
-	"\x10dictation_config\x18\x0f \x01(\v2\x1c.ondewo.vtsi.DictationConfigR\x0fdictationConfig\x1a^\n" +
+	"\x10dictation_config\x18\x0f \x01(\v2\x1c.ondewo.vtsi.DictationConfigR\x0fdictationConfig\x12#\n" +
+	"\vs2t_emit_ms\x18\x10 \x01(\rH\vR\ts2tEmitMs\x88\x01\x01\x125\n" +
+	"\x14s2t_request_partials\x18\x11 \x01(\bH\fR\x12s2tRequestPartials\x88\x01\x01\x12P\n" +
+	"#s2t_request_end_of_speech_candidate\x18\x12 \x01(\bH\rR\x1es2tRequestEndOfSpeechCandidate\x88\x01\x01\x125\n" +
+	"\x14smart_turn_threshold\x18\x13 \x01(\x02H\x0eR\x12smartTurnThreshold\x88\x01\x01\x12O\n" +
+	"\"post_unmute_phantom_window_seconds\x18\x14 \x01(\x02H\x0fR\x1epostUnmutePhantomWindowSeconds\x88\x01\x01\x1a^\n" +
 	"\x12EndOfTurnHoldBands\x12H\n" +
 	"\x05bands\x18\x01 \x03(\v22.ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBandR\x05bands\x1ap\n" +
 	"\x11EndOfTurnHoldBand\x12+\n" +
@@ -3810,7 +5017,12 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x14_uncertain_min_wordsB!\n" +
 	"\x1f_incomplete_max_silence_secondsB\x14\n" +
 	"\x12_exact_probabilityB\x1d\n" +
-	"\x1b_final_merge_window_seconds\"\x87\b\n" +
+	"\x1b_final_merge_window_secondsB\x0e\n" +
+	"\f_s2t_emit_msB\x17\n" +
+	"\x15_s2t_request_partialsB&\n" +
+	"$_s2t_request_end_of_speech_candidateB\x17\n" +
+	"\x15_smart_turn_thresholdB%\n" +
+	"#_post_unmute_phantom_window_seconds\"\x87\b\n" +
 	"\x0fDictationConfig\x12&\n" +
 	"\fhold_enabled\x18\x01 \x01(\bH\x00R\vholdEnabled\x88\x01\x01\x129\n" +
 	"\x16expected_input_enabled\x18\x02 \x01(\bH\x01R\x14expectedInputEnabled\x88\x01\x01\x12H\n" +
@@ -3831,7 +5043,7 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x1e_hold_invalid_checksum_secondsB!\n" +
 	"\x1f_early_commit_on_complete_valueB$\n" +
 	"\"_s2t_slot_min_duration_off_secondsB,\n" +
-	"*_s2t_slot_min_duration_off_restore_seconds\"\x88\a\n" +
+	"*_s2t_slot_min_duration_off_restore_seconds\"\xda\v\n" +
 	"\x1aInterruptionHandlingConfig\x12\x1d\n" +
 	"\aenabled\x18\x01 \x01(\bH\x00R\aenabled\x88\x01\x01\x12N\n" +
 	"!min_interruption_duration_seconds\x18\x02 \x01(\x02H\x01R\x1eminInterruptionDurationSeconds\x88\x01\x01\x129\n" +
@@ -3841,7 +5053,15 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x0fbackoff_seconds\x18\x06 \x01(\x02H\x05R\x0ebackoffSeconds\x88\x01\x01\x12J\n" +
 	"\x1ffirst_message_protected_seconds\x18\a \x01(\x02H\x06R\x1cfirstMessageProtectedSeconds\x88\x01\x01\x12T\n" +
 	"$transcribe_on_disabled_interruptions\x18\b \x01(\bH\aR!transcribeOnDisabledInterruptions\x88\x01\x01\x12<\n" +
-	"\x18interruption_fade_out_ms\x18\t \x01(\x05H\bR\x15interruptionFadeOutMs\x88\x01\x01B\n" +
+	"\x18interruption_fade_out_ms\x18\t \x01(\x05H\bR\x15interruptionFadeOutMs\x88\x01\x01\x12I\n" +
+	"\x1fcancel_on_speech_while_thinking\x18\n" +
+	" \x01(\bH\tR\x1bcancelOnSpeechWhileThinking\x88\x01\x01\x12R\n" +
+	"$ai_teams_cancel_pending_on_interrupt\x18\v \x01(\bH\n" +
+	"R\x1faiTeamsCancelPendingOnInterrupt\x88\x01\x01\x127\n" +
+	"\x16t2s_cancel_on_barge_in\x18\f \x01(\bH\vR\x12t2sCancelOnBargeIn\x88\x01\x01\x12<\n" +
+	"\x18nlu_turn_control_enabled\x18\r \x01(\bH\fR\x15nluTurnControlEnabled\x88\x01\x01\x125\n" +
+	"\x14heard_report_enabled\x18\x0e \x01(\bH\rR\x12heardReportEnabled\x88\x01\x01\x12D\n" +
+	"\x1cheard_text_alignment_enabled\x18\x0f \x01(\bH\x0eR\x19heardTextAlignmentEnabled\x88\x01\x01B\n" +
 	"\n" +
 	"\b_enabledB$\n" +
 	"\"_min_interruption_duration_secondsB\x19\n" +
@@ -3851,17 +5071,36 @@ const file_ondewo_vtsi_call_configs_proto_rawDesc = "" +
 	"\x10_backoff_secondsB\"\n" +
 	" _first_message_protected_secondsB'\n" +
 	"%_transcribe_on_disabled_interruptionsB\x1b\n" +
-	"\x19_interruption_fade_out_ms\"\xfd\x03\n" +
+	"\x19_interruption_fade_out_msB\"\n" +
+	" _cancel_on_speech_while_thinkingB'\n" +
+	"%_ai_teams_cancel_pending_on_interruptB\x19\n" +
+	"\x17_t2s_cancel_on_barge_inB\x1b\n" +
+	"\x19_nlu_turn_control_enabledB\x17\n" +
+	"\x15_heard_report_enabledB\x1f\n" +
+	"\x1d_heard_text_alignment_enabled\"\xb5\b\n" +
 	"\x14ResponseTimingConfig\x125\n" +
 	"\x14turn_timeout_seconds\x18\x01 \x01(\x02H\x00R\x12turnTimeoutSeconds\x88\x01\x01\x12K\n" +
 	" silence_end_call_timeout_seconds\x18\x02 \x01(\x02H\x01R\x1csilenceEndCallTimeoutSeconds\x88\x01\x01\x12N\n" +
 	"\x13soft_timeout_config\x18\x03 \x01(\v2\x1e.ondewo.vtsi.SoftTimeoutConfigR\x11softTimeoutConfig\x12G\n" +
 	"\x1dpreemptive_generation_enabled\x18\x04 \x01(\bH\x02R\x1bpreemptiveGenerationEnabled\x88\x01\x01\x12F\n" +
-	"\x1dt2s_chunked_streaming_enabled\x18\x05 \x01(\bH\x03R\x1at2sChunkedStreamingEnabled\x88\x01\x01B\x17\n" +
+	"\x1dt2s_chunked_streaming_enabled\x18\x05 \x01(\bH\x03R\x1at2sChunkedStreamingEnabled\x88\x01\x01\x120\n" +
+	"\x11streaming_enabled\x18\x06 \x01(\bH\x04R\x10streamingEnabled\x88\x01\x01\x12:\n" +
+	"\x17nlu_call_stream_enabled\x18\a \x01(\bH\x05R\x14nluCallStreamEnabled\x88\x01\x01\x123\n" +
+	"\x13turn_timeout_intent\x18\b \x01(\tH\x06R\x11turnTimeoutIntent\x88\x01\x01\x129\n" +
+	"\x17t2s_max_edge_silence_ms\x18\t \x01(\x05H\aR\x13t2sMaxEdgeSilenceMs\x88\x01\x01\x12R\n" +
+	"$nlu_call_stream_turn_timeout_seconds\x18\n" +
+	" \x01(\x02H\bR\x1fnluCallStreamTurnTimeoutSeconds\x88\x01\x01\x12N\n" +
+	"\"nlu_call_stream_turn_quiet_seconds\x18\v \x01(\x02H\tR\x1dnluCallStreamTurnQuietSeconds\x88\x01\x01B\x17\n" +
 	"\x15_turn_timeout_secondsB#\n" +
 	"!_silence_end_call_timeout_secondsB \n" +
 	"\x1e_preemptive_generation_enabledB \n" +
-	"\x1e_t2s_chunked_streaming_enabled\"\xbb\x01\n" +
+	"\x1e_t2s_chunked_streaming_enabledB\x14\n" +
+	"\x12_streaming_enabledB\x1a\n" +
+	"\x18_nlu_call_stream_enabledB\x16\n" +
+	"\x14_turn_timeout_intentB\x1a\n" +
+	"\x18_t2s_max_edge_silence_msB'\n" +
+	"%_nlu_call_stream_turn_timeout_secondsB%\n" +
+	"#_nlu_call_stream_turn_quiet_seconds\"\xbb\x01\n" +
 	"\x11SoftTimeoutConfig\x12,\n" +
 	"\x0ftimeout_seconds\x18\x01 \x01(\x02H\x00R\x0etimeoutSeconds\x88\x01\x01\x12\x1a\n" +
 	"\bmessages\x18\x02 \x03(\tR\bmessages\x121\n" +
@@ -4018,7 +5257,7 @@ func file_ondewo_vtsi_call_configs_proto_rawDescGZIP() []byte {
 }
 
 var file_ondewo_vtsi_call_configs_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_ondewo_vtsi_call_configs_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_ondewo_vtsi_call_configs_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_ondewo_vtsi_call_configs_proto_goTypes = []any{
 	(WarmIntroTextSource)(0),                            // 0: ondewo.vtsi.WarmIntroTextSource
 	(WarmIntroUnavailablePolicy)(0),                     // 1: ondewo.vtsi.WarmIntroUnavailablePolicy
@@ -4036,92 +5275,96 @@ var file_ondewo_vtsi_call_configs_proto_goTypes = []any{
 	(*T2SPreemptiveSynthesisConfig)(nil),                // 13: ondewo.vtsi.T2sPreemptiveSynthesisConfig
 	(*S2TVtsiConfig)(nil),                               // 14: ondewo.vtsi.S2tVtsiConfig
 	(*CommonServicesConfig)(nil),                        // 15: ondewo.vtsi.CommonServicesConfig
-	(*VoiceInteractionConfig)(nil),                      // 16: ondewo.vtsi.VoiceInteractionConfig
-	(*DtmfConfig)(nil),                                  // 17: ondewo.vtsi.DtmfConfig
-	(*WarmTransferConfig)(nil),                          // 18: ondewo.vtsi.WarmTransferConfig
-	(*WarmIntroRecord)(nil),                             // 19: ondewo.vtsi.WarmIntroRecord
-	(*TurnDetectionConfig)(nil),                         // 20: ondewo.vtsi.TurnDetectionConfig
-	(*DictationConfig)(nil),                             // 21: ondewo.vtsi.DictationConfig
-	(*InterruptionHandlingConfig)(nil),                  // 22: ondewo.vtsi.InterruptionHandlingConfig
-	(*ResponseTimingConfig)(nil),                        // 23: ondewo.vtsi.ResponseTimingConfig
-	(*SoftTimeoutConfig)(nil),                           // 24: ondewo.vtsi.SoftTimeoutConfig
-	(*AnsweringMachineDetectionConfig)(nil),             // 25: ondewo.vtsi.AnsweringMachineDetectionConfig
-	(*SipBaseConfig)(nil),                               // 26: ondewo.vtsi.SipBaseConfig
-	(*SipCallerConfig)(nil),                             // 27: ondewo.vtsi.SipCallerConfig
-	(*CsiVtsiConfig)(nil),                               // 28: ondewo.vtsi.CsiVtsiConfig
-	(*CsiPreemptiveGenerationConfig)(nil),               // 29: ondewo.vtsi.CsiPreemptiveGenerationConfig
-	(*AudioObjectStorageConfig)(nil),                    // 30: ondewo.vtsi.AudioObjectStorageConfig
-	(*AudioObjectStorageServicesActivationConfig)(nil),  // 31: ondewo.vtsi.AudioObjectStorageServicesActivationConfig
-	(*MessageBrokerConfig)(nil),                         // 32: ondewo.vtsi.MessageBrokerConfig
-	(*MessageBrokerServicesActivationConfig)(nil),       // 33: ondewo.vtsi.MessageBrokerServicesActivationConfig
-	(*RabbitMqConfig)(nil),                              // 34: ondewo.vtsi.RabbitMqConfig
-	(*S2TVtsiCallbacks)(nil),                            // 35: ondewo.vtsi.S2tVtsiCallbacks
-	(*NluVtsiCallbacks)(nil),                            // 36: ondewo.vtsi.NluVtsiCallbacks
-	(*T2SVtsiCallbacks)(nil),                            // 37: ondewo.vtsi.T2sVtsiCallbacks
-	(*TurnDetectionConfig_EndOfTurnHoldBands)(nil),      // 38: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands
-	(*TurnDetectionConfig_EndOfTurnHoldBand)(nil),       // 39: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBand
-	nil,                                 // 40: ondewo.vtsi.DictationConfig.HoldMaxSecondsByCategoryEntry
-	nil,                                 // 41: ondewo.vtsi.SipCallerConfig.SipHeadersEntry
-	(*nlu.Context)(nil),                 // 42: ondewo.nlu.Context
-	(nlu.Intent_Message_Platform)(0),    // 43: ondewo.nlu.Intent.Message.Platform
-	(*t2s.RequestConfig)(nil),           // 44: ondewo.t2s.RequestConfig
-	(*s2t.TranscribeRequestConfig)(nil), // 45: ondewo.s2t.TranscribeRequestConfig
-	(*durationpb.Duration)(nil),         // 46: google.protobuf.Duration
+	(*SipVtsiConfig)(nil),                               // 16: ondewo.vtsi.SipVtsiConfig
+	(*VoiceInteractionConfig)(nil),                      // 17: ondewo.vtsi.VoiceInteractionConfig
+	(*BotTransferConfig)(nil),                           // 18: ondewo.vtsi.BotTransferConfig
+	(*DtmfConfig)(nil),                                  // 19: ondewo.vtsi.DtmfConfig
+	(*WarmTransferConfig)(nil),                          // 20: ondewo.vtsi.WarmTransferConfig
+	(*WarmIntroRecord)(nil),                             // 21: ondewo.vtsi.WarmIntroRecord
+	(*TurnDetectionConfig)(nil),                         // 22: ondewo.vtsi.TurnDetectionConfig
+	(*DictationConfig)(nil),                             // 23: ondewo.vtsi.DictationConfig
+	(*InterruptionHandlingConfig)(nil),                  // 24: ondewo.vtsi.InterruptionHandlingConfig
+	(*ResponseTimingConfig)(nil),                        // 25: ondewo.vtsi.ResponseTimingConfig
+	(*SoftTimeoutConfig)(nil),                           // 26: ondewo.vtsi.SoftTimeoutConfig
+	(*AnsweringMachineDetectionConfig)(nil),             // 27: ondewo.vtsi.AnsweringMachineDetectionConfig
+	(*SipBaseConfig)(nil),                               // 28: ondewo.vtsi.SipBaseConfig
+	(*SipCallerConfig)(nil),                             // 29: ondewo.vtsi.SipCallerConfig
+	(*CsiVtsiConfig)(nil),                               // 30: ondewo.vtsi.CsiVtsiConfig
+	(*CsiPreemptiveGenerationConfig)(nil),               // 31: ondewo.vtsi.CsiPreemptiveGenerationConfig
+	(*AudioObjectStorageConfig)(nil),                    // 32: ondewo.vtsi.AudioObjectStorageConfig
+	(*AudioObjectStorageServicesActivationConfig)(nil),  // 33: ondewo.vtsi.AudioObjectStorageServicesActivationConfig
+	(*MessageBrokerConfig)(nil),                         // 34: ondewo.vtsi.MessageBrokerConfig
+	(*MessageBrokerServicesActivationConfig)(nil),       // 35: ondewo.vtsi.MessageBrokerServicesActivationConfig
+	(*RabbitMqConfig)(nil),                              // 36: ondewo.vtsi.RabbitMqConfig
+	(*S2TVtsiCallbacks)(nil),                            // 37: ondewo.vtsi.S2tVtsiCallbacks
+	(*NluVtsiCallbacks)(nil),                            // 38: ondewo.vtsi.NluVtsiCallbacks
+	(*T2SVtsiCallbacks)(nil),                            // 39: ondewo.vtsi.T2sVtsiCallbacks
+	(*TurnDetectionConfig_EndOfTurnHoldBands)(nil),      // 40: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands
+	(*TurnDetectionConfig_EndOfTurnHoldBand)(nil),       // 41: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBand
+	nil,                                 // 42: ondewo.vtsi.DictationConfig.HoldMaxSecondsByCategoryEntry
+	nil,                                 // 43: ondewo.vtsi.SipCallerConfig.SipHeadersEntry
+	(*nlu.Context)(nil),                 // 44: ondewo.nlu.Context
+	(nlu.Intent_Message_Platform)(0),    // 45: ondewo.nlu.Intent.Message.Platform
+	(*t2s.RequestConfig)(nil),           // 46: ondewo.t2s.RequestConfig
+	(*s2t.TranscribeRequestConfig)(nil), // 47: ondewo.s2t.TranscribeRequestConfig
+	(*durationpb.Duration)(nil),         // 48: google.protobuf.Duration
 }
 var file_ondewo_vtsi_call_configs_proto_depIdxs = []int32{
 	8,  // 0: ondewo.vtsi.NluVtsiConfig.nlu_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
 	9,  // 1: ondewo.vtsi.NluVtsiConfig.credentials:type_name -> ondewo.vtsi.Credentials
-	42, // 2: ondewo.vtsi.NluVtsiConfig.contexts:type_name -> ondewo.nlu.Context
-	43, // 3: ondewo.vtsi.NluVtsiConfig.platform:type_name -> ondewo.nlu.Intent.Message.Platform
+	44, // 2: ondewo.vtsi.NluVtsiConfig.contexts:type_name -> ondewo.nlu.Context
+	45, // 3: ondewo.vtsi.NluVtsiConfig.platform:type_name -> ondewo.nlu.Intent.Message.Platform
 	11, // 4: ondewo.vtsi.NluVtsiConfig.preemptive_generation_config:type_name -> ondewo.vtsi.NluPreemptiveGenerationConfig
 	8,  // 5: ondewo.vtsi.T2sVtsiConfig.t2s_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	44, // 6: ondewo.vtsi.T2sVtsiConfig.t2s_request_config:type_name -> ondewo.t2s.RequestConfig
+	46, // 6: ondewo.vtsi.T2sVtsiConfig.t2s_request_config:type_name -> ondewo.t2s.RequestConfig
 	13, // 7: ondewo.vtsi.T2sVtsiConfig.preemptive_synthesis_config:type_name -> ondewo.vtsi.T2sPreemptiveSynthesisConfig
 	8,  // 8: ondewo.vtsi.S2tVtsiConfig.s2t_base_config:type_name -> ondewo.vtsi.BaseServiceConfig
-	45, // 9: ondewo.vtsi.S2tVtsiConfig.s2t_transcribe_request_config:type_name -> ondewo.s2t.TranscribeRequestConfig
+	47, // 9: ondewo.vtsi.S2tVtsiConfig.s2t_transcribe_request_config:type_name -> ondewo.s2t.TranscribeRequestConfig
 	14, // 10: ondewo.vtsi.CommonServicesConfig.s2t_vtsi_config:type_name -> ondewo.vtsi.S2tVtsiConfig
 	10, // 11: ondewo.vtsi.CommonServicesConfig.nlu_vtsi_config:type_name -> ondewo.vtsi.NluVtsiConfig
 	12, // 12: ondewo.vtsi.CommonServicesConfig.t2s_vtsi_config:type_name -> ondewo.vtsi.T2sVtsiConfig
-	28, // 13: ondewo.vtsi.CommonServicesConfig.csi_vtsi_config:type_name -> ondewo.vtsi.CsiVtsiConfig
-	16, // 14: ondewo.vtsi.CommonServicesConfig.voice_interaction_config:type_name -> ondewo.vtsi.VoiceInteractionConfig
-	20, // 15: ondewo.vtsi.VoiceInteractionConfig.turn_detection_config:type_name -> ondewo.vtsi.TurnDetectionConfig
-	22, // 16: ondewo.vtsi.VoiceInteractionConfig.interruption_handling_config:type_name -> ondewo.vtsi.InterruptionHandlingConfig
-	23, // 17: ondewo.vtsi.VoiceInteractionConfig.response_timing_config:type_name -> ondewo.vtsi.ResponseTimingConfig
-	25, // 18: ondewo.vtsi.VoiceInteractionConfig.answering_machine_detection_config:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig
-	17, // 19: ondewo.vtsi.VoiceInteractionConfig.dtmf_config:type_name -> ondewo.vtsi.DtmfConfig
-	18, // 20: ondewo.vtsi.VoiceInteractionConfig.warm_transfer_config:type_name -> ondewo.vtsi.WarmTransferConfig
-	0,  // 21: ondewo.vtsi.WarmTransferConfig.intro_text_source:type_name -> ondewo.vtsi.WarmIntroTextSource
-	1,  // 22: ondewo.vtsi.WarmTransferConfig.on_intro_unavailable:type_name -> ondewo.vtsi.WarmIntroUnavailablePolicy
-	2,  // 23: ondewo.vtsi.WarmIntroRecord.decision:type_name -> ondewo.vtsi.WarmIntroDecision
-	3,  // 24: ondewo.vtsi.WarmIntroRecord.decided_by:type_name -> ondewo.vtsi.WarmIntroDecidedBy
-	46, // 25: ondewo.vtsi.WarmIntroRecord.ring_duration:type_name -> google.protobuf.Duration
-	46, // 26: ondewo.vtsi.WarmIntroRecord.intro_duration:type_name -> google.protobuf.Duration
-	0,  // 27: ondewo.vtsi.WarmIntroRecord.text_source:type_name -> ondewo.vtsi.WarmIntroTextSource
-	4,  // 28: ondewo.vtsi.TurnDetectionConfig.mode:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnDetectionMode
-	5,  // 29: ondewo.vtsi.TurnDetectionConfig.turn_eagerness:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnEagerness
-	38, // 30: ondewo.vtsi.TurnDetectionConfig.hold_bands:type_name -> ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands
-	21, // 31: ondewo.vtsi.TurnDetectionConfig.dictation_config:type_name -> ondewo.vtsi.DictationConfig
-	40, // 32: ondewo.vtsi.DictationConfig.hold_max_seconds_by_category:type_name -> ondewo.vtsi.DictationConfig.HoldMaxSecondsByCategoryEntry
-	24, // 33: ondewo.vtsi.ResponseTimingConfig.soft_timeout_config:type_name -> ondewo.vtsi.SoftTimeoutConfig
-	6,  // 34: ondewo.vtsi.AnsweringMachineDetectionConfig.action:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdAction
-	7,  // 35: ondewo.vtsi.AnsweringMachineDetectionConfig.sensitivity:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdSensitivity
-	26, // 36: ondewo.vtsi.SipCallerConfig.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
-	41, // 37: ondewo.vtsi.SipCallerConfig.sip_headers:type_name -> ondewo.vtsi.SipCallerConfig.SipHeadersEntry
-	35, // 38: ondewo.vtsi.CsiVtsiConfig.s2t_vtsi_callbacks:type_name -> ondewo.vtsi.S2tVtsiCallbacks
-	36, // 39: ondewo.vtsi.CsiVtsiConfig.nlu_vtsi_callbacks:type_name -> ondewo.vtsi.NluVtsiCallbacks
-	37, // 40: ondewo.vtsi.CsiVtsiConfig.t2s_vtsi_callbacks:type_name -> ondewo.vtsi.T2sVtsiCallbacks
-	30, // 41: ondewo.vtsi.CsiVtsiConfig.audio_object_store_config:type_name -> ondewo.vtsi.AudioObjectStorageConfig
-	32, // 42: ondewo.vtsi.CsiVtsiConfig.message_broker_config:type_name -> ondewo.vtsi.MessageBrokerConfig
-	29, // 43: ondewo.vtsi.CsiVtsiConfig.preemptive_generation_config:type_name -> ondewo.vtsi.CsiPreemptiveGenerationConfig
-	31, // 44: ondewo.vtsi.AudioObjectStorageConfig.audio_object_storage_services_activation_config:type_name -> ondewo.vtsi.AudioObjectStorageServicesActivationConfig
-	33, // 45: ondewo.vtsi.MessageBrokerConfig.message_broker_services_activation_config:type_name -> ondewo.vtsi.MessageBrokerServicesActivationConfig
-	34, // 46: ondewo.vtsi.MessageBrokerConfig.rabbit_mq_config:type_name -> ondewo.vtsi.RabbitMqConfig
-	39, // 47: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands.bands:type_name -> ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBand
-	48, // [48:48] is the sub-list for method output_type
-	48, // [48:48] is the sub-list for method input_type
-	48, // [48:48] is the sub-list for extension type_name
-	48, // [48:48] is the sub-list for extension extendee
-	0,  // [0:48] is the sub-list for field type_name
+	30, // 13: ondewo.vtsi.CommonServicesConfig.csi_vtsi_config:type_name -> ondewo.vtsi.CsiVtsiConfig
+	17, // 14: ondewo.vtsi.CommonServicesConfig.voice_interaction_config:type_name -> ondewo.vtsi.VoiceInteractionConfig
+	16, // 15: ondewo.vtsi.CommonServicesConfig.sip_vtsi_config:type_name -> ondewo.vtsi.SipVtsiConfig
+	22, // 16: ondewo.vtsi.VoiceInteractionConfig.turn_detection_config:type_name -> ondewo.vtsi.TurnDetectionConfig
+	24, // 17: ondewo.vtsi.VoiceInteractionConfig.interruption_handling_config:type_name -> ondewo.vtsi.InterruptionHandlingConfig
+	25, // 18: ondewo.vtsi.VoiceInteractionConfig.response_timing_config:type_name -> ondewo.vtsi.ResponseTimingConfig
+	27, // 19: ondewo.vtsi.VoiceInteractionConfig.answering_machine_detection_config:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig
+	19, // 20: ondewo.vtsi.VoiceInteractionConfig.dtmf_config:type_name -> ondewo.vtsi.DtmfConfig
+	20, // 21: ondewo.vtsi.VoiceInteractionConfig.warm_transfer_config:type_name -> ondewo.vtsi.WarmTransferConfig
+	18, // 22: ondewo.vtsi.VoiceInteractionConfig.bot_transfer_config:type_name -> ondewo.vtsi.BotTransferConfig
+	0,  // 23: ondewo.vtsi.WarmTransferConfig.intro_text_source:type_name -> ondewo.vtsi.WarmIntroTextSource
+	1,  // 24: ondewo.vtsi.WarmTransferConfig.on_intro_unavailable:type_name -> ondewo.vtsi.WarmIntroUnavailablePolicy
+	2,  // 25: ondewo.vtsi.WarmIntroRecord.decision:type_name -> ondewo.vtsi.WarmIntroDecision
+	3,  // 26: ondewo.vtsi.WarmIntroRecord.decided_by:type_name -> ondewo.vtsi.WarmIntroDecidedBy
+	48, // 27: ondewo.vtsi.WarmIntroRecord.ring_duration:type_name -> google.protobuf.Duration
+	48, // 28: ondewo.vtsi.WarmIntroRecord.intro_duration:type_name -> google.protobuf.Duration
+	0,  // 29: ondewo.vtsi.WarmIntroRecord.text_source:type_name -> ondewo.vtsi.WarmIntroTextSource
+	4,  // 30: ondewo.vtsi.TurnDetectionConfig.mode:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnDetectionMode
+	5,  // 31: ondewo.vtsi.TurnDetectionConfig.turn_eagerness:type_name -> ondewo.vtsi.TurnDetectionConfig.TurnEagerness
+	40, // 32: ondewo.vtsi.TurnDetectionConfig.hold_bands:type_name -> ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands
+	23, // 33: ondewo.vtsi.TurnDetectionConfig.dictation_config:type_name -> ondewo.vtsi.DictationConfig
+	42, // 34: ondewo.vtsi.DictationConfig.hold_max_seconds_by_category:type_name -> ondewo.vtsi.DictationConfig.HoldMaxSecondsByCategoryEntry
+	26, // 35: ondewo.vtsi.ResponseTimingConfig.soft_timeout_config:type_name -> ondewo.vtsi.SoftTimeoutConfig
+	6,  // 36: ondewo.vtsi.AnsweringMachineDetectionConfig.action:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdAction
+	7,  // 37: ondewo.vtsi.AnsweringMachineDetectionConfig.sensitivity:type_name -> ondewo.vtsi.AnsweringMachineDetectionConfig.AmdSensitivity
+	28, // 38: ondewo.vtsi.SipCallerConfig.sip_base_config:type_name -> ondewo.vtsi.SipBaseConfig
+	43, // 39: ondewo.vtsi.SipCallerConfig.sip_headers:type_name -> ondewo.vtsi.SipCallerConfig.SipHeadersEntry
+	37, // 40: ondewo.vtsi.CsiVtsiConfig.s2t_vtsi_callbacks:type_name -> ondewo.vtsi.S2tVtsiCallbacks
+	38, // 41: ondewo.vtsi.CsiVtsiConfig.nlu_vtsi_callbacks:type_name -> ondewo.vtsi.NluVtsiCallbacks
+	39, // 42: ondewo.vtsi.CsiVtsiConfig.t2s_vtsi_callbacks:type_name -> ondewo.vtsi.T2sVtsiCallbacks
+	32, // 43: ondewo.vtsi.CsiVtsiConfig.audio_object_store_config:type_name -> ondewo.vtsi.AudioObjectStorageConfig
+	34, // 44: ondewo.vtsi.CsiVtsiConfig.message_broker_config:type_name -> ondewo.vtsi.MessageBrokerConfig
+	31, // 45: ondewo.vtsi.CsiVtsiConfig.preemptive_generation_config:type_name -> ondewo.vtsi.CsiPreemptiveGenerationConfig
+	33, // 46: ondewo.vtsi.AudioObjectStorageConfig.audio_object_storage_services_activation_config:type_name -> ondewo.vtsi.AudioObjectStorageServicesActivationConfig
+	35, // 47: ondewo.vtsi.MessageBrokerConfig.message_broker_services_activation_config:type_name -> ondewo.vtsi.MessageBrokerServicesActivationConfig
+	36, // 48: ondewo.vtsi.MessageBrokerConfig.rabbit_mq_config:type_name -> ondewo.vtsi.RabbitMqConfig
+	41, // 49: ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBands.bands:type_name -> ondewo.vtsi.TurnDetectionConfig.EndOfTurnHoldBand
+	50, // [50:50] is the sub-list for method output_type
+	50, // [50:50] is the sub-list for method input_type
+	50, // [50:50] is the sub-list for extension type_name
+	50, // [50:50] is the sub-list for extension extendee
+	0,  // [0:50] is the sub-list for field type_name
 }
 
 func init() { file_ondewo_vtsi_call_configs_proto_init() }
@@ -4134,30 +5377,35 @@ func file_ondewo_vtsi_call_configs_proto_init() {
 		(*NluVtsiConfig_AuthToken)(nil),
 	}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[3].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[4].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[5].OneofWrappers = []any{}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[9].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[6].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[7].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[8].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[10].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[11].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[12].OneofWrappers = []any{}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[13].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[14].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[15].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[16].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[17].OneofWrappers = []any{}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[20].OneofWrappers = []any{}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[21].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[18].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[19].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[22].OneofWrappers = []any{}
 	file_ondewo_vtsi_call_configs_proto_msgTypes[23].OneofWrappers = []any{}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[24].OneofWrappers = []any{
+	file_ondewo_vtsi_call_configs_proto_msgTypes[24].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[25].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[26].OneofWrappers = []any{
 		(*MessageBrokerConfig_RabbitMqConfig)(nil),
 	}
-	file_ondewo_vtsi_call_configs_proto_msgTypes[25].OneofWrappers = []any{}
+	file_ondewo_vtsi_call_configs_proto_msgTypes[27].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ondewo_vtsi_call_configs_proto_rawDesc), len(file_ondewo_vtsi_call_configs_proto_rawDesc)),
 			NumEnums:      8,
-			NumMessages:   34,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

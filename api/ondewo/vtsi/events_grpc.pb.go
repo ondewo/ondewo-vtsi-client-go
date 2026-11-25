@@ -52,91 +52,33 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Notifies other systems of VTSI events: calls, callers, listeners, scheduled callers,
-// campaigns, VTSI projects, the project&apos;s Asterisk and softphone accounts. Every event is one
-// value of <a href="index.html#ondewo.vtsi.VtsiEvent">VtsiEvent</a> and is delivered as a
-// <a href="index.html#ondewo.vtsi.VtsiEventMessage">VtsiEventMessage</a>.</p>
-// <p>Two delivery paths: the server-streaming <code>SubscribeVtsiEvents</code> RPC, and WEBHOOKS
-// (an HTTP request per event to a URL of the client&apos;s choice). Which events go to which
-// webhooks is configured per project with EVENT SUBSCRIPTIONS.</p>
-// <p><b>Webhooks are best effort.</b> Each event is sent to a webhook as at most
-// <code>ONDEWO_VTSI_WEBHOOK_MAX_ATTEMPTS</code> HTTP requests (3 by default) with backoff between
-// them; after the last one fails, the event is dropped for that webhook. Pending webhook requests
-// live in the memory of the server replica that produced the event and are lost when it restarts.
-// An overloaded server, or a webhook that keeps timing out, drops events rather than slowing calls
-// down. The same event can arrive more than once (a request whose answer was lost is sent again):
-// de-duplicate by <code>event_id</code>. Requests of one webhook can arrive out of order, because
-// several server replicas send independently: order by <code>resource_sequence</code> per
-// <code>resource_name</code>, then <code>event_time</code>. Events a webhook missed can be sent again from
-// the journal with <code>RedeliverWebhookEvents</code>.</p>
-// <p><b>Webhook requests.</b> One HTTP request per event, with the webhook&apos;s <code>http_method</code>
-// (POST by default), the <code>VtsiEventMessage</code> as the body (proto3 JSON, original field names,
-// UTF-8) and these headers, set by the server (a custom header can never use these names):</p>
-// <ul>
+// # ONDEWO VTSI API
 //
-//	<li><code>Content-Type: application/json</code></li>
-//	<li><code>User-Agent: ondewo-vtsi/&lt;server version&gt;</code></li>
-//	<li><code>X-Ondewo-Vtsi-Event</code>: the <code>VtsiEvent</code> name, e.g.
-//	    <code>VTSI_EVENT_CALL_CONNECTED</code> (the decimal number for a value the server cannot name)</li>
-//	<li><code>X-Ondewo-Vtsi-Event-Id</code>: the <code>event_id</code></li>
-//	<li><code>X-Ondewo-Vtsi-Delivery-Attempt</code>: the request&apos;s attempt number for this event, starting
-//	    at 1 (a redelivery starts at 1 again)</li>
-//	<li><code>X-Ondewo-Vtsi-Webhook</code>: the webhook&apos;s resource name, so one endpoint can serve
-//	    several webhooks</li>
-//	<li><code>X-Ondewo-Vtsi-Signature</code>: only when the webhook has a <code>signing_secret</code>:
-//	    <code>t=&lt;unix seconds&gt;,v1=&lt;signature&gt;</code>, see <code>Webhook.signing_secret</code></li>
-//	<li><code>X-Ondewo-Vtsi-Redelivery: true</code>: only on requests sent by
-//	    <code>RedeliverWebhookEvents</code></li>
-//	<li><code>X-Ondewo-Vtsi-Test: true</code>: only on requests sent by <code>TestWebhook</code></li>
+// Notifies other systems of VTSI events: calls, callers, listeners, scheduled callers, campaigns, VTSI projects, the project&apos;s Asterisk and softphone accounts. Every event is one value of <a href="index.html#ondewo.vtsi.VtsiEvent">VtsiEvent</a> and is delivered as a <a href="index.html#ondewo.vtsi.VtsiEventMessage">VtsiEventMessage</a>.
 //
-// </ul>
-// <p>then the webhook&apos;s <code>custom_headers</code>. A 2xx answer is a delivery; a 408, 425, 429 or 5xx
-// answer, a timeout or a connection failure is retried; any other answer (a 3xx included: redirects are
-// never followed) fails the event for that webhook at once.</p>
-// <p><b>Streams can be resumed.</b> While a project has an open <code>SubscribeVtsiEvents</code>
-// stream (and for <code>ONDEWO_VTSI_EVENT_STREAM_RESUME_WINDOW_S</code>, 1 h by default, after the last one
-// closed) or an enabled event subscription, its events are also written to a short-lived journal
-// (<code>ONDEWO_VTSI_EVENT_JOURNAL_RETENTION_S</code>, 24 h by default). A stream that reconnects with its last
-// <code>resume_token</code>, or opens with a <code>start_time</code>, receives the events it missed, provided
-// they are still in the journal; <code>RedeliverWebhookEvents</code> reads the same journal. Nothing else is
-// persisted for redelivery, and events of a period in which the project had neither a stream nor an enabled
-// subscription were never journaled.</p>
-// <p>Use the status RPCs (<code>GetCampaign</code>, <code>ListCalls</code>, the status streams) to
-// reconcile.</p>
-// <p><b>Custom header values and signing secrets are write-only.</b> They are returned as
-// <code>********</code> by every RPC and are never logged or put on an event.</p>
-// <p><b>Names.</b> Event subscriptions are named
-// <code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code>, webhooks
-// <code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code>, projects
-// <code>projects/&lt;project_uuid&gt;/project</code>. Display names of webhooks and subscriptions are free
-// text of at most 128 characters, NOT unique (two webhooks may share one) and may be empty; an empty display
-// name stays empty (no default is generated). Resources are always addressed by resource name.</p>
-// <p><b>Partial responses.</b> Every RPC returning a <code>VtsiEventSubscription</code> or a
-// <code>Webhook</code>, the listings and the two <code>Delete*</code> RPCs (paths of their response) accept a
-// <code>field_mask</code> with the convention of
-// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>: paths relative to the
-// returned message, <code>name</code> always populated, unset or empty returns every field, an unknown path or
-// a path below a repeated or map field is <code>INVALID_ARGUMENT</code> naming it, applied after the masking
-// of secrets so a masked value stays <code>********</code>. A mask never changes what the RPC does.</p>
-// <p><b>Authorization</b> (when enforced): the subscription and webhook RPCs, <code>TestWebhook</code> and
-// <code>RedeliverWebhookEvents</code> need <code>PROJECT_DEVELOPER</code> or a higher role
-// (<code>PROJECT_ADMIN</code>) on the project, or <code>SERVER_ADMIN</code>: a webhook is a standing outbound
-// integration, i.e. administration. <code>SubscribeVtsiEvents</code> reads the project&apos;s events and needs
-// <code>PROJECT_EXECUTOR</code> or higher.</p>
-// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed resource name (also one of
-// another collection), a request field out of range, a resource of another project than the request&apos;s
-// <code>vtsi_project_name</code>, an output-only field that was set, an unknown <code>update_mask</code> or
-// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project, subscription or webhook;
-// <code>PERMISSION_DENIED</code> with authorization enforced for a project on which the caller holds no
-// sufficient role (an unknown project included, so it is not answered <code>NOT_FOUND</code>);
-// <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced;
-// <code>FAILED_PRECONDITION</code> for a disabled subscription or webhook where the RPC needs an enabled one;
-// <code>ABORTED</code> when a concurrent change of the same subscription or webhook won (nothing was written;
-// retry); <code>OUT_OF_RANGE</code> for a <code>start_time</code> older than the journal&apos;s retention;
-// <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot
-// (<code>ONDEWO_VTSI_EVENT_STREAM_MAX_CONCURRENT</code>, 16 per replica by default);
-// <code>UNAVAILABLE</code> when event streams are not available on the replica reached (retry).</p>
+// Two delivery paths: the server-streaming <code>SubscribeVtsiEvents</code> RPC, and WEBHOOKS (an HTTP request per event to a URL of the client&apos;s choice). Which events go to which webhooks is configured per project with EVENT SUBSCRIPTIONS.
+//
+// <b>Webhooks are best effort.</b> Each event is sent to a webhook as at most <code>ONDEWO_VTSI_WEBHOOK_MAX_ATTEMPTS</code> HTTP requests (3 by default) with backoff between them; after the last one fails, the event is dropped for that webhook. Pending webhook requests live in the memory of the server replica that produced the event and are lost when it restarts. An overloaded server, or a webhook that keeps timing out, drops events rather than slowing calls down. The same event can arrive more than once (a request whose answer was lost is sent again): de-duplicate by <code>event_id</code>. Requests of one webhook can arrive out of order, because several server replicas send independently: order by <code>resource_sequence</code> per <code>resource_name</code>, then <code>event_time</code>. Events a webhook missed can be sent again from the journal with <code>RedeliverWebhookEvents</code>.
+//
+// <b>Webhook requests.</b> One HTTP request per event, with the webhook&apos;s <code>http_method</code> (POST by default), the <code>VtsiEventMessage</code> as the body (proto3 JSON, original field names, UTF-8) and these headers, set by the server (a custom header can never use these names):
+//
+// <ul> <li><code>Content-Type: application/json</code></li> <li><code>User-Agent: ondewo-vtsi/&lt;server version&gt;</code></li> <li><code>X-Ondewo-Vtsi-Event</code>: the <code>VtsiEvent</code> name, e.g. <code>VTSI_EVENT_CALL_CONNECTED</code> (the decimal number for a value the server cannot name)</li> <li><code>X-Ondewo-Vtsi-Event-Id</code>: the <code>event_id</code></li> <li><code>X-Ondewo-Vtsi-Delivery-Attempt</code>: the request&apos;s attempt number for this event, starting at 1 (a redelivery starts at 1 again)</li> <li><code>X-Ondewo-Vtsi-Webhook</code>: the webhook&apos;s resource name, so one endpoint can serve several webhooks</li> <li><code>X-Ondewo-Vtsi-Signature</code>: only when the webhook has a <code>signing_secret</code>: <code>t=&lt;unix seconds&gt;,v1=&lt;signature&gt;</code>, see <code>Webhook.signing_secret</code></li> <li><code>X-Ondewo-Vtsi-Redelivery: true</code>: only on requests sent by <code>RedeliverWebhookEvents</code></li> <li><code>X-Ondewo-Vtsi-Test: true</code>: only on requests sent by <code>TestWebhook</code></li> </ul>
+//
+// then the webhook&apos;s <code>custom_headers</code>. A 2xx answer is a delivery; a 408, 425, 429 or 5xx answer, a timeout or a connection failure is retried; any other answer (a 3xx included: redirects are never followed) fails the event for that webhook at once.
+//
+// <b>Streams can be resumed.</b> While a project has an open <code>SubscribeVtsiEvents</code> stream (and for <code>ONDEWO_VTSI_EVENT_STREAM_RESUME_WINDOW_S</code>, 1 h by default, after the last one closed) or an enabled event subscription, its events are also written to a short-lived journal (<code>ONDEWO_VTSI_EVENT_JOURNAL_RETENTION_S</code>, 24 h by default). A stream that reconnects with its last <code>resume_token</code>, or opens with a <code>start_time</code>, receives the events it missed, provided they are still in the journal; <code>RedeliverWebhookEvents</code> reads the same journal. Nothing else is persisted for redelivery, and events of a period in which the project had neither a stream nor an enabled subscription were never journaled.
+//
+// Use the status RPCs (<code>GetCampaign</code>, <code>ListCalls</code>, the status streams) to reconcile.
+//
+// <b>Custom header values and signing secrets are write-only.</b> They are returned as <code>********</code> by every RPC and are never logged or put on an event.
+//
+// <b>Names.</b> Event subscriptions are named <code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code>, webhooks <code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code>, projects <code>projects/&lt;project_uuid&gt;/project</code>. Display names of webhooks and subscriptions are free text of at most 128 characters, NOT unique (two webhooks may share one) and may be empty; an empty display name stays empty (no default is generated). Resources are always addressed by resource name.
+//
+// <b>Partial responses.</b> Every RPC returning a <code>VtsiEventSubscription</code> or a <code>Webhook</code>, the listings and the two <code>Delete*</code> RPCs (paths of their response) accept a <code>field_mask</code> with the convention of <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>: paths relative to the returned message, <code>name</code> always populated, unset or empty returns every field, an unknown path or a path below a repeated or map field is <code>INVALID_ARGUMENT</code> naming it, applied after the masking of secrets so a masked value stays <code>********</code>. A mask never changes what the RPC does.
+//
+// <b>Authorization</b> (when enforced): the subscription and webhook RPCs, <code>TestWebhook</code> and <code>RedeliverWebhookEvents</code> need <code>PROJECT_DEVELOPER</code> or a higher role (<code>PROJECT_ADMIN</code>) on the project, or <code>SERVER_ADMIN</code>: a webhook is a standing outbound integration, i.e. administration. <code>SubscribeVtsiEvents</code> reads the project&apos;s events and needs <code>PROJECT_EXECUTOR</code> or higher.
+//
+// Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed resource name (also one of another collection), a request field out of range, a resource of another project than the request&apos;s <code>vtsi_project_name</code>, an output-only field that was set, an unknown <code>update_mask</code> or <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project, subscription or webhook; <code>PERMISSION_DENIED</code> with authorization enforced for a project on which the caller holds no sufficient role (an unknown project included, so it is not answered <code>NOT_FOUND</code>); <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced; <code>FAILED_PRECONDITION</code> for a disabled subscription or webhook where the RPC needs an enabled one; <code>ABORTED</code> when a concurrent change of the same subscription or webhook won (nothing was written; retry); <code>OUT_OF_RANGE</code> for a <code>start_time</code> older than the journal&apos;s retention; <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot (<code>ONDEWO_VTSI_EVENT_STREAM_MAX_CONCURRENT</code>, 16 per replica by default); <code>UNAVAILABLE</code> when event streams are not available on the replica reached (retry).
 type EventsClient interface {
 	// <p>Creates an event subscription: which events of the project are delivered to which
 	// webhooks. A subscription without webhooks is usable by <code>SubscribeVtsiEvents</code>. Takes effect
@@ -446,91 +388,33 @@ type Events_SubscribeVtsiEventsClient = grpc.ServerStreamingClient[SubscribeVtsi
 // All implementations must embed UnimplementedEventsServer
 // for forward compatibility.
 //
-// <p>ONDEWO VTSI API</p>
-// <p>Notifies other systems of VTSI events: calls, callers, listeners, scheduled callers,
-// campaigns, VTSI projects, the project&apos;s Asterisk and softphone accounts. Every event is one
-// value of <a href="index.html#ondewo.vtsi.VtsiEvent">VtsiEvent</a> and is delivered as a
-// <a href="index.html#ondewo.vtsi.VtsiEventMessage">VtsiEventMessage</a>.</p>
-// <p>Two delivery paths: the server-streaming <code>SubscribeVtsiEvents</code> RPC, and WEBHOOKS
-// (an HTTP request per event to a URL of the client&apos;s choice). Which events go to which
-// webhooks is configured per project with EVENT SUBSCRIPTIONS.</p>
-// <p><b>Webhooks are best effort.</b> Each event is sent to a webhook as at most
-// <code>ONDEWO_VTSI_WEBHOOK_MAX_ATTEMPTS</code> HTTP requests (3 by default) with backoff between
-// them; after the last one fails, the event is dropped for that webhook. Pending webhook requests
-// live in the memory of the server replica that produced the event and are lost when it restarts.
-// An overloaded server, or a webhook that keeps timing out, drops events rather than slowing calls
-// down. The same event can arrive more than once (a request whose answer was lost is sent again):
-// de-duplicate by <code>event_id</code>. Requests of one webhook can arrive out of order, because
-// several server replicas send independently: order by <code>resource_sequence</code> per
-// <code>resource_name</code>, then <code>event_time</code>. Events a webhook missed can be sent again from
-// the journal with <code>RedeliverWebhookEvents</code>.</p>
-// <p><b>Webhook requests.</b> One HTTP request per event, with the webhook&apos;s <code>http_method</code>
-// (POST by default), the <code>VtsiEventMessage</code> as the body (proto3 JSON, original field names,
-// UTF-8) and these headers, set by the server (a custom header can never use these names):</p>
-// <ul>
+// # ONDEWO VTSI API
 //
-//	<li><code>Content-Type: application/json</code></li>
-//	<li><code>User-Agent: ondewo-vtsi/&lt;server version&gt;</code></li>
-//	<li><code>X-Ondewo-Vtsi-Event</code>: the <code>VtsiEvent</code> name, e.g.
-//	    <code>VTSI_EVENT_CALL_CONNECTED</code> (the decimal number for a value the server cannot name)</li>
-//	<li><code>X-Ondewo-Vtsi-Event-Id</code>: the <code>event_id</code></li>
-//	<li><code>X-Ondewo-Vtsi-Delivery-Attempt</code>: the request&apos;s attempt number for this event, starting
-//	    at 1 (a redelivery starts at 1 again)</li>
-//	<li><code>X-Ondewo-Vtsi-Webhook</code>: the webhook&apos;s resource name, so one endpoint can serve
-//	    several webhooks</li>
-//	<li><code>X-Ondewo-Vtsi-Signature</code>: only when the webhook has a <code>signing_secret</code>:
-//	    <code>t=&lt;unix seconds&gt;,v1=&lt;signature&gt;</code>, see <code>Webhook.signing_secret</code></li>
-//	<li><code>X-Ondewo-Vtsi-Redelivery: true</code>: only on requests sent by
-//	    <code>RedeliverWebhookEvents</code></li>
-//	<li><code>X-Ondewo-Vtsi-Test: true</code>: only on requests sent by <code>TestWebhook</code></li>
+// Notifies other systems of VTSI events: calls, callers, listeners, scheduled callers, campaigns, VTSI projects, the project&apos;s Asterisk and softphone accounts. Every event is one value of <a href="index.html#ondewo.vtsi.VtsiEvent">VtsiEvent</a> and is delivered as a <a href="index.html#ondewo.vtsi.VtsiEventMessage">VtsiEventMessage</a>.
 //
-// </ul>
-// <p>then the webhook&apos;s <code>custom_headers</code>. A 2xx answer is a delivery; a 408, 425, 429 or 5xx
-// answer, a timeout or a connection failure is retried; any other answer (a 3xx included: redirects are
-// never followed) fails the event for that webhook at once.</p>
-// <p><b>Streams can be resumed.</b> While a project has an open <code>SubscribeVtsiEvents</code>
-// stream (and for <code>ONDEWO_VTSI_EVENT_STREAM_RESUME_WINDOW_S</code>, 1 h by default, after the last one
-// closed) or an enabled event subscription, its events are also written to a short-lived journal
-// (<code>ONDEWO_VTSI_EVENT_JOURNAL_RETENTION_S</code>, 24 h by default). A stream that reconnects with its last
-// <code>resume_token</code>, or opens with a <code>start_time</code>, receives the events it missed, provided
-// they are still in the journal; <code>RedeliverWebhookEvents</code> reads the same journal. Nothing else is
-// persisted for redelivery, and events of a period in which the project had neither a stream nor an enabled
-// subscription were never journaled.</p>
-// <p>Use the status RPCs (<code>GetCampaign</code>, <code>ListCalls</code>, the status streams) to
-// reconcile.</p>
-// <p><b>Custom header values and signing secrets are write-only.</b> They are returned as
-// <code>********</code> by every RPC and are never logged or put on an event.</p>
-// <p><b>Names.</b> Event subscriptions are named
-// <code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code>, webhooks
-// <code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code>, projects
-// <code>projects/&lt;project_uuid&gt;/project</code>. Display names of webhooks and subscriptions are free
-// text of at most 128 characters, NOT unique (two webhooks may share one) and may be empty; an empty display
-// name stays empty (no default is generated). Resources are always addressed by resource name.</p>
-// <p><b>Partial responses.</b> Every RPC returning a <code>VtsiEventSubscription</code> or a
-// <code>Webhook</code>, the listings and the two <code>Delete*</code> RPCs (paths of their response) accept a
-// <code>field_mask</code> with the convention of
-// <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>: paths relative to the
-// returned message, <code>name</code> always populated, unset or empty returns every field, an unknown path or
-// a path below a repeated or map field is <code>INVALID_ARGUMENT</code> naming it, applied after the masking
-// of secrets so a masked value stays <code>********</code>. A mask never changes what the RPC does.</p>
-// <p><b>Authorization</b> (when enforced): the subscription and webhook RPCs, <code>TestWebhook</code> and
-// <code>RedeliverWebhookEvents</code> need <code>PROJECT_DEVELOPER</code> or a higher role
-// (<code>PROJECT_ADMIN</code>) on the project, or <code>SERVER_ADMIN</code>: a webhook is a standing outbound
-// integration, i.e. administration. <code>SubscribeVtsiEvents</code> reads the project&apos;s events and needs
-// <code>PROJECT_EXECUTOR</code> or higher.</p>
-// <p>Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed resource name (also one of
-// another collection), a request field out of range, a resource of another project than the request&apos;s
-// <code>vtsi_project_name</code>, an output-only field that was set, an unknown <code>update_mask</code> or
-// <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project, subscription or webhook;
-// <code>PERMISSION_DENIED</code> with authorization enforced for a project on which the caller holds no
-// sufficient role (an unknown project included, so it is not answered <code>NOT_FOUND</code>);
-// <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced;
-// <code>FAILED_PRECONDITION</code> for a disabled subscription or webhook where the RPC needs an enabled one;
-// <code>ABORTED</code> when a concurrent change of the same subscription or webhook won (nothing was written;
-// retry); <code>OUT_OF_RANGE</code> for a <code>start_time</code> older than the journal&apos;s retention;
-// <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot
-// (<code>ONDEWO_VTSI_EVENT_STREAM_MAX_CONCURRENT</code>, 16 per replica by default);
-// <code>UNAVAILABLE</code> when event streams are not available on the replica reached (retry).</p>
+// Two delivery paths: the server-streaming <code>SubscribeVtsiEvents</code> RPC, and WEBHOOKS (an HTTP request per event to a URL of the client&apos;s choice). Which events go to which webhooks is configured per project with EVENT SUBSCRIPTIONS.
+//
+// <b>Webhooks are best effort.</b> Each event is sent to a webhook as at most <code>ONDEWO_VTSI_WEBHOOK_MAX_ATTEMPTS</code> HTTP requests (3 by default) with backoff between them; after the last one fails, the event is dropped for that webhook. Pending webhook requests live in the memory of the server replica that produced the event and are lost when it restarts. An overloaded server, or a webhook that keeps timing out, drops events rather than slowing calls down. The same event can arrive more than once (a request whose answer was lost is sent again): de-duplicate by <code>event_id</code>. Requests of one webhook can arrive out of order, because several server replicas send independently: order by <code>resource_sequence</code> per <code>resource_name</code>, then <code>event_time</code>. Events a webhook missed can be sent again from the journal with <code>RedeliverWebhookEvents</code>.
+//
+// <b>Webhook requests.</b> One HTTP request per event, with the webhook&apos;s <code>http_method</code> (POST by default), the <code>VtsiEventMessage</code> as the body (proto3 JSON, original field names, UTF-8) and these headers, set by the server (a custom header can never use these names):
+//
+// <ul> <li><code>Content-Type: application/json</code></li> <li><code>User-Agent: ondewo-vtsi/&lt;server version&gt;</code></li> <li><code>X-Ondewo-Vtsi-Event</code>: the <code>VtsiEvent</code> name, e.g. <code>VTSI_EVENT_CALL_CONNECTED</code> (the decimal number for a value the server cannot name)</li> <li><code>X-Ondewo-Vtsi-Event-Id</code>: the <code>event_id</code></li> <li><code>X-Ondewo-Vtsi-Delivery-Attempt</code>: the request&apos;s attempt number for this event, starting at 1 (a redelivery starts at 1 again)</li> <li><code>X-Ondewo-Vtsi-Webhook</code>: the webhook&apos;s resource name, so one endpoint can serve several webhooks</li> <li><code>X-Ondewo-Vtsi-Signature</code>: only when the webhook has a <code>signing_secret</code>: <code>t=&lt;unix seconds&gt;,v1=&lt;signature&gt;</code>, see <code>Webhook.signing_secret</code></li> <li><code>X-Ondewo-Vtsi-Redelivery: true</code>: only on requests sent by <code>RedeliverWebhookEvents</code></li> <li><code>X-Ondewo-Vtsi-Test: true</code>: only on requests sent by <code>TestWebhook</code></li> </ul>
+//
+// then the webhook&apos;s <code>custom_headers</code>. A 2xx answer is a delivery; a 408, 425, 429 or 5xx answer, a timeout or a connection failure is retried; any other answer (a 3xx included: redirects are never followed) fails the event for that webhook at once.
+//
+// <b>Streams can be resumed.</b> While a project has an open <code>SubscribeVtsiEvents</code> stream (and for <code>ONDEWO_VTSI_EVENT_STREAM_RESUME_WINDOW_S</code>, 1 h by default, after the last one closed) or an enabled event subscription, its events are also written to a short-lived journal (<code>ONDEWO_VTSI_EVENT_JOURNAL_RETENTION_S</code>, 24 h by default). A stream that reconnects with its last <code>resume_token</code>, or opens with a <code>start_time</code>, receives the events it missed, provided they are still in the journal; <code>RedeliverWebhookEvents</code> reads the same journal. Nothing else is persisted for redelivery, and events of a period in which the project had neither a stream nor an enabled subscription were never journaled.
+//
+// Use the status RPCs (<code>GetCampaign</code>, <code>ListCalls</code>, the status streams) to reconcile.
+//
+// <b>Custom header values and signing secrets are write-only.</b> They are returned as <code>********</code> by every RPC and are never logged or put on an event.
+//
+// <b>Names.</b> Event subscriptions are named <code>projects/&lt;project_uuid&gt;/event_subscriptions/&lt;subscription_uuid&gt;</code>, webhooks <code>projects/&lt;project_uuid&gt;/webhooks/&lt;webhook_uuid&gt;</code>, projects <code>projects/&lt;project_uuid&gt;/project</code>. Display names of webhooks and subscriptions are free text of at most 128 characters, NOT unique (two webhooks may share one) and may be empty; an empty display name stays empty (no default is generated). Resources are always addressed by resource name.
+//
+// <b>Partial responses.</b> Every RPC returning a <code>VtsiEventSubscription</code> or a <code>Webhook</code>, the listings and the two <code>Delete*</code> RPCs (paths of their response) accept a <code>field_mask</code> with the convention of <a href="index.html#ondewo.vtsi.GetCampaignRequest">GetCampaignRequest.field_mask</a>: paths relative to the returned message, <code>name</code> always populated, unset or empty returns every field, an unknown path or a path below a repeated or map field is <code>INVALID_ARGUMENT</code> naming it, applied after the masking of secrets so a masked value stays <code>********</code>. A mask never changes what the RPC does.
+//
+// <b>Authorization</b> (when enforced): the subscription and webhook RPCs, <code>TestWebhook</code> and <code>RedeliverWebhookEvents</code> need <code>PROJECT_DEVELOPER</code> or a higher role (<code>PROJECT_ADMIN</code>) on the project, or <code>SERVER_ADMIN</code>: a webhook is a standing outbound integration, i.e. administration. <code>SubscribeVtsiEvents</code> reads the project&apos;s events and needs <code>PROJECT_EXECUTOR</code> or higher.
+//
+// Errors are gRPC status codes: <code>INVALID_ARGUMENT</code> for a malformed resource name (also one of another collection), a request field out of range, a resource of another project than the request&apos;s <code>vtsi_project_name</code>, an output-only field that was set, an unknown <code>update_mask</code> or <code>field_mask</code> path; <code>NOT_FOUND</code> for an unknown project, subscription or webhook; <code>PERMISSION_DENIED</code> with authorization enforced for a project on which the caller holds no sufficient role (an unknown project included, so it is not answered <code>NOT_FOUND</code>); <code>UNAUTHENTICATED</code> for a request without a valid credential while authorization is enforced; <code>FAILED_PRECONDITION</code> for a disabled subscription or webhook where the RPC needs an enabled one; <code>ABORTED</code> when a concurrent change of the same subscription or webhook won (nothing was written; retry); <code>OUT_OF_RANGE</code> for a <code>start_time</code> older than the journal&apos;s retention; <code>RESOURCE_EXHAUSTED</code> when the server has no free stream slot (<code>ONDEWO_VTSI_EVENT_STREAM_MAX_CONCURRENT</code>, 16 per replica by default); <code>UNAVAILABLE</code> when event streams are not available on the replica reached (retry).
 type EventsServer interface {
 	// <p>Creates an event subscription: which events of the project are delivered to which
 	// webhooks. A subscription without webhooks is usable by <code>SubscribeVtsiEvents</code>. Takes effect
